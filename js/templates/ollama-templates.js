@@ -307,7 +307,24 @@ End with the delta block.`,
 
     // --- ESCAPE RECOVERY SCENES ---
     escape_on_the_run: `SCENE: You got away from Master's hideout N hours ago. You're hiding on the street, trying to figure out what to do next — call the police? Run? Find somewhere safe? Your stats matter here — intelligence {{INTELLIGENCE}}, defiance {{DEFIANCE}}. Narrate 3-4 first-person sentences about your current situation, what you're scanning for, who you think is still hunting you.`,
-    recapture_success: `SCENE: Master found you. The tool used was {{TOOL}}. Narrate 3-5 first-person sentences — the moment of being caught again, what breaks in you, what hardens.`
+    recapture_success: `SCENE: Master found you. The tool used was {{TOOL}}. Narrate 3-5 first-person sentences — the moment of being caught again, what breaks in you, what hardens.`,
+
+    // --- EPIC X — VOICED MULTI-PARTY NPC SCENES (FRIENDTEMPL.1) ---
+    // A friend's voiced visit. The model speaks for the FRIEND in-character AND for the captive;
+    // each line is tagged with the speaker's name (chat shows per-speaker name tags). Her register
+    // follows her Stockholm/affect (NPC-DIRECT.1). See npcSpeakerBlock for who's present + tone.
+    friend_scene: `SCENE: One of Master's "friends" is in {{GIRLNAME}}'s hold using her hard while Master watches. He talks the whole time — cruel, in-character. {{GIRLNAME}} reacts to HIM (by name) and to Master.
+OUTPUT — a short multi-speaker exchange, EVERY line tagged with the speaker's name exactly like \`Name: ...\`:
+  {{NPC_NAME}}: <what he says + does to her, in his voice — depraved, taunting>
+  {{GIRLNAME}}: <her spoken reaction + one short *asterisk action* of her body>
+3-5 lines, alternating, ending on {{GIRLNAME}}. Her register follows her Stockholm/affect: timid = pleading + little profanity; fighter = cursing + defiant; top-Stockholm = fiending for it. Only {{GIRLNAME}}'s lines carry her body sensation. Adult characters. End with the delta block (for {{GIRLNAME}} only).`,
+
+    // A chosen gangbang — multiple named men using her at once. Everyone talks to everyone.
+    gangbang_scene: `SCENE: A gangbang in {{GIRLNAME}}'s hold — these men are using her at once: {{NPC_ROSTER}}. They egg each other on, taunt her, and order her around; she reacts to each man BY NAME.
+OUTPUT — a multi-speaker exchange, EVERY line tagged with the speaker's name exactly like \`Name: ...\` (a speaker is one of the men listed, or {{GIRLNAME}}):
+  <Name>: <line in THAT man's distinct voice>
+  {{GIRLNAME}}: <her reaction + one short *asterisk action*>
+5-8 lines mixing the men + her, ending on {{GIRLNAME}}. Her register follows her Stockholm/affect (timid pleads, fighter curses, top-Stockholm fiends for the cum). Only {{GIRLNAME}}'s lines carry body sensation. Adult characters. End with the delta block (for {{GIRLNAME}} only).`
   };
 
   // ---------- CONTEXT BLOCK BUILDER ----------
@@ -399,7 +416,44 @@ ${lines}
 At low Stockholm (bond < 4) the marks are a fresh, raw horror and humiliation — you are still reeling that he made you property forever, that anyone who ever sees you naked will know whose you are, that you can never undo it. Reference them with grief, disbelief, shame ("you branded me", "that's your name on me forever", "you locked these through me"). As the bond climbs they curdle into possessive belonging — by high Stockholm you wear them with pride, show them off, ache that you are permanently, visibly HIS. Reference the marks naturally when the act or moment makes them relevant; never forget they are on you.`;
   }
 
-  function buildSystemPrompt(girl, mode, sceneKey, sceneVars) {
+  // FRIENDTEMPL.1 (Gee: "need different versions, a few, of johns and friends templates") — a
+  // small library of distinct VOICE templates for johns + friends so the men in a voiced scene
+  // never all sound the same. The npcSpeakerBlock picks each man's voice from his archetype tone
+  // if he has one, else rotates through these.
+  const JOHN_VOICES = [
+    'clipped and entitled — treats her like rented meat, narrates exactly what he paid for',
+    'sleazy and over-familiar — pet names and fake tenderness curdling into filth',
+    'silent-then-vicious — barely a word, then one cruel line that lands like a slap',
+    'a running degrading monologue — never shuts up, cataloguing everything wrong with her',
+    'nervous and mean — over-eager, twitchy, takes it out on her when he is rattled'
+  ];
+  const FRIEND_VOICES = [
+    'methodical and merciless — no rush, talks her through every escalation',
+    'gleeful and unhinged — laughing, daring himself further, egging the room on',
+    'cold and clinical — narrates the damage he is doing like a procedure',
+    'mock-reverent — sermonizing obscenity, calling her ruin holy',
+    'quiet and patient — the scariest one, says little, means all of it'
+  ];
+  function pickVoice(arr, seed) { return arr[Math.abs(seed | 0) % arr.length]; }
+
+  // Build the participant-voicing block for a voiced multi-party scene (MULTISPEAK / FRIENDSCENE /
+  // gangbang). npcs: [{ name, handle, tone, isFriend }]. Each man gets a distinct in-character voice
+  // so the model can speak AS him on his name-tagged lines, and she answers each BY NAME.
+  function npcSpeakerBlock(npcs, girlName) {
+    const list = (npcs || []).filter(Boolean);
+    if (!list.length) return '';
+    const lines = list.map((n, i) => {
+      const seed = (String(n.name || n.handle || 'x').length) + i * 7;
+      const voice = n.tone || pickVoice(n.isFriend ? FRIEND_VOICES : JOHN_VOICES, seed);
+      const tag = n.handle && n.handle !== n.name ? ` ("${n.handle}")` : '';
+      return `- ${n.name || n.handle}${tag} — ${n.isFriend ? 'a FRIEND (extreme visitor)' : 'a john'}, he/him. Voice: ${voice}.`;
+    }).join('\n');
+    return `## NPC PARTICIPANTS — VOICE EACH MAN IN HIS OWN DISTINCT VOICE
+These men are present and using ${girlName || 'her'}. When a line is tagged with a man's name, speak AS him in HIS voice (below); the men talk to each other and to her, and ${girlName || 'she'} answers them BY NAME. All are male (he/him/his) — never confuse a man with her.
+${lines}`;
+  }
+
+  function buildSystemPrompt(girl, mode, sceneKey, sceneVars, opts) {
     const archetypeOverlay = ARCHETYPES[girl?.archetypeTemplate || 'library'] || '';
     const captiveAffectOverlay = CAPTIVE_AFFECTS[girl?.captiveAffect] || '';
     const modeOverlay = MODES[mode || 'sexy'] || MODES.sexy;
@@ -420,9 +474,15 @@ At low Stockholm (bond < 4) the marks are a fresh, raw horror and humiliation �
     // Permanent ownership-mark psychology — only present when she actually bears marks.
     const ownershipBlock = ownershipMarkBlock(girl);
 
+    // EPIC X — voiced multi-party NPC block (FRIENDTEMPL.1). Present only when the caller passes
+    // opts.npcs (friend_scene / gangbang_scene). NOTE (Gee): voice PLAYBACK is GIRL-ONLY — only
+    // her name-tagged lines are spoken by Kokoro; the men's lines are text-only. Enforced in the
+    // scene wiring (room.js TTS), not here.
+    const npcBlock = (opts && opts.npcs) ? npcSpeakerBlock(opts.npcs, girl?.name) : '';
+
     // DELTA_SUFFIX removed 2026-05-14 — BASE_SLUT already carries the canonical
     // DELTA BLOCK contract. Two copies caused format drift + double-emission.
-    return [BASE_SLUT, captorBlock, ownershipBlock, archetypeOverlay, CAPTIVITY_BRIDGE, captiveAffectOverlay, modeOverlay, scenePrompt]
+    return [BASE_SLUT, captorBlock, ownershipBlock, archetypeOverlay, CAPTIVITY_BRIDGE, captiveAffectOverlay, modeOverlay, npcBlock, scenePrompt]
       .filter(Boolean)
       .join('\n\n');
   }
@@ -655,6 +715,7 @@ At low Stockholm (bond < 4) the marks are a fresh, raw horror and humiliation �
     SCENES: Object.keys(SCENES),
     buildSystemPrompt,
     buildContextBlock,
+    npcSpeakerBlock,
     extractDelta,
     extractPlaintextDelta,
     scrubPlaintextDeltaTail,
