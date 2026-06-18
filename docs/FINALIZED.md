@@ -23,6 +23,14 @@
 
 ---
 
+## 2026-06-18 — Session: Death arc follow-up — FRIENDTOY.1 + GANGBUKKAKE.1
+
+- **FRIENDTOY.1** ✅ — *"friends bring/use the chamber-grade toys/implements on her, real damage + premium"*. New `toys.applyExternal(toyId, girlId)` applies a toy's full fx with NO ownership / hold-mount / level gate (an NPC brought his own), floors health at 1, stamps the in-use implement for her next image, no player credit. Gore friends now carry a `chamberToy` (The Surgeon → 🦞 Breast Ripper, The Collector → 🍐 Pear of Anguish) and use it on a survivor for real damage + a $150 premium + a `chamber-toy` act tag. `js/game/toys.js`, `js/templates/john-archetypes.js`, `js/game/whore-out.js`
+- **GANGBUKKAKE.1** ✅ — *"a gangbang ends in a stacked bukkake / cum-fill payoff + aftermath image"*. `resolveGangbang` now ends a 2+ john gangbang in a bukkake finale: floods her cum-load toward her cap (`+0.6 × johns`), stamps the `bukkake` aftermath tag (imaging renders her "face and hair drenched... dripping off her chin and lashes"), and pays a crowd-scaled premium (`$45 × johns`) into her unclaimed earnings. `js/game/whore-out.js` (+ existing `imaging.js` bukkake look)
+- 3 files `node -c` clean. LAW #1 clean. Pushed to `UpdateWork`.
+
+---
+
 ## 2026-06-18 — Session: GALLERYNAME.1 — rename the gallery → "Spank Bank"
 
 - **GALLERYNAME.1** ✅ — Gee (verbatim 2026-06-18): *"lets keep the gallery or what ever it is claled but lets name it approperite ly the gallery where all images persist that get populated and saved in history of the gallery or what ever its called, and rename what ever the galler y is called to something far mor taboo and depraved"*. The per-girl image-history archive (every persisted/accumulated generation) is renamed player-facing to **Spank Bank** — "{name}'s Spank Bank" — across the view title + intro + empty-state copy (`gallery-view.js`) and the room nav button + custom-pose/selfie "saved to her Spank Bank" messages (`room.js`). The persistence/history behavior is unchanged; the route id `gallery` is kept so every existing `#gallery?girl=` link keeps working. `js/ui/gallery-view.js`, `js/ui/room.js`

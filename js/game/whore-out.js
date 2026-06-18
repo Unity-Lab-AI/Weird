@@ -458,12 +458,24 @@
       window.DMTHGame.state.updateGirl(girl.id, { body });
     }
 
+    // FRIENDTOY.1 — a chamber-grade friend brings + uses his OWN implement on her (real damage +
+    // the in-image implement + a premium). Only on a survivor (a kill already ended the visit).
+    let chamberToyName = null;
+    let chamberPremium = 0;
+    if (!killed && arc.chamberToy && window.DMTHGame.toys?.applyExternal) {
+      try {
+        const tr = window.DMTHGame.toys.applyExternal(arc.chamberToy, girl.id);
+        if (tr && tr.ok) { chamberToyName = tr.name; chamberPremium = 150; }
+      } catch (e) { /* non-fatal */ }
+    }
+
     const refreshed = window.DMTHGame.state.getGirl(girl.id) || girl;
     const actTags = [...(arc.permittedActsPreference || []).slice(0, 2), killed ? 'snuff' : 'friend-extreme'];
+    if (chamberToyName) actTags.push('chamber-toy');
     const basePay = arc.payRange[0] + Math.floor(Math.random() * (arc.payRange[1] - arc.payRange[0]));
     const sat = window.DMTHGame.state.getSatisfaction ? window.DMTHGame.state.getSatisfaction() : 50;
-    // SNUFFBONUS.1 — if he finished her, the snuff bonus folds into his payout.
-    const payment = Math.round(basePay * (1 + ((sat - 50) / 50) * 0.12)) + snuffBonus;
+    // SNUFFBONUS.1 snuff bonus + FRIENDTOY.1 chamber-toy premium both fold into his payout.
+    const payment = Math.round(basePay * (1 + ((sat - 50) / 50) * 0.12)) + snuffBonus + chamberPremium;
 
     const encounter = {
       id: 'frnd_' + Date.now().toString(36) + '_' + Math.floor(Math.random() * 0xffff).toString(36),
@@ -534,11 +546,33 @@
       const enc = tryArrival(window.DMTHGame.state.getGirl(girlId));
       if (enc) encs.push(enc); else break;
     }
-    const gross = encs.reduce((t, e) => t + (e.totalPaid || 0), 0);
-    if (window.DMTHNotify) {
-      window.DMTHNotify.show(`💦 Gangbang on ${girl0.name}: ${encs.length} john${encs.length === 1 ? '' : 's'} took turns — $${gross}.`, { type: encs.length ? 'success' : 'info', durationMs: 6000 });
+    let gross = encs.reduce((t, e) => t + (e.totalPaid || 0), 0);
+
+    // GANGBUKKAKE.1 — a gangbang ends in a stacked bukkake / cum-fill finale: every john empties
+    // onto/into her at once. Floods her cum-load toward her cap, stamps the bukkake aftermath so
+    // her next image renders her glazed, and pays a premium that scales with the crowd size.
+    let bukkake = null;
+    const gAfter = window.DMTHGame.state.getGirl(girlId);
+    if (encs.length >= 2 && gAfter && gAfter.encounterState === 'captive') {
+      const cap = gAfter.body?.cumLoadCap ?? 10;
+      const body = { ...gAfter.body };
+      body.cumLoad = Math.min(cap, (body.cumLoad || 0) + encs.length * 0.6);
+      body.recentActTag = 'bukkake';
+      if (window.DMTHGame.gameClock) body.recentActAt = window.DMTHGame.gameClock.now();
+      const bukkakePay = encs.length * 45;
+      const wo = getWhoreOut(gAfter);
+      window.DMTHGame.state.updateGirl(girlId, {
+        body,
+        whoreOut: { ...wo, unclaimedEarnings: (wo.unclaimedEarnings || 0) + bukkakePay }
+      });
+      gross += bukkakePay;
+      bukkake = { pay: bukkakePay, count: encs.length };
     }
-    return { ok: true, count: encs.length, gross };
+
+    if (window.DMTHNotify) {
+      window.DMTHNotify.show(`💦 Gangbang on ${girl0.name}: ${encs.length} john${encs.length === 1 ? '' : 's'} took turns${bukkake ? ` and finished in a bukkake — glazed, dripping, cum-filled (+$${bukkake.pay})` : ''} — $${gross}.`, { type: encs.length ? 'success' : 'info', durationMs: 6500 });
+    }
+    return { ok: true, count: encs.length, gross, bukkake };
   }
 
   // -----------------------------------------------------------------------

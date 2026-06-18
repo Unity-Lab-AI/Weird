@@ -227,6 +227,7 @@
       displayName: 'The Surgeon', arrivalWeight: 8, payRange: [450, 800],
       healthDrop: [35, 50], bruisesAdded: 3, johnActionId: 'masochist-overload',
       permittedActsPreference: ['toys', 'pain', 'humiliation'],
+      chamberToy: 'breast-ripper',   // FRIENDTOY.1 — brings his own chamber-grade implement
       ability: 'brings his own instruments and opens her up clinical and slow',
       dialogueTone: 'cold, invasive, talks her through every cut'
     },
@@ -248,6 +249,7 @@
       displayName: 'The Collector', arrivalWeight: 6, payRange: [500, 900],
       healthDrop: [30, 45], bruisesAdded: 4, johnActionId: 'extreme-degrade',
       permittedActsPreference: ['humiliation', 'sex-rough', 'toys'],
+      chamberToy: 'pear-of-anguish',   // FRIENDTOY.1 — brings the worst chamber implement
       ability: 'marks and ruins her like he\'s claiming a trophy, wants a piece of her to keep',
       dialogueTone: 'collector\'s patience, cataloguing every part of her out loud as he wrecks it'
     },

@@ -155,13 +155,39 @@
     return { ok: true, toyId, maso };
   }
 
+  // FRIENDTOY.1 — apply a toy's effect to a captive WITHOUT the ownership / hold-mount / level
+  // gates: an NPC ("friend") brought his OWN chamber-grade implement. Health floors at 1 (the toy
+  // never insta-kills — the FRIENDKILL gate owns lethality). No player credit (byJohn semantics);
+  // stamps the in-use toy so her next image renders the implement on her body. Returns the spec.
+  function applyExternal(toyId, girlId) {
+    const t = TOYS[toyId];
+    if (!t) return { ok: false, reason: 'unknown toy' };
+    const girl = window.DMTHGame.state.getGirl(girlId);
+    if (!girl || girl.encounterState !== 'captive') return { ok: false, reason: 'not a living captive' };
+    const fx = t.fx || {};
+    const b = { ...(girl.body || {}) };
+    if (fx.health)  b.health  = clamp((b.health ?? 100) + fx.health, 1, 100);
+    if (fx.stamina) b.stamina = clamp((b.stamina ?? 70) + fx.stamina, 0, b.health ?? 100);
+    if (fx.arousal) b.arousal = clamp((b.arousal ?? 0) + fx.arousal, 0, 100);
+    if (fx.wetness) b.wetness = clamp((b.wetness ?? 0) + fx.wetness, 0, 100);
+    if (fx.bruises) b.bruises = clamp((b.bruises ?? 0) + fx.bruises, 0, 99);
+    if (fx.cumLoad) b.cumLoad = +(((b.cumLoad || 0) + fx.cumLoad).toFixed(1));
+    if (fx.tag) { b.recentActTag = fx.tag; if (window.DMTHGame.gameClock) b.recentActAt = window.DMTHGame.gameClock.now(); }
+    if (TOY_IMG[toyId]) { b.recentToy = toyId; if (window.DMTHGame.gameClock) b.recentToyAt = window.DMTHGame.gameClock.now(); }
+    const bond = { ...(girl.bond || {}) };
+    if (fx.bondDebt) bond.bondDebt = (bond.bondDebt || 0) + fx.bondDebt;
+    window.DMTHGame.state.updateGirl(girlId, { body: b, bond });
+    if (fx.wanted && window.DMTHGame.wanted) window.DMTHGame.wanted.accrue(fx.wanted);
+    return { ok: true, toyId, name: t.name, emoji: t.emoji, healthHit: Math.abs(fx.health || 0) };
+  }
+
   // Toy ids that can turn up as world loot (find them) — fed into loot.FULL_POOL by loot.js.
   function lootableIds() { return Object.keys(TOYS); }
 
   window.DMTHGame = window.DMTHGame || {};
   window.DMTHGame.toys = Object.freeze({
     TOYS, TOY_IMG, MAX_TOYS_PER_HOLD,
-    spec, owns, levelOk, buy, use, lootableIds,
+    spec, owns, levelOk, buy, use, applyExternal, lootableIds,
     holdToys, holdToysAt, attachToHold, detachFromHold
   });
 })();
