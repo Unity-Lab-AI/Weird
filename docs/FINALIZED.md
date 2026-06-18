@@ -23,6 +23,15 @@
 
 ---
 
+## 2026-06-18 — Session: Condoms-as-item + milk realism + preggo appetite — CONDOMPRICE.1 + MILKREAL.1 + PREGNEED.1(partial)
+
+- **CONDOMPRICE.1** ✅ — Gee (verbatim 2026-06-18): *"condoms are an item so one cant just toggle on condom use ... the player as to actually stick the dugeon oand or hold with condoms before the johns use them(and its one condom per john so the condoms cant be expensicve but like 10-15 % the cost of what the avertage john brings in ... so that the player doesnt go broke"*. The stock-draw enforcement (1 condom/john, drawn hold→dungeon-pool, no stock = he goes raw = pregnancy risk) was already live (CONDOM-STOCK.1). Tuned the price to spec: condom 3-pack $6 → **$27** (~$9/condom ≈ 12% of an average ~$75 starting-girl john's fee — a real budget line that never bankrupts). Reframed the room whore-out toggle to "Condom required (needs stock)" with a tooltip explaining the 1-per-john stock draw. `js/assets/catalog.js`, `js/ui/room.js`
+- **MILKREAL.1** ✅ — Gee: *"a 18 year old is not going to have 12 lb melons that would still be samll as shes still maturing at 18 so yeah"*. `milk.breastCapFor` now scales breast capacity by AGE — `ageFactor` 0.55 at 18 → 1.0 by ~28, capped 1.15 — on top of the 🍈 big-tits surgical 2×, so a barely-legal captive holds noticeably less milk than a fully-developed woman. `js/game/milk.js`. (The image breast-SIZE token scaling is deferred to the visual/outfit pass.)
+- **PREGNEED.1** 🟡 PARTIAL — Gee: *"pregoo girls need incresae appetite and are moodyier, but get bonius to kink"*. SHIPPED: the pregnancy tick now drains extra food (she eats for two — neglect bites the starvation penalty faster while preggo); moodier is already handled by the bond-split preggo mood (unindoctrinated rots, bonded glows). DEFERRED: the kink BONUS (it waits on the KINKDISC/KINKMATRIX kink system, queued). PREGOUTFIT.1 (half-nude belly/milk-accentuating preggo outfit) queued for the EPIC AD outfit work. `js/game/pregnancy.js`
+- 4 files `node -c` clean. LAW #1 clean. Pushed to `UpdateWork`.
+
+---
+
 ## 2026-06-18 — Session: Death arc follow-up — FRIENDTOY.1 + GANGBUKKAKE.1
 
 - **FRIENDTOY.1** ✅ — *"friends bring/use the chamber-grade toys/implements on her, real damage + premium"*. New `toys.applyExternal(toyId, girlId)` applies a toy's full fx with NO ownership / hold-mount / level gate (an NPC brought his own), floors health at 1, stamps the in-use implement for her next image, no player credit. Gore friends now carry a `chamberToy` (The Surgeon → 🦞 Breast Ripper, The Collector → 🍐 Pear of Anguish) and use it on a survivor for real damage + a $150 premium + a `chamber-toy` act tag. `js/game/toys.js`, `js/templates/john-archetypes.js`, `js/game/whore-out.js`

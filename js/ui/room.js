@@ -307,8 +307,8 @@
                   </select>
                 </div>
                 <div class="stat-row" data-tooltip="Countdown to the next expected john arrival, in GAME time. Cadence × BUZZ multiplier determines this. Fractional arrivals carry forward — at 'rapid' BUZZ 100 you'll see ~6 johns per real-time tick (30 game min)."><span>Next john in</span><b>${countdownTxt}</b><span class="muted small" style="margin-left:8px">· ~${perTick.toFixed(2)} johns/tick · BUZZ×${buzzMul.toFixed(2)} (🐝 ${buzzNow})</span></div>
-                <div class="stat-row" data-tooltip="If on, every john MUST use a condom (override their compliance rate). Blocks pregnancy conception via this path.">
-                  <span>Condom required</span>
+                <div class="stat-row" data-tooltip="Condoms are a real item — this only works if the hold/dungeon is STOCKED with condoms (one is drawn PER john, ~$9 each). No stock = he goes raw = pregnancy risk. Stock condoms via supply to keep a girl off the breeding track.">
+                  <span>Condom required (needs stock)</span>
                   <label><input type="checkbox" id="whore-condom" ${wo.condomRequired ? 'checked' : ''}/> enforce</label>
                 </div>
                 <div class="stat-row" data-tooltip="Let your FRIENDS in — rare, extreme visitors who'll nearly kill her (~40-60 HP in one visit) for a fortune. Every visit is logged to her history for her trophy. Use sparingly; they'll wreck her.">
@@ -430,7 +430,7 @@
             const pct = cap > 0 ? Math.round((fill / cap) * 100) : 0;
             const rigged = milk.holdHasTitSucker(girl);
             const owned = milk.ownedTitSuckers();
-            const bigTits = cap > milk.breastCapFor({}) ; // cap doubled by the big-tits spec
+            const bigTits = !!(window.DMTHGame.specialize && window.DMTHGame.specialize.has(girl, 'big-tits'));
             return `<h3>🍼 Lactation</h3>
               <div class="stat-row" data-tooltip="A captive lactates while pregnant (2nd trimester+) or freshly postpartum — otherwise her breasts are dry."><span>Status</span><b>${lactating ? '🤱 lactating' : '— dry'}</b></div>
               ${lactating ? `

@@ -206,8 +206,8 @@
       id: 'condom', displayName: 'Condom (3-pack)', emoji: '🎈',
       category: 'item', subcategory: 'contraception',
       prompt: 'product photograph of three plain unmarked square foil condom packets fanned out on a plain backdrop, generic pharmacy commerce style, muted lighting',
-      cost: 6, tier: 1,
-      notes: 'Preventive — when equipped/used during a turn, blocks conception roll. Stacks of 3. (Wardrobe-equip wiring deferred — for now, owning ≥1 is the gate.)'
+      cost: 27, tier: 1,
+      notes: 'Preventive — ONE per john, drawn from the hold/dungeon stock during a whore-out turn (you must stock the hold first; no stock = he goes raw = pregnancy risk). ~$9/condom ≈ 12% of an average starting-girl john\'s fee, so keeping a girl off the breeding track costs but never bankrupts you. Stacks of 3.'
     },
     {
       id: 'plan-b', displayName: 'Plan B Pill', emoji: '💊',

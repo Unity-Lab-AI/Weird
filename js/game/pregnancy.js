@@ -517,6 +517,13 @@
       // one is horrified by it — being bred against her will rots her mood + spikes bond-debt.
       const bond = girl.bond?.bondLevel || 0;
       const patch = { pregnancy: { ...preg, gestationDays: newDays, trimester: newTrimester } };
+      // PREGNEED.1 (Gee) — a pregnant girl eats for two: extra food drain on top of the normal
+      // consumable tick (neglect her food and the starvation penalty bites faster while preggo).
+      if (girl.consumables && girl.consumables.food) {
+        const cons = JSON.parse(JSON.stringify(girl.consumables));
+        cons.food.stock = Math.max(0, (cons.food.stock || 0) - 1);
+        patch.consumables = cons;
+      }
       if (bond >= 6) {
         patch.bond = { ...girl.bond, bondXP: (girl.bond?.bondXP || 0) + 1 };
         patch.mood = { ...girl.mood, mood: bond >= 8 ? 'devoted' : 'dependent', moodEmoji: '🥰' };

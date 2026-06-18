@@ -113,10 +113,16 @@
     return s.roster.filter(g => g.encounterState === 'captive' && isLactating(g)).length;
   }
 
-  // Her breast capacity in liters — doubled by the 🍈 big-tits specialization.
+  // Her breast capacity (game-units) — scaled by AGE so a barely-legal 18yo (still maturing)
+  // holds noticeably less than a fully-developed woman; doubled by the 🍈 big-tits (surgical)
+  // specialization. ageFactor: 0.55 at 18 → 1.0 by ~28 → caps at 1.15. No 18yo "12-lb melons".
+  function ageFactor(girl) {
+    const age = girl?.age || 22;
+    return Math.max(0.55, Math.min(1.15, 0.55 + Math.max(0, age - 18) * 0.045));
+  }
   function breastCapFor(girl) {
     const mul = window.DMTHGame.specialize ? window.DMTHGame.specialize.milkMultiplier(girl) : 1;
-    return BREAST_CAP_BASE * mul;
+    return +(BREAST_CAP_BASE * ageFactor(girl) * mul).toFixed(1);
   }
   function breastFill(girl) { return girl?.body?.breastMilk || 0; }
   // Can she be sucked right now? Lactating AND breasts near-full.
