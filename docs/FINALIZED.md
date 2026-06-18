@@ -13,6 +13,14 @@
 
 ---
 
+## 2026-06-18 — Session: NPC-IDENT.1 — johns/friends get names (johns/friends multi-party foundation)
+
+First brick of the johns/friends multi-party arc. `node -c` clean.
+- **NPC-IDENT.1** — `mintNpcIdentity(archetypeId, {isFriend})` in john-archetypes.js (JOHN_NAMES pool + NPC_PRONOUNS + handle); resolveEncounter + resolveFriendEncounter stamp `johnName`/`johnHandle` on each ledger entry; `summarizeLedger`/`contextBlockText` now surface the handle so the captive references johns/friends BY NAME ("Marcus the rough john", "The Butcher (Gus)") in her Ollama context. `john-archetypes.js`, `whore-out.js`
+- Remaining johns/friends arc (FRIENDTEMPL speaker templates + MULTISPEAK NPC turn-taking engine + NPC-DIRECT + FRIENDSCENE narration + GANGSEL/GANGSCALE + FRIENDKILL lethal-finish gate + FRIENDTOY/GANGBUKKAKE/FRIENDROSTER) logged + queued (#131-151) — next build arc.
+
+---
+
 ## 2026-06-18 — Session: Stockholm long-build + cum-load capacity economy + wide drug use-cases (NEXT-BUILD batch 1)
 
 First slice of the NEXT BUILD queue. All `node -c` clean. NOT yet playtested.

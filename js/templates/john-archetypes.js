@@ -253,6 +253,33 @@
     return entries[entries.length - 1][0];
   }
 
+  // NPC-IDENT.1 — johns + friends need an identity so a multi-party scene can name them and the
+  // model knows WHO the player is addressing ("tell Marcus to..."). Mint a name + pronouns per
+  // encounter. Johns get a first name; friends keep their archetype title ("The Butcher") as the
+  // recognizable handle but still carry a name + pronouns for dialogue.
+  const JOHN_NAMES = [
+    'Marcus', 'Vince', 'Dale', 'Roy', 'Gus', 'Hank', 'Sal', 'Eddie', 'Frank', 'Otis',
+    'Cyrus', 'Bruno', 'Lou', 'Wade', 'Carl', 'Moe', 'Rex', 'Dom', 'Saul', 'Karl'
+  ];
+  // All johns/friends are male NPCs in this content; pronouns kept as a field so the prompt + UI
+  // can address them unambiguously and the model never confuses them with the girl ("she").
+  const NPC_PRONOUNS = { subject: 'he', object: 'him', possessive: 'his' };
+  function pickFrom(arr, rng) { return arr[Math.floor((rng || Math.random)() * arr.length) % arr.length]; }
+  function mintNpcIdentity(archetypeId, opts = {}) {
+    const isFriend = !!opts.isFriend;
+    const arc = isFriend ? FRIEND_ARCHETYPES[archetypeId] : JOHN_ARCHETYPES[archetypeId];
+    const name = pickFrom(JOHN_NAMES, opts.rng);
+    const title = arc ? arc.displayName : (isFriend ? 'Friend' : 'John');
+    return {
+      name,
+      pronouns: NPC_PRONOUNS,
+      archetype: archetypeId,
+      isFriend,
+      // What the player + model SEE/address him by — a friend leads with his title, a john by name.
+      handle: isFriend ? `${title} (${name})` : `${name} the ${title.toLowerCase()}`
+    };
+  }
+
   // Pick a john archetype weighted by arrivalWeight + pregnantWantBias if applicable.
   // Zero-weight archetypes (postmortem-john) are excluded from the rotation — they get
   // forced into play by direct lookup in whore-out when the girl's encounterState matches.
@@ -290,6 +317,9 @@
   window.DMTHJohnArchetypes = Object.freeze({
     JOHN_ARCHETYPES,
     FRIEND_ARCHETYPES,
+    JOHN_NAMES,
+    NPC_PRONOUNS,
+    mintNpcIdentity,
     rollJohnArchetype,
     rollFriendArchetype,
     rollJohnActs

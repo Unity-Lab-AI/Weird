@@ -201,6 +201,8 @@
     const arc = window.DMTHJohnArchetypes.JOHN_ARCHETYPES[archetypeId];
     if (!arc) return null;
     const wo = getWhoreOut(girl);
+    // NPC-IDENT.1 — mint this john a name so she can reference him + a multi-party scene can address him.
+    const npc = window.DMTHJohnArchetypes.mintNpcIdentity ? window.DMTHJohnArchetypes.mintNpcIdentity(archetypeId) : null;
 
     // Pick acts — intersection of john's preferences + player's permittedActs (if non-empty)
     // When player has a non-empty permittedActs whitelist and no
@@ -331,6 +333,8 @@
       ts: Date.now(),
       johnArchetype: archetypeId,
       johnDescription: arc.displayName,
+      johnName: npc ? npc.name : null,
+      johnHandle: npc ? npc.handle : arc.displayName,
       acts: johnExtraActs.length ? [...acts, ...johnExtraActs] : acts,
       duration_min: arc.intensity * 5 + Math.floor(Math.random() * 10),
       payment,
@@ -393,6 +397,8 @@
   function resolveFriendEncounter(girl, friendId) {
     const arc = window.DMTHJohnArchetypes.FRIEND_ARCHETYPES[friendId];
     if (!arc || girl.encounterState === 'dead') return null;
+    // NPC-IDENT.1 — mint the friend an identity (title + name) for chat memory + multi-party scenes.
+    const npc = window.DMTHJohnArchetypes.mintNpcIdentity ? window.DMTHJohnArchetypes.mintNpcIdentity(friendId, { isFriend: true }) : null;
 
     const moodBefore = girl.mood?.mood || 'neutral';
     const bondXPBefore = girl.bond?.bondXP || 0;
@@ -557,6 +563,7 @@
       ts: e.ts,
       archetype: e.johnArchetype,
       description: e.johnDescription,
+      handle: e.johnHandle || e.johnName || e.johnDescription,   // NPC-IDENT.1 — name she can reference
       acts: e.acts.join(', '),
       paid: e.totalPaid,
       notes: e.notes
@@ -568,11 +575,10 @@
     const summary = summarizeLedger(girlId, { last: 5 });
     if (!summary.length) return '';
     const lines = summary.map(e => {
-      const when = new Date(e.ts);
       const ago = Math.max(0, Math.round((Date.now() - e.ts) / 60000));
-      return `  - ${ago}min ago: ${e.description} (${e.acts}) — $${e.paid}. ${e.notes}`;
+      return `  - ${ago}min ago: ${e.handle} (${e.acts}) — $${e.paid}. ${e.notes}`;
     });
-    return `RECENT JOHNS (last 5 — she remembers and may reference them):\n${lines.join('\n')}`;
+    return `RECENT JOHNS/FRIENDS (last 5 — she remembers them BY NAME and may reference them):\n${lines.join('\n')}`;
   }
 
   window.DMTHGame = window.DMTHGame || {};
