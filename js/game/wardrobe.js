@@ -277,6 +277,60 @@
       description: 'fully-nude-body wearing only sheer-black-fishnet-stockings and clear-stripper-platform-heels, bare-exposed-nude-tits-nipples-out, bare-naked-pussy, a rhinestone choker, body-glitter on bare skin', multiplier: 1.45, roleplay: 'stripper',
       nude: 'accessories', accessoriesOnly: 'fully-nude-body wearing only sheer-black-fishnet-stockings pulled up the thighs and clear-stripper-platform-heels, bare-exposed-nude-tits-nipples-out, bare-naked-pussy, a rhinestone choker, a lace-garter stuffed-with-cash on one thigh, body-glitter shimmering on bare skin', syncArchetype: 'stripper'
     },
+    // SKIMPYALL.1 + SKIMPYEXOTIC.1 (Gee) — every girl type gets its OWN special nude-like outfit,
+    // and they are NOT modest: exotic, beyond-sexy variations of the type's normal look, max exposed
+    // nudity. Backfill for the archetypes that didn't already have a dedicated skimpy (the rest
+    // auto-sync via roleplay tags). DASHGROUP-friendly concept words (groupConcepts dashes them).
+    {
+      id: 'skimpy-library', displayName: 'Bookworm: Cardigan & Bare', emoji: '📚', price: 150, tier: 3,
+      description: 'an open oversized cardigan hanging off her bare shoulders over nothing, wire-rim glasses, fully-nude underneath, bare-exposed-breasts nipples-out, bottomless, bare-naked-pussy, white thigh-high stockings, an open book held against one hip', multiplier: 1.35, roleplay: 'library',
+      nude: 'accessories', accessoriesOnly: 'an open oversized cardigan hanging off her bare shoulders over an otherwise fully-nude body, wire-rim reading glasses, bare-exposed-breasts nipples-out, bottomless, bare-naked-pussy, white thigh-high stockings, an open book pressed to one bare hip', syncArchetype: 'library'
+    },
+    {
+      id: 'skimpy-club', displayName: 'Club: Body Chain Only', emoji: '🍸', price: 160, tier: 3,
+      description: 'only a glittering draped gold body chain over a fully-nude body, topless, bare-exposed-tits nipples-out, bottomless, bare-naked-pussy, a choker, strappy stilettos, club lights on bare skin', multiplier: 1.4, roleplay: 'club',
+      nude: 'accessories', accessoriesOnly: 'only a glittering draped gold body chain crossing an otherwise fully-nude body, topless, bare-exposed-tits nipples-out, bottomless, bare-naked-pussy, a thin choker, strappy stiletto heels, glitter on bare skin', syncArchetype: 'club'
+    },
+    {
+      id: 'skimpy-street', displayName: 'Street: Hoodie Open, Bare', emoji: '🧥', price: 145, tier: 3,
+      description: 'an unzipped cropped hoodie hanging open off her bare shoulders over nothing, topless, bare-exposed-tits nipples-out, bottomless, bare-naked-pussy, beat-up sneakers, a thin chain', multiplier: 1.3, roleplay: 'street',
+      nude: 'accessories', accessoriesOnly: 'an unzipped cropped hoodie hanging wide open off her bare shoulders over an otherwise fully-nude body, topless, bare-exposed-tits nipples-out, bottomless, bare-naked-pussy, beat-up sneakers', syncArchetype: 'street'
+    },
+    {
+      id: 'skimpy-gym', displayName: 'Gym: Stripped Mid-Workout', emoji: '🏋️', price: 150, tier: 3,
+      description: 'a sports bra shoved up above her bare-exposed-tits nipples-out, leggings peeled down around the ankles, bottomless, bare-naked-pussy, sweat-sheen on toned bare skin, sneakers', multiplier: 1.35, roleplay: 'gym',
+      nude: 'accessories', accessoriesOnly: 'a sports bra shoved up above her bare-exposed-tits nipples-out, leggings peeled all the way down around her ankles, bottomless, bare-naked-pussy, a sheen of sweat on toned bare skin, athletic sneakers', syncArchetype: 'gym'
+    },
+    {
+      id: 'skimpy-model', displayName: 'Model: Open Couture, Bare', emoji: '💄', price: 175, tier: 3,
+      description: 'an open designer blazer hanging off her bare shoulders over nothing, topless, bare-exposed-breasts nipples-out, bottomless, bare-naked-pussy, statement jewelry, stiletto heels, high-fashion editorial pose', multiplier: 1.4, roleplay: 'model',
+      nude: 'accessories', accessoriesOnly: 'an open designer blazer hanging off her bare shoulders over an otherwise fully-nude body, topless, bare-exposed-breasts nipples-out, bottomless, bare-naked-pussy, statement jewelry, stiletto heels, editorial high-fashion posture', syncArchetype: 'model'
+    },
+    {
+      id: 'skimpy-grad', displayName: 'Grad: Sash, Cap & Bare', emoji: '🎓', price: 150, tier: 3,
+      description: 'only a graduation sash draped across her bare-exposed-tits nipples-out and a mortarboard cap, otherwise fully-nude, bottomless, bare-naked-pussy, knee-high socks (adult 18+)', multiplier: 1.35, roleplay: 'highschool-grad',
+      nude: 'accessories', accessoriesOnly: 'only a satin graduation sash draped across her bare-exposed-tits nipples-out and a mortarboard graduation cap, otherwise fully-nude, bottomless, bare-naked-pussy, knee-high socks, eighteen years old', syncArchetype: 'highschool-grad'
+    },
+    {
+      id: 'skimpy-neighbor', displayName: 'Neighbor: Robe Falling Open', emoji: '🏡', price: 145, tier: 3,
+      description: 'a short silk robe falling open off her bare shoulders, untied at the waist, topless, bare-exposed-tits nipples-out, bottomless, bare-naked-pussy, barefoot, a coffee mug in one hand', multiplier: 1.3, roleplay: 'neighbor',
+      nude: 'accessories', accessoriesOnly: 'a short silk robe falling open off her bare shoulders and untied at the waist over an otherwise fully-nude body, topless, bare-exposed-tits nipples-out, bottomless, bare-naked-pussy, barefoot, a coffee mug in one hand', syncArchetype: 'neighbor'
+    },
+    {
+      id: 'skimpy-family-friend', displayName: 'Family Friend: Sundress Hiked', emoji: '🧺', price: 150, tier: 3,
+      description: 'a barbecue sundress with the straps pulled off her shoulders and the skirt hiked up to her waist, topless, bare-exposed-breasts nipples-out, bottomless, bare-naked-pussy, wedge sandals', multiplier: 1.35, roleplay: 'family-friend',
+      nude: 'accessories', accessoriesOnly: 'a floral barbecue sundress with the straps pulled off her shoulders and the skirt hiked up around her waist, topless, bare-exposed-breasts nipples-out, bottomless, bare-naked-pussy, wedge sandals', syncArchetype: 'family-friend'
+    },
+    {
+      id: 'skimpy-cousin', displayName: 'Cousin: Bikini Pulled Aside', emoji: '🏖️', price: 145, tier: 3,
+      description: 'a lake-house bikini with the top pulled down under her bare-exposed-tits nipples-out and the bottoms pulled aside baring her bare-naked-pussy, a sarong falling off her hips, barefoot, wet skin', multiplier: 1.3, roleplay: 'second-cousin',
+      nude: 'accessories', accessoriesOnly: 'a string bikini with the top pulled down under her bare-exposed-tits nipples-out and the bottoms pulled fully aside baring her bare-naked-pussy, a sarong falling off her hips, barefoot, sun-wet bare skin', syncArchetype: 'second-cousin'
+    },
+    {
+      id: 'skimpy-unity', displayName: 'Unity: Leather Harness, Bare', emoji: '🖤', price: 160, tier: 3,
+      description: 'a black-leather harness with buckles framing a fully-nude body, topless, bare-exposed-tits nipples-out, bottomless, bare-naked-pussy, a D-ring collar, fishnet stockings, combat boots, heavy smudged eyeliner', multiplier: 1.4, roleplay: 'goth',
+      nude: 'accessories', accessoriesOnly: 'a black-leather buckle harness framing an otherwise fully-nude body, topless, bare-exposed-tits nipples-out, bottomless, bare-naked-pussy, a D-ring collar, torn fishnet stockings, combat boots', syncArchetype: 'unity_seed'
+    },
     {
       id: 'goth-outfit',
       displayName: 'Goth Fit',
