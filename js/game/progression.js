@@ -91,6 +91,30 @@
     return { ok: true, key, fee };
   }
 
+  // PLAYERCUMLVL.1 — the player's cum-wad (the vaginal cum-fill he deposits) GROWS with DEPRAVITY
+  // level: L1 ×1.0 → L12 ×1.88. Bigger loads = faster breeding + more cum-fill content premium.
+  // (Friends bust a much bigger wad than the player/johns — FRIENDCUMWAD.1, applied in whore-out.)
+  function cumWadMultiplier() { return 1 + (getLevel() - 1) * 0.08; }
+
+  // LEVELVIEW.1 — which gated features unlock AT exactly this level (for the viewable detail).
+  function unlocksAtLevel(level) {
+    return Object.entries(UNLOCKS).filter(([, req]) => req === level).map(([k]) => k);
+  }
+  // Human-readable perk list for a given level (cum-wad growth + any feature unlocks at it).
+  const UNLOCK_LABELS = { own: 'ownership marks (brand / tattoo / piercing)', extreme: 'the ☠️ Extreme + ⛓️ Torture tabs', nugget: 'nugget / delimbing', dismember: 'dismember + harvest disposal', snuff: 'snuff a captive (kill on camera)' };
+  function levelPerks(level) {
+    const perks = [`💦 Cum wad ×${(1 + (level - 1) * 0.08).toFixed(2)} — bigger loads, faster breeding`];
+    unlocksAtLevel(level).forEach(k => perks.push(`🔓 ${UNLOCK_LABELS[k] || k}`));
+    return perks;
+  }
+  // Viewable "what the NEXT level unlocks" descriptor. null at max level.
+  function nextLevelInfo() {
+    const lvl = getLevel();
+    if (lvl >= MAX_LEVEL) return null;
+    const next = lvl + 1;
+    return { level: next, title: titleFor(next), perks: levelPerks(next), xp: xpToNext() };
+  }
+
   // Human-readable HUD line.
   function describe() {
     const lvl = getLevel();
@@ -153,6 +177,7 @@
   window.DMTHGame.progression = Object.freeze({
     LEVEL_THRESHOLDS, LEVEL_TITLES, MAX_LEVEL, UNLOCKS, LOCATION_GATES,
     levelForXp, getXp, getLevel, titleFor, xpToNext, grantXp,
+    cumWadMultiplier, unlocksAtLevel, levelPerks, nextLevelInfo,
     isCheatUnlocked, isUnlocked, requiredLevel, describe,
     UNLOCK_FEES, unlockFee, buyUnlock,
     isLocationUnlocked, locationGateReason, locationCost, buyLocationAccess

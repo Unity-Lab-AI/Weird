@@ -668,7 +668,9 @@
     const condomBlocks = window.DMTHGame.condoms ? window.DMTHGame.condoms.blocks(girl) : (girl.currentOutfit === 'condom-on');
     const holed = window.DMTHGame.condoms?.isHoled ? window.DMTHGame.condoms.isHoled(girl) : false;
     if (CUM_INSIDE_ACTIONS.has(actionId) && !condomBlocks && window.DMTHGame.pregnancy?.addVaginalCum) {
-      const amt = actionId === 'extreme-breeding-rape' ? 1.6 : 1.2;
+      // PLAYERCUMLVL.1 — the player's cum-wad scales with his DEPRAVITY level (L1 ×1.0 → L12 ×1.88).
+      const cumWad = window.DMTHGame.progression?.cumWadMultiplier ? window.DMTHGame.progression.cumWadMultiplier() : 1;
+      const amt = (actionId === 'extreme-breeding-rape' ? 1.6 : 1.2) * cumWad;
       try { window.DMTHGame.pregnancy.addVaginalCum(girlId, amt, { conceptionSource: 'master:' + actionId }); } catch (e) { /* non-fatal */ }
       // A SABOTAGED (holed) condom breeds her INSTANTLY — one vaginal load conceives outright,
       // no sustained-fill timer needed (she thinks she's protected). Guaranteed conception.

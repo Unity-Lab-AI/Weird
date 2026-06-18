@@ -523,6 +523,21 @@
       window.DMTHGame.state.updateGirl(girl.id, { body });
     }
 
+    // FRIENDCUMWAD.1 (Gee: "a frinde have a much large cum wad for cum fill than normal johns") —
+    // a friend busts a MUCH bigger load than a john (~3.5 vs a john's ~1.2), and never gloves up,
+    // so it floods her raw: heavy vaginal cum-fill toward breeding + a cum-load bump. Alive girls only.
+    const FRIEND_CUM_WAD = 3.5;
+    if (!killed) {
+      if (window.DMTHGame.pregnancy?.addVaginalCum) {
+        try { window.DMTHGame.pregnancy.addVaginalCum(girl.id, FRIEND_CUM_WAD, { conceptionSource: 'friend:' + friendId }); } catch (e) { /* non-fatal */ }
+      }
+      const gC = window.DMTHGame.state.getGirl(girl.id);
+      if (gC && gC.body) {
+        const cap = gC.body.cumLoadCap ?? 10;
+        window.DMTHGame.state.updateGirl(girl.id, { body: { ...gC.body, cumLoad: Math.min(cap, (gC.body.cumLoad || 0) + FRIEND_CUM_WAD) } });
+      }
+    }
+
     const refreshed = window.DMTHGame.state.getGirl(girl.id) || girl;
     // Gee — a friend does a WIDE RANGE of random act types per visit (he's not one-note). Roll a
     // varied 2-4 act subset from his + a shared depraved pool. (Damage is still capped above, so
@@ -564,7 +579,7 @@
       bondDeltaApplied: (refreshed.bond?.bondXP || 0) - bondXPBefore,
       bondDebtAdded: (refreshed.bond?.bondDebt || 0) - bondDebtBefore,
       bruisesAdded: arc.bruisesAdded || 0,
-      cumLoadAdded: 0,
+      cumLoadAdded: killed ? 0 : FRIEND_CUM_WAD,   // FRIENDCUMWAD.1 — friends bust a big raw load
       // healthDropped — on a kill she dropped her whole arrival health; otherwise the rolled drop.
       // (Was a latent ReferenceError: `curHealth` never existed; a friend KILL would throw here.)
       healthDropped: killed ? startHealth : drop,

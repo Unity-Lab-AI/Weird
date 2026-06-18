@@ -47,6 +47,15 @@
               <div class="sub">"${p.titleFor(lvl)}"${p.isCheatUnlocked() ? ' · 🔓 all unlocked (cheat)' : ''}</div>
               <div class="bar"><div class="bar-fill" style="width:${pct}%;background:#8e44ad"></div></div>
               <div class="sub small">${nx ? `${nx.have} / ${nx.need} XP → L${nx.next}` : 'MAX LEVEL — The Depraved'}</div>
+              ${(() => {
+                // LEVELVIEW.1 — viewable detail of what the NEXT level unlocks (cum-wad growth + features).
+                const ni = p.nextLevelInfo && p.nextLevelInfo();
+                if (!ni) return '';
+                return `<details class="sub small" style="margin-top:4px" data-tooltip="What hitting the next DEPRAVITY level gets you.">
+                  <summary style="cursor:pointer">▸ Next: L${ni.level} "${ni.title}"</summary>
+                  <ul style="margin:4px 0 0;padding-left:16px">${ni.perks.map(pk => `<li>${pk}</li>`).join('')}</ul>
+                </details>`;
+              })()}
               ${window.DMTHGame.sexdrive ? (() => {
                 const sd = window.DMTHGame.sexdrive.status();
                 return `<div class="bar" data-tooltip="Sexual drive — fed by sex acts, decays over time. MAXED = hunt + cash boosts; DEPRIVED = debuffs. The ceiling scales with how many girls you hold + your DEPRAVITY level, so you can't max it on one captive — you need a roster."><div class="bar-fill" style="width:${Math.round(sd.pct * 100)}%;background:${sd.maxed ? '#27ae60' : sd.deprived ? '#c0392b' : '#e67e22'}"></div></div>
