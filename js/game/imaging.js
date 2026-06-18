@@ -178,23 +178,37 @@
     const intensifier = high >= 75 ? 'extreme' : high >= 50 ? 'pronounced' : high >= 25 ? 'visible' : 'subtle';
     const names = new Set(active.map(d => String(d?.name || d || '').toLowerCase()).filter(Boolean));
     const out = [];
+    // DRUGPERSIST.1 — only depict the ACTIVE act of using when she physically can: a tranq'd
+    // (unconscious) or a nugget (no hands) girl can't hold a blunt or snort a line, so those props
+    // are suppressed (her physiological high markers still render).
+    const canActivelyUse = !names.has('tranquilizer') && !body.isNugget;
+    // DRUGPERSIST.1 (Gee) — render the ACT of using, not just the physiological after-effects:
+    // a girl on coke is snorting lines off a mirror; on weed she's smoking a blunt; etc. The
+    // drug-use prop composes ON TOP of her current clothed/nude state (handled by the outfit /
+    // nudity tokens elsewhere) — so she's shown smoking a blunt whether dressed or naked. Skipped
+    // for ketamine / tranquilizer (too gone to actively use anything).
     if (names.has('coke')) {
       out.push(`${intensifier} dilated pupils filling most of the iris, tight clenched jaw, twitchy restless fingers, faint reddened nostrils, hyperalert wide-eyed gaze, light sweat sheen on forehead and upper lip`);
+      if (canActivelyUse) out.push('actively snorting a thick line of white powder off a small mirror through a tightly rolled banknote, more white lines and a razor blade laid out on the mirror in front of her, leaning down over it');
       // High coke load → physical wear: nosebleed, then a strung-out junkie look at the extreme.
       if (high >= 75) out.push('thin trickle of blood from one raw red nostril, wiped-raw chafed skin under the nose');
       if (high >= 90) out.push('strung-out hollow-cheeked junkie wear, faint old track marks along the inner arms');
     }
     if (names.has('weed')) {
       out.push(`heavy-lidded reddened glassy eyes, slow languid blinks, softly slack jaw, ${intensifier} relaxed loose posture, parted dry lips, hazy ambient atmosphere suggesting smoke`);
+      if (canActivelyUse) out.push('actively smoking a fat lit blunt, the joint held to her lips or between her fingers, glowing ember tip, thick curl of smoke drifting up around her face');
     }
     if (names.has('mdma')) {
       out.push(`${intensifier} flushed glowing cheeks, dilated dark pupils, dewy luminous skin with light sweat, subtle grinding jaw motion, euphoric soft-edged unfocused smile, restless hands`);
+      if (canActivelyUse) out.push('rolling hard — chewing gum or sucking a pacifier, clutching a water bottle, jaw working, hands roaming over her own skin');
     }
     if (names.has('acid')) {
       out.push(`${intensifier} fully dilated pupils swallowing the iris, distant unfocused fascinated gaze past the camera, slack open-mouthed wonderment expression, flushed cheeks, gently swaying posture`);
+      if (canActivelyUse) out.push('a small square paper blotter tab balanced on her outstretched tongue, mouth open, eyes rolled up');
     }
     if (names.has('whiskey') || names.has('alcohol')) {
       out.push(`${intensifier} alcohol-flushed cheeks and upper chest, glassy unfocused eyes, slightly smudged makeup, parted lips, faintly swaying posture, slightly disheveled hair`);
+      if (canActivelyUse) out.push('swigging straight from a bottle of brown whiskey or holding a half-empty glass, bottle tipped to her lips, a drink spilling slightly');
     }
     if (names.has('ketamine')) {
       out.push(`${intensifier} disconnected vacant stare, half-lidded eyes, fully slack jaw, motionless dissociated posture, body limp and unsteady, awareness distant and elsewhere`);
