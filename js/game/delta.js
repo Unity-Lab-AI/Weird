@@ -82,14 +82,16 @@
     // AND (b) delta.tags contains at least one VAGINAL_CUM_TAG marker (so BJ / anal /
     // facial / body-shot don't fire conception). Inner gates (bond < 9, no condom, status
     // not already pregnant) live inside pregnancy.attemptConception() — defense in depth.
-    if (window.DMTHGame.pregnancy && delta.cumLoad >= 1.0) {
+    if (window.DMTHGame.pregnancy?.addVaginalCum && delta.cumLoad >= 1.0) {
       const tags = Array.isArray(delta.tags) ? delta.tags.map(t => String(t).toLowerCase()) : [];
       const isVaginalCum = tags.some(t => VAGINAL_CUM_TAGS.has(t));
-      if (isVaginalCum) {
+      // CUMFILL.1 — a vaginal creampie raises her vaginal cum-fill; the sustained-fill timer
+      // (pregnancy.tickCumFill) conceives. Gated on no condom equipped.
+      if (isVaginalCum && !(window.DMTHGame.condoms ? window.DMTHGame.condoms.blocks(girl) : girl.currentOutfit === 'condom-on')) {
         try {
-          window.DMTHGame.pregnancy.attemptConception(girlId, { conceptionSource: 'organic' });
+          window.DMTHGame.pregnancy.addVaginalCum(girlId, delta.cumLoad, { conceptionSource: 'organic' });
         } catch (err) {
-          console.debug('[pregnancy] conception hook error:', err);
+          console.debug('[pregnancy] vaginal cum-fill error:', err);
         }
       }
     }

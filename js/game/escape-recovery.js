@@ -63,6 +63,8 @@
         goneAt: Date.now()
       });
       window.DMTHGame.state.addNotoriety(5);
+      // She's gone for good — a free witness who can name you. Major WANTED spike.
+      if (window.DMTHGame.wanted) window.DMTHGame.wanted.accrue('escape-ratted');
       return { outcome: 'lost-forever', successP };
     }
   }
@@ -78,6 +80,8 @@
       if ((now - escapedAt) >= RECOVERY_WINDOW_MS) {
         window.DMTHGame.state.updateGirl(g.id, { encounterState: 'gone', goneAt: now });
         window.DMTHGame.state.addNotoriety(3);
+        // Aged out of the recovery window uncaught — she's in the wind and talking. WANTED spike.
+        if (window.DMTHGame.wanted) window.DMTHGame.wanted.accrue('escape-ratted');
       }
     }
   }

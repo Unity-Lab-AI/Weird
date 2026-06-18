@@ -159,6 +159,21 @@
       pregnantWantBias: 1.80,                   // strongly drawn to already-pregnant
       johnActionId: 'john-rough'
     },
+    sadist: {
+      displayName: 'Sadist',
+      arrivalWeight: 5,
+      payRange: [130, 260],
+      tipChance: 0.25,
+      tipMul: 1.50,
+      permittedActsPreference: ['sex-rough', 'anal', 'choke', 'humiliation', 'toys'],
+      intensity: 5,
+      moodImpact: -18,
+      bruisesAdded: 4,
+      condomCompliance: 0.30,
+      dialogueTone: 'cruel and methodical — wants to hurt her, uses whatever\'s in the room on her, pays for the privilege',
+      pregnantWantBias: 0.60,
+      johnActionId: 'john-rough'
+    },
     degrader: {
       displayName: 'Degrader',
       arrivalWeight: 6,

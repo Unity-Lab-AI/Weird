@@ -14,6 +14,11 @@
     const locId = params.loc;
     const loc = window.DMTHAssets.getById('location', locId);
     if (!loc) { el.innerHTML = `<p>unknown location</p>`; return; }
+    // PLVL.2 — locked hunting ground can't be entered until its level / roster / purchase gate is met.
+    if (window.DMTHGame.progression && !window.DMTHGame.progression.isLocationUnlocked(locId)) {
+      el.innerHTML = `<div class="panel"><h2>🔒 ${loc.emoji} ${loc.displayName} — locked</h2><p class="small muted">${window.DMTHGame.progression.locationGateReason(locId)}.</p><a href="#town" class="btn-small">← back to town</a></div>`;
+      return;
+    }
     const encounters = window.DMTHGame.hunt.rollEncounters(locId, 3);
     const inv = window.DMTHGame.state.current.inventory;
 
@@ -24,6 +29,7 @@
         <div class="stat-row small"><span>Notoriety</span><b>${window.DMTHGame.state.current.wallet.notoriety}</b>
           <span class="muted">(experience bonus applied to acquisitions)</span></div>
         <a href="#hunt" class="btn-small">← back to map</a>
+        <button id="scavenge-area" class="btn-small" data-tooltip="Search the area for loot — tools, drugs, gear, cash. ~50% you find something; sometimes a rare item from the full catalog. Free, no notoriety.">🔦 Search the area</button>
       </div>
       <div class="panel">
         <h2>Girls available to acquire</h2>
@@ -69,6 +75,13 @@
     el.querySelectorAll('[data-walk]').forEach(b => {
       b.onclick = () => window.DMTHRouter.go('hunt');
     });
+
+    // LOOT.2 — search the area for tools/drugs/gear/cash.
+    const scavBtn = el.querySelector('#scavenge-area');
+    if (scavBtn) scavBtn.onclick = () => {
+      const r = window.DMTHGame.loot.scavengeLocation(locId);
+      if (!r.ok && window.DMTHNotify) window.DMTHNotify.show(`🔦 ${r.reason || 'nothing found'}.`, { type: 'info', durationMs: 3000 });
+    };
 
     // Make the whole card clickable — click anywhere on a girl card to approach her
     el.querySelectorAll('.approach-card').forEach(card => {
@@ -204,6 +217,8 @@
           girl, sceneKey: 'first_encounter', sceneVars: { LOCATION: locName },
           userText: '', resultEl, heading: `${girl.name} says:`
         });
+        // LOOT.2 — winning the conversation can shake loose an item / cash from the target.
+        if (window.DMTHGame.loot) { try { window.DMTHGame.loot.rollConversationWin(girl, locId); } catch (e) { /* non-fatal */ } }
       };
       el.querySelector('[data-action="walk"]').onclick = () => window.DMTHRouter.go('hunt');
 

@@ -18,10 +18,44 @@
 
     el.innerHTML = `
       <div class="grid-2">
-        <section class="panel" data-tooltip="Liquid cash on hand. Notoriety = total heat from the operation. Tick = elapsed game-time ticks.">
+        <section class="panel" data-tooltip="Liquid cash on hand. WANTED = law-heat — builds from hunts, escapes, deaths, sloppy disposal, and corpse content; decays slowly. High tiers trigger raids → fines → jail. Notoriety = legacy heat stat.">
           <h2>💰 Treasury</h2>
           <div class="big-num">$${s.wallet.money.toLocaleString()}</div>
-          <div class="sub">Notoriety: ${s.wallet.notoriety} · Tick: ${s.tickCount}</div>
+          ${(() => {
+            const w = window.DMTHGame.wanted ? window.DMTHGame.wanted.describe() : null;
+            return w
+              ? `<div class="sub">${w.emoji} WANTED: <b>${w.label}</b> (${w.level}/100) · Notoriety: ${s.wallet.notoriety} · Tick: ${s.tickCount}</div>
+                 <div class="bar" data-tooltip="WANTED level 0-100. ${w.label}."><div class="bar-fill" style="width:${w.level}%;background:${w.level>=60?'#c0392b':w.level>=40?'#e67e22':w.level>=20?'#f1c40f':'#27ae60'}"></div></div>`
+              : `<div class="sub">Notoriety: ${s.wallet.notoriety} · Tick: ${s.tickCount}</div>`;
+          })()}
+        </section>
+        <section class="panel" data-tooltip="DEPRAVITY — the player level. Earns XP from EVERY successful act (a kiss to a capture to a 'mass' drop). Higher level unlocks the heaviest depravities: branding (L3), extreme acts (L4), nugget-making (L6), dismemberment (L7). Cheat/sandbox start unlocks everything.">
+          <h2>😈 Depravity</h2>
+          ${(() => {
+            const p = window.DMTHGame.progression;
+            if (!p) return '<div class="sub">—</div>';
+            const lvl = p.getLevel();
+            const nx = p.xpToNext();
+            const lo = p.LEVEL_THRESHOLDS[lvl - 1] || 0;
+            const pct = nx ? Math.max(0, Math.min(100, Math.round(((nx.have - lo) / Math.max(1, nx.need - lo)) * 100))) : 100;
+            return `<div class="big-num">L${lvl}</div>
+              <div class="sub">"${p.titleFor(lvl)}"${p.isCheatUnlocked() ? ' · 🔓 all unlocked (cheat)' : ''}</div>
+              <div class="bar"><div class="bar-fill" style="width:${pct}%;background:#8e44ad"></div></div>
+              <div class="sub small">${nx ? `${nx.have} / ${nx.need} XP → L${nx.next}` : 'MAX LEVEL — The Depraved'}</div>
+              ${window.DMTHGame.sexdrive ? (() => {
+                const sd = window.DMTHGame.sexdrive.status();
+                return `<div class="bar" data-tooltip="Sexual drive — fed by sex acts, decays over time. MAXED = hunt + cash boosts; DEPRIVED = debuffs. The ceiling scales with how many girls you hold + your DEPRAVITY level, so you can't max it on one captive — you need a roster."><div class="bar-fill" style="width:${Math.round(sd.pct * 100)}%;background:${sd.maxed ? '#27ae60' : sd.deprived ? '#c0392b' : '#e67e22'}"></div></div>
+                  <div class="sub small">🍆 Sex-drive ${sd.value}/${sd.max}${sd.maxed ? ' · MAXED (boosts)' : sd.deprived ? ' · DEPRIVED (debuffs)' : ''}</div>`;
+              })() : ''}
+              ${(() => {
+                const p = window.DMTHGame.progression;
+                if (!p || p.isCheatUnlocked() || !p.UNLOCKS) return '';
+                const keys = Object.keys(p.UNLOCKS).filter(k => !p.isUnlocked(k) && p.unlockFee(k) > 0);
+                if (!keys.length) return '';
+                return `<div class="sub small" style="margin-top:6px"><b>🔒 Locked — level up, or buy early:</b></div>` +
+                  keys.map(k => `<div class="stat-row small" data-tooltip="Unlock &quot;${k}&quot; now for $${p.unlockFee(k).toLocaleString()} instead of grinding to DEPRAVITY level ${p.requiredLevel(k)}."><span>${k} <span class="muted">L${p.requiredLevel(k)}</span></span><button class="btn-small" data-buy-unlock="${k}">🔓 $${p.unlockFee(k).toLocaleString()}</button></div>`).join('');
+              })()}`;
+          })()}
         </section>
         <section class="panel" data-tooltip="Films auto-sell on tick. Listed = passive earners. Sold = closed sales. Total earned = lifetime payouts.">
           <h2>🎬 Film Market</h2>
@@ -54,9 +88,27 @@
           <a href="#shop" class="btn-small" data-tooltip="Buy tools, drugs, food, water, contraception, abortion supplies.">🛒 Shop</a>
           <a href="#slave-market" class="btn-small" data-tooltip="Buy/sell captives. Untrained cheap, trained premium.">⛓️ Slave market</a>
           <a href="#achievements" class="btn-small" data-tooltip="Unlocked milestones.">🏆 Achievements</a>
+          <a href="#trophy-room" class="btn-small" data-tooltip="Trophies minted from terminally-disposed girls — each grants stacking perks.">🏆 Trophy room</a>
           ${window.DMTHGame.escapeRecovery && window.DMTHGame.escapeRecovery.recoverable().length > 0 ? `<a href="#escape-recovery" class="btn-small btn-danger" data-tooltip="Girls have escaped — recapture them before they alert authorities.">🏃 ${window.DMTHGame.escapeRecovery.recoverable().length} on the run</a>` : ''}
           ${captives.length > 0 ? `<a href="#room?girl=${captives[0].id}" class="btn-small" data-tooltip="Jump straight into ${captives[0].name}'s hold.">🚪 Enter ${captives[0].name}'s hold</a>` : ''}
         </div>
+      </section>
+
+      <section class="panel" data-tooltip="Pre-bought defenses that AUTO-APPLY the moment a raid hits — no scramble, no menu mid-bust. Stock them while you're flush so a bad raid doesn't end the run.">
+        <h2>🚨 Legal Defenses</h2>
+        <p class="small muted">Raids hit on their own when WANTED runs high. These kick in automatically: a lawyer beats a body-in-hold instant-arrest (or cuts a fine 40%), dirty-cop connections let you bribe a raid away entirely, and an escape kit lets you FLEE an unpayable fine instead of going to prison.</p>
+        ${window.DMTHGame.arrest && window.DMTHGame.arrest.VALVES ? (() => {
+          const A = window.DMTHGame.arrest;
+          const rows = Object.entries(A.VALVES).map(([id, v]) => `
+            <div class="stat-row" data-tooltip="${v.notes.replace(/"/g, '&quot;')}">
+              <span>${v.displayName} <b class="muted">×${A.valveCount(id)}</b></span>
+              <button class="btn-small" data-buy-valve="${id}">Buy $${v.cost.toLocaleString()}</button>
+            </div>`).join('');
+          const bribe = A.hasBribeContacts()
+            ? `<div class="stat-row" data-tooltip="Active — a raid you can afford the bribe on (~1.6× the fine) auto-resolves with WANTED slashed and no record."><span>💰 Dirty-Cop Connections</span><b class="ok">✓ active</b></div>`
+            : `<div class="stat-row" data-tooltip="One-time. Unlocks bribing a raid away — costs ~1.6× the fine but slashes WANTED far harder than a fine and leaves no escalating record."><span>💰 Dirty-Cop Connections</span><button class="btn-small" data-buy-bribe>Buy $${A.BRIBE_COST.toLocaleString()}</button></div>`;
+          return rows + bribe;
+        })() : '<p class="muted small">—</p>'}
       </section>
 
       <section class="panel">
@@ -86,6 +138,30 @@
         }
       </section>
     `;
+
+    // PAYUNLOCK.1 — buy early access to a gated action tier.
+    el.querySelectorAll('[data-buy-unlock]').forEach(b => {
+      b.onclick = () => {
+        const r = window.DMTHGame.progression.buyUnlock(b.dataset.buyUnlock);
+        if (!r.ok) { alert(r.reason); return; }
+        render(el);
+      };
+    });
+
+    // F.5 — buy arrest escape valves (lawyer / escape kit / bribe contacts).
+    el.querySelectorAll('[data-buy-valve]').forEach(b => {
+      b.onclick = () => {
+        const r = window.DMTHGame.arrest.buyValve(b.dataset.buyValve);
+        if (!r.ok) { alert(r.reason); return; }
+        render(el);
+      };
+    });
+    const bribeBtn = el.querySelector('[data-buy-bribe]');
+    if (bribeBtn) bribeBtn.onclick = () => {
+      const r = window.DMTHGame.arrest.buyBribeContacts();
+      if (!r.ok) { alert(r.reason); return; }
+      render(el);
+    };
 
     // No listener cleanup needed for static anchors.
     const unsub = window.DMTHGame.state.onChange(() => {

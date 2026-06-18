@@ -8,15 +8,16 @@
     street:        [{ arche: 'street', w: 0.55 }, { arche: 'barista', w: 0.2 }, { arche: 'club', w: 0.25 }],
     club:          [{ arche: 'club', w: 0.55 }, { arche: 'sorority', w: 0.25 }, { arche: 'street', w: 0.2 }],
     library:       [{ arche: 'library', w: 0.6 }, { arche: 'barista', w: 0.25 }, { arche: 'sorority', w: 0.15 }],
-    park:          [{ arche: 'gym', w: 0.35 }, { arche: 'barista', w: 0.3 }, { arche: 'library', w: 0.2 }, { arche: 'street', w: 0.15 }],
+    park:          [{ arche: 'gym', w: 0.25 }, { arche: 'barista', w: 0.2 }, { arche: 'college-student', w: 0.2 }, { arche: 'neighbor', w: 0.15 }, { arche: 'library', w: 0.12 }, { arche: 'street', w: 0.08 }],
     gym:           [{ arche: 'gym', w: 0.7 }, { arche: 'sorority', w: 0.15 }, { arche: 'street', w: 0.15 }],
-    mall:          [{ arche: 'sorority', w: 0.3 }, { arche: 'club', w: 0.25 }, { arche: 'barista', w: 0.25 }, { arche: 'library', w: 0.2 }],
-    'coffee-shop': [{ arche: 'barista', w: 0.6 }, { arche: 'library', w: 0.25 }, { arche: 'club', w: 0.15 }],
+    mall:          [{ arche: 'sorority', w: 0.22 }, { arche: 'college-student', w: 0.2 }, { arche: 'family-friend', w: 0.16 }, { arche: 'club', w: 0.16 }, { arche: 'barista', w: 0.16 }, { arche: 'library', w: 0.1 }],
+    'coffee-shop': [{ arche: 'barista', w: 0.4 }, { arche: 'college-student', w: 0.22 }, { arche: 'highschool-grad', w: 0.18 }, { arche: 'library', w: 0.12 }, { arche: 'club', w: 0.08 }],
     sorority:      [{ arche: 'sorority', w: 0.7 }, { arche: 'club', w: 0.15 }, { arche: 'model', w: 0.1 }, { arche: 'gym', w: 0.05 }],
     remote:        [{ arche: 'street', w: 0.4 }, { arche: 'waitress', w: 0.25 }, { arche: 'gym', w: 0.2 }, { arche: 'library', w: 0.15 }],
     'hotel-lobby': [{ arche: 'sorority', w: 0.3 }, { arche: 'model', w: 0.25 }, { arche: 'office', w: 0.2 }, { arche: 'club', w: 0.15 }, { arche: 'library', w: 0.1 }],
-    'private-party':[{ arche: 'sorority', w: 0.4 }, { arche: 'club', w: 0.3 }, { arche: 'model', w: 0.15 }, { arche: 'street', w: 0.15 }],
-    'school-campus':[{ arche: 'sorority', w: 0.4 }, { arche: 'library', w: 0.3 }, { arche: 'gym', w: 0.2 }, { arche: 'barista', w: 0.1 }]
+    'private-party':[{ arche: 'sorority', w: 0.3 }, { arche: 'club', w: 0.22 }, { arche: 'college-student', w: 0.18 }, { arche: 'second-cousin', w: 0.12 }, { arche: 'model', w: 0.1 }, { arche: 'street', w: 0.08 }],
+    'school-campus':[{ arche: 'college-student', w: 0.34 }, { arche: 'sorority', w: 0.24 }, { arche: 'highschool-grad', w: 0.16 }, { arche: 'library', w: 0.16 }, { arche: 'gym', w: 0.1 }],
+    'neighborhood': [{ arche: 'neighbor', w: 0.45 }, { arche: 'family-friend', w: 0.25 }, { arche: 'second-cousin', w: 0.15 }, { arche: 'college-student', w: 0.15 }]
   };
 
   // Additional archetype locations for new archetypes
@@ -191,6 +192,15 @@
     const playerSat = window.DMTHGame.state.current?.wallet?.playerSatisfaction ?? 50;
     const satisfactionBonus = ((playerSat - 50) / 50) * (playerSat >= 50 ? 0.20 : 0.10);
 
+    // WANTED is a pure hunting liability — the hotter you are, the harder the catch (cops
+    // watching, targets warier). Scales by tier (js/game/wanted.js). The legacy
+    // `notorietyBonus` stays for back-compat, but WANTED is the real heat pressure.
+    const wantedPenalty = window.DMTHGame.wanted ? window.DMTHGame.wanted.huntPenalty() : 0;
+    // Trophy perks — disposal trophies grant stacking hunt bonuses (some archetype-targeted).
+    const trophyBonus = window.DMTHGame.trophies ? window.DMTHGame.trophies.huntBonusFor(girl.archetypeTemplate) : 0;
+    // SEXDRIVE.1 — a maxed sexual drive sharpens the hunt; a deprived one dulls it.
+    const sexDriveBonus = window.DMTHGame.sexdrive ? window.DMTHGame.sexdrive.huntBonus() : 0;
+
     const breakdown = {
       baseline:            0.40,
       toolPower:           +toolPower,
@@ -198,9 +208,12 @@
       defiance:            -(defiance / 100) * 0.20,
       intelligence:        -(intelligence / 100) * 0.12,
       notorietyBonus:      +Math.min(0.12, notoriety * 0.004),
+      wantedPenalty:       -wantedPenalty,
+      trophyBonus:         +trophyBonus,
       suspicionPenalty:    -suspicionPenalty,
       exposurePenalty:     -exposure,
-      satisfactionBonus:   +satisfactionBonus
+      satisfactionBonus:   +satisfactionBonus,
+      sexDriveBonus:       +sexDriveBonus
     };
     const sumRaw =
       breakdown.baseline +
@@ -209,9 +222,12 @@
       breakdown.defiance +
       breakdown.intelligence +
       breakdown.notorietyBonus +
+      breakdown.wantedPenalty +
+      breakdown.trophyBonus +
       breakdown.suspicionPenalty +
       breakdown.exposurePenalty +
-      breakdown.satisfactionBonus;
+      breakdown.satisfactionBonus +
+      breakdown.sexDriveBonus;
 
     const successP = Math.max(0.05, Math.min(0.95, sumRaw));
 
@@ -276,6 +292,8 @@
     girl.assignedDungeonId = dungeon.id;
     girl.assignedHoldIdx = openIdx;
     girl.captureDate = Date.now();
+    // Seed dungeon-occupancy history for the death dossier's "held longest at" stat (DEATHSTATS.1).
+    girl.dungeonHistory = [...(girl.dungeonHistory || []), { dungeonId: dungeon.id, at: Date.now() }];
     girl.mood.mood = 'terrified';
     girl.mood.moodEmoji = '😱';
     window.DMTHGame.state.addGirl(girl);

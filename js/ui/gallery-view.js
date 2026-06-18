@@ -63,6 +63,21 @@
 
     if (history.length === 0) return;
 
+    // Resolve cached blobs by cacheKey — the stored entry.url may be a dead blob: URL after
+    // a page reload. Rebuild a live object URL from the cached Blob and swap it into each
+    // thumbnail (and stash on the entry so the lightbox uses it too). Falls back to entry.url.
+    if (window.DMTHGame.imaging?.resolveCached) {
+      el.querySelectorAll('.gallery-thumb').forEach(async (thumb) => {
+        const idx = Number(thumb.dataset.idx);
+        const ck = history[idx]?.cacheKey;
+        if (!ck) return;
+        try {
+          const u = await window.DMTHGame.imaging.resolveCached(ck);
+          if (u) { history[idx]._resolved = u; const img = thumb.querySelector('img'); if (img) img.src = u; }
+        } catch {}
+      });
+    }
+
     let currentIdx = 0;
     const overlay = el.querySelector('#lightbox-overlay');
     const lbImg = el.querySelector('#lightbox-img');
@@ -74,17 +89,18 @@
       currentIdx = idx;
       const entry = history[idx];
       if (!entry) return;
-      lbImg.src = entry.url;
+      const liveUrl = entry._resolved || entry.url;
+      lbImg.src = liveUrl;
       lbImg.alt = `${girl.name} ${entry.situation}`;
       lbMeta.innerHTML = `
         <b>${entry.situation}</b>${entry.userStaging ? ' · 🎨 custom' : ''}
         <span class="small muted">· ${new Date(entry.ts).toLocaleString()}</span>
         ${entry.userStaging ? `<div class="small muted" style="margin-top:6px;font-style:italic">"${entry.userStaging}"</div>` : ''}
       `;
-      lbDownload.href = entry.url;
-      const ext = entry.url.match(/\.(jpe?g|png|webp)/i)?.[1] || 'jpg';
+      lbDownload.href = liveUrl;
+      const ext = (entry.url.match(/\.(jpe?g|png|webp)/i)?.[1]) || 'jpg';
       lbDownload.download = `${girl.name}-${entry.situation}-${entry.id || Date.now()}.${ext}`;
-      lbOpen.href = entry.url;
+      lbOpen.href = liveUrl;
       overlay.style.display = 'flex';
     }
 

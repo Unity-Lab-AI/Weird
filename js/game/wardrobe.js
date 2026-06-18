@@ -408,10 +408,28 @@
     return current?.multiplier || 1.0;
   }
 
+  // Stat bonuses from the equipped outfit (CLOTHING.1). Derived from the outfit's content
+  // multiplier + nude/roleplay flags so we don't have to hand-author a bonus block per outfit:
+  //   - johnPayMul:         multiplier already applied to john pay via johnHappinessForGirl
+  //   - playerSatisfaction: a lewder/nuder outfit gives the player a bigger satisfaction hit per sex act
+  //   - girlArousal:        skin/lewd outfits leave her more exposed + worked-up
+  //   - escapeSuppress:     restraint-flavored outfits physically hold her (lowers escape risk)
+  function outfitBonuses(girl) {
+    const o = getById(girl?.currentOutfit) || {};
+    const mult = ((girl?.wardrobe || []).find(w => w.id === girl.currentOutfit)?.multiplier) || o.multiplier || 1.0;
+    const restraintFlavored = /restraint|cuff|harness|bondage|latex|catsuit|chain/i.test(`${o.roleplay || ''} ${o.id || ''} ${o.description || ''}`);
+    return {
+      johnPayMul: mult,
+      playerSatisfaction: Math.max(0, Math.round((mult - 1) * 6)),
+      girlArousal: o.nude ? 4 : Math.max(0, Math.round((mult - 1) * 8)),
+      escapeSuppress: restraintFlavored ? 0.03 : 0
+    };
+  }
+
   window.DMTHGame = window.DMTHGame || {};
   window.DMTHGame.wardrobe = Object.freeze({
     OUTFITS, catalog, getById, buyForGirl, equip, derobe, stripEverything,
-    currentMultiplier, builtIns, isNude,
+    currentMultiplier, outfitBonuses, builtIns, isNude,
     NUDE_PSEUDO_ID, NUDE_PSEUDO,
     NO_WARDROBE_PSEUDO_ID, NO_WARDROBE_PSEUDO,
     CONDOM_PSEUDO_ID, CONDOM_PSEUDO

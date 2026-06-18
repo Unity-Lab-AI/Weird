@@ -159,6 +159,14 @@
 
     // Postmortem branch — body is dead but whore-out continues. Always uses postmortem-john.
     if (girl.encounterState === 'dead') {
+      // Corpse clientele is niche AND risky. A share of arrivals are disgusted and balk —
+      // no service, and a disgusted client talks (WANTED bump). Disgust rises with decay.
+      const decayDays = (girl.body?.decayedMinutes || 0) / 1440;
+      const disgustChance = Math.min(0.6, 0.15 + decayDays * 0.06);
+      if (Math.random() < disgustChance) {
+        if (window.DMTHGame.wanted) window.DMTHGame.wanted.accrue('john-disgust');
+        return null;
+      }
       return resolveEncounter(girl, 'postmortem-john');
     }
 
@@ -201,18 +209,43 @@
       acts = filtered;
     }
 
-    // Condom use — player-requirement overrides john compliance
-    const condomUsed = wo.condomRequired
-      ? true
-      : Math.random() < arc.condomCompliance;
+    // Condom use (CONDOM-STOCK.1) — a john can only glove up if her hold / the dungeon POOL is
+    // actually STOCKED with condoms. "Condom required" enforces it ONLY when stock exists; with
+    // no condoms stocked the john goes RAW regardless (so an unstocked room = pregnancy risk).
+    // Each used condom consumes one from the supply (hold first, then dungeon pool).
+    let condomUsed = false;
+    if (girl.encounterState !== 'dead') {
+      const wantsCondom = wo.condomRequired || Math.random() < (arc.condomCompliance || 0);
+      if (wantsCondom && window.DMTHGame.supply?.draw && window.DMTHGame.supply.draw(girl, 'condoms', 1) > 0) {
+        condomUsed = true;
+      }
+    }
 
-    // Compute pay using johnHappinessForGirl multiplier
+    // Compute pay. Alive girls scale by johnHappinessForGirl (service quality). A CORPSE
+    // pays a steep necro PREMIUM instead (the degenerate-content money tier) — happiness is
+    // irrelevant to a corpse john, so we bypass it and apply a decay-scaled premium: fresh
+    // bodies command ~2.8×, declining toward a 1.4× floor as they rot. The matching law-heat
+    // (WANTED corpse-content-sale) is accrued below.
+    const isPostmortem = girl.encounterState === 'dead';
     const basePay = arc.payRange[0] + Math.floor(Math.random() * (arc.payRange[1] - arc.payRange[0]));
-    const happiness = window.DMTHGame.actionEffects?.johnHappinessForGirl(girl) || { multiplier: 1.0, breakdown: {} };
-    const payment = Math.round(basePay * happiness.multiplier);
+    let necroMult = 1;
+    if (isPostmortem) {
+      const decayDays = (girl.body?.decayedMinutes || 0) / 1440;
+      // CORPSE-TIMER.1 — fresh pays the most, near-rotten very little. Steeper falloff so
+      // across the ~5-day window the premium slides from 2.8× (fresh) toward the 1.2× floor.
+      necroMult = Math.max(1.2, 2.8 - decayDays * 0.32);
+    }
+    const happiness = isPostmortem
+      ? { multiplier: 1.0, breakdown: { postmortem: true, necroMult } }
+      : (window.DMTHGame.actionEffects?.johnHappinessForGirl(girl) || { multiplier: 1.0, breakdown: {} });
+    // Player-satisfaction cash bonus — a satisfied operator runs a tighter, higher-earning
+    // house. Centered at 50 (neutral); full 100 → +12%, floor 0 → -12%. This is the "cash
+    // gains" half of the satisfaction loop (hunting bonus lives in hunt.js).
+    const sat = window.DMTHGame.state.getSatisfaction ? window.DMTHGame.state.getSatisfaction() : 50;
+    const satMul = 1 + ((sat - 50) / 50) * 0.12;
+    const payment = Math.round(basePay * happiness.multiplier * necroMult * satMul);
     const tipRoll = Math.random() < arc.tipChance;
     const tip = tipRoll ? Math.round(payment * (arc.tipMul - 1.0)) : 0;
-    const totalPaid = payment + tip;
 
     // Apply the john action (drains stamina + health + mood per archetype intensity)
     // Capture bond before+after so encounter ledger records the ACTUAL bond delta applied,
@@ -233,17 +266,35 @@
     // Determine cum delivery: vaginal-cum acts trigger pregnancy hook unless condomUsed
     const hasVaginalCum = acts.some(a => VAGINAL_CUM_ACTS.has(a));
     let pregnancyHookFired = false;
-    if (hasVaginalCum && !condomUsed && window.DMTHGame.pregnancy) {
+    if (hasVaginalCum && !condomUsed && window.DMTHGame.pregnancy?.addVaginalCum) {
       try {
-        const r = window.DMTHGame.pregnancy.attemptConception(girl.id, {
-          conceptionSource: 'whore-out',
-          johnEncounterId: null   // set below after we have the id
-        });
-        if (r && r.rolled) pregnancyHookFired = true;
+        // CUMFILL.1 — a john's vaginal load raises her vaginal cum-fill; sustained fill (the
+        // preggo timer in pregnancy.tickCumFill) is what conceives, not a per-john roll.
+        window.DMTHGame.pregnancy.addVaginalCum(girl.id, 1.2, { conceptionSource: 'whore-out' });
+        pregnancyHookFired = true;
       } catch (err) {
-        console.debug('[whore-out] pregnancy hook failed:', err);
+        console.debug('[whore-out] vaginal cum-fill failed:', err);
       }
     }
+
+    // JOHN-VARIETY.1 — a depraved john (intensity ≥ 3) helps himself to what's in the room:
+    // a TOY mounted in her hold and/or a hit of DRUGS from the dungeon pool, used on/around her
+    // (smoke her weed and blacken her eye). Draws from the same supply the player stocks; applies
+    // the toy's real damage/effect; pays a depravity premium on top. Alive girls only.
+    let johnExtraPay = 0;
+    const johnExtraActs = [];
+    if (!isPostmortem && (arc.intensity || 0) >= 3) {
+      const heldToys = window.DMTHGame.toys?.holdToys ? window.DMTHGame.toys.holdToys(girl) : [];
+      if (heldToys.length && Math.random() < ((arc.intensity >= 4) ? 0.5 : 0.25)) {
+        const tid = heldToys[Math.floor(Math.random() * heldToys.length)];
+        try { const r = window.DMTHGame.toys.use(tid, girl.id, { byJohn: true }); if (r && r.ok) { johnExtraActs.push('toy:' + tid); johnExtraPay += 40; } } catch (e) { /* non-fatal */ }
+      }
+      if (window.DMTHGame.supply?.drawDrug && Math.random() < 0.4) {
+        const drg = window.DMTHGame.supply.drawDrug(girl);
+        if (drg) { johnExtraActs.push('drug:' + drg); johnExtraPay += 15; }
+      }
+    }
+    const totalPaid = payment + tip + johnExtraPay;
 
     // For repeat-eligible archetypes, persist a stable johnId so
     // subsequent encounters can match against prior visits. Repeat clients build cumulative
@@ -267,10 +318,11 @@
       ts: Date.now(),
       johnArchetype: archetypeId,
       johnDescription: arc.displayName,
-      acts,
+      acts: johnExtraActs.length ? [...acts, ...johnExtraActs] : acts,
       duration_min: arc.intensity * 5 + Math.floor(Math.random() * 10),
       payment,
       tip,
+      johnExtraPay,
       totalPaid,
       condomUsed,
       girlMoodBefore: moodBefore,
@@ -311,6 +363,11 @@
     if (window.DMTHGame.state.addBuzz) {
       const buzzGain = archetypeId === 'postmortem-john' ? 0.25 : 0.5;
       window.DMTHGame.state.addBuzz(buzzGain, `john-completed: ${archetypeId}`);
+    }
+
+    // Corpse content draws the worst law-heat — every postmortem sale spikes WANTED.
+    if (isPostmortem && window.DMTHGame.wanted) {
+      window.DMTHGame.wanted.accrue('corpse-content-sale');
     }
 
     window.DMTHGame.state.updateGirl(girl.id, { whoreOut: newWo });

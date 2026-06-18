@@ -35,6 +35,9 @@
 
   <!-- Game engine -->
   <script src="js/game/state.js"></script>
+  <script src="js/game/progression.js"></script>
+  <script src="js/game/sexdrive.js"></script>
+  <script src="js/game/wanted.js"></script>
   <script src="js/game/game-clock.js"></script>
   <script src="js/game/girl-gen.js"></script>
   <script src="js/game/bootstrap.js"></script>
@@ -54,23 +57,36 @@
   <script src="js/game/escape-recovery.js"></script>
   <script src="js/game/save-slots.js"></script>
   <script src="js/game/lifespan.js"></script>
+  <script src="js/game/death.js"></script>
   <script src="js/game/action-effects.js"></script>
   <script src="js/game/pregnancy.js"></script>
+  <script src="js/game/condoms.js"></script>
   <script src="js/game/whore-out.js"></script>
   <script src="js/game/film.js"></script>
   <script src="js/game/market.js"></script>
+  <script src="js/game/milk.js"></script>
   <script src="js/game/shop.js"></script>
   <script src="js/game/hunt.js"></script>
   <script src="js/game/capture.js"></script>
+  <script src="js/game/supply.js"></script>
+  <script src="js/game/loot.js"></script>
+  <script src="js/game/toys.js"></script>
+  <script src="js/game/transport.js"></script>
   <script src="js/game/propositioner.js"></script>
   <script src="js/game/disposal.js"></script>
+  <script src="js/game/trophies.js"></script>
   <script src="js/game/slave-market.js"></script>
+  <script src="js/game/arrest.js"></script>
   <script src="js/game/tick.js"></script>
 
   <!-- UI layer -->
   <script src="js/ui/router.js"></script>
   <script src="js/ui/newgame.js"></script>
   <script src="js/ui/dashboard.js"></script>
+  <script src="js/ui/charsheet.js"></script>
+  <script src="js/ui/game-over-view.js"></script>
+  <script src="js/ui/trophy-room-view.js"></script>
+  <script src="js/ui/room/panels.js"></script>
   <script src="js/ui/room.js"></script>
   <script src="js/ui/roster.js"></script>
   <script src="js/ui/dungeon-view.js"></script>
@@ -88,6 +104,7 @@
   <script src="js/ui/asset-img.js"></script>
   <script src="js/ui/tooltips.js"></script>
   <script src="js/ui/notify.js"></script>
+  <script src="js/ui/death-dossier-overlay.js"></script>
   <script src="js/ui/voice-queue.js"></script>
   <script src="js/ui/timeline-view.js"></script>
   <script src="js/ui/gallery-view.js"></script>
@@ -100,6 +117,7 @@
     <div class="chrome-brand">DUNGEON MASTER: THE HUNT</div>
     <nav class="chrome-nav">
       <a href="#dashboard" data-route="dashboard" data-tooltip="Treasury + captive count + film market — your operation at a glance.">🏠 Dashboard</a>
+      <a href="#charsheet" data-route="charsheet" data-tooltip="Your character sheet — DEPRAVITY, drives, every buff stacked on you + every debuff dragging on you, and which sins you've unlocked.">📑 Sheet</a>
       <a href="#roster" data-route="roster" data-tooltip="Every captive, every escaped girl, every dispatched corpse — the full ledger.">📋 Roster</a>
       <a href="#dungeon" data-route="dungeon" data-tooltip="Your dungeons + per-hold upgrades. Throw cash at security, restraints, plumbing.">🏚️ Dungeons</a>
       <a href="#town" data-route="town" data-tooltip="The map. Hunt locations + properties you can buy + own.">🌆 Town</a>
@@ -114,6 +132,7 @@
     <div class="chrome-satisfaction" id="chrome-satisfaction" data-tooltip="Player satisfaction (0-100). Sex acts with captives raise it; slow drift down without intimacy. High satisfaction grants a hunting bonus — capture odds get easier the more satisfied you are. Fuck enough and the next catch is much easier.">😐 50</div>
     <div class="chrome-buzz" id="chrome-buzz" data-tooltip="BUZZ (0-100) — underground word-of-mouth about your dungeons. Bumped by film sales, successful johns, high-bond captives, stress-band streaks. Drains over time between income events. Higher BUZZ = more johns visit your whored-out captives more often. BUZZ 100 = 2× john arrival rate.">🐝 0</div>
     <div class="chrome-money" id="chrome-money" data-tooltip="Liquid cash on hand. Spend on upgrades, captures, abortions, slaves.">$0</div>
+    <button class="btn-small" id="chrome-pause" data-tooltip="Pause the game — freezes time, escapes, decay, john arrivals and raids while you step away. Progress is saved; resume any time. State also persists automatically when you navigate away and reload.">⏸</button>
     <button class="btn-small" id="chrome-voice" data-tooltip="Toggle Kokoro TTS voice playback on/off.">🔊</button>
     <button class="btn-small btn-danger" id="chrome-new-game" data-tooltip="WIPES your save and starts fresh. Use Settings → Save Slots to keep a copy first.">🔄 New Game</button>
     <a href="#settings" class="btn-small" data-tooltip="Ollama / Kokoro / Pollinations / save slots / factory reset.">⚙</a>
@@ -186,6 +205,33 @@
 
     // Start the tick engine
     window.DMTHGame.tick.start();
+
+    // === PAUSE.1 — pause/resume + persist across navigation ===
+    // Freezes the game clock + gates the tick (no escapes / decay / johns / raids while paused).
+    // Paused state persists in localStorage so it restores on reload; every toggle flushes a save.
+    const PAUSE_KEY = 'dmth_paused';
+    function applyPaused(on, silent) {
+      const btn = document.getElementById('chrome-pause');
+      if (on) {
+        if (window.DMTHGame.gameClock) window.DMTHGame.gameClock.pause();
+        if (btn) { btn.textContent = '▶️'; btn.title = 'Paused — click to resume'; btn.classList.add('btn-danger'); }
+      } else {
+        if (window.DMTHGame.gameClock) window.DMTHGame.gameClock.resume();
+        if (btn) { btn.textContent = '⏸'; btn.title = 'Pause the game'; btn.classList.remove('btn-danger'); }
+      }
+      localStorage.setItem(PAUSE_KEY, on ? '1' : '0');
+      try { window.DMTHGame.state.save(); } catch {}
+      if (!silent && window.DMTHNotify) window.DMTHNotify.show(on ? '⏸ Game paused — time frozen, progress saved.' : '▶️ Game resumed.', { type: 'info', durationMs: 2000 });
+    }
+    // Restore last session's pause state (silently — no toast on boot).
+    if (localStorage.getItem(PAUSE_KEY) === '1') applyPaused(true, true);
+    const pauseBtn = document.getElementById('chrome-pause');
+    if (pauseBtn) pauseBtn.onclick = () => applyPaused(localStorage.getItem(PAUSE_KEY) !== '1');
+
+    // Flush a save when navigating away / hiding the tab, so returning to the program reloads
+    // the latest progress (mutate() already auto-saves continuously; this is the on-exit flush).
+    window.addEventListener('visibilitychange', () => { if (document.hidden) { try { window.DMTHGame.state.save(); } catch {} } });
+    window.addEventListener('beforeunload', () => { try { window.DMTHGame.state.save(); } catch {} });
 
     // === Voice (Kokoro TTS) ===
     // Voice toggle — persists in localStorage. Default: on.

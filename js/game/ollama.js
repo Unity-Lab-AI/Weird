@@ -160,7 +160,13 @@
   async function runTurn({ girl, mode, sceneKey, sceneVars, userText, room, onChunk }) {
     const system = buildSystemPrompt(girl, mode, sceneKey, sceneVars);
     const girlState = { body: girl.body, mood: girl.mood, bond: girl.bond, stats: girl.stats };
-    const recentTurns = window.DMTHGame.state.getTurns(girl.id, 6).map(t => ({ role: t.role, text: t.text }));
+    // Only this girl's OWN turns feed her context. Speaker-tagged turns are partner-captive
+    // lines mirrored into a HOST girl's shared log by the multi-girl scene (MULTIGIRL.2) —
+    // filter them out so a girl never mistakes a roommate's line for her own prior reply.
+    const recentTurns = window.DMTHGame.state.getTurns(girl.id, 16)
+      .filter(t => !t.speaker)
+      .slice(-6)
+      .map(t => ({ role: t.role, text: t.text }));
 
     // Retrieve top-K relevant past memories via embedding (fire-and-forget, best-effort)
     let memory = [];

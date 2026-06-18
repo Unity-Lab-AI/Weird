@@ -117,12 +117,62 @@
       drugsPool:      ['coffee-heavy','pills-from-hospital-stash','wine-after-shift','occasional-coke'],
       speechTokens:   ['professional-bedside-manner-cracking','clinical-vocabulary','swears-tired-and-hard','deadpan-gallows-humor']
     },
+    'college-student': {
+      namePool:       ['Madison','Hailey','Bella','Sydney','Paige','Morgan','Chloe','Jordan','Riley','Tessa'],
+      ageRange:       [18, 22],
+      facialTokens:   ['fresh dorm-room face, no-makeup glow, hair in a messy bun','bright eyes, light freckles, easy smile, backpack-strap shoulder','soft round cheeks, lip gloss, hoop earrings','tired-but-pretty exam-week look, hoodie hood half-up'],
+      outfitTokens:   ['college hoodie, leggings, slides, lanyard with dorm key','crop tee, denim shorts, sneakers, tote bag','oversized sweatshirt, biker shorts, scrunchie on wrist','tank top, plaid pajama bottoms, fuzzy socks'],
+      statsRanges:    { intelligence: [60,90], defiance: [45,75], curiosity: [60,90], trust: [10,25], obedience: [5,20], stamina: [50,80], painTolerance: [20,50], lust: [45,80] },
+      kinksPool:      ['praise','first-time-nerves','roleplay:tutor','exhibition-shy','being-talked-through-it','overstimulation'],
+      drugsPool:      ['adderall','jungle-juice','weed','occasional-coke'],
+      speechTokens:   ['up-talk','says-like-a-lot','nervous-giggle','texts-in-her-head']
+    },
+    'highschool-grad': {
+      namePool:       ['Brianna','Kayla','Destinee','Mackenzie','Aubrey','Jocelyn','Aaliyah','Brooklyn','Skylar','Harper'],
+      ageRange:       [18, 19],
+      facialTokens:   ['fresh-18 baby face, braces just off, bright wide eyes','glossy lips, prom-makeup leftover, soft cheeks','sun-freckled, ponytail, graduation glow','dewy young skin, big doe eyes, nervous lip-bite'],
+      outfitTokens:   ['grad-trip sundress, sandals, friendship bracelets','cheer shorts, school tee, sneakers','bikini top under an open flannel, denim cutoffs','tank dress, slides, tiny crossbody bag'],
+      statsRanges:    { intelligence: [45,75], defiance: [40,70], curiosity: [65,95], trust: [15,30], obedience: [5,20], stamina: [55,80], painTolerance: [15,45], lust: [40,75] },
+      kinksPool:      ['first-everything','praise-heavy','corruption-arc','roleplay:older-man','shy-exhibition','being-her-first'],
+      drugsPool:      ['wine-coolers','weed-curious','vape','barely-drinks'],
+      speechTokens:   ['naive','asks-if-this-is-normal','calls-for-mom-when-scared','fast-learner']
+    },
+    neighbor: {
+      namePool:       ['Megan','Lauren','Katie','Amber','Jess','Nicole','Steph','Dana','Holly','Carrie'],
+      ageRange:       [19, 30],
+      facialTokens:   ['girl-next-door pretty, natural makeup, familiar warm face','sun-kissed, casual ponytail, easy neighborly smile','soft features, reading glasses pushed up, coffee-mug-in-hand look','approachable beauty, hair tucked behind one ear'],
+      outfitTokens:   ['yoga set carrying the mail, slides','sundress watering plants on the porch, bare feet','oversized tee and sleep shorts taking out trash','gym clothes, earbuds in, jogging the block'],
+      statsRanges:    { intelligence: [55,85], defiance: [50,80], curiosity: [50,80], trust: [20,40], obedience: [5,20], stamina: [50,80], painTolerance: [25,55], lust: [45,80] },
+      kinksPool:      ['forbidden-familiarity','roleplay:friendly-neighbor','slow-corruption','being-recognized','guilt-and-want'],
+      drugsPool:      ['wine','weed','occasional-pills'],
+      speechTokens:   ['uses-your-name-in-disbelief','"i-know-you"','betrayed-tone','bargains-on-shared-history']
+    },
+    'family-friend': {
+      namePool:       ['Sandra','Theresa','Gina','Bonnie','Paula','Sharon','Donna','Lori','Renee','Connie'],
+      ageRange:       [22, 34],
+      facialTokens:   ['warm trusting face that knows you, soft maternal eyes','polished friend-of-the-family look, tasteful makeup','familiar kind features, laugh lines, hair done nice','approachable elegance, the woman from the cookouts'],
+      outfitTokens:   ['sundress from the family barbecue, wedge sandals','blouse and capris, dropping off a casserole dish','cardigan and jeans, purse on her shoulder','church-nice dress, modest heels'],
+      statsRanges:    { intelligence: [60,85], defiance: [45,75], curiosity: [45,75], trust: [25,45], obedience: [5,20], stamina: [45,70], painTolerance: [25,55], lust: [40,75] },
+      kinksPool:      ['betrayal-of-trust','roleplay:family-friend','taboo-familiarity','guilt-ridden-submission','"what-would-they-think"'],
+      drugsPool:      ['wine-nightly','xanax','occasional-edible'],
+      speechTokens:   ['disbelief-its-you','invokes-your-family','"ive-known-you-since"','tries-to-shame-you-out-of-it']
+    },
+    'second-cousin': {
+      namePool:       ['Brittany','Ashlyn','Cassidy','Devyn','Kelsey','Marlee','Raegan','Shelby','Taylor','Whitley'],
+      ageRange:       [19, 26],
+      facialTokens:   ['family-resemblance pretty, same eyes as yours, soft young face','familiar bone structure, freckles, reunion-photo smile','related-looking beauty, hair like your side of the family','the cousin from the holidays, glossed lips, knowing look'],
+      outfitTokens:   ['family-reunion sundress, sandals','leggings and a college tee at the holiday table','swimsuit and sarong from the lake-house trip','casual jeans and a fitted top, hair down'],
+      statsRanges:    { intelligence: [55,85], defiance: [50,80], curiosity: [55,85], trust: [20,40], obedience: [5,20], stamina: [50,80], painTolerance: [20,50], lust: [45,85] },
+      kinksPool:      ['blood-taboo','roleplay:kissing-cousins','forbidden-family','secret-keeping','"we-cant-were-related"'],
+      drugsPool:      ['weed','wine','party-drugs-at-reunions'],
+      speechTokens:   ['"were-cousins"-protest','family-guilt','disbelief','secret-shared-history']
+    },
     unity_seed: {
       // Unity is SEEDED — not re-rolled. This exists as a template record but generator
       // skips re-rolling when given id='girl_unity' (see bootstrap.js).
       namePool:       ['Unity'],
       ageRange:       [25, 25],
-      facialTokens:   ['pale skin, black hair with pink streaks, heavy smudged eyeliner, nose ring, pierced lower lip, dilated pupils'],
+      facialTokens:   ['pale skin, black hair with pink streaks, heavy smudged eyeliner, nose ring, pierced lower lip'],
       outfitTokens:   ['black leather bodice with too many buckles, collar with D-ring, fishnet stockings, combat boots, black leather mini skirt'],
       statsRanges:    { intelligence: [90,90], defiance: [30,30], curiosity: [85,85], trust: [40,40], obedience: [55,55], stamina: [75,75], painTolerance: [75,75], lust: [99,99] },
       kinksPool:      ['all-of-them','three-cocks','coke-on-clit','degradation-with-love','choking','hairpulling','anal','deepthroat','edging','breeding','watching-code-compile'],

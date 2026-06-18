@@ -20,6 +20,12 @@
 //     bondXP:    -20..+20
 //     bondDebt:  -20..+20
 //     notoriety: -5..+5       // bumps the wallet, not the body
+//     escapeRisk: -0.12..+0.12 // explicit override on the 0-1 escape-risk bar. When omitted,
+//                              // applyAction DERIVES it from the act's nature: loving /
+//                              // indoctrinating acts (bondXP↑, mood↑, forgiveness) lower her
+//                              // fighting spirit + the bar; violence / degradation (bondDebt↑,
+//                              // bruises↑) raise it. Set explicitly only where physical
+//                              // suppression isn't captured by bond/mood (restraint, sedation).
 //     notes:     string       // human-readable label, used in tooltip previews
 //   }
 
@@ -136,12 +142,12 @@
       notes: 'Whiskey — actually drops stamina (depressant) but loosens her up.'
     },
     'drug-ketamine': {
-      stamina: -15, health: -4, mood: -5, satisfaction: +2,
-      notes: 'Ketamine — heavy stamina drain (dissociation), health hit.'
+      stamina: -15, health: -4, mood: -5, escapeRisk: -0.06, satisfaction: +2,
+      notes: 'Ketamine — heavy stamina drain (dissociation), health hit. Dissociated = can\'t plan an escape (lowers escape risk).'
     },
     'drug-tranquilizer': {
-      stamina: -30, health: -2, mood: -8, satisfaction: +3,
-      notes: 'Tranquilizer dart — knocks her out. Heavy stamina drain.'
+      stamina: -30, health: -2, mood: -8, escapeRisk: -0.12, satisfaction: +3,
+      notes: 'Tranquilizer dart — knocks her out cold. Heavy stamina drain. Unconscious = escape risk craters.'
     },
 
     // -----------------------------------------------------------------
@@ -189,11 +195,49 @@
     },
 
     // -----------------------------------------------------------------
+    // EXTREME / DEPRAVED — vile, disturbing acts. HEAVY tolls on the girl (health/stamina/
+    // bruises/mood) but the biggest player-satisfaction payouts + the strongest film-value
+    // markers (cumLoad + bruises + aftermath). Stacking these on ONE girl drains her health
+    // toward death fast — the satisfaction the player wants has to be spread across the
+    // roster or it kills her. 18+ fiction.
+    // -----------------------------------------------------------------
+    'extreme-facefuck': {
+      stamina: -12, health: -6, mood: -12, arousal: +10, cumLoad: +0.8, bruises: +2, bondDebt: +6, satisfaction: +7,
+      notes: 'Brutal face-fuck — throat trauma, ruined makeup, gagging. Big satisfaction + film value, real health toll.'
+    },
+    'extreme-rough-anal': {
+      stamina: -20, health: -8, mood: -14, arousal: +8, wetness: +6, cumLoad: +1.0, bruises: +3, bondDebt: +8, satisfaction: +8,
+      notes: 'Tearing rough anal — heavy stamina + health hit, big bond-debt, premium film markers.'
+    },
+    'extreme-breeding-rape': {
+      stamina: -10, health: -5, mood: -14, arousal: +6, cumLoad: +1.6, bruises: +3, bondDebt: +9, satisfaction: +9,
+      notes: 'Forced breeding — max cum delivery + bond-debt. Huge satisfaction + film value. Pregnancy risk via scene tags.'
+    },
+    'extreme-degrade': {
+      stamina: -4, health: -3, mood: -16, arousal: +5, bruises: +1, bondDebt: +8, satisfaction: +6,
+      notes: 'Total degradation — piss, spit, slurs, filming her ruin. Destroys mood + bond, strong humiliation film value.'
+    },
+    'extreme-beatdown': {
+      stamina: -10, health: -18, mood: -16, bruises: +8, bondDebt: +10, satisfaction: +6,
+      notes: 'Full beatdown — massive bruising + health crater. Brutal film content. Will kill a low-health captive.'
+    },
+    'extreme-choke-out': {
+      stamina: -8, health: -12, mood: -10, arousal: +12, wetness: +6, bruises: +4, bondDebt: +7, satisfaction: +9,
+      notes: 'Choke her to the edge of blackout — erotic asphyxiation. Huge satisfaction + film value. REAL death risk at low health.'
+    },
+    // Psycho-masochist tier — for a girl who CRAVES the pain (masochist affect / high lust):
+    // arousal floods, bond actually RISES, she begs for more. On anyone else it's pure trauma.
+    'masochist-overload': {
+      stamina: -12, health: -8, mood: -2, arousal: +18, wetness: +18, cumLoad: +0.6, bruises: +5, bondXP: +4, satisfaction: +8,
+      notes: 'Psycho-masochist overload — she begs for the pain. Arousal + wetness flood, bruises stack, bond RISES (for a masochist). Big satisfaction. On a non-masochist it is just damage.'
+    },
+
+    // -----------------------------------------------------------------
     // RESTRAINT — low stamina, mood drop
     // -----------------------------------------------------------------
     'restrain': {
-      stamina: -1, health: 0, mood: -3, bondDebt: +1, satisfaction: +1,
-      notes: 'Restrain her — minimal physical cost, mood drop, bond-debt blip.'
+      stamina: -1, health: 0, mood: -3, bondDebt: +1, escapeRisk: -0.05, satisfaction: +1,
+      notes: 'Restrain her — minimal physical cost, mood drop, bond-debt blip. Tighter restraint physically suppresses escape risk.'
     },
 
     // -----------------------------------------------------------------
@@ -245,10 +289,48 @@
     }
   });
 
+  // Maps an action to the recent-act aftermath tag stamped on the body. imaging.js
+  // actAftermathTokens() reads body.recentActTag (+ recentActAt game-min, TTL-faded) and
+  // renders the fresh aftermath of what was just done to her in her next image. Only acts
+  // that visibly mark the body are tagged; the latest tagged act wins.
+  const AFTERMATH_TAGS = Object.freeze({
+    'sex-rough':       'rough',
+    'sex-anal':        'anal',
+    'sex-cum-inside':  'creampied',
+    'sex-oral':        'throated',
+    'sex-gentle':      'used',
+    'choke':           'choked',
+    'whip':            'whipped',
+    'punch':           'beaten',
+    'slap':            'slapped',
+    'john-rough':      'rough',
+    'john-degrader':   'used',
+    'extreme-facefuck':      'throated',
+    'extreme-rough-anal':    'anal',
+    'extreme-breeding-rape': 'creampied',
+    'extreme-degrade':       'used',
+    'extreme-beatdown':      'beaten',
+    'extreme-choke-out':     'choked',
+    'masochist-overload':    'rough',
+    'love-kiss-gentle':      'kissed',
+    'love-forehead-kiss':    'kissed',
+    'love-praise':           'kissed',
+    'love-cuddle':           'caressed',
+    'love-massage':          'caressed',
+    'love-hold-her':         'caressed',
+    'love-hair-brush':       'caressed'
+  });
+
   // Threshold below which actions become gated. Returns the minimum stamina required
   // for the action to land cleanly. Stamina < required = action still runs but takes
   // a bigger health hit + bigger mood penalty.
   const STAMINA_THRESHOLD_FOR_STRAIN = 20;
+
+  // XTOL.1 — a girl absorbs ~XTOL_LIMIT extreme acts before she's spent and needs recovery
+  // (heal / caress / love / feed / water / time). Care acts + rest walk the streak back down;
+  // pushing past the limit piles extra damage on top.
+  const XTOL_LIMIT = 10;
+  const EXTREME_ACTS_FOR_TOL = new Set(['extreme-facefuck', 'extreme-rough-anal', 'extreme-breeding-rape', 'extreme-degrade', 'extreme-beatdown', 'extreme-choke-out', 'masochist-overload']);
 
   // Apply an action's deltas to a girl. Optional opts:
   //   { strain: true } — applies a strain multiplier (1.5x cost on negative effects)
@@ -298,20 +380,25 @@
     // the action-effects layer a way to push mood meaningfully.
     if (action.mood) {
       const moodDelta = action.mood < 0 ? action.mood * strainMul : action.mood;
-      mood.moodPressure = (mood.moodPressure || 0) + moodDelta;
-      // Reclassify mood.mood at major threshold boundaries — keep mood-string in sync
-      // with cumulative pressure so johnHappinessForGirl + UI mood-name read correct.
-      const p = mood.moodPressure;
-      if (p <= -30 && mood.mood !== 'broken') { mood.mood = 'broken'; mood.moodEmoji = '😵'; }
-      else if (p <= -15 && !['broken','traumatized'].includes(mood.mood)) { mood.mood = 'subdued'; mood.moodEmoji = '😔'; }
-      else if (p <= -5 && ['ambivalent','curious','reciprocated','dependent','partner','devoted','fully-bonded'].includes(mood.mood)) {
-        mood.mood = 'wary'; mood.moodEmoji = '😐';
-      }
-      else if (p >= 30 && ['terrified','wary','broken','catatonic','subdued','traumatized'].includes(mood.mood)) {
-        mood.mood = 'reciprocated'; mood.moodEmoji = '😏';
-      }
-      else if (p >= 15 && ['terrified','wary','broken','catatonic'].includes(mood.mood)) {
-        mood.mood = 'acclimating'; mood.moodEmoji = '😶';
+      // Clamp cumulative pressure so it can't run away in either direction.
+      mood.moodPressure = clamp((mood.moodPressure || 0) + moodDelta, -60, 60);
+      // Monotonic ladder — the pressure band ALONE determines the action-driven mood, so there
+      // are no dead-ends (acclimating/reciprocated can keep climbing or fall back cleanly).
+      // The bond system owns the top moods (devoted/partner/dependent/fully-bonded); don't
+      // stomp those — only reclassify when the current mood is action-driven.
+      const BOND_OWNED = ['devoted', 'partner', 'dependent', 'fully-bonded'];
+      if (!BOND_OWNED.includes(mood.mood)) {
+        const p = mood.moodPressure;
+        let m, e;
+        if      (p <= -45) { m = 'broken';      e = '😵'; }
+        else if (p <= -25) { m = 'traumatized'; e = '😞'; }
+        else if (p <= -12) { m = 'subdued';     e = '😔'; }
+        else if (p <=  -4) { m = 'wary';        e = '😐'; }
+        else if (p <    6) { m = 'ambivalent';  e = '😶'; }
+        else if (p <   16) { m = 'acclimating'; e = '🙂'; }
+        else if (p <   30) { m = 'curious';     e = '😏'; }
+        else               { m = 'reciprocated';e = '😍'; }
+        mood.mood = m; mood.moodEmoji = e;
       }
       mood.history = [...(mood.history || []), { actionId, deltaPressure: moodDelta, ts: Date.now() }].slice(-30);
     }
@@ -333,9 +420,255 @@
     if (action.satisfaction && window.DMTHGame.state.addSatisfaction) {
       window.DMTHGame.state.addSatisfaction(action.satisfaction, actionId);
     }
+    // SEXDRIVE.1 — sex acts feed the player's sexual-drive need (clamped to its scaling cap,
+    // so one girl can't push it into the maxed boost band — you need a roster).
+    if (action.satisfaction && window.DMTHGame.sexdrive) {
+      try { window.DMTHGame.sexdrive.feed(action.satisfaction); } catch (e) { /* non-fatal */ }
+    }
 
-    window.DMTHGame.state.updateGirl(girlId, { body, bond, mood });
-    return { ok: true, action, strain: !!opts.strain };
+    // Stamp the recent-act aftermath tag so the NEXT image of her renders what was just
+    // done (imaging.js actAftermathTokens — TTL-faded). Latest tagged act wins.
+    const aftermathTag = AFTERMATH_TAGS[actionId];
+    if (aftermathTag) {
+      body.recentActTag = aftermathTag;
+      if (window.DMTHGame.gameClock) body.recentActAt = window.DMTHGame.gameClock.now();
+    }
+
+    // Escape-risk bar — the captive's drive to get out (0-1; she escapes if it maxes). Acts
+    // shift it: loving / indoctrinating acts lower her fighting spirit + the bar; violence /
+    // degradation stoke defiance + raise it. Explicit action.escapeRisk overrides the derive
+    // (used where physical suppression isn't captured by bond/mood — restraint, sedation).
+    // The bar's passive rise + containment counters (security / restraints / guard dog) live
+    // in tick.js; this is the player's active lever to manage it through care.
+    const escape = { ...(girl.escape || { currentRisk: 0.1, factors: {}, lastAttempt: null }) };
+    const escapeRiskDelta = (typeof action.escapeRisk === 'number') ? action.escapeRisk : (
+      -(action.bondXP || 0) * 0.006                       // indoctrination calms her
+      - Math.max(0, action.mood || 0) * 0.003             // a lifted mood softens the fight
+      + (action.bondDebt || 0) * 0.005                    // forgiveness (−) lowers, harshness (+) raises
+      + Math.max(0, action.bruises || 0) * 0.004          // fresh pain stokes desperation
+      - Math.max(0, action.health || 0) * 0.002           // healing settles her
+    );
+    escape.currentRisk = clamp((escape.currentRisk ?? 0.1) + escapeRiskDelta, 0, 1);
+    escape.lastRiskDelta = escapeRiskDelta;
+
+    // Clothing stat bonuses (CLOTHING.1) — on a SEXUAL act, the equipped outfit boosts the
+    // player's satisfaction + her arousal; a restraint-flavored outfit also suppresses escape.
+    if ((action.arousal || action.cumLoad) && window.DMTHGame.wardrobe?.outfitBonuses) {
+      const ob = window.DMTHGame.wardrobe.outfitBonuses(girl);
+      if (ob.girlArousal) body.arousal = clamp((body.arousal ?? 0) + ob.girlArousal, 0, 100);
+      if (ob.escapeSuppress) escape.currentRisk = clamp(escape.currentRisk - ob.escapeSuppress, 0, 1);
+      if (ob.playerSatisfaction && window.DMTHGame.state.addSatisfaction) {
+        window.DMTHGame.state.addSatisfaction(ob.playerSatisfaction, `outfit-bonus:${girl.currentOutfit}`);
+      }
+    }
+
+    // XTOL.1 — extreme-act tolerance. Extreme acts stack a streak; care/rest walk it back.
+    // Past the limit she's spent → extra health/stamina toll until she's recovered.
+    const isExtremeAct = EXTREME_ACTS_FOR_TOL.has(actionId);
+    const isRecoveryAct = actionId === 'heal' || actionId.startsWith('love-') || actionId.startsWith('feed-') || actionId.startsWith('water-');
+    let xStreak = body.extremeStreak || 0;
+    if (isExtremeAct) {
+      xStreak += 1;
+      if (xStreak > XTOL_LIMIT) {
+        body.health = clamp((body.health ?? 100) - 6, 0, 100);
+        body.stamina = clamp((body.stamina ?? 70) - 8, 0, body.health);
+        if (window.DMTHNotify && xStreak === XTOL_LIMIT + 1) {
+          window.DMTHNotify.show(`⚠️ ${girl.name} is spent (${XTOL_LIMIT}+ extreme acts) — heal / caress / feed / rest her before she breaks.`, { type: 'error', durationMs: 6000 });
+        }
+      } else if (xStreak === XTOL_LIMIT && window.DMTHNotify) {
+        window.DMTHNotify.show(`⚠️ ${girl.name} is at her extreme-act limit — she needs recovery now.`, { type: 'warn', durationMs: 5000 });
+      }
+    } else if (isRecoveryAct) {
+      xStreak = Math.max(0, xStreak - 2);
+    }
+    body.extremeStreak = xStreak;
+
+    window.DMTHGame.state.updateGirl(girlId, { body, bond, mood, escape });
+
+    // Breeding / cum-inside ACTIONS raise her VAGINAL cum-fill (CUMFILL.1) — sustained fill is
+    // what conceives (pregnancy.tickCumFill timer), not this single event. Skipped when a
+    // condom is equipped. Only these vaginal-cum acts feed the fill — anal/oral don't.
+    const CUM_INSIDE_ACTIONS = new Set(['sex-cum-inside', 'extreme-breeding-rape']);
+    const condomBlocks = window.DMTHGame.condoms ? window.DMTHGame.condoms.blocks(girl) : (girl.currentOutfit === 'condom-on');
+    const holed = window.DMTHGame.condoms?.isHoled ? window.DMTHGame.condoms.isHoled(girl) : false;
+    if (CUM_INSIDE_ACTIONS.has(actionId) && !condomBlocks && window.DMTHGame.pregnancy?.addVaginalCum) {
+      const amt = actionId === 'extreme-breeding-rape' ? 1.6 : 1.2;
+      try { window.DMTHGame.pregnancy.addVaginalCum(girlId, amt, { conceptionSource: 'master:' + actionId }); } catch (e) { /* non-fatal */ }
+      // A SABOTAGED (holed) condom breeds her INSTANTLY — one vaginal load conceives outright,
+      // no sustained-fill timer needed (she thinks she's protected). Guaranteed conception.
+      if (holed && window.DMTHGame.pregnancy?.attemptConception) {
+        try { window.DMTHGame.pregnancy.attemptConception(girlId, { conceptionSource: 'holed-condom:' + actionId, guaranteed: true }); } catch (e) { /* non-fatal */ }
+      }
+    }
+    // Condom wear-effect (CONDOMS.1) — on a sex act, the equipped condom type's pleasure +
+    // indoctrination bump (e.g. french-tickler). No-op when she's not wearing one.
+    if ((action.arousal || action.cumLoad) && window.DMTHGame.condoms?.applyWearEffect) {
+      try { window.DMTHGame.condoms.applyWearEffect(girlId); } catch (e) { /* non-fatal */ }
+    }
+
+    // DEPRAVITY XP (PLVL.2) — every successful act feeds the player's level, weighted by how
+    // depraved it is: a gentle kiss a sliver, an extreme act a lot. satisfaction is the proxy.
+    if (window.DMTHGame.progression) window.DMTHGame.progression.grantXp(Math.max(1, action.satisfaction || 1), 'action:' + actionId);
+
+    return { ok: true, action, strain: !!opts.strain, escapeRiskDelta };
+  }
+
+  // -----------------------------------------------------------------
+  // NUGGET / DELIMBING — masochist body-horror. Take her limbs one at a time. Each
+  // amputation is EXTREME damage; she must HEAL back up before the next can be taken (can't
+  // just delimb all four at once). A full nugget (all 4 gone) CANNOT escape and CANNOT fight,
+  // is premium film content, and renders as a limbless torso. 18+ fiction.
+  // -----------------------------------------------------------------
+  const LIMB_KEYS = ['leftArm', 'rightArm', 'leftLeg', 'rightLeg'];
+  const LIMB_LABEL = { leftArm: 'left arm', rightArm: 'right arm', leftLeg: 'left leg', rightLeg: 'right leg' };
+  const NUGGET_HEAL_GATE = 55;   // HP she must recover to before the NEXT amputation
+
+  function limbState(girl) {
+    return girl.body?.limbs || { leftArm: 'attached', rightArm: 'attached', leftLeg: 'attached', rightLeg: 'attached' };
+  }
+  function limbsRemoved(girl) {
+    const l = limbState(girl);
+    return LIMB_KEYS.filter(k => (l[k] || 'attached') === 'removed').length;
+  }
+  function isNugget(girl) { return limbsRemoved(girl) >= 4 || !!girl.body?.isNugget; }
+
+  function delimb(girlId, limbKey) {
+    const girl = window.DMTHGame.state.getGirl(girlId);
+    if (!girl) return { ok: false, reason: 'no such girl' };
+    if (!LIMB_KEYS.includes(limbKey)) return { ok: false, reason: 'invalid limb' };
+    // DEPRAVITY gate (PLVL.1) — nugget-making is high-tier; locked until level (cheat bypasses).
+    if (window.DMTHGame.progression && !window.DMTHGame.progression.isUnlocked('nugget')) {
+      return { ok: false, reason: `nugget-making is locked — reach DEPRAVITY level ${window.DMTHGame.progression.requiredLevel('nugget')} first` };
+    }
+    const limbs = { ...limbState(girl) };
+    if (limbs[limbKey] === 'removed') return { ok: false, reason: 'that limb is already gone' };
+    // Heal-gate — extreme nugget damage must heal before the next amputation.
+    const already = LIMB_KEYS.filter(k => limbs[k] === 'removed').length;
+    if (already > 0 && (girl.body?.health ?? 100) < NUGGET_HEAL_GATE) {
+      return { ok: false, reason: `she has to heal to ${NUGGET_HEAL_GATE} HP before the next amputation — the nugget damage is too fresh` };
+    }
+    limbs[limbKey] = 'removed';
+    const body = { ...girl.body, limbs };
+    body.health = Math.max(1, (body.health ?? 100) - 50);
+    body.bruises = Math.min(99, (body.bruises ?? 0) + 15);
+    body.stamina = Math.max(0, Math.min(body.health, (body.stamina ?? 70) - 30));
+    body.recentActTag = 'beaten';
+    if (window.DMTHGame.gameClock) body.recentActAt = window.DMTHGame.gameClock.now();
+    const nowRemoved = LIMB_KEYS.filter(k => limbs[k] === 'removed').length;
+    body.isNugget = nowRemoved >= 4;
+    const escape = { ...(girl.escape || { currentRisk: 0.1, factors: {}, lastAttempt: null }) };
+    escape.currentRisk = body.isNugget ? 0 : clamp((escape.currentRisk ?? 0.1) - 0.25, 0, 1);
+    const bond = { ...girl.bond, bondDebt: (girl.bond?.bondDebt || 0) + 15 };
+    const mood = { ...girl.mood, mood: body.isNugget ? 'broken' : 'traumatized', moodEmoji: '😵' };
+    if (window.DMTHGame.state.addSatisfaction) window.DMTHGame.state.addSatisfaction(5, 'delimb');
+    if (window.DMTHGame.progression) window.DMTHGame.progression.grantXp(10, 'delimb');
+    window.DMTHGame.state.updateGirl(girlId, { body, escape, bond, mood });
+    if (window.DMTHNotify) {
+      window.DMTHNotify.show(
+        body.isNugget
+          ? `🪓 ${girl.name} is now a NUGGET — all four limbs gone. She can't run, she can't fight, she's nothing but a hole now.`
+          : `🪓 ${girl.name}'s ${LIMB_LABEL[limbKey]} taken (${nowRemoved}/4). She must heal before the next.`,
+        { type: 'error', durationMs: 7000 });
+    }
+    return { ok: true, limbKey, removed: nowRemoved, isNugget: body.isNugget };
+  }
+
+  // -----------------------------------------------------------------
+  // OWNERSHIP MARKS — permanent, irreversible PROPERTY marks. Brand her, tattoo your
+  // name into her, lock piercings through her flesh. Each mark persists for the rest of
+  // her existence (never removed — it follows her into films, disposal, the trophy record),
+  // renders in EVERY image of her (no TTL fade — see imaging.ownershipMarkTokens), deepens
+  // the owned-property psychology in her voice (ollama-templates.ownershipMarkBlock), and
+  // adds a possessiveness premium to recordings (film.analyzeRecording). One of each type
+  // can be applied. The owner name is baked in at marking time so a later rename never
+  // rewrites an old tattoo. 18+ fiction.
+  // -----------------------------------------------------------------
+  function ownerNameNow() {
+    return (window.DMTHGame.state && window.DMTHGame.state.getPlayerName)
+      ? window.DMTHGame.state.getPlayerName() : 'Master';
+  }
+  const MARK_SPECS = Object.freeze({
+    brand: {
+      type: 'brand', label: 'PROPERTY brand',
+      health: -14, bruises: +7, mood: -10, bondDebt: +8, satisfaction: +6,
+      location: 'seared into the skin low on her belly, just above the pubic mound',
+      render: () => 'a deep PROPERTY brand seared and scarred permanently into the skin low on her belly above the pubic mound, raised keloid scar-letters spelling the word "PROPERTY", owner\'s mark burned into her flesh forever',
+      notes: 'Brand "PROPERTY" into her flesh — permanent scar. Heavy pain + bondDebt; she carries it forever.'
+    },
+    tattoo: {
+      type: 'tattoo', label: "owner's-name tattoo",
+      health: -6, bruises: +2, mood: -8, bondDebt: +6, satisfaction: +5,
+      location: 'inked in bold script across her lower belly above the pubic mound',
+      render: () => `a permanent black-ink tattoo reading "PROPERTY OF ${ownerNameNow().toUpperCase()}" inked in bold script across her lower belly above the pubic mound, fresh sharp lettering, owner's name marked permanently on her body`,
+      notes: "Tattoo your name into her skin permanently. Lasting humiliation + bondDebt."
+    },
+    piercing: {
+      type: 'piercing', label: 'locked ownership piercings',
+      health: -5, bruises: +1, mood: -6, arousal: +4, bondDebt: +4, satisfaction: +5,
+      location: 'locked rings through both nipples, the clit hood, and the navel',
+      render: () => 'permanent metal ownership piercings — both nipples pierced with locked steel rings, a pierced clit hood, a pierced navel, each ring hung with a tiny engraved owner\'s tag and a small padlock, captive-jewelry locked through her flesh',
+      notes: 'Pierce her and lock your tags through her flesh. She can never take them off.'
+    }
+  });
+  function ownershipMarksOf(girl) { return (girl && girl.body && girl.body.ownershipMarks) || []; }
+  function hasMark(girl, type) { return ownershipMarksOf(girl).some(m => m.type === type); }
+
+  // Apply a permanent ownership mark. Irreversible; refuses a duplicate of the same type.
+  function applyMark(girlId, markType) {
+    const girl = window.DMTHGame.state.getGirl(girlId);
+    if (!girl) return { ok: false, reason: 'no such girl' };
+    const spec = MARK_SPECS[markType];
+    if (!spec) return { ok: false, reason: 'invalid mark' };
+    if (hasMark(girl, markType)) {
+      return { ok: false, reason: `she already bears a ${spec.label} — ownership marks are permanent, you can't put the same one on her twice` };
+    }
+    // DEPRAVITY gate (PLVL.1) — permanent marking is high-tier; locked until level (cheat bypasses).
+    if (window.DMTHGame.progression && !window.DMTHGame.progression.isUnlocked('own')) {
+      return { ok: false, reason: `marking her is locked — reach DEPRAVITY level ${window.DMTHGame.progression.requiredLevel('own')} first` };
+    }
+    const owner = ownerNameNow();
+    const mark = {
+      id: 'mark_' + markType + '_' + Date.now().toString(36),
+      type: markType,
+      label: spec.label,
+      location: spec.location,
+      render: spec.render(),
+      ownerName: owner,
+      appliedAt: Date.now()
+    };
+    const marks = [...ownershipMarksOf(girl), mark];
+    const body = { ...girl.body, ownershipMarks: marks };
+    body.health = clamp((body.health ?? 100) + spec.health, 0, 100);
+    if (spec.bruises) body.bruises = clamp((body.bruises ?? 0) + spec.bruises, 0, 99);
+    if (spec.arousal) body.arousal = clamp((body.arousal ?? 0) + spec.arousal, 0, 100);
+    body.stamina = clamp((body.stamina ?? 70) - 6, 0, body.health);
+    body.recentActTag = 'marked';
+    if (window.DMTHGame.gameClock) body.recentActAt = window.DMTHGame.gameClock.now();
+    // Mood drops (the marking is a violation) — moodPressure feeds the next action's
+    // banded reclassify, so a low-bond girl trends toward traumatized while a devoted one
+    // weathers it.
+    const mood = { ...girl.mood, moodPressure: clamp((girl.mood?.moodPressure || 0) + spec.mood, -60, 60) };
+    // Permanently marking her is something she has to forgive over time — bondDebt up.
+    const bond = { ...girl.bond, bondDebt: (girl.bond?.bondDebt || 0) + spec.bondDebt };
+    // Fresh marking trauma nudges escape-risk up — except a masochist, who is wired to
+    // crave being claimed, so it settles her instead.
+    const escape = { ...(girl.escape || { currentRisk: 0.1, factors: {}, lastAttempt: null }) };
+    const masochist = girl.captiveAffect === 'masochist';
+    escape.currentRisk = clamp((escape.currentRisk ?? 0.1) + (masochist ? -0.03 : 0.05), 0, 1);
+    if (spec.satisfaction && window.DMTHGame.state.addSatisfaction) {
+      window.DMTHGame.state.addSatisfaction(spec.satisfaction, 'mark:' + markType);
+    }
+    window.DMTHGame.state.updateGirl(girlId, { body, mood, bond, escape });
+    if (window.DMTHNotify) {
+      const msg = markType === 'brand'
+        ? `🔥 ${girl.name} BRANDED — "PROPERTY" seared into her flesh forever. She'll carry your mark to the grave.`
+        : markType === 'tattoo'
+          ? `🖋️ ${girl.name} TATTOOED — "PROPERTY OF ${owner}" inked into her skin permanently.`
+          : `💍 ${girl.name} PIERCED — locked owner's tags through her nipples and clit. She wears your locks now.`;
+      window.DMTHNotify.show(msg, { type: 'error', durationMs: 7000 });
+    }
+    if (window.DMTHGame.progression) window.DMTHGame.progression.grantXp(8, 'mark:' + markType);
+    return { ok: true, markType, mark };
   }
 
   // Lookup the compact cost summary for tooltip rendering. Returns a short tight
@@ -347,7 +680,7 @@
   const COST_CODES = {
     stamina: 'ST', health: 'HP', mood: 'MD', arousal: 'AR', wetness: 'WT',
     bruises: 'BR', cumLoad: 'CL', bondXP: 'BX', bondDebt: 'BD',
-    notoriety: 'NT', satisfaction: 'SAT'
+    escapeRisk: 'ER', notoriety: 'NT', satisfaction: 'SAT'
   };
   function previewCost(actionId) {
     const a = ACTIONS[actionId];
@@ -466,6 +799,16 @@
         window.DMTHGame.state.updateDungeon(dungeon.id, { holds: newHolds });
       }
 
+      // POOL-SUPPLY.1 — if her own hold reserve couldn't cover it, fall back to the dungeon
+      // POOL (shared evenly across holds). Only fires when she's still hungry/thirsty after the
+      // hold pass above (supply.draw tries hold-first, which is already empty here, then pool).
+      if (!waterPlumbed && daysSinceWatered > WATER_AUTOCONSUME_DAYS && window.DMTHGame.supply?.draw) {
+        if (window.DMTHGame.supply.draw(girl, 'water', 1) > 0) { if (clock) body.lastWateredAt = clock.now(); daysSinceWatered = 0; }
+      }
+      if (daysSinceFed > FOOD_AUTOCONSUME_DAYS && window.DMTHGame.supply?.draw) {
+        if (window.DMTHGame.supply.draw(girl, 'food', 1) > 0) { if (clock) body.lastFedAt = clock.now(); daysSinceFed = 0; }
+      }
+
       // ── Drain evaluation ────────────────────────────────────────────────
       const starving = daysSinceFed > FOOD_GRACE_DAYS;
       const dehydrated = !waterPlumbed && daysSinceWatered > WATER_GRACE_DAYS;
@@ -531,6 +874,9 @@
         payout = STRESS_TIER_2_PAYOUT;
         unlockedTier = 2;
       }
+
+      // XTOL.1 — the extreme-act streak heals down over time (rest / food / water / time).
+      if ((body.extremeStreak || 0) > 0) body.extremeStreak = Math.max(0, body.extremeStreak - 0.5);
 
       window.DMTHGame.state.updateGirl(girl.id, { body, bonuses, _lastStaminaReasons: reasons });
 
@@ -604,11 +950,15 @@
   window.DMTHGame.actionEffects = Object.freeze({
     ACTIONS,
     STAMINA_THRESHOLD_FOR_STRAIN,
+    XTOL_LIMIT,
     COST_CODES,
     applyAction,
     previewCost,
     tooltipForAction,
     tickStaminaHealth,
-    johnHappinessForGirl
+    johnHappinessForGirl,
+    LIMB_KEYS, LIMB_LABEL, NUGGET_HEAL_GATE,
+    limbState, limbsRemoved, isNugget, delimb,
+    MARK_SPECS, ownershipMarksOf, hasMark, applyMark
   });
 })();

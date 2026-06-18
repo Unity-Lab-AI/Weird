@@ -12,6 +12,9 @@
         <p class="small muted">Click any location to visit and hunt the girls available there. Each location spawns different archetypes at different difficulty levels.</p>
         <div class="stat-row small" data-tooltip="Cumulative heat from your operation. Higher = harder spawns, lower capture odds, more cop interest."><span>Notoriety</span><b>${window.DMTHGame.state.current.wallet.notoriety}</b>
           <span class="muted">(affects spawns + acquire odds)</span></div>
+        <div class="btn-row" style="margin-top:6px">
+          <button id="case-streets" class="btn-small" data-tooltip="Prowl the town for loose loot — tools, drugs, gear, cash off the streets. ~50% you turn something up; sometimes a rare item from the full catalog. Free, no notoriety.">🔦 Case the streets</button>
+        </div>
       </div>
 
       <div class="panel">
@@ -36,6 +39,22 @@
         window.DMTHRouter.go('hunt', { stage: 'location', loc: b.dataset.visit });
       };
     });
+
+    // PLVL.2 — buy private access to a cost-gated hunting ground.
+    el.querySelectorAll('[data-buy-location]').forEach(b => {
+      b.onclick = () => {
+        const r = window.DMTHGame.progression.buyLocationAccess(b.dataset.buyLocation);
+        if (!r.ok) { alert(r.reason); return; }
+        window.DMTHRouter.handle();
+      };
+    });
+
+    // LOOT.2 — town action: case the streets for loose loot (generic + rare full-catalog pulls).
+    const caseBtn = el.querySelector('#case-streets');
+    if (caseBtn) caseBtn.onclick = () => {
+      const r = window.DMTHGame.loot.scavengeLocation('__town__');
+      if (!r.ok && window.DMTHNotify) window.DMTHNotify.show(`🔦 ${r.reason || 'nothing on the streets right now'}.`, { type: 'info', durationMs: 3000 });
+    };
 
     // Lazy-load cover images (if dropped into assets/locations/<id>/cover.*)
     if (window.DMTHAssetImg) window.DMTHAssetImg.decorate(el, 64);
@@ -63,6 +82,20 @@
       </div>`;
     }
     const diff = s.subcategory === 'easy' ? '🟢' : s.subcategory === 'medium' ? '🟡' : '🔴';
+    // PLVL.2 — gated hunting grounds. Locked ones can't be visited until the level / roster /
+    // purchase requirement is met; cost-gated ones show a Buy-access button.
+    const prog = window.DMTHGame.progression;
+    const locked = prog && !prog.isLocationUnlocked(s.itemId);
+    if (locked) {
+      const reason = prog.locationGateReason(s.itemId);
+      const cost = prog.locationCost(s.itemId);
+      return `<div class="plot-slot filled locked" style="grid-column:${s.x+1};grid-row:${s.y+1};opacity:.6" data-tooltip="🔒 ${reason.replace(/"/g, '&quot;')}">
+        <div class="asset-slot slot-emoji" data-asset-category="location" data-asset-id="${s.itemId}" data-asset-size="64">${s.emoji}</div>
+        <div class="slot-label">${s.label} 🔒</div>
+        <div class="slot-meta small">${reason}</div>
+        ${cost ? `<button class="btn-small" data-buy-location="${s.itemId}" data-tooltip="Buy private access to ${s.label} — $${cost.toLocaleString()}. Unlocks hunting here.">🗝️ Buy access $${cost.toLocaleString()}</button>` : ''}
+      </div>`;
+    }
     const tip = `${s.label} — ${s.subcategory} difficulty. Click to visit + hunt girls who spawn here.`;
     return `
       <button class="plot-slot filled" data-visit="${s.itemId}" style="grid-column:${s.x+1};grid-row:${s.y+1}" data-tooltip="${tip}">

@@ -11,6 +11,11 @@
     mode: 'normal',                // 'normal' | 'sandbox'
     tickCount: 0,
 
+    // Set by the arrest system (js/game/arrest.js) when a raid ends the run — jail, no bail.
+    // { reason, at, finalStats } | null. When set, the tick loop halts and the game-over
+    // screen takes over. The lose condition.
+    gameOver: null,
+
     wallet: {
       money: 200,
       notoriety: 0,
@@ -25,7 +30,24 @@
       // by time-decay between income events, failed encounters, captive deaths. Drives
       // a buzzMul = 1 + (buzz/100) on whore-out john arrival rate — BUZZ 100 doubles
       // the johns coming through. Visible as chrome-bar 🐝 BUZZ badge.
-      buzz: 0
+      buzz: 0,
+
+      // WANTED level (0-100). The law-heat axis — distinct from `notoriety` (legacy soft
+      // stat) and `buzz` (good underground rep). Builds from hunts/escapes/deaths/sloppy
+      // disposal/corpse content; decays slowly over time (js/game/wanted.js decayTick).
+      // High tiers trigger raids → fines → jail → GAME OVER (arrest system). Pure liability.
+      wanted: 0,
+
+      // DEPRAVITY XP (0+). The player-progression spine (js/game/progression.js). Earned from
+      // every successful action; the derived DEPRAVITY level gates high-tier depravities
+      // (branding / extreme acts / nugget / dismember / later hunting grounds). Level is always
+      // computed from this xp — never stored separately.
+      depravityXp: 0,
+
+      // SEXDRIVE.1 — player sexual-drive NEED (0..scaling cap). Fed by sex acts, decays over
+      // time. Maxed = stat boosts (hunting/cash); deprived = debuffs. The CAP scales with
+      // roster size + DEPRAVITY level (js/game/sexdrive.js) so it can't be maxed early.
+      sexDrive: 0
     },
 
     inventory: {},                 // { [itemId]: qty }
@@ -33,11 +55,15 @@
     dungeons: [],                  // [{ id, templateId, holds:[{id, captiveGirlId|null, upgrades}], purchasedAt }]
 
     properties: [],                // [{ locationId, owned, passiveIncomePerTick }]
+    unlockedLocations: [],         // [locationId] hunting grounds with bought private access (PLVL.2)
+    purchasedUnlocks: [],          // [unlockKey] gated action tiers bought early with cash (PAYUNLOCK.1)
 
     roster: [],                    // [GirlProfile+state]  id-keyed; see girl-gen.js
 
     films: [],                     // [Film]  see film.js
     disposals: [],                 // [DisposalLog]
+    trophies: [],                  // [Trophy] minted on terminal disposal — see trophies.js. Each grants stacking player perks.
+    bodyParts: [],                 // [BodyPart] harvested via the dismember disposal path — sold passively in the body-part market (market.js).
     propositioners: {              // propositioner business sim
       inbox: [],                   // pending offers
       active: [],                  // engagements underway
@@ -56,7 +82,10 @@
     settings: {
       mode: 'sexy',                // 'sexy' | 'hurtme' | 'sexy_with_damage'
       activeGirlId: null,
-      activeDungeonId: null
+      activeDungeonId: null,
+      // What the girls call the player — set at new-game. Default 'Master'. Injected into
+      // every system prompt so captives address the player by his chosen name, not just "Master".
+      playerName: 'Master'
     }
   };
 
@@ -80,6 +109,43 @@
   // One-shot migrations on load — repair save shapes that pre-date a schema change.
   // Each migration is idempotent + null-safe so re-running doesn't double-mutate.
   function migrateLoadedState(s) {
+    // Wallet backfill — the shallow load-merge (Object.assign) lets an old save's wallet
+    // overwrite DEFAULT_STATE.wallet wholesale, dropping fields added after that save was
+    // written. Backfill the heat/economy meters so reads never hit undefined.
+    if (s.wallet) {
+      if (typeof s.wallet.wanted !== 'number') s.wallet.wanted = 0;
+      if (typeof s.wallet.buzz !== 'number') s.wallet.buzz = 0;
+      if (typeof s.wallet.playerSatisfaction !== 'number') s.wallet.playerSatisfaction = 50;
+      if (typeof s.wallet.depravityXp !== 'number') s.wallet.depravityXp = 0;
+      if (typeof s.wallet.sexDrive !== 'number') s.wallet.sexDrive = 0;
+      if (!s.wallet.suspicionByLocation) s.wallet.suspicionByLocation = {};
+    }
+    // Nested-container backfill — the shallow load-merge can drop sub-shapes added after an
+    // old save was written. Guard every container the engine assumes exists (IMG.7).
+    if (!s.trophies) s.trophies = [];
+    if (!s.bodyParts) s.bodyParts = [];
+    if (!s.unlockedLocations) s.unlockedLocations = [];
+    if (!s.purchasedUnlocks) s.purchasedUnlocks = [];
+    if (!s.settings) s.settings = {};
+    if (!s.settings.playerName) s.settings.playerName = 'Master';
+    if (!s.slaveMarket) s.slaveMarket = { listed: [], available: [], recentSales: [] };
+    else { s.slaveMarket.listed ||= []; s.slaveMarket.available ||= []; s.slaveMarket.recentSales ||= []; }
+    if (!s.propositioners) s.propositioners = { inbox: [], active: [], completed: [], repeatClients: {} };
+    else { s.propositioners.inbox ||= []; s.propositioners.active ||= []; s.propositioners.completed ||= []; s.propositioners.repeatClients ||= {}; }
+    if (!s.disposals) s.disposals = [];
+    if (!s.turns) s.turns = {};
+    // Dungeon-level backfill — the shared supply POOL (POOL-SUPPLY.1) + per-hold toy mounts
+    // (TOY-HOLD.1) + condom/drug reserves. Defense-in-depth so any future unguarded read on an
+    // old save can't hit undefined.
+    for (const d of s.dungeons || []) {
+      if (!d.pool || typeof d.pool !== 'object') d.pool = { food: 0, water: 0, condoms: 0, drugs: {} };
+      else { d.pool.food ||= 0; d.pool.water ||= 0; d.pool.condoms ||= 0; if (!d.pool.drugs || typeof d.pool.drugs !== 'object') d.pool.drugs = {}; }
+      for (const h of d.holds || []) {
+        if (h && !Array.isArray(h.toys)) h.toys = [];
+        if (h && typeof h.condomReserve !== 'number') h.condomReserve = 0;
+        if (h && (!h.drugReserve || typeof h.drugReserve !== 'object')) h.drugReserve = {};
+      }
+    }
     if (!s.roster) return;
     // Known archetype-id → canonical display name fallbacks for the seeded captives.
     // Procedural archetypes (library/club/street/sorority/gym/barista/etc.) use their
@@ -117,11 +183,21 @@
       const BODY_DEFAULTS = {
         arousal: 0, wetness: 0, cumLoad: 0, bruises: 0, high: 0,
         stamina: 70, health: 100,
-        activeDrugs: [], outfitState: 'intact'
+        activeDrugs: [], outfitState: 'intact',
+        // CUMFILL.1 — vaginal cum-fill meter (preggo-relevant; distinct from generic cumLoad)
+        // + the sustained-fill maintain counter that the preggo timer reads.
+        vaginalCum: 0, preggoFillMaintained: 0,
+        // XTOL.1 — running count of extreme acts since her last recovery (heal/care/rest).
+        extremeStreak: 0
       };
       for (const [k, v] of Object.entries(BODY_DEFAULTS)) {
         if (g.body[k] == null) g.body[k] = v;
       }
+      // Permanent ownership marks (DEP-EXP.1) — own array per girl (never the shared default
+      // ref) so marks can't alias across captives. Lazy-init for saves predating the feature.
+      if (!Array.isArray(g.body.ownershipMarks)) g.body.ownershipMarks = [];
+      // Forced-addiction map (DEP-EXP.2) — own object per girl. { [drugKey]: 0-100 }.
+      if (!g.body.addiction || typeof g.body.addiction !== 'object') g.body.addiction = {};
       // bond / mood / escape minimal shape
       g.bond = g.bond || { bondLevel: 0, bondXP: 0, bondDebt: 0, milestones: [] };
       if (g.bond.bondLevel == null) g.bond.bondLevel = 0;
@@ -131,6 +207,9 @@
       if (g.mood.mood == null) g.mood.mood = 'neutral';
       if (g.mood.moodEmoji == null) g.mood.moodEmoji = '🙂';
       g.escape = g.escape || { currentRisk: 0.1, factors: {}, lastAttempt: null };
+      // New per-girl array fields (MULTIGIRL.3 scene roster + DEATHSTATS.1 dungeon history).
+      if (!Array.isArray(g.dungeonHistory)) g.dungeonHistory = [];
+      if (!Array.isArray(g.sceneGirlIds)) g.sceneGirlIds = [];
     }
   }
 
@@ -196,10 +275,33 @@
     });
   }
   function getBuzz() { return typeof state?.wallet?.buzz === 'number' ? state.wallet.buzz : 0; }
+  function addWanted(delta, reason) {
+    mutate(s => {
+      const cur = typeof s.wallet.wanted === 'number' ? s.wallet.wanted : 0;
+      s.wallet.wanted = Math.max(0, Math.min(100, cur + delta));
+      s.wallet._lastWantedEvent = { delta, reason, at: Date.now() };
+    });
+  }
+  function getWanted() { return typeof state?.wallet?.wanted === 'number' ? state.wallet.wanted : 0; }
+  function addDepravityXp(delta, reason) {
+    mutate(s => {
+      const cur = typeof s.wallet.depravityXp === 'number' ? s.wallet.depravityXp : 0;
+      s.wallet.depravityXp = Math.max(0, cur + delta);
+      s.wallet._lastDepravityEvent = { delta, reason, at: Date.now() };
+    });
+  }
+  function getDepravityXp() { return typeof state?.wallet?.depravityXp === 'number' ? state.wallet.depravityXp : 0; }
+  function setSexDrive(v) { mutate(s => { s.wallet.sexDrive = Math.max(0, v); }); }
+  function getSexDrive() { return typeof state?.wallet?.sexDrive === 'number' ? state.wallet.sexDrive : 0; }
 
   // inventory
+  // Per-item max is basically-unlimited (ITEMCAP.1) — 9999 of each. The sandbox / everything-
+  // unlocked start seeds 99 of each (bootstrap.js), which is fine; this clamp guarantees the
+  // player can keep GAINING well past the starting amount (buy / loot) up to 9999, while
+  // preventing a runaway/overflow count.
+  const ITEM_MAX = 9999;
   function addItem(itemId, qty = 1) {
-    mutate(s => { s.inventory[itemId] = (s.inventory[itemId] || 0) + qty; });
+    mutate(s => { s.inventory[itemId] = Math.min(ITEM_MAX, (s.inventory[itemId] || 0) + qty); });
   }
   function consumeItem(itemId, qty = 1) {
     if (!state || (state.inventory[itemId] || 0) < qty) return false;
@@ -243,10 +345,16 @@
   }
 
   // turns
-  function appendTurn(girlId, role, text) {
+  // `speaker` is optional — used by the multi-girl scene (MULTIGIRL.2) to mirror a partner
+  // captive's reply into the HOST girl's shared log with HER name, while each girl's OWN log
+  // stays speaker-less (so each girl's Ollama context only ever sees her own lines — the
+  // context builder filters out speaker-tagged turns).
+  function appendTurn(girlId, role, text, speaker) {
     mutate(s => {
       if (!s.turns[girlId]) s.turns[girlId] = [];
-      s.turns[girlId].push({ role, text, ts: Date.now() });
+      const entry = { role, text, ts: Date.now() };
+      if (speaker) entry.speaker = speaker;
+      s.turns[girlId].push(entry);
       if (s.turns[girlId].length > 200) s.turns[girlId] = s.turns[girlId].slice(-200);
     });
   }
@@ -272,6 +380,20 @@
 
   // disposals
   function addDisposal(log) { mutate(s => { s.disposals.push(log); }); }
+
+  // trophies — minted on terminal disposal; never removed (permanent collection + perks).
+  function addTrophy(trophy) { mutate(s => { if (!s.trophies) s.trophies = []; s.trophies.push(trophy); }); }
+  function getTrophies() { return (state && state.trophies) || []; }
+
+  // body parts — harvested via the dismember disposal path (DEP-EXP.3); sold in the body-part market.
+  function addBodyPart(part) { mutate(s => { if (!s.bodyParts) s.bodyParts = []; s.bodyParts.push(part); }); }
+  function getBodyParts() { return (state && state.bodyParts) || []; }
+  function removeBodyPart(id) { mutate(s => { if (s.bodyParts) s.bodyParts = s.bodyParts.filter(p => p.id !== id); }); }
+
+  // unlocked hunting grounds — bought private access (PLVL.2). Never removed.
+  function addUnlockedLocation(locId) { mutate(s => { if (!s.unlockedLocations) s.unlockedLocations = []; if (!s.unlockedLocations.includes(locId)) s.unlockedLocations.push(locId); }); }
+  // purchased early-access action unlocks (PAYUNLOCK.1). Never removed.
+  function addPurchasedUnlock(key) { mutate(s => { if (!s.purchasedUnlocks) s.purchasedUnlocks = []; if (!s.purchasedUnlocks.includes(key)) s.purchasedUnlocks.push(key); }); }
 
   // propositioners
   function enqueuePropositioner(p) { mutate(s => { s.propositioners.inbox.push(p); }); }
@@ -327,6 +449,24 @@
   // tick
   function bumpTick() { mutate(s => { s.tickCount++; }); }
 
+  // game over — the lose condition (arrest → jail). Idempotent: first call wins.
+  function setGameOver(reason, finalStats) {
+    mutate(s => {
+      if (s.gameOver) return;
+      s.gameOver = { reason, at: Date.now(), finalStats: finalStats || null };
+    });
+  }
+  function isGameOver() { return !!(state && state.gameOver); }
+
+  // Player name / honorific the captives address the player by.
+  function setPlayerName(name) {
+    mutate(s => {
+      if (!s.settings) s.settings = {};
+      s.settings.playerName = (name && String(name).trim()) || 'Master';
+    });
+  }
+  function getPlayerName() { return (state && state.settings && state.settings.playerName) || 'Master'; }
+
   window.DMTHGame = window.DMTHGame || {};
   window.DMTHGame.state = {
     get current() { return state; },
@@ -335,14 +475,22 @@
     addMoney, spendMoney, addNotoriety,
     addSatisfaction, getSatisfaction,
     addBuzz, getBuzz,
+    addWanted, getWanted,
+    addDepravityXp, getDepravityXp,
+    setSexDrive, getSexDrive,
     addItem, consumeItem,
     addDungeon, updateDungeon, getDungeon,
     addGirl, updateGirl, getGirl, removeGirl,
     appendTurn, getTurns, clearTurns,
     addFilm, updateFilm, getFilm,
     addDisposal,
+    addTrophy, getTrophies,
+    addBodyPart, getBodyParts, removeBodyPart,
+    addUnlockedLocation, addPurchasedUnlock,
     enqueuePropositioner, acceptPropositioner, completePropositioner, rejectPropositioner,
     listGirlForSale, unlistGirl,
-    bumpTick
+    bumpTick,
+    setGameOver, isGameOver,
+    setPlayerName, getPlayerName
   };
 })();

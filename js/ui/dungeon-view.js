@@ -47,6 +47,7 @@
             <span data-tooltip="Filled holds / total capacity">${d.holds.filter(h => h.captiveGirlId).length}/${d.capacity} held</span>
             <a href="#upgrade?dungeon=${d.id}" class="btn-small" data-tooltip="Configure per-hold upgrade tracks (security / restraints / lights / toys / food / toilet / waterSupply / feedAutomation / bedding / entertainment / decor / climate) + buy more capacity.">⚙️ Upgrades + capacity</a>
           </div>
+          ${renderFacilities(d)}
           <div class="hold-grid">
             ${d.holds.map((h, i) => {
               const g = h.captiveGirlId ? window.DMTHGame.state.getGirl(h.captiveGirlId) : null;
@@ -77,8 +78,43 @@
       `;
     }
 
+    function renderFacilities(d) {
+      const ops = window.DMTHGame.dungeonOps;
+      if (!ops || !ops.SECURITY_FACILITIES) return '';
+      const money = s.wallet.money;
+      const secRows = Object.entries(ops.SECURITY_FACILITIES).map(([id, f]) => {
+        const owned = ops.hasSecurity(d, id);
+        const tip = `${f.notes} (+${Math.round((f.containment||0)*100)}% containment, −${(f.wantedReduction||0).toFixed(2)} WANTED/tick)`.replace(/"/g, '&quot;');
+        if (owned) return `<span class="ok small" data-tooltip="${tip}">✓ ${f.displayName}</span>`;
+        return `<button class="btn-small" data-buy-sec="${id}" data-dungeon="${d.id}" ${money < f.cost ? 'disabled' : ''} data-tooltip="${tip}">${f.displayName} — $${f.cost.toLocaleString()}</button>`;
+      }).join(' ');
+      const dispRows = Object.entries(ops.DISPOSAL_FACILITIES || {}).map(([id, f]) => {
+        const owned = ops.hasFacility(d, f.facilityKey);
+        const tip = `${f.notes}`.replace(/"/g, '&quot;');
+        if (owned) return `<span class="ok small" data-tooltip="${tip}">✓ ${f.displayName}</span>`;
+        return `<button class="btn-small" data-buy-disp="${id}" data-dungeon="${d.id}" ${money < f.cost ? 'disabled' : ''} data-tooltip="${tip}">${f.displayName} — $${f.cost.toLocaleString()}</button>`;
+      }).join(' ');
+      return `<div class="facilities small" style="margin:6px 0">
+        <div class="muted" data-tooltip="Dungeon-wide security — suppresses escape-risk + auto-contains breaks once invested. Guard dog is just one option.">🔒 Containment: ${secRows}</div>
+        <div class="muted" style="margin-top:4px" data-tooltip="Build these to unlock the gated disposal methods.">⚱️ Disposal: ${dispRows}</div>
+      </div>`;
+    }
+
     // Lazy-load any cover images dropped into asset folders
     if (window.DMTHAssetImg) window.DMTHAssetImg.decorate(el, 140);
+
+    el.querySelectorAll('[data-buy-sec]').forEach(b => {
+      b.onclick = () => {
+        try { window.DMTHGame.dungeonOps.buySecurityFacility(b.dataset.dungeon, b.dataset.buySec); window.DMTHRouter.handle(); }
+        catch (e) { alert(e.message); }
+      };
+    });
+    el.querySelectorAll('[data-buy-disp]').forEach(b => {
+      b.onclick = () => {
+        try { window.DMTHGame.dungeonOps.buyDisposalFacility(b.dataset.dungeon, b.dataset.buyDisp); window.DMTHRouter.handle(); }
+        catch (e) { alert(e.message); }
+      };
+    });
 
     el.querySelectorAll('[data-buy]').forEach(b => {
       b.onclick = () => {

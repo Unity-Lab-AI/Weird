@@ -174,7 +174,8 @@
         { emoji: '🥃',  label: 'whiskey shot',          text: '*pours whiskey into a tumbler, presses it to her lips*', applyId: 'drug-whiskey' },
         { emoji: '💊',  label: 'feed her a pill',       text: '*places a pill on her tongue* swallow.', applyId: 'drug-mdma' },
         { emoji: '🧪',  label: 'tab of acid',           text: '*places a tab on her tongue, holds her jaw shut*', applyId: 'drug-acid' },
-        { emoji: '💉',  label: 'k-shot',                text: '*jabs a small syringe into her thigh*', applyId: 'drug-ketamine' }
+        { emoji: '💉',  label: 'k-shot',                text: '*jabs a small syringe into her thigh*', applyId: 'drug-ketamine' },
+        { emoji: '🥛',  label: 'feed her girl-milk',   text: '*tips a glass of warm girl-milk to her lips and makes her drink every drop down*', milkDrink: true }
       ]
     },
     love: {
@@ -192,7 +193,37 @@
         { emoji: '🎵',  label: 'lullaby',                text: '*pulls her to my chest, hums low until her breathing slows, her body goes soft*', applyId: 'love-lullaby' },
         { emoji: '🤗',  label: 'just hold her',          text: '*sits on the floor next to her, no words, just an arm around her shoulders*', applyId: 'love-hold-her' },
         { emoji: '🌷',  label: 'aftercare (full)',       text: '*water, blanket, clean every bruise, hold her until she sleeps. one full session of care.*', applyId: 'love-aftercare' },
-        { emoji: '🤫',  label: 'sweet promise',          text: 'shh. I\'ve got you. nothing\'s going to hurt you tonight. I promise.', applyId: 'love-promise-sweet' }
+        { emoji: '🤫',  label: 'sweet promise',          text: 'shh. I\'ve got you. nothing\'s going to hurt you tonight. I promise.', applyId: 'love-promise-sweet' },
+        { emoji: '🤱',  label: 'suck her milk',          text: '*latches onto her breast and sucks the warm milk straight from her nipple*', milkSuck: true }
+      ]
+    },
+    extreme: {
+      label: '☠️ Extreme',
+      actions: [
+        { emoji: '👅', label: 'brutal face-fuck',         text: '*both fists in her hair, slams her throat raw until her makeup runs black and she retches around it*', applyId: 'extreme-facefuck' },
+        { emoji: '🍑', label: 'tear her ass open',        text: '*no prep, no mercy — forces all the way in and sets a tearing pace while she screams into the mattress*', applyId: 'extreme-rough-anal' },
+        { emoji: '🩸', label: 'breed her raw',            text: '*pins her down, fucks her bare and empties as deep as it goes, holds her hips so it takes*', applyId: 'extreme-breeding-rape' },
+        { emoji: '🤮', label: 'total degradation',        text: '*spits in her open mouth, calls her every filthy name, films her ruin and makes her thank me for it*', applyId: 'extreme-degrade' },
+        { emoji: '💀', label: 'beat her down',            text: '*rains down fists and boots until she\'s a bruised, bleeding, sobbing heap on the concrete*', applyId: 'extreme-beatdown' },
+        { emoji: '🌑', label: 'choke to the edge',        text: '*crushes her throat shut while I fuck her, lets go the instant her eyes roll back, then does it again*', applyId: 'extreme-choke-out' },
+        { emoji: '🔥', label: 'pain overload',            text: '*stacks pain on pain on pain — and watches whether she finally breaks or starts begging for more*', applyId: 'masochist-overload' }
+      ]
+    },
+    nugget: {
+      label: '🪓 Nugget',
+      actions: [
+        { emoji: '💪', label: 'take left arm',  text: '*tourniquets above the shoulder and takes her left arm off at the joint while she shrieks and thrashes*', delimbKey: 'leftArm' },
+        { emoji: '💪', label: 'take right arm', text: '*pins the other arm flat and works the blade through the right shoulder, slow and deliberate*', delimbKey: 'rightArm' },
+        { emoji: '🦵', label: 'take left leg',  text: '*cinches the strap at the hip and removes her left leg, cauterizing as he goes*', delimbKey: 'leftLeg' },
+        { emoji: '🦵', label: 'take right leg', text: '*the last leg comes off at the hip — now she is a complete nugget, limbless and helpless, nothing left to run on*', delimbKey: 'rightLeg' }
+      ]
+    },
+    own: {
+      label: '🏷️ Own',
+      actions: [
+        { emoji: '🔥', label: 'brand PROPERTY',     text: '*heats the iron until it glows white and presses "PROPERTY" deep into the skin above her cunt, holding it there while she screams and bucks against the straps*', markKey: 'brand' },
+        { emoji: '🖋️', label: 'tattoo your name',   text: '*holds her down and inks your name permanently across her lower belly, the needle buzzing line by line, wiping the blood as the letters take*', markKey: 'tattoo' },
+        { emoji: '💍', label: 'pierce + lock her',  text: '*drives the needles through her nipples and clit hood one by one, threads a locked owner-tag through each, and snaps the little padlocks shut*', markKey: 'piercing' }
       ]
     },
     commands: {
@@ -207,17 +238,29 @@
         { emoji: '🔓',  label: 'loosen one restraint',  text: '*unclips one cuff* behave.', sat: 1 },
         { emoji: '🛐',  label: 'kneel and worship',     text: 'on your knees. mouth open. now.', applyId: 'sex-oral' },
         { emoji: '👀',  label: 'inspect her',           text: '*walks slow circles around her, examining every inch of her body*', sat: 2 },
-        { emoji: '❤️‍🩹',label: 'show a little mercy',    text: '*softens for a second — tucks hair behind her ear, thumb on her cheek*', applyId: 'love-forehead-kiss' }
+        { emoji: '❤️‍🩹',label: 'show a little mercy',    text: '*softens for a second — tucks hair behind her ear, thumb on her cheek*', applyId: 'love-forehead-kiss' },
+        { emoji: '🙏',  label: 'ask her for drugs',      text: 'you holding? hand it over. now.', askDrugs: true }
       ]
     }
   };
 
   function render(container, girl, mode, onSelect) {
-    const currentTab = container.dataset.qaTab || 'force';
+    // DEPRAVITY-level gating (PLVL.1) — the heaviest tabs are locked until the player levels
+    // up (cheat/sandbox start bypasses). A locked tab can't be opened; it shows the required
+    // level in a tooltip. Tab keys map 1:1 to progression UNLOCK keys.
+    const prog = window.DMTHGame.progression;
+    const GATED_TABS = { extreme: 'extreme', nugget: 'nugget', own: 'own' };
+    const tabLocked = (k) => !!(GATED_TABS[k] && prog && !prog.isUnlocked(GATED_TABS[k]));
+    let currentTab = container.dataset.qaTab || 'force';
+    if (tabLocked(currentTab)) currentTab = 'force';   // never sit on a locked tab
     const tabKeys = Object.keys(TABS);
     container.innerHTML = `
       <div class="qa-tabs">
-        ${tabKeys.map(k => `<button class="qa-tab ${k === currentTab ? 'active' : ''}" data-qa-tab-key="${k}">${TABS[k].label}</button>`).join('')}
+        ${tabKeys.map(k => {
+          const locked = tabLocked(k);
+          const req = locked ? prog.requiredLevel(GATED_TABS[k]) : 0;
+          return `<button class="qa-tab ${k === currentTab ? 'active' : ''}" data-qa-tab-key="${k}" ${locked ? `disabled data-tooltip="🔒 DEPRAVITY level ${req} required — build your level by using your captives"` : ''}>${TABS[k].label}${locked ? ' 🔒' : ''}</button>`;
+        }).join('')}
       </div>
       <div class="qa-grid">
         ${TABS[currentTab].actions.map((a, i) => {
@@ -225,9 +268,19 @@
           // for any action that routes through applyAction. Switched from native title to
           // data-tooltip so the DMTHTooltips engine renders styled hover bubbles with
           // multi-line layout (\\n → soft wrap). Stat codes: ST/HP/MD/AR/WT/BR/CL/BX/BD/SAT.
-          const cost = a.applyId && window.DMTHGame?.actionEffects?.previewCost
+          let cost = a.applyId && window.DMTHGame?.actionEffects?.previewCost
             ? window.DMTHGame.actionEffects.previewCost(a.applyId)
             : '';
+          // Ownership marks aren't in the ACTIONS table — build their tooltip from MARK_SPECS
+          // so the player sees the full (permanent, irreversible) effect cost.
+          if (!cost && a.markKey && window.DMTHGame?.actionEffects?.MARK_SPECS) {
+            const s = window.DMTHGame.actionEffects.MARK_SPECS[a.markKey];
+            if (s) {
+              const bits = [`HP${s.health}`, s.bruises ? `BR+${s.bruises}` : '', s.arousal ? `AR+${s.arousal}` : '',
+                            s.mood ? `MD${s.mood}` : '', `BD+${s.bondDebt}`, `SAT+${s.satisfaction}`].filter(Boolean);
+              cost = `PERMANENT · IRREVERSIBLE · ${bits.join(' · ')}`;
+            }
+          }
           const tip = cost ? `${a.text}\n📊 ${cost}` : a.text;
           return `<button class="qa-btn" data-qa-idx="${i}" data-tooltip="${escapeHtml(tip)}">
             <span class="qa-emoji">${a.emoji}</span>
@@ -248,12 +301,46 @@
         const idx = parseInt(b.dataset.qaIdx, 10);
         const action = TABS[currentTab].actions[idx];
         if (!action) return;
+        // Delimbing — heal-gated, special path (not an ACTIONS spec). If she hasn't healed
+        // from the last amputation, the attempt is refused and the turn isn't sent.
+        if (action.delimbKey && girl?.id && window.DMTHGame?.actionEffects?.delimb) {
+          const r = window.DMTHGame.actionEffects.delimb(girl.id, action.delimbKey);
+          if (!r.ok) { alert(r.reason); return; }
+        }
+        // Ownership marks — permanent, irreversible PROPERTY marks. Special path (not an
+        // ACTIONS spec). Refuses a duplicate of the same mark type; the turn isn't sent.
+        if (action.markKey && girl?.id && window.DMTHGame?.actionEffects?.applyMark) {
+          const r = window.DMTHGame.actionEffects.applyMark(girl.id, action.markKey);
+          if (!r.ok) { alert(r.reason); return; }
+        }
+        // Girl-milk feed — soothing drug-like effect. Consumes 1L from inventory; refused if none.
+        if (action.milkDrink && girl?.id && window.DMTHGame?.milk?.drinkGirl) {
+          const r = window.DMTHGame.milk.drinkGirl(girl.id);
+          if (!r.ok) { alert(r.reason); return; }
+        }
+        // Ask-for-drugs loot (LOOT.1) — she may give up a stash item (notifies on success).
+        // Non-blocking: the chat turn still fires so she answers / refuses / lies in character.
+        if (action.askDrugs && girl?.id && window.DMTHGame?.loot?.askGirlForDrugs) {
+          try { window.DMTHGame.loot.askGirlForDrugs(girl.id); } catch (e) { /* non-fatal */ }
+        }
+        // Suck milk straight from her breast (MILK.2) — bonus boost, no rig needed. Refused
+        // (turn not sent) if she isn't lactating.
+        if (action.milkSuck && girl?.id && window.DMTHGame?.milk?.suckFromBreast) {
+          const r = window.DMTHGame.milk.suckFromBreast(girl.id);
+          if (!r.ok) { alert(r.reason); return; }
+        }
         // applyId — primary stat mutation path. Routes through action-effects.applyAction
         // for deterministic stamina/health/mood/arousal/wetness/cumLoad/bruises/bondXP
         // deltas. Source of truth for body state regardless of Ollama emit reliability.
         // satisfaction is baked into the ACTIONS spec so it bumps from there.
         if (action.applyId && girl?.id && window.DMTHGame?.actionEffects?.applyAction) {
           try { window.DMTHGame.actionEffects.applyAction(girl.id, action.applyId); } catch (e) { console.warn('[qa] applyAction failed:', e); }
+          // Drug actions must ALSO engage the scheduler (mirrors room.js) so body.activeDrugs
+          // + body.high populate — otherwise the drug never shows in her image or runs a curve.
+          if (action.applyId.startsWith('drug-') && window.DMTHGame?.drugs?.offer) {
+            const drugKey = action.applyId.slice(5);
+            try { window.DMTHGame.drugs.offer(girl.id, drugKey); } catch (e) { console.warn('[qa] drug offer failed:', e); }
+          }
         } else if (action.sat && window.DMTHGame?.state?.addSatisfaction) {
           // Fallback for purely text-emit actions (degrade lines, commands) — bump
           // satisfaction directly so the meter still tracks even without an ACTIONS row.

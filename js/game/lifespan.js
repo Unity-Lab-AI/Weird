@@ -8,11 +8,12 @@
   const REAL_MS_PER_GAME_DAY = 30 * 60_000;       // 30 real minutes = 1 in-game day
   const AGING_REAL_MS_PER_GAME_YEAR = 30 * 24 * 60 * 60 * 1000; // slow — 30 real days = 1 in-game year
 
-  // Forced-disposal threshold for postmortem bodies (game minutes since death).
-  // 7 game days = 7 × 1440 game min = 10080 game min. After this point, the body is too
-  // far gone for any clientele; the UI surfaces a nudge to dispose. (No auto-disposal
-  // — player still has to pick a method.)
-  const POSTMORTEM_DECAY_LIMIT = 7 * 1440;
+  // Corpse usability window (CORPSE-TIMER.1) — game minutes since death. The decay timer
+  // starts the instant the corpse is made; you've got ~5 game days to make money off the body,
+  // FRESH paying the most and NEAR-ROTTEN very little (whore-out necro multiplier scales down
+  // with decayDays). Past the limit it's a maggot-infested mess no one wants — the UI nudges
+  // disposal and a body left to rot bleeds passive WANTED. (No auto-disposal — player picks a method.)
+  const POSTMORTEM_DECAY_LIMIT = 5 * 1440;
 
   // Lifespan states in order of severity
   const STATES = {
@@ -74,13 +75,23 @@
     if (!girl) return null;
     // Dead-body decay-only branch — no vital re-evaluation.
     if (girl.encounterState === 'dead') {
+      // Death dossier backstop (DEATHSTATS.1) — catches a death from ANY path that didn't
+      // already build the record (idempotent). Fires the popup + saves her final snapshot.
+      if (window.DMTHGame.death && !girl.deathRecord) {
+        window.DMTHGame.death.ensureDeathRecord(girl.id, girl.deceasedCause);
+      }
       if (girl.body?.diedAt == null) return null;
       const newDecay = (girl.body.decayedMinutes || 0) + 30;
       const patch = { body: { ...girl.body, decayedMinutes: newDecay } };
       if (newDecay >= POSTMORTEM_DECAY_LIMIT && (girl.body.decayedMinutes || 0) < POSTMORTEM_DECAY_LIMIT) {
         if (window.DMTHNotify) {
-          window.DMTHNotify.show(`☠️ ${girl.name}'s body has decayed past usability — dispose now.`, { type: 'error', durationMs: 8000 });
+          window.DMTHNotify.show(`☠️ ${girl.name}'s body has decayed past usability — dispose now or the smell draws attention.`, { type: 'error', durationMs: 8000 });
         }
+      }
+      // A body left to rot past the limit is evidence — passive WANTED accrual every tick it
+      // sits. The longer you leave a corpse, the more the neighbors notice.
+      if (newDecay >= POSTMORTEM_DECAY_LIMIT && window.DMTHGame.wanted) {
+        window.DMTHGame.wanted.accrue('decay-discovery');
       }
       window.DMTHGame.state.updateGirl(girl.id, patch);
       return null;
@@ -124,9 +135,11 @@
     // time-of-death; freeing happens on disposal. Disposal log entry is also deferred to
     // disposal-time so the disposals ledger reflects player-initiated removals, not the
     // moment-of-death itself.
-    if (['died-of-neglect', 'mentally-broken', 'aged-out'].includes(lifespan.state)) {
-      if (!girl.lifespan || girl.lifespan.state !== lifespan.state) {
-        patch.encounterState = lifespan.state === 'mentally-broken' ? 'broken' : 'dead';
+    // DEATH (neglect / aged-out) → corpse. Body STAYS in the hold for postmortem use until
+    // disposal. MENTAL BREAK is handled separately below — she stays a live captive.
+    if (['died-of-neglect', 'aged-out'].includes(lifespan.state)) {
+      if (!girl.lifespan || !['died-of-neglect', 'aged-out'].includes(girl.lifespan.state)) {
+        patch.encounterState = 'dead';
         patch.deceasedAt = Date.now();
         patch.deceasedCause = lifespan.state;
         // Stamp game-minutes time-of-death on body for postmortem decay tracking.
@@ -138,10 +151,22 @@
         if (window.DMTHGame.state.addBuzz) {
           window.DMTHGame.state.addBuzz(-3, `captive-died: ${lifespan.state}`);
         }
-        // Notify — but no disposal log entry yet (deferred to actual disposal action).
+        // A body to account for — death raises WANTED. Disposing of it cleanly mitigates
+        // later; leaving it to rot past the decay limit adds passive heat (decay-discovery).
+        if (window.DMTHGame.wanted) window.DMTHGame.wanted.accrue('captive-death');
         if (window.DMTHNotify) {
-          const verb = lifespan.state === 'mentally-broken' ? 'broke beyond repair' : 'died of neglect';
-          window.DMTHNotify.show(`☠️ ${girl.name} ${verb} — body remains in her hold for postmortem use until disposal.`, { type: 'error', durationMs: 6000 });
+          window.DMTHNotify.show(`☠️ ${girl.name} died of neglect — body remains in her hold for postmortem use until disposal.`, { type: 'error', durationMs: 6000 });
+        }
+      }
+    } else if (lifespan.state === 'mentally-broken') {
+      // Mind gone, body ALIVE. She stays a captive — fully interactable, whoreable, and
+      // disposable — just catatonic/broken, never recovering her mind. This replaces the old
+      // `encounterState: 'broken'` phantom state that nothing downstream handled (soft-lock).
+      if (girl.mind !== 'broken') {
+        patch.mind = 'broken';
+        patch.mood = { mood: 'broken', moodEmoji: '😵', history: [...(girl.mood?.history || []), { shift: 'mentally-broken', ts: Date.now() }] };
+        if (window.DMTHNotify) {
+          window.DMTHNotify.show(`💀 ${girl.name} broke beyond repair — her mind is gone, her body is still yours.`, { type: 'error', durationMs: 6000 });
         }
       }
     }
@@ -179,10 +204,71 @@
     };
   }
 
+  // ---- SNUFF (deliberate kill → corpse) ----
+  // A myriad of ways to do the deed, quick → slow & methodical, each its own sexually-taboo
+  // act. Filmed or not. The result is always a CORPSE in her hold (postmortem use until
+  // disposal — distinct from disposal, which removes her). corpse = the visible cause marker
+  // the image pipeline renders on the body (imaging.postmortemTokens). 18+ fiction.
+  const SNUFF_METHODS = Object.freeze({
+    'choke-fuck':       { displayName: 'Strangle Her Mid-Fuck',     emoji: '🤲', speed: 'slow',  xp: 16, wanted: 5, filmBase: 1100, corpse: 'choked',       notes: 'Erotic asphyxiation taken all the way — choke the life out of her while buried inside her. Slow, intimate, vile.' },
+    'cock-suffocate':   { displayName: 'Suffocate on His Cock',     emoji: '👄', speed: 'slow',  xp: 15, wanted: 4, filmBase: 1000, corpse: 'choked',       notes: 'Hold her down on his cock until she stops struggling — throat-fucked to death.' },
+    'slit-throat':      { displayName: 'Slit Her Throat Mid-Thrust',emoji: '🔪', speed: 'quick', xp: 14, wanted: 6, filmBase: 1200, corpse: 'bloody-throat',notes: 'One deep cut while she rides — fast, bloody, over in seconds.' },
+    'hotshot':          { displayName: 'Lethal Hotshot',            emoji: '💉', speed: 'quick', xp: 12, wanted: 4, filmBase: 900,  corpse: 'peaceful',     notes: 'A hotshot mid-scene — she nods off and never wakes. Quick, almost gentle.' },
+    'drown-bath':       { displayName: 'Drown Her in the Bath',     emoji: '🛁', speed: 'slow',  xp: 15, wanted: 4, filmBase: 1000, corpse: 'drowned',      notes: 'Hold her under during a bath — slow, watching the bubbles stop.' },
+    'beat-to-death':    { displayName: 'Beat Her to Death',         emoji: '💀', speed: 'slow',  xp: 14, wanted: 7, filmBase: 1100, corpse: 'beaten',       notes: 'Fists and boots until she stops moving. Slow, brutal, messy.' },
+    'breed-then-bleed': { displayName: 'Breed Her, Then Bleed Her', emoji: '🩸', speed: 'slow',  xp: 18, wanted: 7, filmBase: 1400, corpse: 'bled-out',     notes: 'Pump her full, then open her up and let her bleed out slow while it leaks. The most methodical and depraved.' },
+    'snap-neck':        { displayName: 'Snap Her Neck',             emoji: '🦴', speed: 'quick', xp: 11, wanted: 5, filmBase: 800,  corpse: 'broken-neck',  notes: 'One sharp twist from behind mid-fuck. Instant.' },
+    // ── more demented chamber-grade kills (the worse, the better) ──
+    'gut-her':          { displayName: 'Disembowel Her Slow',       emoji: '🔪', speed: 'slow',  xp: 22, wanted: 9, filmBase: 1700, corpse: 'gutted',       notes: 'Open her belly and keep fucking her while she watches her own insides spill into her lap. The vilest, slowest end.' },
+    'flay':             { displayName: 'Flay Her Alive',            emoji: '🩸', speed: 'slow',  xp: 20, wanted: 8, filmBase: 1600, corpse: 'flayed',       notes: 'Peel her skin off in sheets while she screams herself hoarse, then let the shock take her.' },
+    'impale':           { displayName: 'Impale Her',                emoji: '🪓', speed: 'slow',  xp: 19, wanted: 8, filmBase: 1500, corpse: 'impaled',      notes: 'Mount her, alive, on a stake through the worst place — gravity does the rest over long minutes.' },
+    'piston-death':     { displayName: 'Fuck Her to Death',         emoji: '🛠️', speed: 'slow',  xp: 16, wanted: 5, filmBase: 1300, corpse: 'peaceful',     notes: 'Strap her to the machine and leave it railing every hole on max until her heart simply quits.' },
+    'speedball':        { displayName: 'Lethal Speedball',          emoji: '💉', speed: 'quick', xp: 13, wanted: 4, filmBase: 1000, corpse: 'peaceful',     notes: 'A speedball slammed mid-orgasm — she cums, seizes, and flatlines with the smile still on her face.' },
+    'crush-skull':      { displayName: 'Crush Her Skull',           emoji: '🔨', speed: 'quick', xp: 12, wanted: 7, filmBase: 900,  corpse: 'beaten',       notes: 'One boot, one cinderblock, done. Fast and final and very messy.' }
+  });
+
+  function snuffKill(girlId, methodId, opts = {}) {
+    const girl = window.DMTHGame.state.getGirl(girlId);
+    if (!girl) return { ok: false, reason: 'no such girl' };
+    if (girl.encounterState !== 'captive') return { ok: false, reason: 'only a living captive can be snuffed' };
+    const m = SNUFF_METHODS[methodId];
+    if (!m) return { ok: false, reason: 'unknown snuff method' };
+    // DEPRAVITY gate (mirrors the room UI gate as an engine backstop).
+    if (window.DMTHGame.progression && !window.DMTHGame.progression.isUnlocked('snuff')) {
+      return { ok: false, reason: `snuff is locked — reach DEPRAVITY level ${window.DMTHGame.progression.requiredLevel('snuff')}` };
+    }
+
+    // Filmed snuff records a premium reel BEFORE she's flipped to a corpse (film.startRecording
+    // requires a living captive). Unfilmed just makes the corpse.
+    let filmId = null;
+    if (opts.filmed && window.DMTHGame.film) {
+      try {
+        window.DMTHGame.film.startRecording(girlId, ['snuff', 'extreme-pain', 'finalization', m.speed]);
+        window.DMTHGame.state.appendTurn(girlId, 'user', `*${m.displayName.toLowerCase()} — on camera*`);
+        const film = window.DMTHGame.film.stopRecording({ title: `${girl.name}: ${m.displayName}`, basePrice: m.filmBase });
+        filmId = film?.id || null;
+      } catch (e) { /* filming failed — still make the corpse */ }
+    }
+
+    window.DMTHGame.state.updateGirl(girlId, {
+      encounterState: 'dead',
+      deceasedAt: Date.now(),
+      deceasedCause: (opts.filmed ? 'snuff-filmed:' : 'snuff:') + methodId,
+      body: { ...girl.body, diedAt: window.DMTHGame.gameClock?.now?.() ?? 0, decayedMinutes: 0, corpseMarker: m.corpse }
+    });
+    if (window.DMTHGame.death) window.DMTHGame.death.ensureDeathRecord(girlId, (opts.filmed ? 'snuff-filmed:' : 'snuff:') + methodId);
+    if (window.DMTHGame.state.addBuzz) window.DMTHGame.state.addBuzz(opts.filmed ? -1 : -3, 'snuff:' + methodId);
+    if (window.DMTHGame.wanted) window.DMTHGame.wanted.accrue('captive-death');
+    if (window.DMTHGame.progression) window.DMTHGame.progression.grantXp(m.xp + (opts.filmed ? 4 : 0), 'snuff:' + methodId);
+    if (window.DMTHNotify) window.DMTHNotify.show(`☠️ ${girl.name} — ${m.displayName}${opts.filmed ? ' (premium snuff film listed)' : ''}. Her body's in the hold for postmortem use until you dispose of it.`, { type: 'error', durationMs: 7000 });
+    return { ok: true, methodId, filmed: !!opts.filmed, filmId };
+  }
+
   window.DMTHGame = window.DMTHGame || {};
   window.DMTHGame.lifespan = Object.freeze({
     STATES, evaluate, tickAll, daysCaptive, currentAge, careScore, describeLifespan,
     TICK_MS, REAL_MS_PER_GAME_DAY, AGING_REAL_MS_PER_GAME_YEAR,
-    POSTMORTEM_DECAY_LIMIT
+    POSTMORTEM_DECAY_LIMIT,
+    SNUFF_METHODS, snuffKill
   });
 })();

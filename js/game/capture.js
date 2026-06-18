@@ -298,6 +298,37 @@
   function escalationMultiplier(tier) { return ESCALATION_MULTIPLIERS[tier] || 0; }
   function escalationNarration(tier) { return ESCALATION_NARRATION[Math.min(tier, ESCAPE_TIER)]; }
 
+  // Per-tool injury applied to the girl AT capture. Blunt tools (lead pipe) do real damage
+  // that must heal over time via care/heal actions; chemical tools leave her sick/groggy
+  // (small health hit, no bruises); restraints leave minor marks. Health floors at 1 — a
+  // capture never insta-kills. Healing is the existing rest/heal/feed/love loop.
+  const CAPTURE_INJURY = Object.freeze({
+    pipe:         { health: -25, bruises: 6, tag: 'beaten' },
+    handcuffs:    { health: -2,  bruises: 2 },
+    shackles:     { health: -3,  bruises: 2 },
+    'zip-ties':   { health: -2,  bruises: 1 },
+    rope:         { health: -1,  bruises: 1 },
+    'duct-tape':  { health: -1,  bruises: 1 },
+    harness:      { health: -2,  bruises: 1 },
+    rohypnol:     { health: -4,  bruises: 0 },
+    chloroform:   { health: -5,  bruises: 0 },
+    ether:        { health: -5,  bruises: 0 },
+    ketamine:     { health: -6,  bruises: 0 },
+    tranquilizer: { health: -4,  bruises: 0 }
+  });
+
+  function applyCaptureInjury(girl, toolId) {
+    const inj = CAPTURE_INJURY[toolId];
+    if (!inj || !girl.body) return;
+    girl.body.health = Math.max(1, (girl.body.health ?? 100) + (inj.health || 0));
+    girl.body.bruises = Math.min(99, (girl.body.bruises ?? 0) + (inj.bruises || 0));
+    // A heavy blunt hit shows as fresh damage in her first images (heals as she recovers).
+    if (inj.tag) {
+      girl.body.recentActTag = inj.tag;
+      if (window.DMTHGame.gameClock) girl.body.recentActAt = window.DMTHGame.gameClock.now();
+    }
+  }
+
   // Roll a single-tool capture. On success, escort the girl to the active dungeon's
   // first open hold via hunt.js. On failure, bump location suspicion AND the encounter's
   // escalation tier. The caller (UI) decides what to do with the new tier — typically
@@ -319,8 +350,17 @@
     const roll = Math.random();
     if (roll < chance) {
       try {
+        // Capture tool leaves its mark — blunt tools wound, chemicals sicken (L.1). Heals
+        // over time via the rest/heal/feed/love loop. Apply BEFORE escort so it persists.
+        applyCaptureInjury(girl, toolId);
         const escort = window.DMTHGame.hunt.escortToHold(girl);
-        return { outcome: 'success', toolId, baseChance: base, chance, roll, escort, escalationTier };
+        // LOOT.1 — a successful grab drops location-aware loot (a tool from the scene, or cash
+        // she was carrying). Non-fatal if loot module isn't present.
+        let loot = null;
+        if (window.DMTHGame.loot) { try { loot = window.DMTHGame.loot.rollCaptureLoot(locationId); } catch (e) { /* non-fatal */ } }
+        // DEPRAVITY XP (PLVL.2) — a successful capture is a big level boost.
+        if (window.DMTHGame.progression) window.DMTHGame.progression.grantXp(25, 'capture');
+        return { outcome: 'success', toolId, baseChance: base, chance, roll, escort, escalationTier, loot };
       } catch (err) {
         return { outcome: 'success-no-room', toolId, baseChance: base, chance, roll, error: err.message, escalationTier };
       }
@@ -332,10 +372,13 @@
     s.wallet.suspicionByLocation[locationId] = sus + 1;
     const newTier = escalationTier + 1;
     if (newTier >= ESCAPE_TIER) {
-      // She gets away — bigger notoriety hit since she'll talk
+      // She gets away — bigger notoriety hit since she'll talk, and she saw your face (WANTED).
       window.DMTHGame.state.addNotoriety(2);
+      if (window.DMTHGame.wanted) window.DMTHGame.wanted.accrue('witnessed-capture');
       return { outcome: 'escaped', toolId, baseChance: base, chance, roll, suspicionDelta: 1, escalationTier: newTier, notorietyDelta: 2 };
     }
+    // A botched grab in the open draws a little heat.
+    if (window.DMTHGame.wanted) window.DMTHGame.wanted.accrue('botched-capture');
     return { outcome: 'miss', toolId, baseChance: base, chance, roll, suspicionDelta: 1, escalationTier: newTier };
   }
 
