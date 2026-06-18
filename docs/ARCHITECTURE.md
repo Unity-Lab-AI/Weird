@@ -1194,7 +1194,8 @@ The static-client implementation lives entirely under `js/`. Engine modules are 
 |--------|----------------|
 | `state.js` | Central reactive state + IDB persistence; `mutate()` auto-saves+emits; `migrateLoadedState()` backfills old saves (incl. new wallet/dungeon/hold/girl fields). |
 | `progression.js` | **DEPRAVITY** player level (XP from every act) + tier gating (own L3 / extreme L4 / nugget L6 / dismember L7 / snuff L7) + pay-to-unlock + hunting-ground gates. |
-| `sexdrive.js` | Player sex-drive NEED; ceiling scales with roster + level; maxed = boosts, deprived = debuffs. |
+| `sexdrive.js` | Player sex-drive NEED; ceiling scales with roster + level; maxed = boosts, deprived = debuffs. GRADED capture bonus by band + variety (distinct girls/day) fill multiplier + per-(girl,act) anti-spam diminishing returns. |
+| `playerstamina.js` | **💦 Nut Reserve** — player spend-resource; drains per act (extreme costs most), regens per tick, low = reduced satisfaction/sex-drive fill. Refilled by viagra / girl's-milk / etc. (`wallet.nutReserve`). |
 | `wanted.js` | WANTED heat axis (tiers, accrual, decay, raid-chance). |
 | `arrest.js` | Raid roll → fine → jail/GAME OVER + F.5 escape valves (lawyer / dirty-cop bribe / escape-kit flee). |
 | `lifespan.js` | Days-captive aging, neglect death, **SNUFF_METHODS** (14, filmed/corpse markers), corpse decay (5-day window). |

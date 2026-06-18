@@ -106,6 +106,8 @@
     // 13. Stamina + health drain/regen. Starvation/dehydration/
     // chronic-bruise penalties + passive rest regen when no negative pressure is active.
     if (window.DMTHGame.actionEffects) window.DMTHGame.actionEffects.tickStaminaHealth();
+    // DEATHWARN.1 — non-intrusive low-health alert for held captives (throttled per girl).
+    if (window.DMTHGame.actionEffects && window.DMTHGame.actionEffects.lowHealthAlertSweep) window.DMTHGame.actionEffects.lowHealthAlertSweep();
 
     // Player satisfaction slow decay — without intimacy this tick, the meter drifts down.
     // 0.5/tick = full decay (50 → 0) over ~100 ticks (~50 real minutes). Sex acts via
@@ -127,6 +129,10 @@
 
     // Player sexual-drive deprivation drift (SEXDRIVE.1) — falls without intimacy.
     if (window.DMTHGame.sexdrive) window.DMTHGame.sexdrive.decayTick();
+
+    // Player Nut Reserve regen (PLAYERSTAM.1) — rebuilds briskly each tick so you're never just
+    // sitting and waiting; refill items (viagra / girl's-milk) top it instantly.
+    if (window.DMTHGame.playerStamina) window.DMTHGame.playerStamina.regenTick();
 
     // 14. Whore-out john arrivals. Per-rate arrival rolls per
     // whored-out captive; each arrival resolves the encounter, drains stamina via action-

@@ -242,6 +242,37 @@
       notes: 'Clean clinical referral — works any time before day 200. 3% complication. Zero notoriety. Expensive but safe.'
     },
 
+    // --- PLAYER BOOST (PLAYERSTAM.2) — refill your 💦 Nut Reserve. `playerRefill` = amount
+    //     restored (999 = full). Lootable + purchasable; girl-milk does it too (milk.drinkPlayer). ---
+    {
+      id: 'blue-pill', displayName: 'Blue Pill (Viagra)', emoji: '💊',
+      category: 'item', subcategory: 'player-boost',
+      prompt: 'product photograph of a single diamond-shaped blue tablet beside its foil blister-pack on a plain backdrop, pharmacy commerce style',
+      cost: 40, tier: 1, playerRefill: 999,
+      notes: 'Pop one and you\'re iron-hard and bottomless again — FULLY refills your Nut Reserve. Buy it or loot it.'
+    },
+    {
+      id: 'energy-shot', displayName: 'Energy Shot', emoji: '⚡',
+      category: 'item', subcategory: 'player-boost',
+      prompt: 'product photograph of a small 2-ounce energy-shot bottle with a blank label on a plain backdrop, convenience-store commerce style',
+      cost: 12, tier: 0, playerRefill: 35,
+      notes: 'A quick jolt — restores a chunk of your Nut Reserve so you can keep going.'
+    },
+    {
+      id: 'the-good-coke', displayName: 'The Good Coke', emoji: '❄️',
+      category: 'item', subcategory: 'player-boost',
+      prompt: 'product photograph of a small folded paper bindle beside a thin white line on a dark glass surface, gritty noir commerce style',
+      cost: 30, tier: 1, playerRefill: 55,
+      notes: 'A fat rail for yourself — surges your Nut Reserve back up and keeps your dick raging.'
+    },
+    {
+      id: 'oyster-tonic', displayName: 'Oyster & Maca Tonic', emoji: '🦪',
+      category: 'item', subcategory: 'player-boost',
+      prompt: 'product photograph of a small amber tonic bottle with a blank kraft label beside a single raw oyster on a plain backdrop, apothecary commerce style',
+      cost: 18, tier: 0, playerRefill: 40,
+      notes: 'An aphrodisiac stamina tonic — restores a solid chunk of your Nut Reserve.'
+    },
+
     // --- BLUNT ---
     {
       id: 'pipe', displayName: 'Lead Pipe', emoji: '🔧',

@@ -307,6 +307,13 @@
                 <div class="stat-row" data-tooltip="If on, every john MUST use a condom (override their compliance rate). Blocks pregnancy conception via this path.">
                   <span>Condom required</span>
                   <label><input type="checkbox" id="whore-condom" ${wo.condomRequired ? 'checked' : ''}/> enforce</label>
+                </div>
+                <div class="stat-row" data-tooltip="Let your FRIENDS in — rare, extreme visitors who'll nearly kill her (~40-60 HP in one visit) for a fortune. Every visit is logged to her history for her trophy. Use sparingly; they'll wreck her.">
+                  <span>🩸 Let friends in</span>
+                  <label><input type="checkbox" id="whore-friends" ${wo.friendsAllowed ? 'checked' : ''}/> allow</label>
+                </div>
+                <div class="btn-row" style="margin-top:4px">
+                  <button class="btn-small" data-whore-gangbang data-tooltip="Throw her a gangbang right now — several johns take turns back-to-back. Stacks pay + cum-fill with a heavy stamina/health toll; ends early if she's too spent.">💦 Throw a gangbang</button>
                 </div>`;
               })() + `
                 <div class="stat-row" data-tooltip="Pay multiplier from her current stats (bond × stamina × health × mood × outfit). Higher = bigger payouts per john. Better-trained girls earn more.">
@@ -1222,6 +1229,27 @@
     if (condomChk) {
       condomChk.onchange = () => {
         window.DMTHGame.whoreOut.updateSettings(girl.id, { condomRequired: condomChk.checked });
+      };
+    }
+    // FRIENDS.1 — toggle whether extreme "friends" can come for this girl.
+    const friendsChk = el.querySelector('#whore-friends');
+    if (friendsChk) {
+      friendsChk.onchange = () => {
+        window.DMTHGame.whoreOut.updateSettings(girl.id, { friendsAllowed: friendsChk.checked });
+      };
+    }
+    // GANGBANG.1 — throw a gangbang right now (3-5 johns back-to-back). Lethality-gated below.
+    const gangBtn = el.querySelector('[data-whore-gangbang]');
+    if (gangBtn) {
+      gangBtn.onclick = () => {
+        const g = window.DMTHGame.state.getGirl(girl.id);
+        const hp = g?.body?.health ?? 100;
+        // DEATHWARN.1 — a gangbang on a low-health girl can finish her. Warn before it does.
+        if (hp <= 35 && !confirm(`${girl.name} is already wrecked (${Math.round(hp)} HP). A gangbang could be the thing that finally kills her — let the pack have her anyway?`)) return;
+        const n = 3 + Math.floor(Math.random() * 3);
+        const r = window.DMTHGame.whoreOut.resolveGangbang(girl.id, n);
+        if (!r.ok) { alert(r.reason || 'gangbang failed'); return; }
+        window.DMTHRouter.handle();
       };
     }
     const cashoutBtn = el.querySelector('[data-whore-cashout]');

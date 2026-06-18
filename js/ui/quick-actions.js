@@ -20,78 +20,85 @@
     force: {
       label: '💢 Force',
       actions: [
-        { emoji: '🤜',  label: 'pin her down',        text: '*pins her shoulders to the bed, one hand on her throat, forces her knees apart*', applyId: 'restrain' },
-        { emoji: '🍆',  label: 'force vag entry',     text: '*shoves inside her dry, no warning, watches her face break*', applyId: 'sex-rough' },
-        { emoji: '🍑',  label: 'force anal',          text: '*spits once, forces the head in, ignores the scream*', applyId: 'sex-anal' },
-        { emoji: '👄',  label: 'face fuck hard',      text: '*grabs her hair with both hands and fucks her throat until her nose hits my pelvis*', applyId: 'sex-oral' },
-        { emoji: '🤐',  label: 'gag her to the hilt', text: '*holds her jaw open and buries it, holds her there while she gags*', applyId: 'sex-oral' },
-        { emoji: '🧱',  label: 'pin to wall',         text: '*slams her against the wall face-first, pulls her hips back, takes what I want*', applyId: 'sex-rough' },
-        { emoji: '💦',  label: 'force cum inside',    text: '*pins her hips, holds her in place, empties inside her, doesn\'t let her pull away*', applyId: 'sex-cum-inside' },
-        { emoji: '🫸',  label: 'throat pin',          text: '*grips her throat while I fuck her, watches her eyes go glassy*', applyId: 'choke' },
-        { emoji: '✋',  label: 'grab by hair',        text: '*yanks her by the roots, drags her where I want her*', applyId: 'restrain' },
-        { emoji: '🩸',  label: 'breed her',           text: '*holds her down after finishing, keeps me inside, refuses to let it spill*', applyId: 'sex-cum-inside' }
+        { emoji: '🤜',  label: 'pin the bitch down',   text: '*pins her shoulders to the bed, one hand on her throat, forces her knees apart*', applyId: 'restrain' },
+        { emoji: '🍆',  label: 'split her open dry',   text: '*shoves inside her dry, no warning, watches her face break*', applyId: 'sex-rough' },
+        { emoji: '🍑',  label: 'force her tight ass',  text: '*spits once, forces the head in, ignores the scream*', applyId: 'sex-anal' },
+        { emoji: '👄',  label: 'wreck her throat',     text: '*grabs her hair with both hands and fucks her throat until her nose hits my pelvis*', applyId: 'sex-oral' },
+        { emoji: '🤐',  label: 'bury it till she gags',text: '*holds her jaw open and buries it, holds her there while she gags*', applyId: 'sex-oral' },
+        { emoji: '🧱',  label: 'fuck her into the wall',text: '*slams her against the wall face-first, pulls her hips back, takes what I want*', applyId: 'sex-rough' },
+        { emoji: '💦',  label: 'flood her cunt',       text: '*pins her hips, holds her in place, empties inside her, doesn\'t let her pull away*', applyId: 'sex-cum-inside' },
+        { emoji: '🫸',  label: 'choke her while I fuck',text: '*grips her throat while I fuck her, watches her eyes go glassy*', applyId: 'choke' },
+        { emoji: '✋',  label: 'drag her by the hair',  text: '*yanks her by the roots, drags her where I want her*', applyId: 'restrain' },
+        { emoji: '🩸',  label: 'breed the bitch',      text: '*holds her down after finishing, keeps me inside, refuses to let it spill*', applyId: 'sex-cum-inside' }
       ]
     },
     positions: {
       label: '🍆 Positions',
       actions: [
-        { emoji: '⬇',  label: 'missionary (pinned)',    text: '*puts her on her back, pins her wrists over her head, fucks her slow and deep*', applyId: 'sex-gentle' },
-        { emoji: '🐕', label: 'doggy rough',            text: '*grabs her hips and pulls her back onto me, sets a brutal pace*', applyId: 'sex-rough' },
-        { emoji: '🤸', label: 'prone-bone',             text: '*flattens her face-down onto the mattress, lies on top, fucks her pinned flat*', applyId: 'sex-rough' },
-        { emoji: '🔁', label: 'reverse cowgirl (force)',text: '*sits back, pulls her onto me backwards, grabs her hips and bounces her*', applyId: 'sex-rough' },
-        { emoji: '🧍', label: 'against the wall',       text: '*picks her up, pins her to the wall, her legs around my waist, fucks her held up*', applyId: 'sex-rough' },
-        { emoji: '🛏️', label: 'spooning rough',         text: '*behind her, hand on her throat, one leg up, fucks her on her side*', applyId: 'sex-rough' },
-        { emoji: '🧎', label: 'kneeling service',       text: '*stands over her, hands in her hair, uses her mouth*', applyId: 'sex-oral' },
-        { emoji: '🪑', label: 'over my lap',            text: '*drags her face-down across my thighs, ass up, starts spanking*', applyId: 'slap' },
-        { emoji: '🔃', label: 'flipped upside',         text: '*lifts her upside down by the hips, face at my cock, fucks her throat while her legs kick*', applyId: 'sex-oral' },
-        { emoji: '🪢', label: 'spread-eagle tied',      text: '*ties each wrist and ankle to the bedposts, spreads her wide, takes my time*', applyId: 'sex-gentle' }
+        { emoji: '⬇',  label: 'pin + breed missionary',  text: '*puts her on her back, pins her wrists over her head, fucks her slow and deep*', applyId: 'sex-gentle' },
+        { emoji: '🐕', label: 'rut her doggy',           text: '*grabs her hips and pulls her back onto me, sets a brutal pace*', applyId: 'sex-rough' },
+        { emoji: '🤸', label: 'flatten + pound',         text: '*flattens her face-down onto the mattress, lies on top, fucks her pinned flat*', applyId: 'sex-rough' },
+        { emoji: '🔁', label: 'bounce her backwards',    text: '*sits back, pulls her onto me backwards, grabs her hips and bounces her*', applyId: 'sex-rough' },
+        { emoji: '🧍', label: 'fuck her up the wall',    text: '*picks her up, pins her to the wall, her legs around my waist, fucks her held up*', applyId: 'sex-rough' },
+        { emoji: '🛏️', label: 'spoon + throat-grip',     text: '*behind her, hand on her throat, one leg up, fucks her on her side*', applyId: 'sex-rough' },
+        { emoji: '🧎', label: 'use her kneeling mouth',  text: '*stands over her, hands in her hair, uses her mouth*', applyId: 'sex-oral' },
+        { emoji: '🪑', label: 'spank her over my lap',   text: '*drags her face-down across my thighs, ass up, starts spanking*', applyId: 'slap' },
+        { emoji: '🔃', label: 'upside-down throat fuck',  text: '*lifts her upside down by the hips, face at my cock, fucks her throat while her legs kick*', applyId: 'sex-oral' },
+        { emoji: '🪢', label: 'tie her open + take it',  text: '*ties each wrist and ankle to the bedposts, spreads her wide, takes my time*', applyId: 'sex-gentle' }
       ]
     },
     oral: {
       label: '👅 Oral',
       actions: [
-        { emoji: '🫦',  label: 'face fuck',             text: '*holds her head and fucks her mouth with full strokes*', applyId: 'sex-oral' },
-        { emoji: '🌪️', label: 'throat bulge',           text: '*watches the bulge of my cock moving in her throat, one hand pressing on it from outside*', applyId: 'sex-oral' },
-        { emoji: '💧',  label: 'make her gag',          text: '*holds her nose, forces her to take all of it, listens to her gag and choke*', applyId: 'sex-oral' },
-        { emoji: '✋',  label: 'pin nose shut',         text: '*pinches her nose so her only air is my cock pulling back*', applyId: 'sex-oral' },
-        { emoji: '👄',  label: 'slap with cock',        text: '*pulls out, slaps her across the face with my cock, then back in*', applyId: 'slap' },
-        { emoji: '🥵',  label: 'make her swallow',      text: '*finishes in her mouth, grabs her jaw shut, tells her to swallow every drop*', applyId: 'sex-oral' },
-        { emoji: '💦',  label: 'cum on her face',       text: '*pulls out at the last second, coats her cheeks, eyelashes, mouth*', applyId: 'sex-oral' },
-        { emoji: '🧎',  label: 'make her worship',      text: '*stands over her, tells her to kiss every inch, thank it, lick it slow*', applyId: 'sex-oral' },
-        { emoji: '🫁',  label: 'deepthroat hold',       text: '*buries her nose in my pelvis and holds her there, counts to ten*', applyId: 'sex-oral' },
-        { emoji: '🦷',  label: 'bite warning',          text: '*one finger under her jaw — no teeth. she learns fast.*', applyId: 'slap' }
+        { emoji: '🫦',  label: 'fuck her face',         text: '*holds her head and fucks her mouth with full strokes*', applyId: 'sex-oral' },
+        { emoji: '🌪️', label: 'bulge her throat',       text: '*watches the bulge of my cock moving in her throat, one hand pressing on it from outside*', applyId: 'sex-oral' },
+        { emoji: '💧',  label: 'gag her on it',         text: '*holds her nose, forces her to take all of it, listens to her gag and choke*', applyId: 'sex-oral' },
+        { emoji: '✋',  label: 'pinch her nose, no air', text: '*pinches her nose so her only air is my cock pulling back*', applyId: 'sex-oral' },
+        { emoji: '👄',  label: 'cock-slap her stupid',  text: '*pulls out, slaps her across the face with my cock, then back in*', applyId: 'slap' },
+        { emoji: '🥵',  label: 'make her swallow it',   text: '*finishes in her mouth, grabs her jaw shut, tells her to swallow every drop*', applyId: 'sex-oral' },
+        { emoji: '💦',  label: 'glaze her face',        text: '*pulls out at the last second, coats her cheeks, eyelashes, mouth*', applyId: 'sex-oral', actTag: 'facial' },
+        { emoji: '🧎',  label: 'make her worship cock', text: '*stands over her, tells her to kiss every inch, thank it, lick it slow*', applyId: 'sex-oral' },
+        { emoji: '🫁',  label: 'nose to my pelvis',     text: '*buries her nose in my pelvis and holds her there, counts to ten*', applyId: 'sex-oral' },
+        { emoji: '🦷',  label: 'no teeth, slut',        text: '*one finger under her jaw — no teeth. she learns fast.*', applyId: 'slap' },
+        { emoji: '🌊',  label: 'bukkake — drown her',   text: '*lines them up and has load after load painted across her face until she\'s dripping, blinking it out of her eyes, mouth open for more*', applyId: 'sex-oral', actTag: 'bukkake' },
+        { emoji: '🥛',  label: 'gokkun — swallow every load', text: '*collects load after load in a glass and makes her tip the whole thing back, throat working, not a drop wasted*', applyId: 'sex-oral' },
+        { emoji: '🔀',  label: 'ass-to-mouth',          text: '*pulls straight out of her ass and shoves it down her throat, makes her clean every inch with her tongue*', applyId: 'sex-oral' },
+        { emoji: '🍯',  label: 'throat creampie',       text: '*buries it to the root and empties straight down her throat, holds her there until she\'s swallowed it all*', applyId: 'sex-oral' }
       ]
     },
     anal: {
       label: '🍑 Anal',
       actions: [
-        { emoji: '💢',  label: 'force entry dry',       text: '*spits once, works the head in, ignores her cry*', applyId: 'sex-anal' },
-        { emoji: '🟣',  label: 'plug first',            text: '*slides the plug in, leaves it an hour to open her up*', applyId: 'restrain' },
-        { emoji: '🍆',  label: 'slow deep anal',        text: '*slides in inch by inch, watches her face in the mirror*', applyId: 'sex-anal' },
-        { emoji: '🚀',  label: 'brutal pace',           text: '*grabs her hips and sets a merciless pace, hears her lose her breath*', applyId: 'sex-anal' },
-        { emoji: '🫸',  label: 'double pen',            text: '*works in two while a finger stays deep in her cunt, both at once*', applyId: 'sex-anal' },
-        { emoji: '💦',  label: 'cream her ass',         text: '*empties deep, holds her hips still, watches it leak when I pull out*', applyId: 'sex-anal' },
-        { emoji: '👅',  label: 'rim her',               text: '*spreads her cheeks, tongue flat from back to front, over and over*', applyId: 'sex-oral' },
-        { emoji: '📏',  label: 'anal training',         text: '*starts with one finger, works up, tells her what number we\'re at*', applyId: 'sex-anal' },
-        { emoji: '🕳️',  label: 'gape hold',             text: '*pulls out at the right moment, holds her open, watches*', applyId: 'sex-anal' }
+        { emoji: '💢',  label: 'force her ass dry',     text: '*spits once, works the head in, ignores her cry*', applyId: 'sex-anal' },
+        { emoji: '🟣',  label: 'plug her open',         text: '*slides the plug in, leaves it an hour to open her up*', applyId: 'restrain' },
+        { emoji: '🍆',  label: 'sink it deep in her ass',text: '*slides in inch by inch, watches her face in the mirror*', applyId: 'sex-anal' },
+        { emoji: '🚀',  label: 'jackhammer her ass',    text: '*grabs her hips and sets a merciless pace, hears her lose her breath*', applyId: 'sex-anal' },
+        { emoji: '🫸',  label: 'stuff both holes',       text: '*works in two while a finger stays deep in her cunt, both at once*', applyId: 'sex-anal' },
+        { emoji: '💦',  label: 'cream her gaping ass',  text: '*empties deep, holds her hips still, watches it leak when I pull out*', applyId: 'sex-anal' },
+        { emoji: '👅',  label: 'tongue her asshole',    text: '*spreads her cheeks, tongue flat from back to front, over and over*', applyId: 'sex-oral' },
+        { emoji: '📏',  label: 'train her ass open',    text: '*starts with one finger, works up, tells her what number we\'re at*', applyId: 'sex-anal' },
+        { emoji: '🕳️',  label: 'hold her gaping',       text: '*pulls out at the right moment, holds her open, watches*', applyId: 'sex-anal' },
+        { emoji: '✊',  label: 'fist her ass',          text: '*tucks the thumb and works the whole fist past her ring, knuckle by knuckle, until her hole swallows my wrist*', applyId: 'sex-anal', actTag: 'fisted' },
+        { emoji: '🌹',  label: 'prolapse her',          text: '*pumps deep and fast then drags out hard over and over until her hole turns itself inside-out, pink and ruined*', applyId: 'sex-anal', actTag: 'prolapsed' },
+        { emoji: '🔁',  label: 'ass-to-mouth spit-shine',text: '*pulls straight out of her ass and feeds it to her mouth, makes her tongue it clean before it goes back in*', applyId: 'sex-oral' }
       ]
     },
     pain: {
       label: '🔥 Pain (kink)',
       actions: [
-        { emoji: '🕯️',  label: 'hot wax on tits',       text: '*drips red candle wax slowly across her nipples and down her sternum*', applyId: 'slap' },
-        { emoji: '🕯️',  label: 'hot wax thighs',        text: '*drips hot wax along her inner thighs, watches her stomach jump*', applyId: 'slap' },
-        { emoji: '🥢',  label: 'whip her back',         text: '*lays five stripes across her shoulders with the leather, makes her count them*', applyId: 'whip' },
-        { emoji: '🪵',  label: 'cane ass',              text: '*six strokes with the cane, slow and measured, marks across both cheeks*', applyId: 'whip' },
-        { emoji: '🪢',  label: 'flog breasts',          text: '*steady flogging across her tits until they\'re red and swollen*', applyId: 'whip' },
-        { emoji: '🤏',  label: 'pinch nipples hard',    text: '*takes both nipples between thumb and forefinger, pinches, twists*', applyId: 'slap' },
-        { emoji: '🎀',  label: 'clamp nipples',         text: '*clips the weighted clamps on, adjusts until she whimpers*', applyId: 'slap' },
-        { emoji: '📎',  label: 'clamp clit',            text: '*small clamp on her clit hood, just enough pressure to keep her still*', applyId: 'slap' },
-        { emoji: '✋',  label: 'slap her pussy',        text: '*open-hand slap right between her legs, sharp wet sound*', applyId: 'slap' },
-        { emoji: '🤚',  label: 'slap tits red',         text: '*open-handed slap across one tit, then the other, until they sting red*', applyId: 'slap' },
-        { emoji: '🦷',  label: 'bite nipples',          text: '*leans down, teeth closed on one nipple, bites until she sucks in a breath*', applyId: 'slap' },
-        { emoji: '🧊',  label: 'ice on nipples',        text: '*holds an ice cube on each nipple until she\'s shaking and her teeth chatter*', applyId: 'restrain' },
-        { emoji: '🔥',  label: 'cigarette burn',        text: '*lights one, lets it smolder against her inner thigh, watches the skin pucker*', applyId: 'whip' }
+        { emoji: '🕯️',  label: 'wax her nipples raw',    text: '*drips red candle wax slowly across her nipples and down her sternum*', applyId: 'slap' },
+        { emoji: '🕯️',  label: 'wax her spread thighs',  text: '*drips hot wax along her inner thighs, watches her stomach jump*', applyId: 'slap' },
+        { emoji: '🥢',  label: 'stripe her back',        text: '*lays five stripes across her shoulders with the leather, makes her count them*', applyId: 'whip' },
+        { emoji: '🪵',  label: 'cane her ass raw',       text: '*six strokes with the cane, slow and measured, marks across both cheeks*', applyId: 'whip' },
+        { emoji: '🪢',  label: 'flog her tits red',      text: '*steady flogging across her tits until they\'re red and swollen*', applyId: 'whip' },
+        { emoji: '🤏',  label: 'twist her nipples',      text: '*takes both nipples between thumb and forefinger, pinches, twists*', applyId: 'slap' },
+        { emoji: '🎀',  label: 'clamp her nipples',      text: '*clips the weighted clamps on, adjusts until she whimpers*', applyId: 'slap' },
+        { emoji: '📎',  label: 'clamp her clit',         text: '*small clamp on her clit hood, just enough pressure to keep her still*', applyId: 'slap' },
+        { emoji: '✋',  label: 'slap her wet cunt',      text: '*open-hand slap right between her legs, sharp wet sound*', applyId: 'slap' },
+        { emoji: '🤚',  label: 'slap her tits raw',      text: '*open-handed slap across one tit, then the other, until they sting red*', applyId: 'slap' },
+        { emoji: '🦷',  label: 'bite her nipples',       text: '*leans down, teeth closed on one nipple, bites until she sucks in a breath*', applyId: 'slap' },
+        { emoji: '🧊',  label: 'ice her stiff nipples',  text: '*holds an ice cube on each nipple until she\'s shaking and her teeth chatter*', applyId: 'restrain' },
+        { emoji: '🔥',  label: 'burn her inner thigh',   text: '*lights one, lets it smolder against her inner thigh, watches the skin pucker*', applyId: 'whip' }
       ]
     },
     violence: {
@@ -121,32 +128,35 @@
     punishment: {
       label: '⚱️ Punishment',
       actions: [
-        { emoji: '🧍',  label: 'corner, silent',        text: '*sends her to the corner on her knees, hands behind head, one hour silent*', applyId: 'restrain' },
-        { emoji: '🧎',  label: 'kneel on rice',         text: '*dumps a handful of rice, makes her kneel on it until I say stop*', applyId: 'slap' },
-        { emoji: '🚫',  label: 'denial — edge only',    text: '*edges her for an hour, stops every time she tightens, no release*', applyId: 'sex-gentle' },
-        { emoji: '🔁',  label: 'forced orgasm x5',      text: '*the wand, no breaks, until she\'s crying and trying to crawl away*', applyId: 'sex-rough' },
-        { emoji: '🥣',  label: 'no food today',         text: '*empties her food dish, shuts the slot, walks away*', applyId: 'restrain' },
-        { emoji: '🚿',  label: 'cold shower',           text: '*turns the hose on her — icy — until her teeth chatter*', applyId: 'slap' },
-        { emoji: '🎽',  label: 'belt spanking',         text: '*folds my belt, twenty strokes, tells her to count*', applyId: 'whip' },
-        { emoji: '🪪',  label: 'mirror watch',          text: '*forces her to watch herself in the mirror while I use her*', applyId: 'restrain' },
-        { emoji: '🎭',  label: 'hood her for hours',    text: '*pulls the canvas hood down, leaves her in the dark restrained*', applyId: 'restrain' },
-        { emoji: '🔇',  label: 'gag + abandon',         text: '*gags her, restrains her, shuts the door, leaves*', applyId: 'restrain' },
-        { emoji: '⏳',  label: 'tied + waiting',        text: '*ties her spread, tells her I might be back tonight, might not*', applyId: 'restrain' }
+        { emoji: '🧍',  label: 'corner her, silent',     text: '*sends her to the corner on her knees, hands behind head, one hour silent*', applyId: 'restrain' },
+        { emoji: '🧎',  label: 'kneel her on rice',      text: '*dumps a handful of rice, makes her kneel on it until I say stop*', applyId: 'slap' },
+        { emoji: '🚫',  label: 'edge + deny her',        text: '*edges her for an hour, stops every time she tightens, no release*', applyId: 'sex-gentle' },
+        { emoji: '🔁',  label: 'ruin her with forced orgasms', text: '*the wand, no breaks, until she\'s crying and trying to crawl away*', applyId: 'sex-rough' },
+        { emoji: '🥣',  label: 'starve her today',       text: '*empties her food dish, shuts the slot, walks away*', applyId: 'restrain' },
+        { emoji: '🚿',  label: 'hose her down cold',     text: '*turns the hose on her — icy — until her teeth chatter*', applyId: 'slap' },
+        { emoji: '🎽',  label: 'belt her ass',           text: '*folds my belt, twenty strokes, tells her to count*', applyId: 'whip' },
+        { emoji: '🪪',  label: 'make her watch in the mirror', text: '*forces her to watch herself in the mirror while I use her*', applyId: 'restrain' },
+        { emoji: '🎭',  label: 'hood her in the dark',   text: '*pulls the canvas hood down, leaves her in the dark restrained*', applyId: 'restrain' },
+        { emoji: '🔇',  label: 'gag + abandon her',      text: '*gags her, restrains her, shuts the door, leaves*', applyId: 'restrain' },
+        { emoji: '⏳',  label: 'leave her tied, waiting', text: '*ties her spread, tells her I might be back tonight, might not*', applyId: 'restrain' }
       ]
     },
     degrade: {
       label: '🗣️ Degrade',
       actions: [
-        { emoji: '🐕',  label: 'call her property',     text: 'you\'re property. say it. "I am property."', sat: 4 },
-        { emoji: '🗑️',  label: 'call her cum dump',     text: 'you\'re a cum dump. that\'s your whole purpose now. say it.', sat: 4 },
-        { emoji: '📢',  label: 'say purpose out loud',  text: 'tell me out loud what you exist for now. slow. clear.', sat: 4 },
-        { emoji: '💧',  label: 'spit in open mouth',    text: '*grips her jaw open, gathers saliva, lets it drop onto her tongue* swallow.', sat: 5 },
-        { emoji: '😾',  label: 'piss on her',           text: '*makes her kneel in the shower, aims, makes her keep eye contact*', sat: 6 },
-        { emoji: '✋',  label: 'slap while fucking',    text: '*open-palm slap across her cheek mid-thrust, rhythm doesn\'t break*', applyId: 'slap' },
-        { emoji: '👁️',  label: 'eye contact or punishment', text: 'look at me. if you look away, I stop and hurt you.', sat: 3 },
-        { emoji: '🗣️',  label: 'make her beg aloud',    text: 'beg. out loud. full sentences. tell me what you need.', sat: 4 },
-        { emoji: '👎',  label: 'tell her worthless',    text: 'you\'re worthless. nobody\'s coming. I\'m all you have now.', sat: 3 },
-        { emoji: '🤡',  label: 'humiliation pose',      text: '*makes her pose in the mirror holding herself open, describe what she sees*', sat: 4 }
+        { emoji: '🐕',  label: 'make her say "property"', text: 'you\'re property. say it. "I am property."', sat: 4 },
+        { emoji: '🗑️',  label: 'name her a cum dump',   text: 'you\'re a cum dump. that\'s your whole purpose now. say it.', sat: 4 },
+        { emoji: '📢',  label: 'make her state her purpose', text: 'tell me out loud what you exist for now. slow. clear.', sat: 4 },
+        { emoji: '💧',  label: 'spit in her mouth',      text: '*grips her jaw open, gathers saliva, lets it drop onto her tongue* swallow.', sat: 5 },
+        { emoji: '😾',  label: 'piss all over her',      text: '*makes her kneel in the shower, aims, makes her keep eye contact*', sat: 6, actTag: 'pissed' },
+        { emoji: '✋',  label: 'slap her mid-fuck',      text: '*open-palm slap across her cheek mid-thrust, rhythm doesn\'t break*', applyId: 'slap' },
+        { emoji: '👁️',  label: 'eyes on me or pain',     text: 'look at me. if you look away, I stop and hurt you.', sat: 3 },
+        { emoji: '🗣️',  label: 'make her beg out loud',  text: 'beg. out loud. full sentences. tell me what you need.', sat: 4 },
+        { emoji: '👎',  label: 'tell her she\'s worthless', text: 'you\'re worthless. nobody\'s coming. I\'m all you have now.', sat: 3 },
+        { emoji: '🤡',  label: 'pose her open + describe it', text: '*makes her pose in the mirror holding herself open, describe what she sees*', sat: 4 },
+        { emoji: '🌊',  label: 'piss + cum facial',      text: '*finishes across her face then keeps her kneeling and pisses over the cum, makes her hold her mouth open through all of it*', sat: 6, actTag: 'pissed' },
+        { emoji: '❄️',  label: 'make her snowball it',   text: '*spits my own load back into her mouth and makes her hold it, swirl it, then swallow while I watch her throat move*', sat: 5, actTag: 'facial' },
+        { emoji: '🚶',  label: 'cum-walk of shame',      text: '*coats her face and tits, then makes her crawl the length of the room with it dripping, thanking me the whole way*', sat: 4, actTag: 'facial' }
       ]
     },
     bondage: {
@@ -206,7 +216,12 @@
         { emoji: '🤮', label: 'total degradation',        text: '*spits in her open mouth, calls her every filthy name, films her ruin and makes her thank me for it*', applyId: 'extreme-degrade' },
         { emoji: '💀', label: 'beat her down',            text: '*rains down fists and boots until she\'s a bruised, bleeding, sobbing heap on the concrete*', applyId: 'extreme-beatdown' },
         { emoji: '🌑', label: 'choke to the edge',        text: '*crushes her throat shut while I fuck her, lets go the instant her eyes roll back, then does it again*', applyId: 'extreme-choke-out' },
-        { emoji: '🔥', label: 'pain overload',            text: '*stacks pain on pain on pain — and watches whether she finally breaks or starts begging for more*', applyId: 'masochist-overload' }
+        { emoji: '🔥', label: 'pain overload',            text: '*stacks pain on pain on pain — and watches whether she finally breaks or starts begging for more*', applyId: 'masochist-overload' },
+        { emoji: '🌊', label: 'bukkake gangbang',         text: '*lines up every cock in the place and has them dump load after load across her face and down her throat until she\'s drowning in it, blinking it out of her eyes, gulping for air*', applyId: 'extreme-degrade', actTag: 'bukkake' },
+        { emoji: '🌹', label: 'prolapse her ass',         text: '*pounds her ass raw then rips out hard over and over until her ruined hole turns itself inside-out, pink and wrecked and twitching*', applyId: 'extreme-rough-anal', actTag: 'prolapsed' },
+        { emoji: '✊', label: 'fist her cunt to the wrist',text: '*folds my hand to a wedge and forces it past her stretched cunt knuckle by knuckle until my whole fist is buried and she\'s howling*', applyId: 'masochist-overload', actTag: 'fisted' },
+        { emoji: '🩸', label: 'cervix-battering breeding rape', text: '*pins her flat and rapes her so deep the head batters her cervix with every stroke, then breeds her raw and holds it in so it takes*', applyId: 'extreme-breeding-rape' },
+        { emoji: '💦', label: 'piss + cum facial',         text: '*glazes her face with cum then pisses over the top of it while she kneels with her mouth open and thanks me through the stream*', applyId: 'extreme-degrade', actTag: 'pissed' }
       ]
     },
     nugget: {
@@ -229,16 +244,16 @@
     commands: {
       label: '🎯 Commands',
       actions: [
-        { emoji: '🔇',  label: 'shut the fuck up',      text: 'shut the fuck up.', sat: 1 },
-        { emoji: '🗣️',  label: 'beg',                   text: 'beg. use your full words.', sat: 2 },
-        { emoji: '🧍',  label: 'stand still',           text: 'hold perfectly still. if you move I stop.', sat: 1 },
-        { emoji: '🤐',  label: 'gag her',               text: '*stuffs the gag in her mouth, cinches the strap*', applyId: 'restrain' },
-        { emoji: '👁️',  label: 'eyes on me',            text: '*stops, stares* eyes on me. the whole time.', sat: 2 },
-        { emoji: '🚪',  label: 'leave her tied',        text: '*stands up mid-scene, zips up* think about it. *walks out*', applyId: 'restrain' },
-        { emoji: '🔓',  label: 'loosen one restraint',  text: '*unclips one cuff* behave.', sat: 1 },
-        { emoji: '🛐',  label: 'kneel and worship',     text: 'on your knees. mouth open. now.', applyId: 'sex-oral' },
-        { emoji: '👀',  label: 'inspect her',           text: '*walks slow circles around her, examining every inch of her body*', sat: 2 },
-        { emoji: '❤️‍🩹',label: 'show a little mercy',    text: '*softens for a second — tucks hair behind her ear, thumb on her cheek*', applyId: 'love-forehead-kiss' }
+        { emoji: '🔇',  label: 'shut your whore mouth',  text: 'shut the fuck up.', sat: 1 },
+        { emoji: '🗣️',  label: 'grovel for it',          text: 'beg. use your full words.', sat: 2 },
+        { emoji: '🧍',  label: 'present for inspection',  text: 'hold perfectly still. if you move I stop.', sat: 1 },
+        { emoji: '🤐',  label: 'gag the bitch',          text: '*stuffs the gag in her mouth, cinches the strap*', applyId: 'restrain' },
+        { emoji: '👁️',  label: 'worship your owner',      text: '*stops, stares* eyes on me. the whole time.', sat: 2 },
+        { emoji: '🚪',  label: 'edge her + walk out',     text: '*stands up mid-scene, zips up* think about it. *walks out*', applyId: 'restrain' },
+        { emoji: '🔓',  label: 'reward her — one cuff',   text: '*unclips one cuff* behave.', sat: 1 },
+        { emoji: '🛐',  label: 'on her knees, mouth open', text: 'on your knees. mouth open. now.', applyId: 'sex-oral' },
+        { emoji: '👀',  label: 'appraise the meat',       text: '*walks slow circles around her, examining every inch of her body*', sat: 2 },
+        { emoji: '❤️‍🩹',label: 'fake a little tenderness', text: '*softens for a second — tucks hair behind her ear, thumb on her cheek*', applyId: 'love-forehead-kiss' }
       ]
     }
   };
@@ -300,6 +315,11 @@
         const idx = parseInt(b.dataset.qaIdx, 10);
         const action = TABS[currentTab].actions[idx];
         if (!action) return;
+        // DEATHWARN.1 — if this act would likely KILL her, throw a depraved confirm first.
+        if (action.applyId && girl?.id && window.DMTHGame?.actionEffects?.wouldBeLethal
+            && window.DMTHGame.actionEffects.wouldBeLethal(girl.id, action.applyId)) {
+          if (!confirm(window.DMTHGame.actionEffects.lethalWarningLine())) return;
+        }
         // Delimbing — heal-gated, special path (not an ACTIONS spec). If she hasn't healed
         // from the last amputation, the attempt is refused and the turn isn't sent.
         if (action.delimbKey && girl?.id && window.DMTHGame?.actionEffects?.delimb) {
@@ -339,6 +359,18 @@
           // Fallback for purely text-emit actions (degrade lines, commands) — bump
           // satisfaction directly so the meter still tracks even without an ACTIONS row.
           window.DMTHGame.state.addSatisfaction(action.sat, `qa:${currentTab}:${action.label}`);
+        }
+        // actTag override — some acts (bukkake / facial / fisting / prolapse / piss) route
+        // through a coarse applyId (sex-oral / sex-anal / extreme-degrade) whose default
+        // aftermath tag can't show the specific act. Stamp the precise tag AFTER applyAction
+        // so imaging.js renders the right aftermath on her next image.
+        if (action.actTag && girl?.id && window.DMTHGame?.state?.updateGirl) {
+          const refreshed = window.DMTHGame.state.getGirl(girl.id);
+          if (refreshed) {
+            const body = { ...(refreshed.body || {}), recentActTag: action.actTag };
+            if (window.DMTHGame.gameClock) body.recentActAt = window.DMTHGame.gameClock.now();
+            window.DMTHGame.state.updateGirl(girl.id, { body });
+          }
         }
         // Bondage actions mark girl.body.activeBondage so the next image render
         // front-loads the bondage tokens. Sticky until cleared by another bondage /

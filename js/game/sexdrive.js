@@ -30,12 +30,49 @@
 
   function get() { return window.DMTHGame.state.getSexDrive ? window.DMTHGame.state.getSexDrive() : 0; }
 
-  // Feed the drive (sex acts). Clamped to the current scaling ceiling — so on few girls it
-  // can't climb into the maxed band no matter how much you use the one you have.
-  function feed(amount) {
+  // ── SEXDRIVE.2 — fill scaling ───────────────────────────────────────────────────────────
+  // Maxing the drive is a MID-GAME thing across MULTIPLE girls, not something you grind on one.
+  //   • variety: each distinct girl you use in a game-day raises the fill multiplier;
+  //   • anti-spam: repeating the SAME act on the SAME girl pays diminishing fill fast;
+  //   • extremity: more extreme acts already carry higher satisfaction, so they fill more.
+  const recentActs = {};          // `${girlId}|${actId}` -> { n, at(gameMin) } — in-memory anti-spam
+  const SPAM_WINDOW_MIN = 90;     // diminishing memory lasts ~1.5 game-hours
+  function gameNow() { const c = window.DMTHGame.gameClock; return c ? c.now() : 0; }
+  function gameDay() { const c = window.DMTHGame.gameClock; return c ? Math.floor(c.now() / (c.MIN_PER_DAY || 1440)) + 1 : 1; }
+
+  // Distinct girls used today → fill multiplier. 1 girl = 1.0×; each additional distinct girl
+  // this game-day adds +25% up to +100% (5+ girls). Persisted lazily on state (_sexDriveDay).
+  function varietyMultiplier(girlId) {
+    const s = window.DMTHGame.state.current;
+    if (!s) return 1;
+    const day = gameDay();
+    let log = s._sexDriveDay;
+    if (!log || log.day !== day) log = { day, girls: [] };
+    if (girlId && !log.girls.includes(girlId)) log.girls.push(girlId);
+    s._sexDriveDay = log;
+    try { window.DMTHGame.state.save(); } catch (e) { /* non-fatal */ }
+    return 1 + Math.min(1.0, Math.max(0, log.girls.length - 1) * 0.25);
+  }
+
+  // Repeat the same act on the same girl inside the window → fill decays (0.6^n, floor 0.15) so
+  // you can't just spam the single most-extreme act to cap the meter.
+  function spamMultiplier(girlId, actId) {
+    if (!girlId || !actId) return 1;
+    const key = girlId + '|' + actId;
+    const now = gameNow();
+    const rec = recentActs[key];
+    const n = (rec && (now - rec.at) <= SPAM_WINDOW_MIN) ? rec.n : 0;
+    recentActs[key] = { n: n + 1, at: now };
+    return Math.max(0.15, Math.pow(0.6, n));
+  }
+
+  // Feed the drive (sex acts). amount = action.satisfaction (extreme acts carry more). Scaled by
+  // variety × anti-spam, then clamped to the roster/level ceiling (one girl can't reach maxed).
+  function feed(amount, opts = {}) {
     if (!amount) return;
     const max = effectiveMax();
-    window.DMTHGame.state.setSexDrive(Math.max(0, Math.min(max, get() + amount)));
+    const gain = amount * varietyMultiplier(opts.girlId) * spamMultiplier(opts.girlId, opts.actId);
+    window.DMTHGame.state.setSexDrive(Math.max(0, Math.min(max, get() + gain)));
   }
 
   // Per-tick deprivation drift (called from tick.js).
@@ -52,9 +89,32 @@
     return { value: Math.round(val), max, pct, maxed: pct >= MAXED_PCT, deprived: val <= DEPRIVED_AT };
   }
 
-  // Boosts when maxed, debuffs when deprived. Consumed by hunt odds + income.
-  function huntBonus() { const s = status(); return s.maxed ? 0.12 : s.deprived ? -0.10 : 0; }
-  function cashMul() { const s = status(); return s.maxed ? 1.15 : s.deprived ? 0.92 : 1.0; }
+  // SEXDRIVE.2 — GRADED capture/hunt bonus by drive band (was binary). Different bonus at
+  // different levels: deprived hurts, then it climbs warming → high → maxed.
+  function huntBonus() {
+    const s = status();
+    if (s.deprived) return -0.10;
+    if (s.pct >= 0.85) return 0.14;   // maxed — sharpest hunter
+    if (s.pct >= 0.55) return 0.07;   // high
+    if (s.pct >= 0.30) return 0.02;   // warming
+    return 0;
+  }
+  function cashMul() {
+    const s = status();
+    if (s.deprived) return 0.92;
+    if (s.pct >= 0.85) return 1.15;
+    if (s.pct >= 0.55) return 1.08;
+    return 1.0;
+  }
+  // Band label for HUD/tooltips.
+  function band() {
+    const s = status();
+    if (s.deprived) return 'DEPRIVED';
+    if (s.pct >= 0.85) return 'MAXED';
+    if (s.pct >= 0.55) return 'HIGH';
+    if (s.pct >= 0.30) return 'WARMING';
+    return 'LOW';
+  }
 
   function describe() {
     const s = status();
@@ -64,6 +124,6 @@
   window.DMTHGame = window.DMTHGame || {};
   window.DMTHGame.sexdrive = Object.freeze({
     BASE_CAP, PER_GIRL, PER_LEVEL, MAXED_PCT, DEPRIVED_AT,
-    effectiveMax, get, feed, decayTick, status, huntBonus, cashMul, describe
+    effectiveMax, get, feed, decayTick, status, huntBonus, cashMul, band, describe
   });
 })();

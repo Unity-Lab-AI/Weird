@@ -210,6 +210,49 @@
     }
   });
 
+  // FRIENDS.1/.2 — "friends" are special recurring visitors, RARER and FAR more extreme than
+  // normal johns. When the player toggles them on for a girl, a slice of arrivals become a
+  // friend who uses an EXTREME act and a unique near-kill ability — a direct ~40-60 health drop
+  // (he'll nearly kill her). Pays a fortune. Every friend visit is logged to her history for the
+  // death-dossier / trophy. Friends are gated to held captives (never corpses).
+  const FRIEND_ARCHETYPES = Object.freeze({
+    'the-butcher': {
+      displayName: 'The Butcher', arrivalWeight: 10, payRange: [400, 700],
+      healthDrop: [40, 55], bruisesAdded: 6, johnActionId: 'extreme-beatdown',
+      permittedActsPreference: ['sex-rough', 'choke', 'humiliation'],
+      ability: 'works her over until she\'s a broken, bleeding heap — and pays a fortune for the privilege',
+      dialogueTone: 'methodical and merciless, no rush, no mercy'
+    },
+    'the-surgeon': {
+      displayName: 'The Surgeon', arrivalWeight: 8, payRange: [450, 800],
+      healthDrop: [35, 50], bruisesAdded: 3, johnActionId: 'masochist-overload',
+      permittedActsPreference: ['toys', 'pain', 'humiliation'],
+      ability: 'brings his own instruments and opens her up clinical and slow',
+      dialogueTone: 'cold, invasive, talks her through every cut'
+    },
+    'the-pack': {
+      displayName: 'The Pack', arrivalWeight: 7, payRange: [500, 950],
+      healthDrop: [45, 60], bruisesAdded: 5, johnActionId: 'extreme-rough-anal',
+      permittedActsPreference: ['sex-rough', 'anal', 'creampie', 'bukkake'],
+      ability: 'a whole crew at once — they take turns wrecking every hole until she can\'t stand',
+      dialogueTone: 'a baying pack, egging each other on'
+    },
+    'the-strangler': {
+      displayName: 'The Strangler', arrivalWeight: 6, payRange: [450, 850],
+      healthDrop: [40, 55], bruisesAdded: 2, johnActionId: 'extreme-choke-out',
+      permittedActsPreference: ['choke', 'sex-rough'],
+      ability: 'fucks her right to the edge of death and drags her back, over and over',
+      dialogueTone: 'gets off on the moment her eyes roll back, pays to chase it'
+    }
+  });
+  function rollFriendArchetype(rng) {
+    const entries = Object.entries(FRIEND_ARCHETYPES);
+    const total = entries.reduce((t, [, a]) => t + (a.arrivalWeight || 0), 0);
+    let roll = (rng || Math.random)() * total;
+    for (const [id, a] of entries) { roll -= (a.arrivalWeight || 0); if (roll <= 0) return id; }
+    return entries[entries.length - 1][0];
+  }
+
   // Pick a john archetype weighted by arrivalWeight + pregnantWantBias if applicable.
   // Zero-weight archetypes (postmortem-john) are excluded from the rotation — they get
   // forced into play by direct lookup in whore-out when the girl's encounterState matches.
@@ -246,7 +289,9 @@
   // Note: DMTHTemplates is frozen elsewhere — this is a sibling registry.
   window.DMTHJohnArchetypes = Object.freeze({
     JOHN_ARCHETYPES,
+    FRIEND_ARCHETYPES,
     rollJohnArchetype,
+    rollFriendArchetype,
     rollJohnActs
   });
 })();

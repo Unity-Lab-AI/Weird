@@ -124,7 +124,9 @@
     window.DMTHGame.state.consumeItem(MILK_ITEM, 1);
     if (window.DMTHGame.state.addSatisfaction) window.DMTHGame.state.addSatisfaction(5, 'drink-milk');
     if (window.DMTHGame.state.addBuzz) window.DMTHGame.state.addBuzz(2, 'drink-milk');
-    if (window.DMTHNotify) window.DMTHNotify.show('🥛 You drink a glass of warm girl-milk — satisfaction + buzz boosted.', { type: 'success', durationMs: 4000 });
+    // PLAYERSTAM.2 — warm girl-milk also tops up your Nut Reserve.
+    if (window.DMTHGame.playerStamina) window.DMTHGame.playerStamina.refill(30);
+    if (window.DMTHNotify) window.DMTHNotify.show('🥛 You drink a glass of warm girl-milk — satisfaction, buzz + Nut Reserve boosted.', { type: 'success', durationMs: 4000 });
     return { ok: true };
   }
 

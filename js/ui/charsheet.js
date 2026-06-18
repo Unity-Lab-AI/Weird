@@ -55,6 +55,7 @@
 
     // ---- vitals ----
     const sd = G.sexdrive ? G.sexdrive.status() : null;
+    const ns = G.playerStamina ? G.playerStamina.status() : null;
     const sat = typeof w.playerSatisfaction === 'number' ? w.playerSatisfaction : 50;
     const buzz = typeof w.buzz === 'number' ? w.buzz : 0;
     const wanted = G.wanted ? G.wanted.describe() : { level: 0, label: '—', emoji: '⚪', huntPenalty: 0 };
@@ -152,6 +153,8 @@
           <h2>🍆 The Need</h2>
           ${sd ? `<div class="stat-row" data-tooltip="Sex-drive — your appetite NEED. Ceiling scales with roster + DEPRAVITY level. MAXED = boosts, DEPRIVED = debuffs."><span>🍆 Cock-Hunger</span><b class="${sd.maxed?'ok':sd.deprived?'bad':''}">${sd.value}/${sd.max}${sd.maxed?' · MAXED':sd.deprived?' · DEPRIVED':''}</b></div>
           <div class="bar"><div class="bar-fill" style="width:${Math.round(sd.pct*100)}%;background:${sd.maxed?'#27ae60':sd.deprived?'#c0392b':'#e67e22'}"></div></div>` : ''}
+          ${ns ? `<div class="stat-row" data-tooltip="Nut Reserve — your gas tank. Every act spends it (extreme acts cost most), it regens each tick + refills instantly with viagra / girl's-milk. Empty = running on fumes (reduced satisfaction + fill)."><span>💦 Nut Reserve</span><b class="${ns.empty?'bad':ns.low?'':'ok'}">${ns.value}/${ns.max}${ns.empty?' · ON FUMES':ns.low?' · LOW':''}</b></div>
+          <div class="bar"><div class="bar-fill" style="width:${Math.round(ns.pct*100)}%;background:${ns.empty?'#c0392b':ns.low?'#e67e22':'#3498db'}"></div></div>` : ''}
           <div class="stat-row" data-tooltip="Player satisfaction (0-100). Above 50 = hunt bonus, below 50 = hunt penalty."><span>💦 Spent Load</span><b class="${sat>=60?'ok':sat<40?'bad':''}">${Math.round(sat)}/100</b></div>
           <div class="stat-row" data-tooltip="BUZZ (0-100) — underground word-of-mouth. Higher = johns visit your whored-out captives more often."><span>🐝 Dungeon Cred</span><b>${Math.round(buzz)}/100</b></div>
         </section>

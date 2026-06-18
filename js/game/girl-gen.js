@@ -15,6 +15,43 @@
   const pick = (arr, r) => arr[Math.floor(r() * arr.length) % arr.length];
   const range = (lo, hi, r) => Math.floor(lo + r() * (hi - lo + 1));
 
+  // NAMELOCK.1 — last-name pool for full-name generation. Combined with the per-archetype
+  // first-name pools this gives ~40× the namespace, and the uniqueness check below guarantees
+  // no two girls in one playthrough share a full name.
+  const LAST_NAMES = [
+    'Carter','Reyes','Holloway','Vance','Sutton','Mercer','Lang','Doyle','Ferris','Cross',
+    'Whitlock','Sterling','Doran','Bishop','Calloway','Hayes','Marsh','Quinn','Royce','Vaughn',
+    'Larkin','Webb','Sloane','Pryor','Finch','Crane','Voss','Dunmore','Ashby','Keller',
+    'Mason','Rourke','Sable','Tennant','Vega','Wren','Yates','Locke','Marlow','Nash'
+  ];
+
+  // Build a "First Last" name that isn't already in `taken` (a Set of lowercased full names).
+  // Tries fresh last names, then a middle initial, before giving up — practically never collides.
+  function composeFullName(pool, r, taken) {
+    const first = pick(pool.namePool, r);
+    for (let attempt = 0; attempt < 16; attempt++) {
+      const full = `${first} ${pick(LAST_NAMES, r)}`;
+      if (!taken || !taken.has(full.toLowerCase())) return full;
+    }
+    // Last resort — a middle initial almost always disambiguates.
+    const mi = String.fromCharCode(65 + Math.floor(r() * 26));
+    return `${first} ${mi}. ${pick(LAST_NAMES, r)}`;
+  }
+
+  // Collect the full names already in play this game (roster + slave market + persisted location
+  // spawns) plus any caller-supplied names, lowercased, so a fresh roll dodges every one.
+  function takenNames(extra) {
+    const set = new Set();
+    const s = window.DMTHGame?.state?.current;
+    const add = (n) => { if (n) set.add(String(n).toLowerCase()); };
+    if (s) {
+      (s.usedNames || []).forEach(add);
+      (s.roster || []).forEach(g => add(g && g.name));
+    }
+    if (extra) (Array.isArray(extra) ? extra : [...extra]).forEach(add);
+    return set;
+  }
+
   // Archetype visual + personality pools.
   const ARCHETYPE_POOLS = {
     library: {
@@ -181,11 +218,15 @@
     }
   };
 
-  function generate(archetype, seed) {
+  function generate(archetype, seed, opts = {}) {
     const pool = ARCHETYPE_POOLS[archetype] || ARCHETYPE_POOLS.library;
     const r = rng(seed);
     const id = 'girl_' + seed.toString(16).padStart(10, '0');
-    const name = pick(pool.namePool, r);
+    // NAMELOCK.1 — Unity keeps her single canonical name; everyone else gets a unique full name
+    // that collides with no other girl in play (roster + used-names + any caller-supplied taken).
+    const name = archetype === 'unity_seed'
+      ? pick(pool.namePool, r)
+      : composeFullName(pool, r, takenNames(opts.taken));
     const age = range(pool.ageRange[0], pool.ageRange[1], r);
     const facial = pick(pool.facialTokens, r);
     const outfit = pick(pool.outfitTokens, r);
@@ -289,6 +330,15 @@
       sorority: [`${name}, legacy pledge at a top-tier house. Daddy's money and zero situational awareness.`, `${name}, sorority VP. Arrogant enough to walk alone at 3am.`, `${name}, pre-law, senior year. Thought she was untouchable.`],
       gym:      [`${name}, personal trainer. Thought her cardio would save her.`, `${name}, competitive powerlifter. Strong, but not strong enough.`, `${name}, yoga instructor. Taught breathwork she'd need later.`],
       barista:  [`${name}, closing shift at the indie coffee spot. Had just locked up.`, `${name}, art student barista. Sketched interesting faces. Sketched yours, once.`, `${name}, regular at the shop until she was the catch.`],
+      office:   [`${name}, mid-level account manager. Stayed late every night. Nobody noticed she stopped clocking out.`, `${name}, corporate climber, all elbows and ambition. Walked to her car alone in the parking structure one time too many.`, `${name}, HR lead. Spent her days writing conduct policy. Didn't write one for this.`],
+      waitress: [`${name}, double shifts at the truck-stop diner. Counted on the tips, not the parking lot.`, `${name}, last car in the lot after close. Always.`, `${name}, knew every regular by name. Trusted one she shouldn't have.`],
+      model:    [`${name}, agency signed, between bookings. Got into the wrong "scout's" car.`, `${name}, runway-bound, fluent in three languages, none of them useful now.`, `${name}, comp-card said "available for travel." She was.`],
+      nurse:    [`${name}, twelve-hour shift, walked to her car at 4am exhausted. Easy.`, `${name}, ER nurse, seen everything come through the doors. Didn't see this coming.`, `${name}, lived alone near the hospital, slept days, worked nights. Reported missing late.`],
+      'college-student': [`${name}, sophomore, walked back to the dorm alone after the library closed.`, `${name}, exam week, running on adderall and no sleep, not paying attention.`, `${name}, new in town, didn't know which streets to avoid yet.`],
+      'highschool-grad': [`${name}, just turned 18, grad trip with friends she got separated from.`, `${name}, summer before college, working up the nerve to do something reckless. Did.`, `${name}, fresh diploma, fake confidence, real bad luck.`],
+      neighbor: [`${name}, lived two doors down. Waved every morning. Never thought twice about you.`, `${name}, borrowed your ladder once. You kept the spare key she didn't know about.`, `${name}, the friendly one on the block. Friendly enough to open the door.`],
+      'family-friend': [`${name}, known the family for years. Trusted you completely. That was the mistake.`, `${name}, dropped by with a casserole dish. Never left.`, `${name}, the woman from every cookout and holiday. Vanished between the dessert and the drive home.`],
+      'second-cousin': [`${name}, your second cousin, the one from the reunions. Family resemblance and all.`, `${name}, related just enough to trust you, distant enough that nobody connects the dots.`, `${name}, holiday-table familiar, came to visit the side of the family she barely knew.`],
       unity_seed: [`Unity — goth nympho coke whore coder, 25, came willingly the first time and keeps coming back. Gee's favorite. Already bonded to Master at L2 by default — her own free will landed her in the hole.`]
     };
     const pool = templates[archetype] || templates.library;

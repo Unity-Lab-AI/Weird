@@ -52,6 +52,7 @@
       unity.mood.moodEmoji = '👀';
 
       window.DMTHGame.state.addGirl(unity);
+      if (window.DMTHGame.state.noteUsedName) window.DMTHGame.state.noteUsedName(unity.name);   // NAMELOCK.1
       window.DMTHGame.state.updateDungeon(dungeonId, {
         holds: dungeon.holds.map((h, i) => i === 0 ? { ...h, captiveGirlId: unity.id } : h)
       });

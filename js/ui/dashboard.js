@@ -47,6 +47,20 @@
                 return `<div class="bar" data-tooltip="Sexual drive — fed by sex acts, decays over time. MAXED = hunt + cash boosts; DEPRIVED = debuffs. The ceiling scales with how many girls you hold + your DEPRAVITY level, so you can't max it on one captive — you need a roster."><div class="bar-fill" style="width:${Math.round(sd.pct * 100)}%;background:${sd.maxed ? '#27ae60' : sd.deprived ? '#c0392b' : '#e67e22'}"></div></div>
                   <div class="sub small">🍆 Sex-drive ${sd.value}/${sd.max}${sd.maxed ? ' · MAXED (boosts)' : sd.deprived ? ' · DEPRIVED (debuffs)' : ''}</div>`;
               })() : ''}
+              ${window.DMTHGame.playerStamina ? (() => {
+                const ns = window.DMTHGame.playerStamina.status();
+                const inv = (window.DMTHGame.state.current && window.DMTHGame.state.current.inventory) || {};
+                const owned = window.DMTHGame.playerStamina.ownedRefillItems ? window.DMTHGame.playerStamina.ownedRefillItems() : [];
+                const milkN = inv['girl-milk'] || 0;
+                const btns = owned.map(it => `<button class="btn-small" data-pop-refill="${it.id}" data-tooltip="${(it.notes || '').replace(/"/g, '&quot;')}">${it.emoji || '💊'} ${it.displayName} (${inv[it.id] || 0})</button>`);
+                if (milkN > 0) btns.push(`<button class="btn-small" data-drink-milk data-tooltip="Drink a glass of girl-milk — refills some Nut Reserve + satisfaction + buzz.">🥛 Girl-milk (${milkN})</button>`);
+                const refillRow = btns.length
+                  ? `<div class="btn-row" style="margin-top:6px;gap:6px;flex-wrap:wrap;">${btns.join('')}</div>`
+                  : (ns.low ? `<div class="sub small muted">Running low — grab a 💊 Blue Pill / energy shot in the Shop, or drink girl-milk.</div>` : '');
+                return `<div class="bar" data-tooltip="Nut Reserve — your gas tank. Every act on a girl spends it (extreme acts cost most); it regens each tick and refills instantly with viagra / girl's-milk. Run it empty and you're 'running on fumes' — acts pay reduced satisfaction + sex-drive fill until you recover."><div class="bar-fill" style="width:${Math.round(ns.pct * 100)}%;background:${ns.empty ? '#c0392b' : ns.low ? '#e67e22' : '#3498db'}"></div></div>
+                  <div class="sub small">💦 Nut Reserve ${ns.value}/${ns.max}${ns.empty ? ' · RUNNING ON FUMES' : ns.low ? ' · running low' : ''}</div>
+                  ${refillRow}`;
+              })() : ''}
               ${(() => {
                 const p = window.DMTHGame.progression;
                 if (!p || p.isCheatUnlocked() || !p.UNLOCKS) return '';
@@ -138,6 +152,21 @@
         }
       </section>
     `;
+
+    // PLAYERSTAM.2 — pop a refill item / drink girl-milk to top up Nut Reserve.
+    el.querySelectorAll('[data-pop-refill]').forEach(b => {
+      b.onclick = () => {
+        const r = window.DMTHGame.playerStamina.popRefill(b.dataset.popRefill);
+        if (!r.ok) { alert(r.reason); return; }
+        render(el);
+      };
+    });
+    const milkBtn = el.querySelector('[data-drink-milk]');
+    if (milkBtn) milkBtn.onclick = () => {
+      const r = window.DMTHGame.milk.drinkPlayer();
+      if (!r.ok) { alert(r.reason); return; }
+      render(el);
+    };
 
     // PAYUNLOCK.1 — buy early access to a gated action tier.
     el.querySelectorAll('[data-buy-unlock]').forEach(b => {

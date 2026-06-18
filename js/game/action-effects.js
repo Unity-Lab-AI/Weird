@@ -417,13 +417,24 @@
     // John actions intentionally have satisfaction=0 in their spec (proxied service, not
     // direct intimacy). Mercy / passive ticks have 0 too. Hunting bonus draws from this
     // meter via hunt.previewCaptureOdds.
+    // PLAYERSTAM.1 — the PLAYER spends Nut Reserve on his OWN acts (john-proxied 'john-*' acts
+    // don't drain him). Running low drops his performance: reduced satisfaction + sex-drive fill.
+    const isJohnAct = String(actionId).startsWith('john-');
+    const perfMul = (!isJohnAct && window.DMTHGame.playerStamina)
+      ? window.DMTHGame.playerStamina.performanceMul() : 1;
     if (action.satisfaction && window.DMTHGame.state.addSatisfaction) {
-      window.DMTHGame.state.addSatisfaction(action.satisfaction, actionId);
+      window.DMTHGame.state.addSatisfaction(action.satisfaction * perfMul, actionId);
     }
     // SEXDRIVE.1 — sex acts feed the player's sexual-drive need (clamped to its scaling cap,
     // so one girl can't push it into the maxed boost band — you need a roster).
     if (action.satisfaction && window.DMTHGame.sexdrive) {
-      try { window.DMTHGame.sexdrive.feed(action.satisfaction); } catch (e) { /* non-fatal */ }
+      // SEXDRIVE.2 — pass girl + act so fill scales by variety (distinct girls/day) and decays
+      // when the same act is spammed on the same girl.
+      try { window.DMTHGame.sexdrive.feed(action.satisfaction * perfMul, { girlId, actId: actionId }); } catch (e) { /* non-fatal */ }
+    }
+    // Spend the reserve AFTER reading performance, so this act used the current level.
+    if (!isJohnAct && window.DMTHGame.playerStamina) {
+      try { window.DMTHGame.playerStamina.drainForAction(actionId); } catch (e) { /* non-fatal */ }
     }
 
     // Stamp the recent-act aftermath tag so the NEXT image of her renders what was just
@@ -682,6 +693,52 @@
     bruises: 'BR', cumLoad: 'CL', bondXP: 'BX', bondDebt: 'BD',
     escapeRisk: 'ER', notoriety: 'NT', satisfaction: 'SAT'
   };
+  // ── DEATHWARN.1 — lethality prediction + low-health alerts ──────────────────────────────
+  // Depraved are-you-sure lines (NOT Gee's literal examples). Rotated when an act would kill her.
+  const LETHAL_WARNINGS = [
+    'she\'s hanging by a thread — do this and you\'ll feel her go limp and cold while you\'re still inside her. finish her off?',
+    'one more and her heart quits mid-scream — you want to be balls-deep when the light goes out of her eyes?',
+    'push this and she flatlines under you, wet and wrecked and gone. ride her out the door?',
+    'this is the one that kills her — she dies on your cock if you do it. do it anyway?',
+    'her body can\'t take this — she\'ll seize, go slack, and stop breathing beneath you. send her off?'
+  ];
+  function lethalWarningLine() { return LETHAL_WARNINGS[Math.floor(Math.random() * LETHAL_WARNINGS.length)]; }
+
+  // Would this action likely KILL her right now? Compares her health to the action's health cost
+  // (strain-amplified when she's already low) against the death floor. Used by the UI to throw a
+  // confirm BEFORE the act lands — so the player gets a noticeable warning, not a surprise corpse.
+  function wouldBeLethal(girlId, actionId) {
+    const girl = window.DMTHGame.state.getGirl(girlId);
+    if (!girl || girl.encounterState === 'dead') return false;
+    const a = ACTIONS[actionId];
+    const cost = a && typeof a.health === 'number' ? a.health : 0;
+    if (cost >= 0) return false;
+    const hp = girl.body?.health ?? 100;
+    const strained = (girl.body?.stamina ?? 70) <= STAMINA_THRESHOLD_FOR_STRAIN;
+    const effective = strained ? cost * 1.5 : cost;
+    return (hp + effective) <= 1;   // would hit the death floor (lifespan kills at health <= 0)
+  }
+
+  // Per-tick low-health sweep — fires ONE non-intrusive alert when a held captive drops to/below
+  // the warn band (she needs loving / drugs / healing to recover), throttled via a per-girl flag
+  // so it never nags. Re-arms once she climbs back out. Called from tick.js after the vitals step.
+  const LOW_HEALTH_WARN_BAND = 20;
+  function lowHealthAlertSweep() {
+    const s = window.DMTHGame.state.current;
+    if (!s) return;
+    for (const girl of (s.roster || [])) {
+      if (girl.encounterState !== 'captive') continue;
+      const hp = girl.body?.health ?? 100;
+      const flagged = !!(girl.body && girl.body._lowHpAlerted);
+      if (hp <= LOW_HEALTH_WARN_BAND && !flagged) {
+        if (window.DMTHNotify) window.DMTHNotify.show(`🩹 ${girl.name} is broken down (${Math.round(hp)} HP) — love her, dose her, let her rest, or she'll die on you.`, { type: 'danger', durationMs: 7000 });
+        window.DMTHGame.state.updateGirl(girl.id, { body: { ...(girl.body || {}), _lowHpAlerted: true } });
+      } else if (hp > LOW_HEALTH_WARN_BAND + 12 && flagged) {
+        window.DMTHGame.state.updateGirl(girl.id, { body: { ...(girl.body || {}), _lowHpAlerted: false } });
+      }
+    }
+  }
+
   function previewCost(actionId) {
     const a = ACTIONS[actionId];
     if (!a) return '';
@@ -959,6 +1016,7 @@
     johnHappinessForGirl,
     LIMB_KEYS, LIMB_LABEL, NUGGET_HEAL_GATE,
     limbState, limbsRemoved, isNugget, delimb,
-    MARK_SPECS, ownershipMarksOf, hasMark, applyMark
+    MARK_SPECS, ownershipMarksOf, hasMark, applyMark,
+    wouldBeLethal, lethalWarningLine, lowHealthAlertSweep
   });
 })();

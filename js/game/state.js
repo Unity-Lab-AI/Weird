@@ -47,7 +47,13 @@
       // SEXDRIVE.1 — player sexual-drive NEED (0..scaling cap). Fed by sex acts, decays over
       // time. Maxed = stat boosts (hunting/cash); deprived = debuffs. The CAP scales with
       // roster size + DEPRAVITY level (js/game/sexdrive.js) so it can't be maxed early.
-      sexDrive: 0
+      sexDrive: 0,
+
+      // PLAYERSTAM.1 — "💦 Nut Reserve" (0-100). The player's spend-it-to-use-them resource:
+      // every act on a girl drains it (heavy/extreme acts cost more), it regenerates each tick
+      // (js/game/playerstamina.js), and it's instantly refilled by viagra / girl's-milk / etc.
+      // Empty = "running on fumes" debuff. Depraved-named per Gee, NOT "stamina".
+      nutReserve: 100
     },
 
     inventory: {},                 // { [itemId]: qty }
@@ -83,6 +89,16 @@
     // value = the game-day number the last request was made. Enforces "once a day per girl-type
     // per location" so pre-capture item asks are a trickle, never an endless faucet.
     itemRequestLog: {},
+
+    // NAMELOCK.1 — lowercased full names already in play this game. girl-gen consults this to
+    // avoid generating two girls with the same name; capture + persistent location spawns
+    // register here so names never collide within a single playthrough.
+    usedNames: [],
+
+    // LOCPERSIST.1 — persistent per-location spawn sets. Keyed by locationId →
+    // { girls:[GirlProfile], rolledDay, expiresDay, taken:{ [girlId]: 'captured'|'walked' } }.
+    // Same location, same day = same girls; the set refreshes after a randomized 2-4 day window.
+    locationSpawns: {},
 
     settings: {
       mode: 'sexy',                // 'sexy' | 'hurtme' | 'sexy_with_damage'
@@ -123,6 +139,7 @@
       if (typeof s.wallet.playerSatisfaction !== 'number') s.wallet.playerSatisfaction = 50;
       if (typeof s.wallet.depravityXp !== 'number') s.wallet.depravityXp = 0;
       if (typeof s.wallet.sexDrive !== 'number') s.wallet.sexDrive = 0;
+      if (typeof s.wallet.nutReserve !== 'number') s.wallet.nutReserve = 100;
       if (!s.wallet.suspicionByLocation) s.wallet.suspicionByLocation = {};
     }
     // Nested-container backfill — the shallow load-merge can drop sub-shapes added after an
@@ -140,6 +157,8 @@
     if (!s.disposals) s.disposals = [];
     if (!s.turns) s.turns = {};
     if (!s.itemRequestLog || typeof s.itemRequestLog !== 'object') s.itemRequestLog = {};
+    if (!Array.isArray(s.usedNames)) s.usedNames = [];
+    if (!s.locationSpawns || typeof s.locationSpawns !== 'object') s.locationSpawns = {};
     // Dungeon-level backfill — the shared supply POOL (POOL-SUPPLY.1) + per-hold toy mounts
     // (TOY-HOLD.1) + condom/drug reserves. Defense-in-depth so any future unguarded read on an
     // old save can't hit undefined.
@@ -299,6 +318,9 @@
   function getDepravityXp() { return typeof state?.wallet?.depravityXp === 'number' ? state.wallet.depravityXp : 0; }
   function setSexDrive(v) { mutate(s => { s.wallet.sexDrive = Math.max(0, v); }); }
   function getSexDrive() { return typeof state?.wallet?.sexDrive === 'number' ? state.wallet.sexDrive : 0; }
+  // PLAYERSTAM.1 — Nut Reserve (0-100).
+  function setNutReserve(v) { mutate(s => { s.wallet.nutReserve = Math.max(0, Math.min(100, v)); }); }
+  function getNutReserve() { return typeof state?.wallet?.nutReserve === 'number' ? state.wallet.nutReserve : 100; }
 
   // inventory
   // Per-item max is basically-unlimited (ITEMCAP.1) — 9999 of each. The sandbox / everything-
@@ -477,6 +499,26 @@
   function noteItemRequest(key, day) { mutate(s => { if (!s.itemRequestLog) s.itemRequestLog = {}; s.itemRequestLog[key] = day; }); }
   function lastItemRequestDay(key) { return (state && state.itemRequestLog && state.itemRequestLog[key]) || null; }
 
+  // NAMELOCK.1 — register a full name as used so no future girl reuses it this game.
+  function noteUsedName(name) {
+    if (!name) return;
+    mutate(s => {
+      if (!Array.isArray(s.usedNames)) s.usedNames = [];
+      const lc = String(name).toLowerCase();
+      if (!s.usedNames.some(n => String(n).toLowerCase() === lc)) s.usedNames.push(name);
+    });
+  }
+
+  // LOCPERSIST.1 — persistent per-location spawn sets. read/write the whole record for a location.
+  function getLocationSpawns(locId) { return (state && state.locationSpawns && state.locationSpawns[locId]) || null; }
+  function setLocationSpawns(locId, record) { mutate(s => { if (!s.locationSpawns) s.locationSpawns = {}; s.locationSpawns[locId] = record; }); }
+  function updateLocationSpawns(locId, patch) {
+    mutate(s => {
+      if (!s.locationSpawns) s.locationSpawns = {};
+      s.locationSpawns[locId] = { ...(s.locationSpawns[locId] || {}), ...patch };
+    });
+  }
+
   window.DMTHGame = window.DMTHGame || {};
   window.DMTHGame.state = {
     get current() { return state; },
@@ -488,6 +530,7 @@
     addWanted, getWanted,
     addDepravityXp, getDepravityXp,
     setSexDrive, getSexDrive,
+    setNutReserve, getNutReserve,
     addItem, consumeItem,
     addDungeon, updateDungeon, getDungeon,
     addGirl, updateGirl, getGirl, removeGirl,
@@ -502,6 +545,8 @@
     bumpTick,
     setGameOver, isGameOver,
     setPlayerName, getPlayerName,
-    noteItemRequest, lastItemRequestDay
+    noteItemRequest, lastItemRequestDay,
+    noteUsedName,
+    getLocationSpawns, setLocationSpawns, updateLocationSpawns
   };
 })();

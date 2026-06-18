@@ -28,18 +28,56 @@
     model:    ['club', 'hotel-lobby', 'private-party', 'mall']
   };
 
-  function rollEncounters(locationId, count = 3) {
+  // LOCPERSIST.1 — the girls at a location PERSIST. The same set stays put for a randomized
+  // 2-4 game-day window so you can return and work the same girl across days (lott farming /
+  // mood-building) without capturing her. Captured girls drop out of the set; the window expires
+  // and a fresh set rolls in. Falls back to a one-off roll if state isn't ready.
+  function currentDay() {
+    const c = window.DMTHGame.gameClock;
+    return c ? Math.floor(c.now() / (c.MIN_PER_DAY || 1440)) + 1 : 1;
+  }
+  function rollFreshSet(locationId, count) {
     const spawns = LOCATION_SPAWNS[locationId] || LOCATION_SPAWNS.street;
     const girls = [];
+    const taken = new Set();   // keep names distinct WITHIN this set too
     for (let i = 0; i < count; i++) {
       const arche = weightedPick(spawns);
       const seed = Math.floor(Math.random() * 0x7FFFFFFF);
-      const girl = window.DMTHGame.girlGen.generate(arche, seed);
+      const girl = window.DMTHGame.girlGen.generate(arche, seed, { taken });
+      taken.add(String(girl.name).toLowerCase());
       girl.encounterState = 'encountered';
       girl.encounteredAt = { locationId, ts: Date.now() };
       girls.push(girl);
     }
     return girls;
+  }
+  function rollEncounters(locationId, count = 3) {
+    const st = window.DMTHGame.state;
+    if (!st || !st.getLocationSpawns) return rollFreshSet(locationId, count);   // pre-state fallback
+    const day = currentDay();
+    const rec = st.getLocationSpawns(locationId);
+    if (rec && Array.isArray(rec.girls) && day <= (rec.expiresDay || 0)) {
+      // Still within the window — same girls, minus any already captured.
+      const captured = rec.captured || {};
+      const live = rec.girls.filter(g => g && !captured[g.id]);
+      if (live.length) return live;
+      // everyone here got taken — fall through and roll a fresh set early
+    }
+    const girls = rollFreshSet(locationId, count);
+    const expiresDay = day + 2 + Math.floor(Math.random() * 3);   // persists 2-4 days
+    if (st.setLocationSpawns) st.setLocationSpawns(locationId, { girls, rolledDay: day, expiresDay, captured: {} });
+    return girls;
+  }
+
+  // LOCPERSIST.1 — mark an encountered girl as captured so she stops appearing at that location.
+  function markEncounterCaptured(locationId, girlId) {
+    const st = window.DMTHGame.state;
+    if (!st || !st.getLocationSpawns) return;
+    const rec = st.getLocationSpawns(locationId);
+    if (!rec) return;
+    const captured = { ...(rec.captured || {}) };
+    captured[girlId] = true;
+    if (st.updateLocationSpawns) st.updateLocationSpawns(locationId, { captured });
   }
 
   function weightedPick(entries) {
@@ -297,6 +335,8 @@
     girl.mood.mood = 'terrified';
     girl.mood.moodEmoji = '😱';
     window.DMTHGame.state.addGirl(girl);
+    // NAMELOCK.1 — lock her full name out of future generation now that she's in the collection.
+    if (window.DMTHGame.state.noteUsedName) window.DMTHGame.state.noteUsedName(girl.name);
     const newHolds = dungeon.holds.slice();
     newHolds[openIdx] = { ...newHolds[openIdx], captiveGirlId: girl.id };
     window.DMTHGame.state.updateDungeon(dungeon.id, { holds: newHolds });
@@ -332,6 +372,7 @@
   window.DMTHGame = window.DMTHGame || {};
   window.DMTHGame.hunt = Object.freeze({
     rollEncounters,
+    markEncounterCaptured,
     attemptCapture,
     previewCaptureOdds,
     escortToHold,

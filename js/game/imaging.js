@@ -62,28 +62,36 @@
   function bodyStateTokens(body) {
     const out = [];
     if (!body) return '';
-    if (body.arousal >= 60)     out.push('flushed cheeks, parted lips');
-    if (body.arousal >= 85)     out.push('heavy-lidded eyes, bitten lower lip');
-    if (body.arousal >= 95)     out.push('fucked-out ahegao expression, eyes rolling up, tongue lolling, mindless drooling bliss, brain-melted');
-    if (body.wetness >= 60)     out.push('damp inner thighs');
-    if (body.wetness >= 85)     out.push('glossy thighs');
-    if (body.wetness >= 95)     out.push('soaked dripping cunt, slick smeared all down both inner thighs, glistening wet mess');
-    if (body.cumLoad >= 0.5)    out.push('glazed stomach');
-    if (body.cumLoad >= 1.5)    out.push('streaks across collarbones');
-    if (body.cumLoad >= 3)      out.push('cum overflowing and dripping down her thighs and ass, fresh creampie leaking out of her, glazed in spent loads');
-    if (body.cumLoad >= 5)      out.push('drenched in cum from face to thighs, thick ropes pooling beneath her, saturated and sticky');
+    // TEMPL-CONCISE.1 — ONE concise token per body axis (highest applicable threshold only).
+    // Previously every crossed threshold stacked (arousal≥95 pushed 3 phrases, cum≥5 pushed 4),
+    // piling adjectives that drowned the location / outfit / toy slots. Single-token-per-axis
+    // keeps each component visible without one category eating the others.
+    // Arousal
+    if (body.arousal >= 95)      out.push('fucked-out ahegao, eyes rolling up, tongue lolling');
+    else if (body.arousal >= 85) out.push('heavy-lidded eyes, bitten lower lip');
+    else if (body.arousal >= 60) out.push('flushed cheeks, parted lips');
+    // Wetness
+    if (body.wetness >= 95)      out.push('soaked dripping cunt, slick down both thighs');
+    else if (body.wetness >= 85) out.push('glossy wet thighs');
+    else if (body.wetness >= 60) out.push('damp inner thighs');
+    // Cum on body
+    if (body.cumLoad >= 5)        out.push('drenched in cum face to thighs, thick ropes pooling');
+    else if (body.cumLoad >= 3)   out.push('cum dripping down her thighs and ass, glazed in spent loads');
+    else if (body.cumLoad >= 1.5) out.push('cum streaked across collarbones and stomach');
+    else if (body.cumLoad >= 0.5) out.push('glazed stomach');
     // CUMFILL.1 — vaginal cum-fill (preggo meter) reads as a stuffed, plugged, leaking cunt.
-    if ((body.vaginalCum || 0) >= 3) out.push('pussy visibly stuffed full of cum, swollen well-used cunt, thick load plugged deep inside her, fresh creampie seeping from her vaginal opening');
-    if ((body.vaginalCum || 0) >= 6) out.push('cunt overflowing with backed-up cum, bred-full leaking pussy, thick white running down her inner thighs');
-    if (body.bruises >= 3)      out.push('light bruising on arms');
-    if (body.bruises >= 8)      out.push('darker bruises visible on thighs and shoulders');
-    if (body.bruises >= 15)     out.push('heavy bruising, split lip, smudged makeup');
-    if (body.bruises >= 25)     out.push('body covered in welts and bite marks, fingerprint bruises ringing the throat and hips, raw abused skin');
+    if ((body.vaginalCum || 0) >= 6)      out.push('cunt overflowing with backed-up cum, bred-full and leaking');
+    else if ((body.vaginalCum || 0) >= 3) out.push('pussy stuffed full of cum, swollen and leaking');
+    // Bruises
+    if (body.bruises >= 25)      out.push('covered in welts and bruises, fingerprint marks ringing throat and hips');
+    else if (body.bruises >= 15) out.push('heavy bruising, split lip, smudged makeup');
+    else if (body.bruises >= 8)  out.push('bruises on thighs and shoulders');
+    else if (body.bruises >= 3)  out.push('light bruising on arms');
     // Low HEALTH reads as visible sickness/injury so an unhealthy, damaged captive looks it.
-    if ((body.health ?? 100) < 40) out.push('visibly weakened and unwell, gaunt pale pallor, struggling to hold herself upright');
-    if ((body.health ?? 100) < 20) out.push('badly hurt and bloodied, barely conscious, deathly pale, trembling and weak');
+    if ((body.health ?? 100) < 20)      out.push('badly hurt and bloodied, deathly pale, barely conscious');
+    else if ((body.health ?? 100) < 40) out.push('weakened and unwell, pale and unsteady');
     // Drug withdrawal — dope-sick markers (DEP-EXP.2). Set by drug-scheduler tickAll on body.withdrawalState.
-    if (body.withdrawalState && body.withdrawalState.severity >= 0.2) out.push('dope-sick in drug withdrawal — clammy grey sweating skin, shaking and trembling, runny nose and watering bloodshot eyes, hollow strung-out desperate expression, goosebumps, hugging herself');
+    if (body.withdrawalState && body.withdrawalState.severity >= 0.2) out.push('dope-sick — clammy grey sweat, shaking, hollow strung-out look');
     // NOTE: pupil/high markers moved to drugStateTokens() so they're sourced from the
     // specific active drug and scaled by body.high intensity. bodyStateTokens stays focused
     // on non-chemical body state (arousal / wetness / cum / bruises). Whiskey/alcohol still
@@ -111,7 +119,12 @@
     used:      'flushed and freshly-used, hair mussed, fucked-soft and rumpled',
     kissed:    'soft flushed smile, lips parted and puckered, leaning into it, eyes half-closed and warm',
     caressed:  'skin flushed and goosebumped, shivering softly, leaning into the touch, eyes fluttering',
-    marked:    'a fresh raw ownership mark on her body, skin swollen and reddened and inflamed around the new brand, tattoo or piercing, recently marked and stinging'
+    marked:    'a fresh raw ownership mark on her body, skin swollen and reddened and inflamed around the new brand, tattoo or piercing, recently marked and stinging',
+    facial:    'face glazed and dripping with thick spent cum across her cheeks, lips, eyelashes and nose, ropes of it sliding down her chin',
+    bukkake:   'face and hair drenched and overflowing with load after load of cum, pooling in her open mouth, dripping off her chin and lashes, blinking through the mess',
+    fisted:    'cunt stretched obscenely wide and gaping, puffy and slick and ruined, trembling around the emptiness, fresh-fisted and wrecked',
+    prolapsed: 'wrecked hole fucked inside-out, swollen pink and slick and distended, pushed past its limit and gaping',
+    pissed:    'soaked and dripping, hair plastered to her flushed face, glistening wet and degraded, kneeling in the puddle'
   };
   const ACT_AFTERMATH_TTL_GAMEMIN = 120;   // ~2 game-hours before the look fades
   function actAftermathTokens(body) {

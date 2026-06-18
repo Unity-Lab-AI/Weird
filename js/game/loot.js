@@ -40,6 +40,8 @@
     'duct-tape', 'rope', 'zip-ties', 'handcuffs', 'shackles', 'harness',
     'coke-bumps', 'weed', 'mdma', 'acid', 'wine',
     'basic-meal', 'bottled-water', 'condom', 'condom-standard', 'condom-french-tickler', 'condom-magnum', 'condom-ribbed',
+    // PLAYERSTAM.2 — Nut Reserve refills can turn up as loot too.
+    'blue-pill', 'energy-shot', 'the-good-coke', 'oyster-tonic',
     // TOYS.1 — lower-tier toys/implements can be FOUND in the world too (not just bought). The
     // gory high-tier chamber implements stay shop/level-gated to keep them special.
     'wand-vibrator', 'dildo-set', 'loop-gag', 'flogger-whip', 'fucking-machine'
@@ -96,6 +98,10 @@
     nurse:           [{ id: 'basic-meal', tier: 'cheap' },  { id: 'rohypnol', tier: 'mid' },    { id: 'ketamine', tier: 'prize' }],
     neighbor:        [{ id: 'duct-tape', tier: 'cheap' },   { id: 'rope', tier: 'mid' },        { id: 'wine', tier: 'prize' }],
     unity_seed:      [{ id: 'weed', tier: 'cheap' },        { id: 'coke-bumps', tier: 'mid' },  { id: 'mdma', tier: 'prize' }],
+    'highschool-grad':[{ id: 'weed', tier: 'cheap' },       { id: 'wine', tier: 'mid' },        { id: 'mdma', tier: 'prize' }],
+    'family-friend': [{ id: 'basic-meal', tier: 'cheap' },  { id: 'wine', tier: 'mid' },        { id: 'rohypnol', tier: 'prize' }],
+    'second-cousin': [{ id: 'weed', tier: 'cheap' },        { id: 'wine', tier: 'mid' },        { id: 'mdma', tier: 'prize' }],
+    'college-student':[{ id: 'weed', tier: 'cheap' },       { id: 'wine', tier: 'mid' },        { id: 'mdma', tier: 'prize' }],
     _default:        [{ id: 'duct-tape', tier: 'cheap' },   { id: 'rope', tier: 'mid' },        { id: 'zip-ties', tier: 'prize' }]
   };
   // Base success odds per tier — the 80 / 50 / 25 the player asked for.
@@ -113,7 +119,10 @@
     const gc = window.DMTHGame.gameClock;
     return gc ? Math.floor(gc.now() / (gc.MIN_PER_DAY || 1440)) + 1 : 1;
   }
-  function requestKey(locationId, arch) { return (locationId || '?') + '|' + (arch || '?'); }
+  // Once-per-day key. Now that LOCPERSIST.1 makes encounters persist with stable ids, this is
+  // keyed per GIRL per location per day (was per-archetype while encounters were ephemeral) —
+  // "once a day per girl in a location" exactly as asked.
+  function requestKey(locationId, girlId) { return (locationId || '?') + '|' + (girlId || '?'); }
 
   // Stat-based success chance for one option. base(tier) + char-level bonus − location diff −
   // girl-type diff − her defiance/intelligence. Clamped 5–95% — never impossible, never certain.
@@ -134,7 +143,7 @@
   // The three options for this girl + their live odds + whether today's ask is already spent.
   function requestOptions(girl, locationId) {
     const tpl = requestTemplateFor(girl && girl.archetypeTemplate);
-    const usedToday = window.DMTHGame.state.lastItemRequestDay(requestKey(locationId, girl && girl.archetypeTemplate)) === currentGameDay();
+    const usedToday = window.DMTHGame.state.lastItemRequestDay(requestKey(locationId, girl && (girl.id || girl.archetypeTemplate))) === currentGameDay();
     return {
       usedToday,
       options: tpl.map(o => ({
@@ -150,7 +159,7 @@
     const tpl = requestTemplateFor(girl && girl.archetypeTemplate);
     const opt = tpl[index];
     if (!opt) return { ok: false, reason: 'no such option' };
-    const key = requestKey(locationId, girl && girl.archetypeTemplate);
+    const key = requestKey(locationId, girl && (girl.id || girl.archetypeTemplate));
     const day = currentGameDay();
     if (window.DMTHGame.state.lastItemRequestDay(key) === day) {
       return { ok: false, usedToday: true, reason: 'you already worked this type here today — come back tomorrow' };

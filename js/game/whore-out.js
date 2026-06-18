@@ -101,6 +101,9 @@
       condomRequired: false,
       permittedActs: [],
       blockedJohnTypes: [],
+      // FRIENDS.1 — when ON, a slice of arrivals become "friends": rare, extreme, near-kill
+      // visitors (see FRIEND_ARCHETYPES). Off by default — the player opts a girl into it.
+      friendsAllowed: false,
       johnLedger: [],
       sessionTotals: { encounters: 0, gross: 0, tips: 0, bruisesAdded: 0, cumLoadAdded: 0 },
       unclaimedEarnings: 0,
@@ -175,6 +178,12 @@
 
     // Bond-debt overflow — girl protests, no more johns until debt clears
     if ((girl.bond?.bondDebt || 0) > BONDDEBT_EXCESS) return null;
+
+    // FRIENDS.1 — if the player has let "friends" in for this girl, a slice of arrivals is a
+    // friend instead of a john (rarer, extreme, near-kill). ~15% of arrivals when allowed.
+    if (wo.friendsAllowed && window.DMTHJohnArchetypes.rollFriendArchetype && Math.random() < 0.15) {
+      return resolveFriendEncounter(girl, window.DMTHJohnArchetypes.rollFriendArchetype(Math.random));
+    }
 
     const isPregnant = girl.pregnancy?.status === 'pregnant';
     let archetypeId = window.DMTHJohnArchetypes.rollJohnArchetype(Math.random, { isPregnant });
@@ -374,6 +383,104 @@
     return encounter;
   }
 
+  // FRIENDS.1/.2 — resolve a "friend" visit: the friend's EXTREME act + a direct near-kill
+  // health drop (~40-60), a fortune in pay, logged to her ledger + a friendVisits counter so the
+  // death-dossier / trophy reflects how hard she was used. Alive captives only.
+  function resolveFriendEncounter(girl, friendId) {
+    const arc = window.DMTHJohnArchetypes.FRIEND_ARCHETYPES[friendId];
+    if (!arc || girl.encounterState === 'dead') return null;
+
+    const moodBefore = girl.mood?.mood || 'neutral';
+    const bondXPBefore = girl.bond?.bondXP || 0;
+    const bondDebtBefore = girl.bond?.bondDebt || 0;
+
+    // The friend's extreme act — credited to johns (byJohn) so the PLAYER isn't paid/leveled for it.
+    if (window.DMTHGame.actionEffects?.applyAction) {
+      try { window.DMTHGame.actionEffects.applyAction(girl.id, arc.johnActionId, { byJohn: true, strain: true }); } catch (e) { /* non-fatal */ }
+    }
+    // Near-kill ability — a direct extra health drop on top of the act. Floors at 1; the lifespan
+    // system handles actual death if she was already on the edge.
+    const r0 = window.DMTHGame.state.getGirl(girl.id) || girl;
+    const drop = arc.healthDrop[0] + Math.floor(Math.random() * (arc.healthDrop[1] - arc.healthDrop[0] + 1));
+    const body = { ...(r0.body || {}) };
+    const newHealth = Math.max(1, (body.health ?? 100) - drop);
+    body.health = newHealth;
+    body.bruises = (body.bruises || 0) + (arc.bruisesAdded || 0);
+    body.recentActTag = 'beaten';
+    if (window.DMTHGame.gameClock) body.recentActAt = window.DMTHGame.gameClock.now();
+    window.DMTHGame.state.updateGirl(girl.id, { body });
+
+    const refreshed = window.DMTHGame.state.getGirl(girl.id) || girl;
+    const actTags = [...(arc.permittedActsPreference || []).slice(0, 2), 'friend-extreme'];
+    const basePay = arc.payRange[0] + Math.floor(Math.random() * (arc.payRange[1] - arc.payRange[0]));
+    const sat = window.DMTHGame.state.getSatisfaction ? window.DMTHGame.state.getSatisfaction() : 50;
+    const payment = Math.round(basePay * (1 + ((sat - 50) / 50) * 0.12));
+
+    const encounter = {
+      id: 'frnd_' + Date.now().toString(36) + '_' + Math.floor(Math.random() * 0xffff).toString(36),
+      ts: Date.now(),
+      isFriend: true,
+      johnArchetype: friendId,
+      johnDescription: 'FRIEND — ' + arc.displayName,
+      acts: actTags,
+      duration_min: 30 + Math.floor(Math.random() * 30),
+      payment, tip: 0, johnExtraPay: 0, totalPaid: payment,
+      condomUsed: false,
+      girlMoodBefore: moodBefore,
+      girlMoodAfter: refreshed.mood?.mood || moodBefore,
+      bondDeltaApplied: (refreshed.bond?.bondXP || 0) - bondXPBefore,
+      bondDebtAdded: (refreshed.bond?.bondDebt || 0) - bondDebtBefore,
+      bruisesAdded: arc.bruisesAdded || 0,
+      cumLoadAdded: 0,
+      healthDropped: drop,
+      staminaDrained: 0,
+      notes: `FRIEND ${arc.displayName} — ${arc.ability}. Health −${drop}. ${arc.dialogueTone}.`,
+      pregnancyHookFired: false
+    };
+
+    const newWo = { ...getWhoreOut(refreshed) };
+    newWo.johnLedger = [...(newWo.johnLedger || []), encounter].slice(-200);
+    newWo.sessionTotals = {
+      encounters: (newWo.sessionTotals?.encounters || 0) + 1,
+      gross: (newWo.sessionTotals?.gross || 0) + payment,
+      tips: newWo.sessionTotals?.tips || 0,
+      bruisesAdded: (newWo.sessionTotals?.bruisesAdded || 0) + (arc.bruisesAdded || 0),
+      cumLoadAdded: newWo.sessionTotals?.cumLoadAdded || 0
+    };
+    newWo.unclaimedEarnings = (newWo.unclaimedEarnings || 0) + payment;
+    newWo.friendVisits = (newWo.friendVisits || 0) + 1;   // FRIENDS.2 — history for the dossier/trophy
+    if (window.DMTHGame.gameClock) newWo.lastJohnArrivalAt = window.DMTHGame.gameClock.now();
+    window.DMTHGame.state.updateGirl(girl.id, { whoreOut: newWo });
+
+    if (window.DMTHGame.state.addBuzz) window.DMTHGame.state.addBuzz(1.0, 'friend-visit: ' + friendId);
+    try { if (window.DMTHGame.wanted) window.DMTHGame.wanted.accrue('captive-death'); } catch (e) { /* heat bump — key-safe */ }
+    if (window.DMTHNotify) window.DMTHNotify.show(`🩸 ${arc.displayName} paid $${payment} to wreck ${girl.name} — she's at ${newHealth} HP.`, { type: 'warn', durationMs: 6000 });
+    if (newHealth <= 8 && window.DMTHNotify) {
+      window.DMTHNotify.show(`⚠️ ${girl.name} is barely alive (${newHealth} HP) — heal her now or lose her.`, { type: 'danger', durationMs: 8000 });
+    }
+    return encounter;
+  }
+
+  // GANGBANG.1 — fire N johns on one girl back-to-back as a single gangbang. Each resolves like a
+  // normal arrival (re-reading her so stamina/health/pay/cum-fill stack), summed into one notify.
+  // Ends early if she hits the stamina floor / bond-debt wall. Player-triggered from the room.
+  function resolveGangbang(girlId, n = 3) {
+    const girl0 = window.DMTHGame.state.getGirl(girlId);
+    if (!girl0) return { ok: false, reason: 'no such girl' };
+    if (!getWhoreOut(girl0).enabled) return { ok: false, reason: 'whore-out is off for her' };
+    const count = Math.max(2, Math.min(8, n));
+    const encs = [];
+    for (let i = 0; i < count; i++) {
+      const enc = tryArrival(window.DMTHGame.state.getGirl(girlId));
+      if (enc) encs.push(enc); else break;
+    }
+    const gross = encs.reduce((t, e) => t + (e.totalPaid || 0), 0);
+    if (window.DMTHNotify) {
+      window.DMTHNotify.show(`💦 Gangbang on ${girl0.name}: ${encs.length} john${encs.length === 1 ? '' : 's'} took turns — $${gross}.`, { type: encs.length ? 'success' : 'info', durationMs: 6000 });
+    }
+    return { ok: true, count: encs.length, gross };
+  }
+
   // -----------------------------------------------------------------------
   // Tick wiring
   // -----------------------------------------------------------------------
@@ -475,6 +582,8 @@
     updateSettings,
     tryArrival,
     resolveEncounter,
+    resolveFriendEncounter,
+    resolveGangbang,
     runJohnTick,
     cashout,
     summarizeLedger,

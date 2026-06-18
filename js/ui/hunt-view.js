@@ -294,6 +294,8 @@
               injectInto: resultEl.querySelector('#acquire-narr')
             });
             if (result.outcome === 'success' && result.escort) {
+              // LOCPERSIST.1 — she's taken; drop her from this location's persistent spawn set.
+              try { window.DMTHGame.hunt.markEncounterCaptured(locId, girl.id); } catch (e) { /* non-fatal */ }
               const sceneVars = window.DMTHGame.hunt.composeSceneVars({
                 girl, toolId, locationId: locId, dungeonId: result.escort.dungeonId
               });
