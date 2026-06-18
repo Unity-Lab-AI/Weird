@@ -50,7 +50,8 @@
     if (!log || log.day !== day) log = { day, girls: [] };
     if (girlId && !log.girls.includes(girlId)) log.girls.push(girlId);
     s._sexDriveDay = log;
-    try { window.DMTHGame.state.save(); } catch (e) { /* non-fatal */ }
+    // No explicit save() — feed()'s setSexDrive mutate (and the action's own deltas) persist
+    // this same state object on the same turn, so _sexDriveDay rides along without extra I/O.
     return 1 + Math.min(1.0, Math.max(0, log.girls.length - 1) * 0.25);
   }
 

@@ -417,23 +417,24 @@
     // John actions intentionally have satisfaction=0 in their spec (proxied service, not
     // direct intimacy). Mercy / passive ticks have 0 too. Hunting bonus draws from this
     // meter via hunt.previewCaptureOdds.
-    // PLAYERSTAM.1 — the PLAYER spends Nut Reserve on his OWN acts (john-proxied 'john-*' acts
-    // don't drain him). Running low drops his performance: reduced satisfaction + sex-drive fill.
-    const isJohnAct = String(actionId).startsWith('john-');
-    const perfMul = (!isJohnAct && window.DMTHGame.playerStamina)
+    // PLAYERSTAM.1 — the PLAYER spends Nut Reserve + earns satisfaction/sex-drive on his OWN acts.
+    // Proxy acts performed BY a john or a "friend" (john-* ids OR opts.byJohn) must NOT credit or
+    // charge the player — a friend wrecking her doesn't fill the player's tank or drain it.
+    const isProxyAct = String(actionId).startsWith('john-') || opts.byJohn === true;
+    const perfMul = (!isProxyAct && window.DMTHGame.playerStamina)
       ? window.DMTHGame.playerStamina.performanceMul() : 1;
-    if (action.satisfaction && window.DMTHGame.state.addSatisfaction) {
+    if (action.satisfaction && !isProxyAct && window.DMTHGame.state.addSatisfaction) {
       window.DMTHGame.state.addSatisfaction(action.satisfaction * perfMul, actionId);
     }
     // SEXDRIVE.1 — sex acts feed the player's sexual-drive need (clamped to its scaling cap,
     // so one girl can't push it into the maxed boost band — you need a roster).
-    if (action.satisfaction && window.DMTHGame.sexdrive) {
+    if (action.satisfaction && !isProxyAct && window.DMTHGame.sexdrive) {
       // SEXDRIVE.2 — pass girl + act so fill scales by variety (distinct girls/day) and decays
       // when the same act is spammed on the same girl.
       try { window.DMTHGame.sexdrive.feed(action.satisfaction * perfMul, { girlId, actId: actionId }); } catch (e) { /* non-fatal */ }
     }
     // Spend the reserve AFTER reading performance, so this act used the current level.
-    if (!isJohnAct && window.DMTHGame.playerStamina) {
+    if (!isProxyAct && window.DMTHGame.playerStamina) {
       try { window.DMTHGame.playerStamina.drainForAction(actionId); } catch (e) { /* non-fatal */ }
     }
 

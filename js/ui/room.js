@@ -1231,10 +1231,15 @@
         window.DMTHGame.whoreOut.updateSettings(girl.id, { condomRequired: condomChk.checked });
       };
     }
-    // FRIENDS.1 — toggle whether extreme "friends" can come for this girl.
+    // FRIENDS.1 — toggle whether extreme "friends" can come for this girl. Friends arrive
+    // passively and can't be confirmed per-visit, so DEATHWARN.1 warns at opt-in instead.
     const friendsChk = el.querySelector('#whore-friends');
     if (friendsChk) {
       friendsChk.onchange = () => {
+        if (friendsChk.checked && !confirm(`Letting friends in means men will come to nearly kill ${girl.name} — they'll leave her wrecked at the edge of death for the money, and one bad night could be her last. Open the door to them?`)) {
+          friendsChk.checked = false;
+          return;
+        }
         window.DMTHGame.whoreOut.updateSettings(girl.id, { friendsAllowed: friendsChk.checked });
       };
     }

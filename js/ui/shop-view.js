@@ -3,7 +3,7 @@
 (function () {
   'use strict';
 
-  const SUBCATS = ['blunt','sedation','restraint','containment','toys','drugs','food','dungeon-upgrade','consumables','utility','tech'];
+  const SUBCATS = ['blunt','sedation','restraint','containment','toys','drugs','food','player-boost','dungeon-upgrade','consumables','utility','tech'];
 
   function render(el, params) {
     const subcat = params.sub || 'sedation';
@@ -19,6 +19,7 @@
       'toys': 'In-room toys for sessions.',
       'drugs': 'Recreational drugs you administer in the dungeon — coke, weed, mdma, acid, whiskey.',
       'food': 'Food + water consumables for your captives.',
+      'player-boost': 'Refill your 💦 Nut Reserve — blue pill (viagra, full refill), energy shot, the good coke, oyster tonic. Pop them from the dashboard.',
       'dungeon-upgrade': 'Static dungeon-template upgrades.',
       'consumables': 'Misc per-girl ongoing items.',
       'utility': 'Tools + supplies that don\'t fit the capture loop.',
