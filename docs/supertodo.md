@@ -236,10 +236,10 @@ Per Gee: every new action/stat/button ships with a tooltip that is **non-intrusi
 > *"dont want actions to degrade the indoctination ... builds over time and doesnt really go down much but for the most extreme actions ... long term build ... weeks of game time ... regularabuss and healing type of actions ... which also makes them more robust"*
 - **STOCK-BUILD.1** ✅ no degrade except brutal acts (recompute up/down) · **.2** ✅ trauma-bond + loving climb over weeks · **.3** ✅ higher Stockholm = robust (−50% health drain at L9).
 
-## EPIC U — Cum-load capacity + economy + insertable timed tools — ✅ partial / ⏳
-> *"a weitght thing woman can hold in their vagina ... increase cum load over storage ... higher cum load more money when its maxed but ... lowaers ... mood and maybe health and slightly increase escape"* · *"vaginal weight tools can just be plugs and expanders ... leaving in dildos and plugs for long periods ... insert item ... timer till next cum level reached with visuall axcpansions"*
+## EPIC U — Cum-load capacity + economy + insertable timed tools — ✅ SHIPPED
+> *"a weitght thing woman can hold in their vagina ... increase cum load over storage ... higher cum load more money when its maxed but ... lowaers ... mood and maybe health and slightly increase escape"* · *"vaginal weight tools can just be plugs and expanders ... leaving in dildos and plugs for long periods ... insert item ... timer till next cum level reached with visuall axcpansions"* · *"its a timer until she upgrade her cum level ... massive plug in (pussy wreaker) for near a day or two ... visual expansion( meaning i can see that her stats numbers for like cum level increased"*
 - **CUMCAP.1 / .2** ✅ — per-girl cumLoadCap + Ben Wa kegel trainer + clamp + pay premium near cap + overfull penalties.
-- ⏳ **VAGTOOL.1** plugs/expanders w/ correct names · **CUMTOOL.1** insertable items raise cum-load on a TIMER + visual expansion.
+- ✅ **VAGTOOL.1** plugs/expanders w/ correct names · ✅ **CUMTOOL.1** NEW `cumtool.js` — insertable **Pussy Wrecker** plug left in over a ~1.5-game-day TIMER → cumLoadCap +8 (toward 60 ceiling) on completion; visual expansion = the Cum cap NUMBER jumping on the stat bar; room insert/pull + progress bar.
 
 ## EPIC V — Wide drug use-cases ✅ SHIPPED
 > *"some drugs just knocking out girls to others making them more complient and dosiel for managing fighters ... give a mute girl come coke should get her talking , she might not be indoctrinated to say what u cwant to hear"*

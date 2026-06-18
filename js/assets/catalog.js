@@ -294,6 +294,13 @@
       cost: 220, tier: 2, cumTrainer: 3,
       notes: 'Reusable graduated dilator set — works her open hole by hole. Strongest trainer: each session raises her cum-load storage capacity +3.'
     },
+    {
+      id: 'pussy-wrecker', displayName: 'Pussy Wrecker (massive hold-in plug)', emoji: '🥒',
+      category: 'item', subcategory: 'consumables',
+      prompt: 'product photograph of an enormous girthy silicone plug with a flared base on a plain backdrop, intimate-wellness commerce style, intimidating size',
+      cost: 480, tier: 3, cumImplant: { days: 1.5, capGain: 8 },
+      notes: 'INSERTABLE — left in over time, not a quick session. Plug her with it and leave it ~1.5 game days while a timer runs; when it completes her cum-load CAPACITY jumps +8 (pushable past the kegel cap, toward a 60 ceiling) and she earns a bigger cum premium. Stretches + gapes her — visible in her images while it\'s in.'
+    },
 
     // --- BLUNT ---
     {

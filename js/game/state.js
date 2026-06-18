@@ -237,7 +237,10 @@
         // counted separately in her whore-out ledger). Surfaced in her death record + trophy.
         actsCommitted: 0,
         // Trophy-history — total liters of milk she produced for you (bottled + sucked).
-        milkProducedTotal: 0
+        milkProducedTotal: 0,
+        // CUMTOOL.1 — an insertable hold-in plug left in over time. { itemId, startTick } | null;
+        // when the timer elapses her cumLoadCap upgrades. Gapes/stretches her image while in.
+        cumImplant: null
       };
       for (const [k, v] of Object.entries(BODY_DEFAULTS)) {
         if (g.body[k] == null) g.body[k] = v;

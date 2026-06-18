@@ -447,6 +447,27 @@
           })()}
 
           ${(() => {
+            // 🥒 CUMTOOL.1 — insertable hold-in plug on a timer. Plug her, leave it in ~1-2 game
+            // days, and her cum-load capacity upgrades (the visible jump on the Cum stat bar).
+            const ct = window.DMTHGame.cumtool;
+            if (!ct) return '';
+            const owned = window.DMTHGame.state.current?.inventory?.['pussy-wrecker'] || 0;
+            const prog = ct.progress(girl);
+            const capMaxed = (girl.body?.cumLoadCap ?? 10) >= ct.CUMTOOL_CAP_CEILING;
+            if (!owned && prog == null && !capMaxed) return '';
+            return `<h3>🥒 Cum-capacity plug</h3>
+              ${prog != null ? `
+                <div class="bar-row" data-tooltip="Leave the plug buried in her until this fills, then her cum-load capacity jumps. Pull it early and you lose the progress.">
+                  <label>Stretching</label><div class="bar"><div class="bar-fill" style="width:${Math.round(prog * 100)}%;background:#b06"></div></div><b>${Math.round(prog * 100)}%</b></div>
+                <div class="btn-row"><button class="btn-small" data-cumplug-remove data-tooltip="Pull the plug early — no upgrade, progress lost.">Pull it out</button></div>
+              ` : capMaxed ? `<div class="stat-row small muted">Her cunt's stretched to the max — no more capacity to gain.</div>`
+                : `<div class="stat-row" data-tooltip="Insert the massive plug + leave it in ~1.5 game days; her cum-load capacity upgrades +8 (toward a 60 ceiling) when the timer completes — you'll see the Cum cap number jump.">
+                    <span>🥒 Pussy Wrecker</span><b>have ×${owned}</b>
+                    <button class="btn-small btn-primary" data-cumplug-insert ${owned < 1 ? 'disabled' : ''}>Plug her + leave it in</button>
+                  </div>`}`;
+          })()}
+
+          ${(() => {
             // 🧬 SPECIALIZE.1 — per-girl permanent specialization upgrades.
             const sp = window.DMTHGame.specialize;
             if (!sp) return '';
@@ -1323,6 +1344,12 @@
     if (tsAttach) tsAttach.onclick = () => { const r = window.DMTHGame.milk.attachTitSucker(girl.id); if (!r.ok) { alert(r.reason); return; } window.DMTHRouter.handle(); };
     const tsDetach = el.querySelector('[data-titsucker-detach]');
     if (tsDetach) tsDetach.onclick = () => { const r = window.DMTHGame.milk.detachTitSucker(girl.id); if (!r.ok) { alert(r.reason); return; } window.DMTHRouter.handle(); };
+
+    // CUMTOOL.1 — insert / pull the timed cum-capacity plug.
+    const cpIns = el.querySelector('[data-cumplug-insert]');
+    if (cpIns) cpIns.onclick = () => { const r = window.DMTHGame.cumtool.insert(girl.id, 'pussy-wrecker'); if (!r.ok) { alert(r.reason); return; } window.DMTHRouter.handle(); };
+    const cpRem = el.querySelector('[data-cumplug-remove]');
+    if (cpRem) cpRem.onclick = () => { const r = window.DMTHGame.cumtool.remove(girl.id); if (!r.ok) { alert(r.reason); return; } window.DMTHRouter.handle(); };
 
     // SPECIALIZE.1 — buy a permanent specialization onto this girl.
     el.querySelectorAll('[data-specialize]').forEach(b => {

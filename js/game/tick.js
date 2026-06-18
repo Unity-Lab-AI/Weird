@@ -98,6 +98,8 @@
     // 12b. Milk / lactation economy — refill every lactating captive's breast-fill, bottle
     // milk from any Tit-Sucker-rigged hold, run the warm-milk player buff, + passive milk sales.
     if (window.DMTHGame.milk) window.DMTHGame.milk.tickMilk();
+    // 12b-2. CUMTOOL.1 — complete any insertable hold-in plug whose timer has elapsed (capacity upgrade).
+    if (window.DMTHGame.cumtool) window.DMTHGame.cumtool.tick();
 
     // 12c. Per-archetype passive loot gifts (ARCHGIFT.1) — every held girl-type quietly
     // produces its own gift over time (nurse → free scripts, sorority → allowance, etc.).

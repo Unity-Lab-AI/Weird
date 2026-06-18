@@ -23,6 +23,13 @@
 
 ---
 
+## 2026-06-18 — Session: CUMTOOL.1 — insertable hold-in plug on a timer
+
+- **CUMTOOL.1** ✅ — Gee (verbatim 2026-06-18): *"its a timer until she upgrade her cum level.. ie have to have the massive plug in)pusst wreaker) for near a day or two before the cum level is upgrade to hold more and produce better bonuses"* + *"visual expansion( meaning i can see that her stats numbers ofor like cum level increased"* (+ the original *"leaving in dildos and plugs for long periods of time, ie instert item ... then timer till next cum level reached"*). NEW `js/game/cumtool.js`: the **Pussy Wrecker** (catalog item `pussy-wrecker`, $480, `cumImplant:{days:1.5, capGain:8}`) is INSERTED and left in — per-girl `body.cumImplant = {itemId, startTick}` runs a ~1.5-game-day timer (tick.js `cumtool.tick`); on completion her `cumLoadCap` jumps +8 (pushable past the kegel-train 30 cap toward a 60 ceiling). The "visual expansion" is literally the **Cum cap number jumping on her stat bar** (STATNUM) — bigger cap → bigger cum-ratio premium on johns/films. Room UI: insert / pull-early + a live stretching-progress bar. Distinct from the instant kegel TRAINER (action-effects `trainCumCapacity`). `js/game/cumtool.js` (NEW), `js/assets/catalog.js`, `js/game/state.js` (body.cumImplant), `js/game/tick.js`, `js/ui/room.js`, `game.html`
+- 5 files `node -c` clean. LAW #1 clean. Pushed to `UpdateWork`.
+
+---
+
 ## 2026-06-18 — Session: Condoms-as-item + milk realism + preggo appetite — CONDOMPRICE.1 + MILKREAL.1 + PREGNEED.1(partial)
 
 - **CONDOMPRICE.1** ✅ — Gee (verbatim 2026-06-18): *"condoms are an item so one cant just toggle on condom use ... the player as to actually stick the dugeon oand or hold with condoms before the johns use them(and its one condom per john so the condoms cant be expensicve but like 10-15 % the cost of what the avertage john brings in ... so that the player doesnt go broke"*. The stock-draw enforcement (1 condom/john, drawn hold→dungeon-pool, no stock = he goes raw = pregnancy risk) was already live (CONDOM-STOCK.1). Tuned the price to spec: condom 3-pack $6 → **$27** (~$9/condom ≈ 12% of an average ~$75 starting-girl john's fee — a real budget line that never bankrupts). Reframed the room whore-out toggle to "Condom required (needs stock)" with a tooltip explaining the 1-per-john stock draw. `js/assets/catalog.js`, `js/ui/room.js`
