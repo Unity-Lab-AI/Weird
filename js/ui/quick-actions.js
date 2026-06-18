@@ -272,6 +272,48 @@
     }
   };
 
+  // STATGATE.1 / FORCEGATE.1 — unified action gate. Returns { locked, forceable, forced, tip }.
+  //   FORCEABLE gates (she'd REFUSE — Stockholm too low / not worn down enough) can be overridden
+  //     with the 💢 FORCE toggle, at a cost (bond-debt + escape spike applied on use).
+  //   HARD gates (missing tool/drug, requires-a-prior-extreme, too-hurt-floor) can NOT be forced.
+  //   Action fields: minStock (Stockholm 1-10), maxHealth / minHealth (HP threshold, both ways),
+  //     afterExtreme (only opens once something extreme's been done), reqItem (needs an item).
+  function gateOf(action, girl, forceOn) {
+    const stock = ((girl && girl.bond && girl.bond.bondLevel) || 0) + 1;
+    const body = (girl && girl.body) || {};
+    const inv = (window.DMTHGame.state.current && window.DMTHGame.state.current.inventory) || {};
+    if (action.reqItem && (inv[action.reqItem] || 0) < 1)
+      return { locked: true, forceable: false, tip: `🔒 needs a ${action.reqItem.replace(/-/g, ' ')} — buy one first` };
+    if (action.afterExtreme && !((body.extremeStreak || 0) >= 1 || (body.bruises || 0) >= 5))
+      return { locked: true, forceable: false, tip: '🔒 only opens AFTER something extreme — break her down first' };
+    if (action.minHealth != null && (body.health ?? 100) < action.minHealth)
+      return { locked: true, forceable: false, tip: `🔒 she's too far gone for this — heal her to ${action.minHealth}%+ first` };
+    if (action.minStock && stock < action.minStock) {
+      if (forceOn) return { locked: false, forced: true, tip: `💢 FORCED — only Stockholm ${stock}/10, she'll fight it (costs bond, spikes escape)` };
+      return { locked: true, forceable: true, tip: `🔒 Stockholm ${action.minStock}/10 — she's ${stock}/10. Indoctrinate her, or 💢 Force it.` };
+    }
+    if (action.maxHealth != null && (body.health ?? 100) > action.maxHealth) {
+      if (forceOn) return { locked: false, forced: true, tip: `💢 FORCED — she's not worn down to ≤${action.maxHealth}% yet` };
+      return { locked: true, forceable: true, tip: `🔒 needs her health ≤ ${action.maxHealth}% — wear her down, or 💢 Force it.` };
+    }
+    return { locked: false, tip: null };
+  }
+
+  // FORCEGATE.1 — forcing a refused act costs her: a spike of bond-debt + escape-risk + a mood hit
+  // (she fought it / it set her back). Applied AFTER the act resolves, only on a forced use.
+  function applyForcePenalty(girlId) {
+    const g = window.DMTHGame.state.getGirl(girlId);
+    if (!g) return;
+    const escape = { ...(g.escape || { currentRisk: 0.1 }) };
+    escape.currentRisk = Math.min(1, (escape.currentRisk ?? 0.1) + 0.08);
+    const mood = { ...(g.mood || {}) };
+    mood.moodPressure = Math.max(-60, (mood.moodPressure || 0) - 6);
+    window.DMTHGame.state.updateGirl(girlId, {
+      bond: { ...g.bond, bondDebt: (g.bond?.bondDebt || 0) + 4 },
+      escape, mood
+    });
+  }
+
   function render(container, girl, mode, onSelect) {
     // DEPRAVITY-level gating (PLVL.1) — the heaviest tabs are locked until the player levels
     // up (cheat/sandbox start bypasses). A locked tab can't be opened; it shows the required
@@ -282,6 +324,9 @@
     let currentTab = container.dataset.qaTab || 'force';
     if (tabLocked(currentTab)) currentTab = 'force';   // never sit on a locked tab
     const tabKeys = Object.keys(TABS);
+    // FORCEGATE.1 — the FORCE toggle: when ON, "she'd refuse" gates (Stockholm / not-worn-down)
+    // become doable on a new girl, at a cost (applyForcePenalty on each forced use).
+    const forceOn = container.dataset.qaForce === '1';
     container.innerHTML = `
       <div class="qa-tabs">
         ${tabKeys.map(k => {
@@ -289,6 +334,7 @@
           const req = locked ? prog.requiredLevel(GATED_TABS[k]) : 0;
           return `<button class="qa-tab ${k === currentTab ? 'active' : ''}" data-qa-tab-key="${k}" ${locked ? `disabled data-tooltip="🔒 DEPRAVITY level ${req} required — build your level by using your captives"` : ''}>${TABS[k].label}${locked ? ' 🔒' : ''}</button>`;
         }).join('')}
+        <button class="qa-tab ${forceOn ? 'active' : ''}" id="qa-force-toggle" data-tooltip="💢 FORCE — override her REFUSAL on Stockholm / not-worn-down gated acts (for a new, un-indoctrinated girl). She fights it: each forced use costs +bond-debt and spikes her escape risk. HARD gates (missing tool, or an act that needs a prior extreme) can NOT be forced.">💢 Force ${forceOn ? 'ON' : 'off'}</button>
       </div>
       <div class="qa-grid">
         ${TABS[currentTab].actions.map((a, i) => {
@@ -310,18 +356,14 @@
             }
           }
           const tip = cost ? `${a.text}\n📊 ${cost}` : a.text;
-          // STOCK-GATE.1 — some acts need her indoctrinated to a minimum Stockholm (1-10). Lock
-          // the button + show why until she's broken in enough.
-          const stockRating = ((girl && girl.bond && girl.bond.bondLevel) || 0) + 1;
-          // TOOLGATE seed — an act can require a tool/drug in inventory first (e.g. flay needs a saw).
-          const invQA = window.DMTHGame.state.current?.inventory || {};
-          const needsItem = a.reqItem && (invQA[a.reqItem] || 0) < 1;
-          const locked = (a.minStock && stockRating < a.minStock) || needsItem;
-          const lockTip = needsItem
-            ? `🔒 needs a ${a.reqItem.replace(/-/g, ' ')} — buy one first`
-            : `🔒 Stockholm ${a.minStock}/10 required — she's only ${stockRating}/10. Indoctrinate her first.`;
-          return `<button class="qa-btn${locked ? ' locked' : ''}" data-qa-idx="${i}" ${locked ? 'disabled' : ''} data-tooltip="${escapeHtml(locked ? lockTip : tip)}">
-            <span class="qa-emoji">${locked ? '🔒' : a.emoji}</span>
+          // STATGATE.1 / FORCEGATE.1 — unified gate (Stockholm + HP-threshold both ways + after-
+          // extreme + tool). Forceable gates open under the 💢 FORCE toggle (at a cost on use).
+          const g = gateOf(a, girl, forceOn);
+          const locked = g.locked;
+          const dtip = locked ? g.tip : (g.forced ? `${g.tip}\n${tip}` : tip);
+          const emoji = locked ? '🔒' : (g.forced ? '💢' : a.emoji);
+          return `<button class="qa-btn${locked ? ' locked' : ''}${g.forced ? ' forced' : ''}" data-qa-idx="${i}" ${locked ? 'disabled' : ''} data-tooltip="${escapeHtml(dtip)}">
+            <span class="qa-emoji">${emoji}</span>
             <span class="qa-label">${escapeHtml(a.label)}</span>
           </button>`;
         }).join('')}
@@ -334,21 +376,22 @@
         render(container, girl, mode, onSelect);
       };
     });
+    // FORCEGATE.1 — toggle FORCE on/off, then re-render so forceable gates flip.
+    const forceBtn = container.querySelector('#qa-force-toggle');
+    if (forceBtn) forceBtn.onclick = () => {
+      container.dataset.qaForce = (container.dataset.qaForce === '1') ? '0' : '1';
+      render(container, girl, mode, onSelect);
+    };
     container.querySelectorAll('.qa-btn').forEach(b => {
       b.onclick = () => {
         const idx = parseInt(b.dataset.qaIdx, 10);
         const action = TABS[currentTab].actions[idx];
         if (!action) return;
-        // STOCK-GATE.1 — willing/devoted acts require a minimum Stockholm rating (she has to be
-        // indoctrinated enough). Blocked below threshold.
-        if (action.minStock) {
-          const stockRating = ((girl && girl.bond && girl.bond.bondLevel) || 0) + 1;
-          if (stockRating < action.minStock) { alert(`🔒 ${girl?.name || 'She'} is only Stockholm ${stockRating}/10 — this needs ${action.minStock}/10. Indoctrinate her more first.`); return; }
-        }
-        // TOOLGATE seed — block an act that requires a tool/drug you don't own.
-        if (action.reqItem && (window.DMTHGame.state.current?.inventory?.[action.reqItem] || 0) < 1) {
-          alert(`🔒 You need a ${action.reqItem.replace(/-/g, ' ')} for that — buy one first.`); return;
-        }
+        // STATGATE.1 / FORCEGATE.1 — unified gate. A hard gate blocks outright; a forceable gate
+        // blocks UNLESS the 💢 FORCE toggle is on (then it resolves but levies a force penalty).
+        const forcedNow = container.dataset.qaForce === '1';
+        const g = gateOf(action, girl, forcedNow);
+        if (g.locked) { alert(g.tip); return; }
         // DEATHWARN.1 — if this act would likely KILL her, throw a depraved confirm first.
         if (action.applyId && girl?.id && window.DMTHGame?.actionEffects?.wouldBeLethal
             && window.DMTHGame.actionEffects.wouldBeLethal(girl.id, action.applyId)) {
@@ -421,6 +464,8 @@
             window.DMTHGame.state.updateGirl(girl.id, { body });
           }
         }
+        // FORCEGATE.1 — a forced act (she'd have refused) sets her back: bond-debt + escape spike + mood hit.
+        if (g.forced && girl?.id) applyForcePenalty(girl.id);
         onSelect(action.text);
       };
     });
