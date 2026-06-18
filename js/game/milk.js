@@ -152,7 +152,11 @@
         // so it can never exceed her production (no flood; ~4 L/game-day base, 8 with big-tits).
         if (holdHasTitSucker(g)) {
           const draw = Math.min(Math.floor(bm), TIT_SUCKER_DRAW_WHOLE);
-          if (draw >= 1) { bm -= draw; produced += draw; patch.body.breastMilk = bm; }
+          if (draw >= 1) {
+            bm -= draw; produced += draw; patch.body.breastMilk = bm;
+            // Trophy-history — running total of milk she's produced for you.
+            patch.body.milkProducedTotal = (g.body?.milkProducedTotal || 0) + draw;
+          }
           // Being machine-milked is a small ongoing degradation for a non-indoctrinated girl
           // (never touches health). A bonded one weathers it fine.
           if ((g.bond?.bondLevel || 0) <= 3) {
@@ -232,7 +236,7 @@
     const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
     // Suck her dry.
     const sucked = breastFill(girl);
-    const body = { ...girl.body, breastMilk: 0, arousal: clamp((girl.body?.arousal || 0) + 5, 0, 100) };
+    const body = { ...girl.body, breastMilk: 0, arousal: clamp((girl.body?.arousal || 0) + 5, 0, 100), milkProducedTotal: (girl.body?.milkProducedTotal || 0) + sucked };
     const bond = { ...girl.bond, bondXP: (girl.bond?.bondXP || 0) + 1 };
     window.DMTHGame.state.updateGirl(girlId, { body, bond });
     // Set / refresh the timed buff, then bump satisfaction + buzz (those persist the buff).

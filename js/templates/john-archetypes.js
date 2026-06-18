@@ -264,6 +264,20 @@
       permittedActsPreference: ['sex-rough', 'anal', 'creampie', 'bukkake'],
       ability: 'two of them at once, never giving her a second\'s rest between holes',
       dialogueTone: 'finishing each other\'s sentences, egging each other on over her'
+    },
+    // FRIENDKILL.1 — the snuff specialist. The rarest, highest-paying friend, and the only one
+    // who comes to FINISH her: if she's already low enough that his debuff crosses her remaining
+    // health, he kills her on camera (the lethal-finish gate in whore-out resolves it). `lethal`
+    // marks him as a deliberate executioner; `killLine` is his signature end. A massive payout +
+    // snuff bonus; use him only when you're ready to lose her (the friends opt-in warning covers it).
+    'the-executioner': {
+      displayName: 'The Executioner', arrivalWeight: 3, payRange: [700, 1300],
+      healthDrop: [55, 75], bruisesAdded: 4, johnActionId: 'extreme-choke-out',
+      permittedActsPreference: ['choke', 'sex-rough', 'snuff'],
+      lethal: true, corpse: 'bled-out',
+      killLine: 'gouges his cock into her eye socket until it pops and floods down her cheek, then saws her throat open mid-thrust and fucks the wound while she gurgles and kicks out',
+      ability: 'comes to gut her like meat — chokes her out, splits her open from cunt to sternum, fists the wound and keeps pumping while she bleeds out twitching on his cock, films the whole thing for the buyers who pay for a real death',
+      dialogueTone: 'calm, surgical, almost bored — he\'s carved up more girls than he can count'
     }
   });
   function rollFriendArchetype(rng) {

@@ -331,6 +331,11 @@
   // pushing past the limit piles extra damage on top.
   const XTOL_LIMIT = 10;
   const EXTREME_ACTS_FOR_TOL = new Set(['extreme-facefuck', 'extreme-rough-anal', 'extreme-breeding-rape', 'extreme-degrade', 'extreme-beatdown', 'extreme-choke-out', 'masochist-overload']);
+  // FRIENDKILL.1 / DEATHBAL.1 — acts that CAN finish a captive when they cross her death floor.
+  // The kill only lands when her remaining health <= the act's damage (the player already got the
+  // DEATHWARN confirm), so a managed/healed girl never dies to a routine act — death is a risk you
+  // choose, not attrition. A girl corpsing under the player's own hands pays a snuff bonus too.
+  const ACT_CAN_KILL = new Set([...EXTREME_ACTS_FOR_TOL, 'whip', 'punch', 'choke']);
 
   // STOCK-BUILD.1 — the ONLY way Stockholm degrades: the most extreme BRUTAL acts traumatize her
   // and subtract bond XP (recomputed into a possible level drop). Routine use never degrades it.
@@ -526,7 +531,24 @@
     }
     body.extremeStreak = xStreak;
 
+    // Trophy-history tally — count PLAYER acts committed against her (non-proxy only; johns/friends
+    // are counted separately in the whore-out ledger). Persists into her death record + trophy.
+    if (!isProxyAct) body.actsCommitted = (body.actsCommitted || 0) + 1;
+
     window.DMTHGame.state.updateGirl(girlId, { body, bond, mood, escape });
+
+    // FRIENDKILL.1 / SNUFFBONUS.1 — the player's OWN extreme act finishes her when it crosses her
+    // death floor (health hit 0 on a kill-capable act she wasn't already too healthy to survive).
+    // She got the DEATHWARN confirm first, so a confirmed lethal act SHOULD kill her — and a girl
+    // corpsing under your own hands still pays a snuff bonus (premium content, not pure loss).
+    if (!isProxyAct && ACT_CAN_KILL.has(actionId) && (body.health ?? 100) <= 0
+        && girl.encounterState === 'captive' && window.DMTHGame.lifespan?.killDuringAct) {
+      try {
+        const k = window.DMTHGame.lifespan.killDuringAct(girlId, { cause: 'player-act:' + actionId, byLabel: 'your own hands', baseBonus: 500 });
+        if (k && k.snuffBonus && window.DMTHGame.state.addMoney) window.DMTHGame.state.addMoney(k.snuffBonus, 'snuff-bonus:' + actionId);
+        if (k && k.ok && window.DMTHGame.state.addSatisfaction) window.DMTHGame.state.addSatisfaction(6, 'snuff:' + actionId);
+      } catch (e) { /* non-fatal — she stays at 0 HP and the lifespan tick will catch it */ }
+    }
 
     // Breeding / cum-inside ACTIONS raise her VAGINAL cum-fill (CUMFILL.1) — sustained fill is
     // what conceives (pregnancy.tickCumFill timer), not this single event. Skipped when a

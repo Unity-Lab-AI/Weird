@@ -61,6 +61,10 @@
     const b = girl.body || {};
     const films = (window.DMTHGame.state.current?.films || []).filter(f => f.girlId === girl.id);
     const wo = girl.whoreOut?.sessionTotals || {};
+    // FRIENDKILL.1 / trophy-history — count the sadistic FRIEND visits + how hard she was used so
+    // her death record (and the trophy chosen at corpse disposal) carries what was done to her.
+    const friendVisits = girl.whoreOut?.friendVisits || 0;
+    const friendActs = (girl.whoreOut?.johnLedger || []).filter(e => e.isFriend).length;
     const preg = girl.pregnancy || {};
     const ls = window.DMTHGame.lifespan;
     const turns = window.DMTHGame.state.getTurns ? window.DMTHGame.state.getTurns(girl.id, 200).length : 0;
@@ -89,13 +93,25 @@
         limbsRemoved: b.limbs ? Object.values(b.limbs).filter(x => x === 'removed').length : 0,
         isNugget: !!b.isNugget
       },
-      tally: {
-        films: films.length,
-        filmEarnings: films.reduce((t, f) => t + (f.passiveEarnings || 0) + (f.saleRecord?.price || 0), 0),
-        johns: wo.encounters || 0,
-        pregnancies: (preg.outcomeHistory || []).length + (preg.status === 'pregnant' ? 1 : 0),
-        chatTurns: turns
-      },
+      tally: (() => {
+        const filmEarnings = films.reduce((t, f) => t + (f.passiveEarnings || 0) + (f.saleRecord?.price || 0), 0);
+        const johnGross = (wo.gross || 0) + (wo.tips || 0);
+        const births = (preg.outcomeHistory || []).filter(o => o.status === 'delivered' || o.status === 'birthed').length;
+        const milkProduced = Math.round(girl.body?.milkProducedTotal || 0);
+        return {
+          films: films.length,
+          filmEarnings,
+          johns: wo.encounters || 0,
+          friendVisits,
+          friendActs,
+          playerActs: girl.body?.actsCommitted || 0,
+          totalEarned: filmEarnings + johnGross,   // everything she earned you (films + johns/friends)
+          pregnancies: (preg.outcomeHistory || []).length + (preg.status === 'pregnant' ? 1 : 0),
+          births,
+          milkProduced,
+          chatTurns: turns
+        };
+      })(),
       finalImageUrl: (lastLivingImageEntry(girl) || {}).url || null,
       finalImageCacheKey: (lastLivingImageEntry(girl) || {}).cacheKey || null
     };

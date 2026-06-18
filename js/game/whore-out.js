@@ -278,6 +278,17 @@
     const bondDebtAfter = refreshed?.bond?.bondDebt || 0;
     const bondXPAfter = refreshed?.bond?.bondXP || 0;
 
+    // FRIENDKILL.1 / SNUFFBONUS.1 — a normal john kills her only on the RARE occurrence that his
+    // use crossed her death floor (she was already at ~0 — i.e. a poorly-maintained, over-whored
+    // girl). A managed girl's tiny per-john debuff never gets there. Snuff bonus folds into his pay.
+    let johnKillBonus = 0;
+    if (!isPostmortem && (refreshed?.body?.health ?? 100) <= 0 && window.DMTHGame.lifespan?.killDuringAct) {
+      try {
+        const k = window.DMTHGame.lifespan.killDuringAct(girl.id, { cause: 'john-kill:' + archetypeId, corpse: 'used-up', byLabel: arc.displayName, baseBonus: 450 });
+        johnKillBonus = (k && k.snuffBonus) || 0;
+      } catch (e) { /* non-fatal */ }
+    }
+
     // Determine cum delivery: vaginal-cum acts trigger pregnancy hook unless condomUsed
     const hasVaginalCum = acts.some(a => VAGINAL_CUM_ACTS.has(a));
     let pregnancyHookFired = false;
@@ -309,7 +320,7 @@
         if (drg) { johnExtraActs.push('drug:' + drg); johnExtraPay += 15; }
       }
     }
-    const totalPaid = payment + tip + johnExtraPay;
+    const totalPaid = payment + tip + johnExtraPay + johnKillBonus;
 
     // For repeat-eligible archetypes, persist a stable johnId so
     // subsequent encounters can match against prior visits. Repeat clients build cumulative
@@ -414,23 +425,45 @@
     if (window.DMTHGame.actionEffects?.applyAction) {
       try { window.DMTHGame.actionEffects.applyAction(girl.id, arc.johnActionId, { byJohn: true, strain: true }); } catch (e) { /* non-fatal */ }
     }
-    // Near-kill ability — a direct extra health drop on top of the act. Floors at 1; the lifespan
-    // system handles actual death if she was already on the edge.
+    // Near-kill ability — a direct extra health drop on top of the act.
     const r0 = window.DMTHGame.state.getGirl(girl.id) || girl;
     const drop = arc.healthDrop[0] + Math.floor(Math.random() * (arc.healthDrop[1] - arc.healthDrop[0] + 1));
-    const body = { ...(r0.body || {}) };
-    const newHealth = Math.max(1, (body.health ?? 100) - drop);
-    body.health = newHealth;
-    body.bruises = (body.bruises || 0) + (arc.bruisesAdded || 0);
-    body.recentActTag = 'beaten';
-    if (window.DMTHGame.gameClock) body.recentActAt = window.DMTHGame.gameClock.now();
-    window.DMTHGame.state.updateGirl(girl.id, { body });
+    const curHealth = r0.body?.health ?? 100;
+
+    // FRIENDKILL.1 gate (Gee) — the LETHAL outcome only fires when her remaining health is NOT
+    // greater than his debuff (health <= drop). A healthy girl just gets wrecked down; one already
+    // on the edge gets finished on camera. The Executioner's huge drop makes him the one most
+    // likely to cross it — leave a girl whored-out to friends unmonitored and she can come back dead.
+    const killed = drop >= curHealth;
+    let snuffBonus = 0;
+    let newHealth = curHealth;
+    if (killed) {
+      const k = window.DMTHGame.lifespan.killDuringAct(girl.id, {
+        cause: 'friend-kill:' + friendId, corpse: arc.corpse || 'bled-out',
+        byLabel: arc.displayName, baseBonus: 700
+      });
+      snuffBonus = (k && k.snuffBonus) || 0;
+      newHealth = 0;
+    } else {
+      // Gee: a friend can take "as much as 50% health for all the sadistic acts in totality" —
+      // a survivor never loses more than 50 HP in one visit (the lethal finish is the separate
+      // gated path above). The raw `drop` still drives the kill gate; the WRECK is capped here.
+      const wreck = Math.min(drop, 50);
+      const body = { ...(r0.body || {}) };
+      newHealth = Math.max(1, curHealth - wreck);
+      body.health = newHealth;
+      body.bruises = (body.bruises || 0) + (arc.bruisesAdded || 0);
+      body.recentActTag = 'beaten';
+      if (window.DMTHGame.gameClock) body.recentActAt = window.DMTHGame.gameClock.now();
+      window.DMTHGame.state.updateGirl(girl.id, { body });
+    }
 
     const refreshed = window.DMTHGame.state.getGirl(girl.id) || girl;
-    const actTags = [...(arc.permittedActsPreference || []).slice(0, 2), 'friend-extreme'];
+    const actTags = [...(arc.permittedActsPreference || []).slice(0, 2), killed ? 'snuff' : 'friend-extreme'];
     const basePay = arc.payRange[0] + Math.floor(Math.random() * (arc.payRange[1] - arc.payRange[0]));
     const sat = window.DMTHGame.state.getSatisfaction ? window.DMTHGame.state.getSatisfaction() : 50;
-    const payment = Math.round(basePay * (1 + ((sat - 50) / 50) * 0.12));
+    // SNUFFBONUS.1 — if he finished her, the snuff bonus folds into his payout.
+    const payment = Math.round(basePay * (1 + ((sat - 50) / 50) * 0.12)) + snuffBonus;
 
     const encounter = {
       id: 'frnd_' + Date.now().toString(36) + '_' + Math.floor(Math.random() * 0xffff).toString(36),
@@ -448,9 +481,12 @@
       bondDebtAdded: (refreshed.bond?.bondDebt || 0) - bondDebtBefore,
       bruisesAdded: arc.bruisesAdded || 0,
       cumLoadAdded: 0,
-      healthDropped: drop,
+      healthDropped: killed ? curHealth : drop,
+      killed, snuffBonus,
       staminaDrained: 0,
-      notes: `FRIEND ${arc.displayName} — ${arc.ability}. Health −${drop}. ${arc.dialogueTone}.`,
+      notes: killed
+        ? `FRIEND ${arc.displayName} KILLED her — ${arc.killLine || arc.ability}. Snuff content +$${snuffBonus}. ${arc.dialogueTone}.`
+        : `FRIEND ${arc.displayName} — ${arc.ability}. Health −${drop}. ${arc.dialogueTone}.`,
       pregnancyHookFired: false
     };
 
@@ -468,11 +504,15 @@
     if (window.DMTHGame.gameClock) newWo.lastJohnArrivalAt = window.DMTHGame.gameClock.now();
     window.DMTHGame.state.updateGirl(girl.id, { whoreOut: newWo });
 
-    if (window.DMTHGame.state.addBuzz) window.DMTHGame.state.addBuzz(1.0, 'friend-visit: ' + friendId);
-    try { if (window.DMTHGame.wanted) window.DMTHGame.wanted.accrue('captive-death'); } catch (e) { /* heat bump — key-safe */ }
-    if (window.DMTHNotify) window.DMTHNotify.show(`🩸 ${arc.displayName} paid $${payment} to wreck ${girl.name} — she's at ${newHealth} HP.`, { type: 'warn', durationMs: 6000 });
-    if (newHealth <= 8 && window.DMTHNotify) {
-      window.DMTHNotify.show(`⚠️ ${girl.name} is barely alive (${newHealth} HP) — heal her now or lose her.`, { type: 'danger', durationMs: 8000 });
+    if (window.DMTHGame.state.addBuzz) window.DMTHGame.state.addBuzz(killed ? 0.5 : 1.0, 'friend-visit: ' + friendId);
+    if (!killed) { try { if (window.DMTHGame.wanted) window.DMTHGame.wanted.accrue('captive-death'); } catch (e) { /* heat bump — key-safe */ } }
+    if (window.DMTHNotify) {
+      if (killed) {
+        window.DMTHNotify.show(`☠️ ${arc.displayName} FINISHED ${girl.name} — ${arc.killLine || 'she didn\'t survive him'}. Paid $${payment} (incl. snuff bonus). Her body's in the hold until you dispose of it.`, { type: 'error', durationMs: 9000 });
+      } else {
+        window.DMTHNotify.show(`🩸 ${arc.displayName} paid $${payment} to wreck ${girl.name} — she's at ${newHealth} HP.`, { type: 'warn', durationMs: 6000 });
+        if (newHealth <= 8) window.DMTHNotify.show(`⚠️ ${girl.name} is barely alive (${newHealth} HP) — heal her now or lose her.`, { type: 'danger', durationMs: 8000 });
+      }
     }
     // FRIENDGIFT.1 — friends are generous: ~50% leave a high-tier gift (gear/toys/drugs) for the use.
     if (window.DMTHGame.loot && window.DMTHGame.loot.grantNpcGift && Math.random() < 0.5) {

@@ -62,7 +62,30 @@
       <div class="small" style="margin:4px 0;font-style:italic">"${escapeHtml(t.flavor || '')}"</div>
       <div class="small ok">${escapeHtml(perkText)}</div>
       <div class="small muted">via ${escapeHtml(t.method || '')} · bond L${t.bondAtEnd || 0} · held ${t.daysHeld || 0}d · ${when}d ago</div>
+      ${renderTrophyHistory(t.deathRecord)}
     </div>`;
+  }
+
+  // Her history (scrollable) — total earned + how many johns / friends / player acts / births /
+  // milk she gave you. Only rows with a real value are listed (no zero-padded clutter).
+  function renderTrophyHistory(rec) {
+    const t = rec && rec.tally;
+    if (!t) return '';
+    const hr = (label, val) => `<div class="stat-row small"><span>${label}</span><b>${val}</b></div>`;
+    const rows = [
+      (t.totalEarned > 0) ? hr('💰 Total earned', `$${t.totalEarned.toLocaleString()}`) : '',
+      (t.films > 0) ? hr('🎬 Films', t.films) : '',
+      (t.johns > 0) ? hr('👥 Johns', t.johns) : '',
+      (t.friendVisits > 0) ? hr('🩸 Friend visits', t.friendVisits) : '',
+      (t.playerActs > 0) ? hr('✊ Acts on her', t.playerActs) : '',
+      (t.pregnancies > 0) ? hr('🤰 Pregnancies', t.pregnancies) : '',
+      (t.births > 0) ? hr('🍼 Births', t.births) : '',
+      (t.milkProduced > 0) ? hr('🥛 Milk', `${t.milkProduced}L`) : '',
+      (t.chatTurns > 0) ? hr('💬 Chat turns', t.chatTurns) : ''
+    ].filter(Boolean);
+    if (!rows.length) return '';
+    return `<div class="small muted" style="margin-top:6px">Her history</div>
+      <div style="max-height:140px;overflow-y:auto;padding-right:4px;margin-top:2px">${rows.join('')}</div>`;
   }
 
   function escapeHtml(s) {

@@ -264,11 +264,43 @@
     return { ok: true, methodId, filmed: !!opts.filmed, filmId };
   }
 
+  // ---- DEATH DURING AN ACT (FRIENDKILL.1 / SNUFFBONUS.1 / DEATHBAL.1) ----
+  // The lethal-finish path shared by the player's extreme acts, johns, and "friends". Flips a
+  // living captive to a corpse, stamps cause + corpse marker, builds the death record, and
+  // returns a SNUFF BONUS payout the caller credits to the right pocket (player wallet / john
+  // earnings). GATE (Gee): callers only fire this when the act's damage would cross her death
+  // floor (her remaining health <= the act's debuff) — so a managed, healed, robust girl is
+  // never low enough for a normal act to kill her. Death is a risk you manage, not attrition.
+  function killDuringAct(girlId, opts = {}) {
+    const girl = window.DMTHGame.state.getGirl(girlId);
+    if (!girl || girl.encounterState !== 'captive') return { ok: false, reason: 'not a living captive' };
+    const cause = opts.cause || 'killed-during-act';
+    const corpse = opts.corpse || 'bled-out';
+    window.DMTHGame.state.updateGirl(girlId, {
+      encounterState: 'dead',
+      deceasedAt: Date.now(),
+      deceasedCause: cause,
+      body: { ...girl.body, health: 0, diedAt: window.DMTHGame.gameClock?.now?.() ?? 0, decayedMinutes: 0, corpseMarker: corpse, recentActTag: 'beaten' }
+    });
+    if (window.DMTHGame.death) { try { window.DMTHGame.death.ensureDeathRecord(girlId, cause); } catch (e) { /* non-fatal */ } }
+    // SNUFFBONUS.1 — a girl corpsing mid-act is PREMIUM content, not pure loss. Bonus scales with
+    // bond (a trained/broken girl dying on camera sells for more) + a flat snuff premium.
+    const bondLvl = girl.bond?.bondLevel || 0;
+    const snuffBonus = Math.round((opts.baseBonus || 600) * (1 + bondLvl * 0.12));
+    if (window.DMTHGame.state.addBuzz) window.DMTHGame.state.addBuzz(-2, 'act-death:' + cause);
+    if (window.DMTHGame.wanted) window.DMTHGame.wanted.accrue('captive-death');
+    if (window.DMTHGame.progression) window.DMTHGame.progression.grantXp(14, 'act-death');
+    if (window.DMTHNotify) {
+      window.DMTHNotify.show(`☠️ ${girl.name} died ${opts.byLabel ? 'under ' + opts.byLabel : 'mid-act'} — snuff content sells for +$${snuffBonus.toLocaleString()}. Her body stays in the hold for postmortem use until you dispose of it.`, { type: 'error', durationMs: 8000 });
+    }
+    return { ok: true, snuffBonus, cause, corpse };
+  }
+
   window.DMTHGame = window.DMTHGame || {};
   window.DMTHGame.lifespan = Object.freeze({
     STATES, evaluate, tickAll, daysCaptive, currentAge, careScore, describeLifespan,
     TICK_MS, REAL_MS_PER_GAME_DAY, AGING_REAL_MS_PER_GAME_YEAR,
     POSTMORTEM_DECAY_LIMIT,
-    SNUFF_METHODS, snuffKill
+    SNUFF_METHODS, snuffKill, killDuringAct
   });
 })();

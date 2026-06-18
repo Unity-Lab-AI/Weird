@@ -232,7 +232,12 @@
         breastMilk: 0,
         // MILKBAL.1 — postpartum lactation window expiry (real-ms timestamp). Set on delivery;
         // while now < this she keeps lactating "a few days after birth". 0 = not in window.
-        lactatingUntil: 0
+        lactatingUntil: 0,
+        // Trophy-history — running count of PLAYER acts committed against her (johns/friends are
+        // counted separately in her whore-out ledger). Surfaced in her death record + trophy.
+        actsCommitted: 0,
+        // Trophy-history — total liters of milk she produced for you (bottled + sucked).
+        milkProducedTotal: 0
       };
       for (const [k, v] of Object.entries(BODY_DEFAULTS)) {
         if (g.body[k] == null) g.body[k] = v;

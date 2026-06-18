@@ -51,13 +51,22 @@
         </div>
         <div style="padding:0 18px 8px">
           <div style="color:#c8a0ff;font-size:0.8rem;text-transform:uppercase;letter-spacing:.05em;margin:6px 0 4px">Her history</div>
-          ${row('Captured at', rec.captureLocation)}
-          ${row('Held longest at', rec.longestHeld)}
-          ${row('Days held', rec.daysHeld)}
-          ${row('🎬 Films made', `${t.films} ($${(t.filmEarnings || 0).toLocaleString()})`)}
-          ${row('👥 Johns serviced', t.johns)}
-          ${row('🤰 Pregnancies', t.pregnancies)}
-          ${row('💬 Chat turns', t.chatTurns)}
+          <div style="max-height:200px;overflow-y:auto;padding-right:4px">
+            ${[
+              (t.totalEarned > 0) ? row('💰 Total earned', `$${t.totalEarned.toLocaleString()}`) : '',
+              rec.captureLocation ? row('Captured at', rec.captureLocation) : '',
+              rec.longestHeld ? row('Held longest at', rec.longestHeld) : '',
+              (rec.daysHeld > 0) ? row('Days held', rec.daysHeld) : '',
+              (t.films > 0) ? row('🎬 Films made', `${t.films} ($${(t.filmEarnings || 0).toLocaleString()})`) : '',
+              (t.johns > 0) ? row('👥 Johns serviced', t.johns) : '',
+              (t.friendVisits > 0) ? row('🩸 Friend visits', t.friendVisits) : '',
+              (t.playerActs > 0) ? row('✊ Player acts on her', t.playerActs) : '',
+              (t.pregnancies > 0) ? row('🤰 Pregnancies', t.pregnancies) : '',
+              (t.births > 0) ? row('🍼 Births', t.births) : '',
+              (t.milkProduced > 0) ? row('🥛 Milk produced', `${t.milkProduced}L`) : '',
+              (t.chatTurns > 0) ? row('💬 Chat turns', t.chatTurns) : ''
+            ].filter(Boolean).join('') || `<div class="small muted">No notable history.</div>`}
+          </div>
         </div>
         <div style="display:flex;gap:8px;padding:14px 18px;border-top:1px solid #2a2a30">
           <button id="dossier-dispose" style="flex:1;padding:9px;background:#7a1f1f;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:600">⚱️ Dispose / claim trophy →</button>
