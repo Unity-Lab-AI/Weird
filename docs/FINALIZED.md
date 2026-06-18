@@ -13,6 +13,20 @@
 
 ---
 
+## 2026-06-18 — Session: Stockholm/stat polish batch (start tier, max-HP growth, numeric bars, 1-10 rating, level-gated acts) + vaginal trainers + friend roster
+
+`node -c` clean across touched files. EPIC Y + bits of U/S.
+- **STOCK-START.1** — new captives start at Stockholm 1-3 (internal bond 0-2) by location difficulty (easy grounds +1) + DEPRAVITY level (≥5 +1), capped 2; never overrides a higher seeded bond. `hunt.js` (escortToHold)
+- **ROBUST-HP.1** — `maxHealthFor(girl)` = 100 + min(30, bondLevel×3); used as the health ceiling in heal/regen/tick so high-Stockholm girls heal past 100 (up to ~130 at L9). `action-effects.js`
+- **STATNUM.1** — room stat bars now show value/capacity: Cum L `X/cap`, Health `hp/maxH` (bar widths relative to cap). `room.js`
+- **STOCK-RATING.1** — Stockholm shown as a 1-10 rating (bondLevel+1) in the room. `room.js`
+- **STOCK-GATE.1** — per-girl Stockholm-gated actions: `minStock` on an action locks the button (🔒 "Stockholm N/10 required") + blocks the click until she's indoctrinated enough; tagged "make her worship cock" (needs 5/10). Extensible. `quick-actions.js`
+- **VAGTOOL.1** — vaginal-weight family expanded: Ben Wa balls (+2), weighted vaginal plug (+2), vaginal expander/dilator set (+3); `trainCumCapacity` now uses ANY owned `cumTrainer` item (strongest wins). `catalog.js`, `action-effects.js`
+- **FRIENDROSTER.1** — +4 friend archetypes: The Collector, The Defrocked Priest, The Twins (+ existing butcher/surgeon/pack/strangler). `john-archetypes.js`
+- Remaining EPIC X engine (FRIENDTEMPL/MULTISPEAK/NPC-DIRECT/FRIENDSCENE/GANGSEL/GANGSCALE/FRIENDKILL/FRIENDTOY/GANGBUKKAKE) + EPIC U CUMTOOL (insertable timed) + EPIC W (MODMATRIX/TOYBALANCE) + LEGACY-AUDIT — queued.
+
+---
+
 ## 2026-06-18 — Session: NPC-IDENT.1 — johns/friends get names (johns/friends multi-party foundation)
 
 First brick of the johns/friends multi-party arc. `node -c` clean.

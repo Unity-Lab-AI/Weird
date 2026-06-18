@@ -243,6 +243,27 @@
       permittedActsPreference: ['choke', 'sex-rough'],
       ability: 'fucks her right to the edge of death and drags her back, over and over',
       dialogueTone: 'gets off on the moment her eyes roll back, pays to chase it'
+    },
+    'the-collector': {
+      displayName: 'The Collector', arrivalWeight: 6, payRange: [500, 900],
+      healthDrop: [30, 45], bruisesAdded: 4, johnActionId: 'extreme-degrade',
+      permittedActsPreference: ['humiliation', 'sex-rough', 'toys'],
+      ability: 'marks and ruins her like he\'s claiming a trophy, wants a piece of her to keep',
+      dialogueTone: 'collector\'s patience, cataloguing every part of her out loud as he wrecks it'
+    },
+    'the-priest': {
+      displayName: 'The Defrocked Priest', arrivalWeight: 5, payRange: [450, 800],
+      healthDrop: [32, 48], bruisesAdded: 3, johnActionId: 'masochist-overload',
+      permittedActsPreference: ['humiliation', 'pain', 'sex-rough'],
+      ability: 'turns her ruin into a ritual — slow, reverent, obscene, sermonizing as he defiles her',
+      dialogueTone: 'mock-holy cadence, calls it penance, savors her shame'
+    },
+    'the-twins': {
+      displayName: 'The Twins', arrivalWeight: 5, payRange: [550, 1000],
+      healthDrop: [42, 58], bruisesAdded: 5, johnActionId: 'extreme-rough-anal',
+      permittedActsPreference: ['sex-rough', 'anal', 'creampie', 'bukkake'],
+      ability: 'two of them at once, never giving her a second\'s rest between holes',
+      dialogueTone: 'finishing each other\'s sentences, egging each other on over her'
     }
   });
   function rollFriendArchetype(rng) {

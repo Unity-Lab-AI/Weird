@@ -57,7 +57,7 @@
         { emoji: '👄',  label: 'cock-slap her stupid',  text: '*pulls out, slaps her across the face with my cock, then back in*', applyId: 'slap' },
         { emoji: '🥵',  label: 'make her swallow it',   text: '*finishes in her mouth, grabs her jaw shut, tells her to swallow every drop*', applyId: 'sex-oral' },
         { emoji: '💦',  label: 'glaze her face',        text: '*pulls out at the last second, coats her cheeks, eyelashes, mouth*', applyId: 'sex-oral', actTag: 'facial' },
-        { emoji: '🧎',  label: 'make her worship cock', text: '*stands over her, tells her to kiss every inch, thank it, lick it slow*', applyId: 'sex-oral' },
+        { emoji: '🧎',  label: 'make her worship cock', text: '*stands over her, tells her to kiss every inch, thank it, lick it slow*', applyId: 'sex-oral', minStock: 5 },
         { emoji: '🫁',  label: 'nose to my pelvis',     text: '*buries her nose in my pelvis and holds her there, counts to ten*', applyId: 'sex-oral' },
         { emoji: '🦷',  label: 'no teeth, slut',        text: '*one finger under her jaw — no teeth. she learns fast.*', applyId: 'slap' },
         { emoji: '🌊',  label: 'bukkake — drown her',   text: '*lines them up and has load after load painted across her face until she\'s dripping, blinking it out of her eyes, mouth open for more*', applyId: 'sex-oral', actTag: 'bukkake' },
@@ -297,8 +297,13 @@
             }
           }
           const tip = cost ? `${a.text}\n📊 ${cost}` : a.text;
-          return `<button class="qa-btn" data-qa-idx="${i}" data-tooltip="${escapeHtml(tip)}">
-            <span class="qa-emoji">${a.emoji}</span>
+          // STOCK-GATE.1 — some acts need her indoctrinated to a minimum Stockholm (1-10). Lock
+          // the button + show why until she's broken in enough.
+          const stockRating = ((girl && girl.bond && girl.bond.bondLevel) || 0) + 1;
+          const locked = a.minStock && stockRating < a.minStock;
+          const lockTip = `🔒 Stockholm ${a.minStock}/10 required — she's only ${stockRating}/10. Indoctrinate her first.`;
+          return `<button class="qa-btn${locked ? ' locked' : ''}" data-qa-idx="${i}" ${locked ? 'disabled' : ''} data-tooltip="${escapeHtml(locked ? lockTip : tip)}">
+            <span class="qa-emoji">${locked ? '🔒' : a.emoji}</span>
             <span class="qa-label">${escapeHtml(a.label)}</span>
           </button>`;
         }).join('')}
@@ -316,6 +321,12 @@
         const idx = parseInt(b.dataset.qaIdx, 10);
         const action = TABS[currentTab].actions[idx];
         if (!action) return;
+        // STOCK-GATE.1 — willing/devoted acts require a minimum Stockholm rating (she has to be
+        // indoctrinated enough). Blocked below threshold.
+        if (action.minStock) {
+          const stockRating = ((girl && girl.bond && girl.bond.bondLevel) || 0) + 1;
+          if (stockRating < action.minStock) { alert(`🔒 ${girl?.name || 'She'} is only Stockholm ${stockRating}/10 — this needs ${action.minStock}/10. Indoctrinate her more first.`); return; }
+        }
         // DEATHWARN.1 — if this act would likely KILL her, throw a depraved confirm first.
         if (action.applyId && girl?.id && window.DMTHGame?.actionEffects?.wouldBeLethal
             && window.DMTHGame.actionEffects.wouldBeLethal(girl.id, action.applyId)) {

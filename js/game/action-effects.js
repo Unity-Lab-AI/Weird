@@ -339,6 +339,13 @@
   // bond XP, so REGULAR ABUSE (alongside loving/care acts) slowly indoctrinates over game-weeks.
   const STOCKHOLM_TRAUMA_XP = 1;
 
+  // ROBUST-HP.1 — higher Stockholm lifts her MAX health ceiling above 100 (a fully-bonded captive
+  // is hardier; heal/rest can carry her up to ~130 at L9). Used everywhere health is clamped at top.
+  function maxHealthFor(girl) {
+    const lvl = (girl && girl.bond && girl.bond.bondLevel) || 0;
+    return 100 + Math.min(30, lvl * 3);
+  }
+
   // Apply an action's deltas to a girl. Optional opts:
   //   { strain: true } — applies a strain multiplier (1.5x cost on negative effects)
   function applyAction(girlId, actionId, opts = {}) {
@@ -357,7 +364,7 @@
 
     if (action.health) {
       const d = action.health < 0 ? action.health * strainMul : action.health;
-      body.health = clamp((body.health ?? 100) + d, 0, 100);
+      body.health = clamp((body.health ?? 100) + d, 0, maxHealthFor(girl));   // ROBUST-HP.1 ceiling
     }
     if (action.stamina) {
       const d = action.stamina < 0 ? action.stamina * strainMul : action.stamina;
@@ -769,14 +776,18 @@
   function trainCumCapacity(girlId) {
     const girl = window.DMTHGame.state.getGirl(girlId);
     if (!girl) return { ok: false, reason: 'no such girl' };
-    const inv = window.DMTHGame.state.current && window.DMTHGame.state.current.inventory || {};
-    if (!(inv['ben-wa-balls'] > 0)) return { ok: false, reason: 'you need Ben Wa balls — buy them in the shop' };
+    const inv = (window.DMTHGame.state.current && window.DMTHGame.state.current.inventory) || {};
+    // VAGTOOL.1 — any owned vaginal trainer works (Ben Wa balls / plug / expander). Strongest wins.
+    const items = (window.DMTHAssets && window.DMTHAssets.ITEMS) || [];
+    const owned = items.filter(it => it.cumTrainer && (inv[it.id] > 0));
+    if (!owned.length) return { ok: false, reason: 'you need a vaginal trainer (Ben Wa balls / plug / expander) — buy one in the shop' };
+    const gain = Math.max(...owned.map(it => Number(it.cumTrainer) || 2));
     const body = { ...(girl.body || {}) };
     const cur = body.cumLoadCap ?? 10;
     if (cur >= CUMCAP_MAX) return { ok: false, reason: 'her storage capacity is already maxed' };
-    body.cumLoadCap = Math.min(CUMCAP_MAX, cur + 2);
+    body.cumLoadCap = Math.min(CUMCAP_MAX, cur + gain);
     window.DMTHGame.state.updateGirl(girlId, { body });
-    if (window.DMTHNotify) window.DMTHNotify.show(`⚪ ${girl.name} trained — cum-load capacity ${body.cumLoadCap}/${CUMCAP_MAX}.`, { type: 'success', durationMs: 3500 });
+    if (window.DMTHNotify) window.DMTHNotify.show(`⚪ ${girl.name} trained — cum-load capacity ${body.cumLoadCap}/${CUMCAP_MAX} (+${gain}).`, { type: 'success', durationMs: 3500 });
     return { ok: true, cap: body.cumLoadCap };
   }
 
@@ -958,7 +969,7 @@
       // loop and may carry self-serve updates to lastFedAt / lastWateredAt — so
       // we always persist the body, even if both deltas are zero, so those
       // timestamp resets aren't lost.
-      const newHealth = clamp((body.health ?? 100) + healthDelta, 0, 100);
+      const newHealth = clamp((body.health ?? 100) + healthDelta, 0, maxHealthFor(girl));   // ROBUST-HP.1 ceiling
       // Stamina capped by health — low health pulls down the stamina ceiling.
       body.health = newHealth;
       body.stamina = clamp((body.stamina ?? 70) + staminaDelta, 0, newHealth);
@@ -1086,6 +1097,6 @@
     limbState, limbsRemoved, isNugget, delimb,
     MARK_SPECS, ownershipMarksOf, hasMark, applyMark,
     wouldBeLethal, lethalWarningLine, lowHealthAlertSweep,
-    trainCumCapacity, CUMCAP_MAX
+    trainCumCapacity, CUMCAP_MAX, maxHealthFor
   });
 })();

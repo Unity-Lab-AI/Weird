@@ -334,6 +334,22 @@
     girl.dungeonHistory = [...(girl.dungeonHistory || []), { dungeonId: dungeon.id, at: Date.now() }];
     girl.mood.mood = 'terrified';
     girl.mood.moodEmoji = '😱';
+    // STOCK-START.1 — new captives start at Stockholm 1-3 (internal bond 0-2) depending on the
+    // location they came from (easy grounds = more pliable) + the operator's DEPRAVITY level (a
+    // seasoned hunter breaks them in faster). Never overrides a higher seeded bond (e.g. Unity).
+    const EASY_START_LOCS = new Set(['street', 'library', 'park', 'coffee-shop', 'mall', 'gym', 'neighborhood']);
+    let startTier = 0;
+    if (girl.encounteredAt && EASY_START_LOCS.has(girl.encounteredAt.locationId)) startTier += 1;
+    if (window.DMTHGame.progression && window.DMTHGame.progression.getLevel() >= 5) startTier += 1;
+    startTier = Math.min(2, startTier);
+    if (startTier > 0) {
+      girl.bond = girl.bond || { bondLevel: 0, bondXP: 0, bondDebt: 0, milestones: [] };
+      if ((girl.bond.bondLevel || 0) < startTier) {
+        girl.bond.bondLevel = startTier;
+        const xp = window.DMTHGame.balancing ? window.DMTHGame.balancing.xpForLevel(startTier) : startTier * 50;
+        girl.bond.bondXP = Math.max(girl.bond.bondXP || 0, xp);
+      }
+    }
     window.DMTHGame.state.addGirl(girl);
     // NAMELOCK.1 — lock her full name out of future generation now that she's in the collection.
     if (window.DMTHGame.state.noteUsedName) window.DMTHGame.state.noteUsedName(girl.name);

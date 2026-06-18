@@ -277,8 +277,22 @@
       id: 'ben-wa-balls', displayName: 'Ben Wa Balls (kegel trainer)', emoji: '⚪',
       category: 'item', subcategory: 'consumables',
       prompt: 'product photograph of a pair of small linked metallic weighted balls on a plain backdrop, intimate-wellness commerce style, soft lighting',
-      cost: 90, tier: 1, cumTrainer: true,
-      notes: 'Reusable — make her hold these to train her muscles. Each session raises her cum-load STORAGE capacity (more load = more money, but a full girl gets moody + restless). Buy once, use repeatedly.'
+      cost: 90, tier: 1, cumTrainer: 2,
+      notes: 'Reusable — make her hold these to train her muscles. Each session raises her cum-load STORAGE capacity +2 (more load = more money, but a full girl gets moody + restless). Buy once, use repeatedly.'
+    },
+    {
+      id: 'vaginal-plug', displayName: 'Weighted Vaginal Plug', emoji: '🟪',
+      category: 'item', subcategory: 'consumables',
+      prompt: 'product photograph of a smooth weighted silicone plug with a flared base on a plain backdrop, intimate-wellness commerce style',
+      cost: 130, tier: 1, cumTrainer: 2,
+      notes: 'Reusable plug — worn to train + stretch her. Each session raises her cum-load storage capacity +2. Stronger held-in versions come with the insertable tools later.'
+    },
+    {
+      id: 'vaginal-expander', displayName: 'Vaginal Expander / Dilator Set', emoji: '🔱',
+      category: 'item', subcategory: 'consumables',
+      prompt: 'product photograph of a graduated set of smooth tapered dilator rods of increasing girth on a plain backdrop, clinical intimate-wellness commerce style',
+      cost: 220, tier: 2, cumTrainer: 3,
+      notes: 'Reusable graduated dilator set — works her open hole by hole. Strongest trainer: each session raises her cum-load storage capacity +3.'
     },
 
     // --- BLUNT ---

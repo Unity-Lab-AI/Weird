@@ -254,7 +254,7 @@ Per Gee: every new action/stat/button ships with a tooltip that is **non-intrusi
 - **NPC-IDENT.1** ✅ johns/friends named + she references them by name · **GIRLNAME.1** ✅ girls name-aware.
 - ⏳ **FRIENDTEMPL.1** john/friend speaker templates · **MULTISPEAK.1** everyone-converses engine + per-speaker name tags · **NPC-DIRECT.1** direct an NPC → girl reacts by affect/Stockholm · **FRIENDSCENE.1** narrate it + image + chat memory + real stakes · **GANGSEL.1** participant selector · **GANGSCALE.1** bigger dungeon+roster = bigger gangbang = more satisfaction.
 
-## EPIC Y — Numeric bars + 1-10 Stockholm rating + level-gated actions + variable start ⏳ QUEUED
+## EPIC Y — Numeric bars + 1-10 Stockholm rating + level-gated actions + variable start ✅ SHIPPED
 > *"actual numbers on the stat bars as they increase in valvue and capactite ... get health increased of max levle of health ... a rating for each girl like 1-10 stockholm ... some actions u can only do with girls of certain stokholm levels ... all girls start from level 1-3 depending gilr location dificulty player stats and perks"*
 - ⏳ **STATNUM.1** numbers on bars · **ROBUST-HP.1** lift MAX-health by capacity/Stockholm · **STOCK-RATING.1** 1-10 framing · **STOCK-GATE.1** Stockholm-gated actions · **STOCK-START.1** start at 1-3 by location/stats/perks.
 
