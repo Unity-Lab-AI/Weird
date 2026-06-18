@@ -71,7 +71,31 @@
     { id: 'nipple',    name: 'Her Nipple',         emoji: '🌸', flavor: 'Bitten off and kept in a little jar.', perk: 'filmPriceMul', gore: true },
     { id: 'tooth',     name: 'Her Tooth',          emoji: '🦷', flavor: 'Knocked loose, strung on a chain.',    perk: 'escapeContainmentBonus', gore: true },
     { id: 'tongue',    name: 'Her Tongue',         emoji: '👅', flavor: 'It never talked back again.',          perk: 'healBonus', gore: true },
-    { id: 'hair-lock', name: 'A Lock of Her Hair', emoji: '✂️', flavor: 'Cut close to the scalp.',             perk: 'wantedDecayBonus' }
+    { id: 'hair-lock', name: 'A Lock of Her Hair', emoji: '✂️', flavor: 'Cut close to the scalp.',             perk: 'wantedDecayBonus' },
+    // TROPHYVAR.1 — wide variety, simple → gore. More clothing / jewelry / personal effects…
+    { id: 'stockings', name: 'Her Stockings',      emoji: '🧦', flavor: 'Laddered, peeled off her legs.',       perk: 'johnCadenceBonus' },
+    { id: 'garter',    name: 'Her Garter Belt',    emoji: '🎀', flavor: 'Snapped off her thigh.',               perk: 'filmPriceMul' },
+    { id: 'heels',     name: 'Her Heels',          emoji: '👠', flavor: 'The shoes she couldn\'t run in.',       perk: 'shopDiscount' },
+    { id: 'glasses',   name: 'Her Glasses',        emoji: '👓', flavor: 'One lens cracked.',                    perk: 'huntBonus' },
+    { id: 'bracelet',  name: 'Her Bracelet',       emoji: '📿', flavor: 'Slid off a thin wrist.',               perk: 'shopDiscount' },
+    { id: 'bikini',    name: 'Her Bikini Top',     emoji: '👙', flavor: 'String-tie, still knotted.',           perk: 'johnCadenceBonus' },
+    { id: 'diary',     name: 'Her Diary',          emoji: '📔', flavor: 'Every secret she had, now yours.',     perk: 'wantedDecayBonus' },
+    { id: 'phone',     name: 'Her Phone',          emoji: '📱', flavor: 'Dead battery, full of her life.',      perk: 'wantedDecayBonus' },
+    { id: 'navel-ring',name: 'Her Navel Ring',     emoji: '💠', flavor: 'Unscrewed from her belly.',            perk: 'filmPriceMul' },
+    { id: 'toe-ring',  name: 'Her Toe Ring',       emoji: '🦶', flavor: 'A little band off her toe.',           perk: 'huntBonus' },
+    { id: 'watch',     name: 'Her Watch',          emoji: '⌚', flavor: 'Stopped at the hour you took her.',    perk: 'shopDiscount' },
+    { id: 'perfume',   name: 'Her Perfume',        emoji: '🧴', flavor: 'One spray and she\'s in the room.',    perk: 'johnCadenceBonus' },
+    { id: 'cum-rag',   name: 'Her Cum Rag',        emoji: '🧻', flavor: 'Stiff with everything she swallowed and didn\'t.', perk: 'filmPriceMul' },
+    // …and more FUCKED body-part trophies (gore).
+    { id: 'clit',      name: 'Her Clit',           emoji: '🌷', flavor: 'Snipped and kept on ice in a jar.',    perk: 'filmPriceMul', gore: true },
+    { id: 'labia',     name: 'Her Labia',          emoji: '🥩', flavor: 'Pinned and dried like a butterfly.',   perk: 'filmPriceMul', gore: true },
+    { id: 'ear',       name: 'Her Ear',            emoji: '👂', flavor: 'Taken off clean, still wearing the earring.', perk: 'escapeContainmentBonus', gore: true },
+    { id: 'eye',       name: 'Her Eye',            emoji: '👁️', flavor: 'Floating in a jar — still watching you.', perk: 'escapeContainmentBonus', gore: true },
+    { id: 'pinky-toe', name: 'Her Pinky Toe',      emoji: '🦴', flavor: 'The little one, nail polish intact.',  perk: 'huntBonus', gore: true },
+    { id: 'nails',     name: 'A Jar of Her Nails', emoji: '💅', flavor: 'Pulled one by one, lacquer and all.',  perk: 'filmPriceMul', gore: true },
+    { id: 'scalp',     name: 'Her Scalp-Lock',     emoji: '🩸', flavor: 'Hair and skin both — taken together.', perk: 'wantedDecayBonus', gore: true },
+    { id: 'nipple-pair',name: 'Both Her Nipples',  emoji: '🌸', flavor: 'A matched pair in the jar this time.', perk: 'filmPriceMul', gore: true },
+    { id: 'rib',       name: 'One of Her Ribs',    emoji: '🦴', flavor: 'Cracked out and scrimshawed.',         perk: 'healBonus', gore: true }
   ];
 
   function hashId(s) { let h = 0; const str = String(s || 'x'); for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) | 0; return Math.abs(h); }
