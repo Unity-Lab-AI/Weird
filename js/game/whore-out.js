@@ -399,9 +399,13 @@
     }
 
     // FRIENDGIFT.1 — a satisfied john sometimes leaves a high-tier gift (generous types more often).
-    if (!isPostmortem && window.DMTHGame.loot && window.DMTHGame.loot.grantNpcGift
-        && Math.random() < (0.05 + (arc.intensity || 0) * 0.02)) {
-      window.DMTHGame.loot.grantNpcGift({ from: npc ? npc.handle : arc.displayName, generous: (arc.tipChance || 0) > 0.4 });
+    // A KILL is an EPIC WIN for him (Gee) — he ALWAYS leaves loot + tips bigger when she dies on him.
+    if (window.DMTHGame.loot && window.DMTHGame.loot.grantNpcGift) {
+      if (johnKillBonus > 0) {
+        window.DMTHGame.loot.grantNpcGift({ from: npc ? npc.handle : arc.displayName, generous: true, kill: true });
+      } else if (!isPostmortem && Math.random() < (0.05 + (arc.intensity || 0) * 0.02)) {
+        window.DMTHGame.loot.grantNpcGift({ from: npc ? npc.handle : arc.displayName, generous: (arc.tipChance || 0) > 0.4 });
+      }
     }
 
     window.DMTHGame.state.updateGirl(girl.id, { whoreOut: newWo });
@@ -421,22 +425,26 @@
     const bondXPBefore = girl.bond?.bondXP || 0;
     const bondDebtBefore = girl.bond?.bondDebt || 0;
 
+    // Her health the MOMENT the friend arrives — the kill gate AND the per-visit damage cap are
+    // both measured from this. So a girl already low (e.g. ~20%) servicing a friend is near-certain
+    // to come back a corpse; a healthy one survives, wrecked but capped (Gee).
+    const startHealth = (window.DMTHGame.state.getGirl(girl.id)?.body?.health) ?? 100;
+
     // The friend's extreme act — credited to johns (byJohn) so the PLAYER isn't paid/leveled for it.
     if (window.DMTHGame.actionEffects?.applyAction) {
       try { window.DMTHGame.actionEffects.applyAction(girl.id, arc.johnActionId, { byJohn: true, strain: true }); } catch (e) { /* non-fatal */ }
     }
-    // Near-kill ability — a direct extra health drop on top of the act.
-    const r0 = window.DMTHGame.state.getGirl(girl.id) || girl;
-    const drop = arc.healthDrop[0] + Math.floor(Math.random() * (arc.healthDrop[1] - arc.healthDrop[0] + 1));
-    const curHealth = r0.body?.health ?? 100;
 
-    // FRIENDKILL.1 gate (Gee) — the LETHAL outcome only fires when her remaining health is NOT
-    // greater than his debuff (health <= drop). A healthy girl just gets wrecked down; one already
-    // on the edge gets finished on camera. The Executioner's huge drop makes him the one most
-    // likely to cross it — leave a girl whored-out to friends unmonitored and she can come back dead.
-    const killed = drop >= curHealth;
+    const drop = arc.healthDrop[0] + Math.floor(Math.random() * (arc.healthDrop[1] - arc.healthDrop[0] + 1));
+
+    // FRIENDKILL.1 gate (Gee) — LETHAL only when her ARRIVAL health is not greater than his intended
+    // damage (drop >= startHealth). A girl at ~20% servicing a friend is almost certainly a corpse;
+    // a healthy girl just gets wrecked. The Executioner's huge drop makes him most likely to cross it.
+    const killed = drop >= startHealth;
     let snuffBonus = 0;
-    let newHealth = curHealth;
+    let newHealth = startHealth;
+    let chamberToyName = null;
+    let chamberPremium = 0;
     if (killed) {
       const k = window.DMTHGame.lifespan.killDuringAct(girl.id, {
         cause: 'friend-kill:' + friendId, corpse: arc.corpse || 'bled-out',
@@ -445,32 +453,43 @@
       snuffBonus = (k && k.snuffBonus) || 0;
       newHealth = 0;
     } else {
-      // Gee: a friend can take "as much as 50% health for all the sadistic acts in totality" —
-      // a survivor never loses more than 50 HP in one visit (the lethal finish is the separate
-      // gated path above). The raw `drop` still drives the kill gate; the WRECK is capped here.
-      const wreck = Math.min(drop, 50);
-      const body = { ...(r0.body || {}) };
-      newHealth = Math.max(1, curHealth - wreck);
-      body.health = newHealth;
-      body.bruises = (body.bruises || 0) + (arc.bruisesAdded || 0);
-      body.recentActTag = 'beaten';
+      // FRIENDTOY.1 (Gee correction) — a friend can only use a toy ALREADY MOUNTED in THIS girl's
+      // hold (no bring-your-own, no cross-hold/dungeon). If the hold has toys he'll most likely grab
+      // one — favouring his signature `chamberToy` if it happens to be mounted, else a random mounted
+      // one — and use it on her (byJohn, hold-gated, same as a john). Its negatives land on her; the
+      // health hit is folded into the ≤50-HP visit cap below.
+      const mounted = window.DMTHGame.toys?.holdToys ? window.DMTHGame.toys.holdToys(girl) : [];
+      if (mounted.length && window.DMTHGame.toys?.use) {
+        const pick = (arc.chamberToy && mounted.includes(arc.chamberToy)) ? arc.chamberToy : mounted[Math.floor(Math.random() * mounted.length)];
+        try {
+          const tr = window.DMTHGame.toys.use(pick, girl.id, { byJohn: true });
+          if (tr && tr.ok) { chamberToyName = (window.DMTHGame.toys.TOYS?.[pick]?.name) || pick; chamberPremium = 150; }
+        } catch (e) { /* non-fatal */ }
+      }
+      // Gee: NO single friend takes more than ~50% from one girl in one visit, no matter how many
+      // random acts + the chamber toy he piles on. The friend's WHOLE-visit health damage is capped
+      // at 50 HP (and at least 1 HP, never to 0 — that's the lethal path) — recomputed from her
+      // arrival health, OVERRIDING whatever applyAction + the toy independently subtracted.
+      const loss = Math.min(50, Math.max(1, drop), startHealth - 1);
+      newHealth = Math.max(1, startHealth - loss);
+      const g1 = window.DMTHGame.state.getGirl(girl.id) || girl;
+      const body = { ...(g1.body || {}), health: newHealth, bruises: (g1.body?.bruises || 0) + (arc.bruisesAdded || 0), recentActTag: 'beaten' };
       if (window.DMTHGame.gameClock) body.recentActAt = window.DMTHGame.gameClock.now();
       window.DMTHGame.state.updateGirl(girl.id, { body });
     }
 
-    // FRIENDTOY.1 — a chamber-grade friend brings + uses his OWN implement on her (real damage +
-    // the in-image implement + a premium). Only on a survivor (a kill already ended the visit).
-    let chamberToyName = null;
-    let chamberPremium = 0;
-    if (!killed && arc.chamberToy && window.DMTHGame.toys?.applyExternal) {
-      try {
-        const tr = window.DMTHGame.toys.applyExternal(arc.chamberToy, girl.id);
-        if (tr && tr.ok) { chamberToyName = tr.name; chamberPremium = 150; }
-      } catch (e) { /* non-fatal */ }
-    }
-
     const refreshed = window.DMTHGame.state.getGirl(girl.id) || girl;
-    const actTags = [...(arc.permittedActsPreference || []).slice(0, 2), killed ? 'snuff' : 'friend-extreme'];
+    // Gee — a friend does a WIDE RANGE of random act types per visit (he's not one-note). Roll a
+    // varied 2-4 act subset from his + a shared depraved pool. (Damage is still capped above, so
+    // "more acts" reads as variety in the ledger, never extra health loss.)
+    const FRIEND_ACT_POOL = ['sex-rough', 'anal', 'choke', 'humiliation', 'spit', 'slap', 'hair-pull', 'degrade', 'piss', 'bukkake', 'pain', 'gag'];
+    const actPool = [...new Set([...(arc.permittedActsPreference || []), ...FRIEND_ACT_POOL])];
+    const nActs = 2 + Math.floor(Math.random() * 3);   // 2-4 random acts
+    const actTags = [];
+    for (let i = 0; i < nActs && actPool.length; i++) {
+      actTags.push(actPool.splice(Math.floor(Math.random() * actPool.length), 1)[0]);
+    }
+    actTags.push(killed ? 'snuff' : 'friend-extreme');
     if (chamberToyName) actTags.push('chamber-toy');
     const basePay = arc.payRange[0] + Math.floor(Math.random() * (arc.payRange[1] - arc.payRange[0]));
     const sat = window.DMTHGame.state.getSatisfaction ? window.DMTHGame.state.getSatisfaction() : 50;
@@ -527,8 +546,9 @@
       }
     }
     // FRIENDGIFT.1 — friends are generous: ~50% leave a high-tier gift (gear/toys/drugs) for the use.
-    if (window.DMTHGame.loot && window.DMTHGame.loot.grantNpcGift && Math.random() < 0.5) {
-      window.DMTHGame.loot.grantNpcGift({ from: (npc ? npc.handle : arc.displayName), generous: true });
+    // A KILL is an EPIC WIN (Gee) — a friend who finishes her ALWAYS leaves loot + tips bigger.
+    if (window.DMTHGame.loot && window.DMTHGame.loot.grantNpcGift && (killed || Math.random() < 0.5)) {
+      window.DMTHGame.loot.grantNpcGift({ from: (npc ? npc.handle : arc.displayName), generous: true, kill: killed });
     }
     return encounter;
   }

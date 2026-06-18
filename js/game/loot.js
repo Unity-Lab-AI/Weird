@@ -51,6 +51,12 @@
   const ITEM_LABEL = { 'coke-bumps': 'coke', mdma: 'molly', wine: 'whiskey', 'duct-tape': 'duct tape', 'zip-ties': 'zip-ties', 'basic-meal': 'meal', 'bottled-water': 'water', 'condom-french-tickler': 'french tickler' };
   function label(id) { return ITEM_LABEL[id] || String(id).replace(/-/g, ' '); }
   function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+  // Gee: all loot GAINS get a click-away popup (no close button). Prefer the popup; fall back to a
+  // toast if it isn't loaded. (Passive ambient trickle — ARCHGIFT — stays a quiet toast on purpose.)
+  function lootPop(msg) {
+    if (window.DMTHLootPopup) window.DMTHLootPopup.show(msg);
+    else if (window.DMTHNotify) window.DMTHNotify.show(msg, { type: 'success', durationMs: 5000 });
+  }
 
   // Loot dropped on a SUCCESSFUL capture — location-aware. ~40% find something; 1-in-4 of
   // those is cash she had on her, otherwise a location-appropriate tool.
@@ -59,14 +65,14 @@
     if (Math.random() < 0.25) {
       const cash = 20 + Math.floor(Math.random() * 120);
       window.DMTHGame.state.addMoney(cash, 'loot:capture-cash');
-      if (window.DMTHNotify) window.DMTHNotify.show(`🎁 Looted $${cash} off her.`, { type: 'success', durationMs: 4500 });
+      lootPop(`🎁 Looted $${cash} off her.`);
       return { kind: 'cash', amount: cash };
     }
     const pool = LOCATION_LOOT[locationId] || GENERIC;
     const id = pick(pool);
     const qty = 1 + Math.floor(Math.random() * 2);
     window.DMTHGame.state.addItem(id, qty);
-    if (window.DMTHNotify) window.DMTHNotify.show(`🎁 Looted ${qty}× ${label(id)} from the scene.`, { type: 'success', durationMs: 4500 });
+    lootPop(`🎁 Looted ${qty}× ${label(id)} from the scene.`);
     return { kind: 'item', id, qty };
   }
 
@@ -79,7 +85,7 @@
     const id = pick(pool);
     const qty = 1 + Math.floor(Math.random() * 2);
     window.DMTHGame.state.addItem(id, qty);
-    if (window.DMTHNotify) window.DMTHNotify.show(`🔦 Scavenged ${qty}× ${label(id)} from the area${rare ? ' — nice find!' : ''}.`, { type: 'success', durationMs: 4500 });
+    lootPop(`🔦 Scavenged ${qty}× ${label(id)} from the area${rare ? ' — nice find!' : ''}.`);
     return { ok: true, id, qty, rare };
   }
 
@@ -173,7 +179,7 @@
       return { ok: false, id: opt.id, chance, roll, reason: 'won\'t give it up' };
     }
     window.DMTHGame.state.addItem(opt.id, 1);
-    if (window.DMTHNotify) window.DMTHNotify.show(`🎁 ${(girl && girl.name) || 'She'} hands over 1× ${label(opt.id)}.`, { type: 'success', durationMs: 4500 });
+    lootPop(`🎁 ${(girl && girl.name) || 'She'} hands over 1× ${label(opt.id)}.`);
     return { ok: true, id: opt.id, qty: 1, chance, roll };
   }
 
@@ -202,8 +208,8 @@
       }
     }
     if (window.DMTHNotify) {
-      if (granted.length) window.DMTHNotify.show(`🎒 Stripped her stash: ${granted.map(g => `${g.qty}× ${label(g.id)}`).join(', ')}.`, { type: 'success', durationMs: 6000 });
-      if (toy) window.DMTHNotify.show(`${toy.emoji} She was carrying her own toy — looted 1× ${toy.name}!`, { type: 'success', durationMs: 6000 });
+      if (granted.length) lootPop(`🎒 Stripped her stash: ${granted.map(g => `${g.qty}× ${label(g.id)}`).join(', ')}.`);
+      if (toy) lootPop(`${toy.emoji} She was carrying her own toy — looted 1× ${toy.name}!`);
     }
     return { items: granted, toy };
   }
@@ -222,9 +228,10 @@
   ];
   function grantNpcGift(opts = {}) {
     const id = pick(HIGH_TIER_GIFTS);
-    const qty = 1 + (opts.generous && Math.random() < 0.4 ? 1 : 0);
+    // A kill is an EPIC WIN for the john/friend (Gee) — they tip bigger, so a kill-gift skews to 2×.
+    const qty = 1 + ((opts.generous && Math.random() < 0.4) || (opts.kill && Math.random() < 0.7) ? 1 : 0);
     window.DMTHGame.state.addItem(id, qty);
-    if (window.DMTHNotify) window.DMTHNotify.show(`🎁 ${opts.from || 'A client'} left you ${qty}× ${label(id)} — high-tier gift.`, { type: 'success', durationMs: 5000 });
+    lootPop(`🎁 ${opts.from || 'A client'} ${opts.kill ? 'was THRILLED she died on him — left you' : 'left you'} ${qty}× ${label(id)} — high-tier gift.`);
     return { id, qty };
   }
 

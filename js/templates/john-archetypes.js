@@ -220,6 +220,7 @@
       displayName: 'The Butcher', arrivalWeight: 10, payRange: [400, 700],
       healthDrop: [40, 55], bruisesAdded: 6, johnActionId: 'extreme-beatdown',
       permittedActsPreference: ['sex-rough', 'choke', 'humiliation'],
+      chamberToy: 'cattle-prod',
       ability: 'works her over until she\'s a broken, bleeding heap — and pays a fortune for the privilege',
       dialogueTone: 'methodical and merciless, no rush, no mercy'
     },
@@ -235,6 +236,7 @@
       displayName: 'The Pack', arrivalWeight: 7, payRange: [500, 950],
       healthDrop: [45, 60], bruisesAdded: 5, johnActionId: 'extreme-rough-anal',
       permittedActsPreference: ['sex-rough', 'anal', 'creampie', 'bukkake'],
+      chamberToy: 'fucking-machine',
       ability: 'a whole crew at once — they take turns wrecking every hole until she can\'t stand',
       dialogueTone: 'a baying pack, egging each other on'
     },
@@ -242,6 +244,7 @@
       displayName: 'The Strangler', arrivalWeight: 6, payRange: [450, 850],
       healthDrop: [40, 55], bruisesAdded: 2, johnActionId: 'extreme-choke-out',
       permittedActsPreference: ['choke', 'sex-rough'],
+      chamberToy: 'cattle-prod',
       ability: 'fucks her right to the edge of death and drags her back, over and over',
       dialogueTone: 'gets off on the moment her eyes roll back, pays to chase it'
     },
@@ -257,6 +260,7 @@
       displayName: 'The Defrocked Priest', arrivalWeight: 5, payRange: [450, 800],
       healthDrop: [32, 48], bruisesAdded: 3, johnActionId: 'masochist-overload',
       permittedActsPreference: ['humiliation', 'pain', 'sex-rough'],
+      chamberToy: 'monster-dildo',
       ability: 'turns her ruin into a ritual — slow, reverent, obscene, sermonizing as he defiles her',
       dialogueTone: 'mock-holy cadence, calls it penance, savors her shame'
     },
@@ -264,6 +268,7 @@
       displayName: 'The Twins', arrivalWeight: 5, payRange: [550, 1000],
       healthDrop: [42, 58], bruisesAdded: 5, johnActionId: 'extreme-rough-anal',
       permittedActsPreference: ['sex-rough', 'anal', 'creampie', 'bukkake'],
+      chamberToy: 'fucking-machine',
       ability: 'two of them at once, never giving her a second\'s rest between holes',
       dialogueTone: 'finishing each other\'s sentences, egging each other on over her'
     },
@@ -276,7 +281,7 @@
       displayName: 'The Executioner', arrivalWeight: 3, payRange: [700, 1300],
       healthDrop: [55, 75], bruisesAdded: 4, johnActionId: 'extreme-choke-out',
       permittedActsPreference: ['choke', 'sex-rough', 'snuff'],
-      lethal: true, corpse: 'bled-out',
+      lethal: true, corpse: 'bled-out', chamberToy: 'pear-of-anguish',
       killLine: 'gouges his cock into her eye socket until it pops and floods down her cheek, then saws her throat open mid-thrust and fucks the wound while she gurgles and kicks out',
       ability: 'comes to gut her like meat — chokes her out, splits her open from cunt to sternum, fists the wound and keeps pumping while she bleeds out twitching on his cock, films the whole thing for the buyers who pay for a real death',
       dialogueTone: 'calm, surgical, almost bored — he\'s carved up more girls than he can count'

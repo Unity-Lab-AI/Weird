@@ -48,7 +48,7 @@
     'fucking-machine':'a motorized fucking machine pistoning a dildo into her, strapped in place'
   });
 
-  const MAX_TOYS_PER_HOLD = 5;
+  const MAX_TOYS_PER_HOLD = 3;   // Gee: a max of three toys per hold
 
   function spec(id) { return TOYS[id]; }
   function owns(id) { return ((window.DMTHGame.state.current?.inventory?.[id]) || 0) > 0; }
