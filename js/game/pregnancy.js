@@ -137,7 +137,9 @@
     // counter; the chance escalates with it so sustained breeding becomes near-certain, while a
     // one-off is far from guaranteed. Exposure persists across misses, resets on conception.
     const exposure = (preg.breedingExposure || 0) + 1;
-    const chance = Math.min(0.95, (0.16 + exposure * 0.12) * drugProtectionFactor(girl));
+    // SPECIALIZE.1 — a 🐎 brood-mare conceives more readily.
+    const fertility = window.DMTHGame.specialize ? window.DMTHGame.specialize.fertilityMultiplier(girl) : 1;
+    const chance = Math.min(0.95, (0.16 + exposure * 0.12) * drugProtectionFactor(girl) * fertility);
     const roll = Math.random();
     // CUMFILL.1 — the sustained vaginal cum-fill timer (tickCumFill) calls this with
     // guaranteed:true once she's been kept filled long enough, so conception is the payoff of
@@ -470,6 +472,9 @@
       outcomeHistory: [...(preg.outcomeHistory || []), { status: 'delivered', day: preg.gestationDays, method: null, ts: Date.now(), notes: `${girl.name} delivered — newborn awaiting disposal` }]
     };
     window.DMTHGame.state.updateGirl(girlId, { pregnancy: newPreg });
+    // MILKBAL.1 — delivery opens her postpartum lactation window ("a few days after birth",
+    // extended for a big-tits girl), so her breasts keep producing milk after she's birthed.
+    if (window.DMTHGame.milk?.startPostpartum) window.DMTHGame.milk.startPostpartum(girlId);
     if (window.DMTHNotify) {
       window.DMTHNotify.show(`🍼 ${girl.name} has given birth. The newborn can't join the harem — choose how to dispose of the mass (her room → pregnancy panel).`, { type: 'warn', durationMs: 7000 });
     }

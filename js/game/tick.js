@@ -95,8 +95,8 @@
     // 12a-2. Condom wear-off (CONDOM-TIMED.1) — revert any expired condoms to raw.
     if (window.DMTHGame.condoms?.tickExpiry) window.DMTHGame.condoms.tickExpiry();
 
-    // 12b. Milk / lactation economy — passively farm girl-milk from lactating (preggo)
-    // captives when a milk-sucker is owned, + passive black-market / john milk sales.
+    // 12b. Milk / lactation economy — refill every lactating captive's breast-fill, bottle
+    // milk from any Tit-Sucker-rigged hold, run the warm-milk player buff, + passive milk sales.
     if (window.DMTHGame.milk) window.DMTHGame.milk.tickMilk();
 
     // 12c. Per-archetype passive loot gifts (ARCHGIFT.1) — every held girl-type quietly

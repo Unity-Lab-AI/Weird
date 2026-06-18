@@ -343,7 +343,9 @@
   // is hardier; heal/rest can carry her up to ~130 at L9). Used everywhere health is clamped at top.
   function maxHealthFor(girl) {
     const lvl = (girl && girl.bond && girl.bond.bondLevel) || 0;
-    return 100 + Math.min(30, lvl * 3);
+    // SPECIALIZE.1 — a 🩹 pain-proof girl carries a higher max-health ceiling so she survives more.
+    const specBonus = window.DMTHGame.specialize ? window.DMTHGame.specialize.maxHealthBonus(girl) : 0;
+    return 100 + Math.min(30, lvl * 3) + specBonus;
   }
 
   // Apply an action's deltas to a girl. Optional opts:

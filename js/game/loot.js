@@ -44,7 +44,9 @@
     'blue-pill', 'energy-shot', 'the-good-coke', 'oyster-tonic',
     // TOYS.1 — lower-tier toys/implements can be FOUND in the world too (not just bought). The
     // gory high-tier chamber implements stay shop/level-gated to keep them special.
-    'wand-vibrator', 'dildo-set', 'loop-gag', 'flogger-whip', 'fucking-machine'
+    'wand-vibrator', 'dildo-set', 'loop-gag', 'flogger-whip', 'fucking-machine',
+    // TITSUCKER.1 — the Tit Sucker machine is a rare lootable find (attach one per hold).
+    'tit-sucker'
   ];
   const ITEM_LABEL = { 'coke-bumps': 'coke', mdma: 'molly', wine: 'whiskey', 'duct-tape': 'duct tape', 'zip-ties': 'zip-ties', 'basic-meal': 'meal', 'bottled-water': 'water', 'condom-french-tickler': 'french tickler' };
   function label(id) { return ITEM_LABEL[id] || String(id).replace(/-/g, ' '); }
@@ -214,7 +216,9 @@
     'handcuffs', 'shackles', 'harness',
     'mdma', 'coke-bumps',
     'monster-dildo', 'fucking-machine', 'flogger-whip', 'cattle-prod',
-    'blue-pill', 'ben-wa-balls', 'vaginal-expander', 'condom-magnum'
+    'blue-pill', 'ben-wa-balls', 'vaginal-expander', 'condom-magnum',
+    // TITSUCKER.1 — a generous friend/john might gift you a whole Tit Sucker machine.
+    'tit-sucker'
   ];
   function grantNpcGift(opts = {}) {
     const id = pick(HIGH_TIER_GIFTS);

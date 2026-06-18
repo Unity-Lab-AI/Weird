@@ -418,6 +418,52 @@
               ` : ''}`;
           })()}
 
+          ${(() => {
+            // 🍼 MILKBAL.1 / TITSUCKER.1 — lactation panel: breast-fill bar, Tit Sucker rig
+            // (one per hold), and the warm-milk buff timer. The suck-her-milk act itself lives
+            // in the Love quick-actions tab.
+            const milk = window.DMTHGame.milk;
+            if (!milk) return '';
+            const lactating = milk.isLactating(girl);
+            const fill = milk.breastFill(girl);
+            const cap = milk.breastCapFor(girl);
+            const pct = cap > 0 ? Math.round((fill / cap) * 100) : 0;
+            const rigged = milk.holdHasTitSucker(girl);
+            const owned = milk.ownedTitSuckers();
+            const bigTits = cap > milk.breastCapFor({}) ; // cap doubled by the big-tits spec
+            return `<h3>🍼 Lactation</h3>
+              <div class="stat-row" data-tooltip="A captive lactates while pregnant (2nd trimester+) or freshly postpartum — otherwise her breasts are dry."><span>Status</span><b>${lactating ? '🤱 lactating' : '— dry'}</b></div>
+              ${lactating ? `
+                <div class="bar-row" data-tooltip="Her breast-milk fill — refills slowly over ~1 game day. Suck her dry (Love → suck her milk, needs ≥75% full) for a timed warm-milk buff, or rig a Tit Sucker to bottle it.${bigTits ? ' 🍈 Cow Tits: double capacity + output.' : ''}">
+                  <label>🥛 Breast fill</label><div class="bar"><div class="bar-fill" style="width:${pct}%;background:#e8d8a0"></div></div><b>${fill.toFixed(1)}/${cap}L</b></div>
+              ` : ''}
+              <div class="stat-row" data-tooltip="The Tit Sucker machine bottles this girl's milk into your inventory over time — one per hold. Sell or drink bottled milk in the Black Market.">
+                <span>🍼 Tit Sucker</span><b>${rigged ? '✅ rigged on this hold' : '— none'}</b>
+                ${rigged
+                  ? `<button class="btn-small" data-titsucker-detach data-tooltip="Pull the Tit Sucker off this hold and return it to inventory.">Detach</button>`
+                  : `<button class="btn-small btn-primary" data-titsucker-attach ${owned < 1 ? 'disabled' : ''} data-tooltip="${owned < 1 ? 'No Tit Sucker in inventory — buy one in the Black Market (Milk Trade) or loot one.' : 'Attach an owned Tit Sucker to this hold to bottle her milk while she lactates.'}">Attach (${owned})</button>`}
+              </div>
+              ${milk.buffActive() ? `<div class="stat-row small" data-tooltip="The warm-milk high from sucking a tit dry — Nut Reserve regen + satisfaction trickle each tick. Fades soon; suck another full tit to keep it going."><span>🥛 Warm-milk high</span><b class="gold">${milk.buffTicksLeft()} ticks left</b></div>` : ''}`;
+          })()}
+
+          ${(() => {
+            // 🧬 SPECIALIZE.1 — per-girl permanent specialization upgrades.
+            const sp = window.DMTHGame.specialize;
+            if (!sp) return '';
+            const ownedSpecs = sp.list(girl);
+            const money = window.DMTHGame.state.current?.wallet?.money || 0;
+            return `<h3>🧬 Specializations</h3>
+              <p class="small muted">Permanent fucked-up upgrades that specialize her for a role. Bought once, never removed.</p>
+              ${ownedSpecs.length ? `<div class="stat-row small"><span>Installed</span><b>${ownedSpecs.map(s => `${s.emoji} ${escapeHtml(s.displayName)}`).join(' · ')}</b></div>` : ''}
+              <div class="btn-row" style="flex-wrap:wrap">
+                ${sp.all().map(s => {
+                  const has = sp.has(girl, s.id);
+                  const afford = money >= s.cost;
+                  return `<button class="btn-small ${has ? '' : 'btn-primary'}" data-specialize="${s.id}" ${has || !afford ? 'disabled' : ''} data-tooltip="${escapeHtml(s.notes)}">${s.emoji} ${escapeHtml(s.displayName)} ${has ? '✅' : `— $${s.cost.toLocaleString()}`}</button>`;
+                }).join('')}
+              </div>`;
+          })()}
+
           <h3>Drugs</h3>
           <div class="btn-row">
             ${(() => {
@@ -1271,6 +1317,21 @@
         } catch (e) { alert(e.message); }
       };
     }
+
+    // TITSUCKER.1 — attach / detach the per-hold Tit Sucker.
+    const tsAttach = el.querySelector('[data-titsucker-attach]');
+    if (tsAttach) tsAttach.onclick = () => { const r = window.DMTHGame.milk.attachTitSucker(girl.id); if (!r.ok) { alert(r.reason); return; } window.DMTHRouter.handle(); };
+    const tsDetach = el.querySelector('[data-titsucker-detach]');
+    if (tsDetach) tsDetach.onclick = () => { const r = window.DMTHGame.milk.detachTitSucker(girl.id); if (!r.ok) { alert(r.reason); return; } window.DMTHRouter.handle(); };
+
+    // SPECIALIZE.1 — buy a permanent specialization onto this girl.
+    el.querySelectorAll('[data-specialize]').forEach(b => {
+      b.onclick = () => {
+        const r = window.DMTHGame.specialize.apply(girl.id, b.dataset.specialize);
+        if (!r.ok) { alert(r.reason); return; }
+        window.DMTHRouter.handle();
+      };
+    });
 
     // Abortion method buttons. Each consumes 1 of the corresponding catalog
     // item from inventory and applies the resolver. Confirmation dialog before firing.

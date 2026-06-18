@@ -262,9 +262,9 @@ Per Gee: every new action/stat/button ships with a tooltip that is **non-intrusi
 > *"running memory with each girl ... persist between visits with a clear button ... send past responses of bothe the user and the girl back to the model"*
 - **CHATHIST.1/.2** ✅ — turns persist in IDB + clear button (both sides) + last 16 turns fed to the model.
 
-## EPIC AA — Girl specialization upgrades + milk balance + Tit Sucker ⏳ QUEUED
+## EPIC AA — Girl specialization upgrades + milk balance + Tit Sucker ✅ SHIPPED
 > *"specilized girls for certain things like one could have bigs tits so they make 2x the milk when preggo and afor a few days after birth"* · *"dont make it so ill have littearly 1000000 liters of milk. one suck tit ... timed ... u can suck a tit dry ... dont want ... endless milk until i have like 5+ preggos"* · *"\"Tit sucker\"(name of the machine)(lootable and attachable one to each hold and buy able"*
-- ⏳ **SPECIALIZE.1** per-girl specialization upgrades (big-tits = 2× milk preggo + post-birth, + more) · **MILKBAL.1** breasts refill over time / suck-dry / no endless milk (abundance only at 5+ preggos) · **TITSUCKER.1** rename milk-sucker → "Tit Sucker", one per hold, bottles + stores slowly.
+- ✅ **SPECIALIZE.1** NEW `specialize.js` per-girl registry (Cow Tits 2× milk / Cum-Dump +cap / Brood Mare fertility / Deadened Nerves +max-HP), bought in room panel · ✅ **MILKBAL.1** per-girl `breastMilk` refills only while lactating; suck needs ≥75% full → empties her → timed warm-milk buff (shorter than refill, so no single-girl uptime; abundance only at 5+ preggos) · ✅ **TITSUCKER.1** renamed → "Tit Sucker", `tit-sucker` item buyable + lootable + attachable ONE per hold, bottles whole liters bounded by her fill; legacy milk-sucker auto-converts.
 
 ## EPIC AB — Shop rework (daily limited stock) + shady rename ✅ SHIPPED (The Flesh Fence)
 > *"i dont want the market to have unlimited of everything things are level locked and there are max per day you can buy ... high teir ... only a hand full apera in store each day ... refreshes every day with a different variety ... but dont make it to weere i have to wait weeks ... make the markst not a market but some shady fucked up name"*

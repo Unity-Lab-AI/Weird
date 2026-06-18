@@ -169,7 +169,16 @@
         if (h && !Array.isArray(h.toys)) h.toys = [];
         if (h && typeof h.condomReserve !== 'number') h.condomReserve = 0;
         if (h && (!h.drugReserve || typeof h.drugReserve !== 'object')) h.drugReserve = {};
+        // TITSUCKER.1 — one Tit Sucker can be attached per hold; it bottles the held girl's milk.
+        if (h && typeof h.titSucker !== 'boolean') h.titSucker = false;
       }
+    }
+    // TITSUCKER.1 — legacy conversion. The old single global 'milk-sucker' rig is replaced by
+    // per-hold 'tit-sucker' machines. Carry any owned legacy rig over as an unattached Tit
+    // Sucker the player re-attaches to a hold. Idempotent (only fires while the old key exists).
+    if (s.inventory && s.inventory['milk-sucker']) {
+      s.inventory['tit-sucker'] = (s.inventory['tit-sucker'] || 0) + s.inventory['milk-sucker'];
+      delete s.inventory['milk-sucker'];
     }
     if (!s.roster) return;
     // Known archetype-id → canonical display name fallbacks for the seeded captives.
@@ -216,7 +225,14 @@
         extremeStreak: 0,
         // CUMCAP.1 — per-girl cum-load STORAGE capacity (trained up by vaginal-weight tools).
         // cumLoad is clamped to this; near-cap = pay premium, sustained high = mood/health/escape cost.
-        cumLoadCap: 10
+        cumLoadCap: 10,
+        // MILKBAL.1 — per-girl breast-milk fill (liters). Refills slowly over time ONLY while
+        // she's lactating (preggo 2nd-trimester+ OR inside the postpartum window). A direct
+        // suck empties her; a Tit Sucker bottles it. Bounded by breastCap → no endless milk.
+        breastMilk: 0,
+        // MILKBAL.1 — postpartum lactation window expiry (real-ms timestamp). Set on delivery;
+        // while now < this she keeps lactating "a few days after birth". 0 = not in window.
+        lactatingUntil: 0
       };
       for (const [k, v] of Object.entries(BODY_DEFAULTS)) {
         if (g.body[k] == null) g.body[k] = v;
@@ -238,6 +254,9 @@
       // New per-girl array fields (MULTIGIRL.3 scene roster + DEATHSTATS.1 dungeon history).
       if (!Array.isArray(g.dungeonHistory)) g.dungeonHistory = [];
       if (!Array.isArray(g.sceneGirlIds)) g.sceneGirlIds = [];
+      // SPECIALIZE.1 — per-girl specialization upgrades (e.g. big-tits = 2× milk). Ids only;
+      // effects resolved live by js/game/specialize.js.
+      if (!Array.isArray(g.specializations)) g.specializations = [];
     }
   }
 
