@@ -213,7 +213,7 @@
                 `<option value="${v.id}" ${v.id === girl.voiceId ? 'selected' : ''}>${v.displayName} — ${v.timbre}</option>`
               ).join('')}
             </select>
-            <button id="voice-preview" class="btn-small" title="Hear a sample in this voice">🔊</button>
+            <button id="voice-preview" class="btn-small" data-tooltip="Hear a sample in this voice">🔊</button>
           </div>
           <div id="body-stats-panel">${renderBodyStatsHTML()}</div>
           <h3>Stats</h3>
@@ -408,7 +408,7 @@
                 <div class="bar-row"><label>Term</label><div class="bar"><div class="bar-fill" style="width:${Math.min(100, Math.round((preg.gestationDays/280)*100))}%"></div></div><b>${Math.round((preg.gestationDays/280)*100)}%</b></div>
                 <div class="small muted">Source: ${preg.conceptionSource || 'organic'}${preg.johnEncounterId ? ' · john ledger: ' + preg.johnEncounterId : ''}</div>
                 <div class="btn-row" style="margin-top:6px">
-                  ${methods.map(m => `<button class="btn-small ${m.inWindow && m.inStock ? 'btn-danger' : ''}" data-abort="${m.id}" ${m.inWindow && m.inStock ? '' : 'disabled'} title="${m.label}${!m.inStock ? ' — none in inventory' : ''}${!m.inWindow ? ' — outside window (' + m.windowDays[0] + '-' + m.windowDays[1] + ')' : ''} · ${Math.round(m.complications*100)}% complication · +${m.notorietyHit} notoriety">${m.emoji} ${m.label}${m.owned > 0 ? ` (${m.owned})` : ''}</button>`).join('')}
+                  ${methods.map(m => `<button class="btn-small ${m.inWindow && m.inStock ? 'btn-danger' : ''}" data-abort="${m.id}" ${m.inWindow && m.inStock ? '' : 'disabled'} data-tooltip="${escapeHtml(`${m.label}${!m.inStock ? ' — none in inventory' : ''}${!m.inWindow ? ' — outside window (' + m.windowDays[0] + '-' + m.windowDays[1] + ')' : ''} · ${Math.round(m.complications*100)}% complication · +${m.notorietyHit} notoriety`)}">${m.emoji} ${m.label}${m.owned > 0 ? ` (${m.owned})` : ''}</button>`).join('')}
                 </div>
               ` : ''}
               ${preg.status === 'delivered' && preg.pendingNewbornDisposal && window.DMTHGame.pregnancy?.availableNewbornMethods ? (() => {
@@ -524,14 +524,11 @@
           <h3>Drugs</h3>
           <div class="btn-row">
             ${(() => {
-              // Drug buttons. Tooltip = descriptive text + compact stat preview from
-              // action-effects ACTIONS spec so the player sees what the drug
-              // does to stamina/health/mood/arousal before clicking.
-              const pc = window.DMTHGame.actionEffects?.previewCost || (() => '');
-              const dt = (id, label) => {
-                const c = pc(id);
-                return c ? `${label}\n📊 ${c}` : label;
-              };
+              // Drug buttons. Tooltip = TOOLTIPS-FULL.1 thorough builder — descriptive text +
+              // the drug's full modifiers (👤 HER line) + the player's gains/cost (🎮 YOU line)
+              // so the player sees exactly what the drug does before clicking.
+              const at = window.DMTHGame.actionEffects?.actionTooltip;
+              const dt = (id, label) => at ? at(id, label) : label;
               return `
                 <button class="btn-small" data-drug="coke" data-tooltip="${escapeHtml(dt('drug-coke', 'Line of coke. Rapid-fire chatter, jaw clench, dilated pupils. 45-min curve.'))}">❄️ Line of coke</button>
                 <button class="btn-small" data-drug="weed" data-tooltip="${escapeHtml(dt('drug-weed', 'Roll her a joint. Slow blinks, drifty word choice, relaxed posture. 2-hour curve.'))}">🌿 Roll a joint</button>
@@ -742,7 +739,7 @@
       if (!voiceBtn) return;
       const on = localStorage.getItem(VOICE_KEY) !== 'off';
       voiceBtn.textContent = on ? '🔊' : '🔇';
-      voiceBtn.title = on ? 'Voice ON — click to mute' : 'Voice OFF — click to unmute';
+      voiceBtn.setAttribute('data-tooltip', on ? 'Voice ON — click to mute' : 'Voice OFF — click to unmute');
     }
     syncVoiceBtn();
     if (voiceBtn) {
@@ -756,7 +753,7 @@
         const chromeBtn = document.getElementById('chrome-voice');
         if (chromeBtn) {
           chromeBtn.textContent = wasOn ? '🔇' : '🔊';
-          chromeBtn.title = wasOn ? 'Voice OFF — click to enable' : 'Voice ON — click to mute';
+          chromeBtn.setAttribute('data-tooltip', wasOn ? 'Voice OFF — click to enable' : 'Voice ON — click to mute');
         }
       };
     }
@@ -2107,7 +2104,7 @@
     // and the typed-input Send button. They re-enable when the page re-renders post-wake-up.
     if (isUnconscious) {
       el.querySelectorAll('.qa-btn, [data-drug], [data-feed], [data-water], #selfie-btn, #heal-btn, [data-mode], #record-toggle, #list-sale, #derobe-btn, #strip-all-btn, #send, #mic-btn')
-        .forEach(b => { b.disabled = true; b.title = (b.title || '') + (b.title ? ' · ' : '') + 'she\'s tranquilized — out cold'; });
+        .forEach(b => { b.disabled = true; const t = b.getAttribute('data-tooltip') || ''; b.setAttribute('data-tooltip', t + (t ? '\n' : '') + '💉 she\'s tranquilized — out cold'); });
       const userIn = el.querySelector('#user-in');
       if (userIn) { userIn.disabled = true; userIn.placeholder = 'she\'s tranquilized — wait for wake-up'; }
     }
@@ -2118,7 +2115,7 @@
     // only), KEEP selfie/derobe/strip/record (still pose + record the body).
     if (isDead) {
       el.querySelectorAll('[data-drug], [data-feed], [data-water], [data-drop-food], [data-drop-water], [data-pickup-food], [data-pickup-water], #heal-btn, [data-mode], #list-sale, [data-abort]')
-        .forEach(b => { b.disabled = true; b.title = (b.title || '') + (b.title ? ' · ' : '') + 'she\'s deceased — body cannot metabolize / heal / sell'; });
+        .forEach(b => { b.disabled = true; const t = b.getAttribute('data-tooltip') || ''; b.setAttribute('data-tooltip', t + (t ? '\n' : '') + '☠️ she\'s deceased — body cannot metabolize / heal / sell'); });
     }
 
     // Live mm:ss countdown ticker. Updates every second; on wake-up, fires

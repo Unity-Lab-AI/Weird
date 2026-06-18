@@ -135,7 +135,7 @@
           <button class="ssd-repair-btn-primary" data-action="hard-repair" ${!m ? 'disabled' : ''}>
             🔧 Delete + re-pull ${escapeHtml(m || 'model')}
           </button>
-          <button class="ssd-repair-btn-secondary" data-action="soft-repair" ${!m ? 'disabled' : ''} title="Pull without deleting first. Try this if hard repair fails or you want to preserve the manifest.">
+          <button class="ssd-repair-btn-secondary" data-action="soft-repair" ${!m ? 'disabled' : ''} data-tooltip="Pull without deleting first. Try this if hard repair fails or you want to preserve the manifest.">
             ↻ Soft re-pull only
           </button>
           <button class="ssd-repair-btn-secondary" data-action="cancel">Cancel</button>

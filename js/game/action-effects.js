@@ -1012,6 +1012,84 @@
     return cost ? `${label}\n📊 ${cost}` : label;
   }
 
+  // TOOLTIPS-FULL.1 — THOROUGH non-truncated tooltip (Gee: "tool tips and shit need to be
+  // thourough ie drug types need to show theri modifiers, actions need to show there buffs and
+  // debuffs for bothe the girl and the player"). Lays the full effect out in plain language,
+  // split into a 👤 HER line (her body/bond buffs+debuffs) and a 🎮 YOU line (the PLAYER's gains
+  // + cost: satisfaction, sex-drive fill, DEPRAVITY XP, Nut Reserve spend, crime multiplier).
+  // No truncation — the DMTHTooltips bubble pre-wraps. Falls back to the bare label off-catalog.
+  const GIRL_FIELD_LABELS = {
+    health: 'Health', stamina: 'Stamina', mood: 'Mood', arousal: 'Arousal', wetness: 'Wetness',
+    cumLoad: 'Cum-load', bruises: 'Bruises', bondXP: 'Stockholm', bondDebt: 'Bond-debt',
+    escapeRisk: 'Escape-risk', notoriety: 'Notoriety'
+  };
+  const GIRL_FIELD_ORDER = ['health', 'stamina', 'mood', 'arousal', 'wetness', 'cumLoad', 'bruises', 'bondXP', 'bondDebt', 'escapeRisk', 'notoriety'];
+
+  // Signed delta, integer or float (escapeRisk is a 0-1 float).
+  function fmtSignedDelta(v) {
+    if (Number.isInteger(v)) return (v > 0 ? '+' : '') + v;
+    return (v > 0 ? '+' : '') + (Math.round(v * 100) / 100);
+  }
+
+  // HER side — every non-zero body/bond delta the act carries, in plain language.
+  function girlEffectLine(a) {
+    const parts = [];
+    for (const k of GIRL_FIELD_ORDER) {
+      const v = a[k];
+      if (v == null || v === 0) continue;
+      parts.push(`${GIRL_FIELD_LABELS[k]} ${fmtSignedDelta(v)}`);
+    }
+    return parts.join(' · ');
+  }
+
+  // YOU side — the PLAYER's personal gains + cost for performing this act himself. Proxy acts
+  // (a john servicing her — john-* ids) credit the player NOTHING personal: he just gets paid.
+  function playerEffectLine(actionId, a) {
+    if (String(actionId).startsWith('john-')) {
+      return 'paid per-encounter · no personal stat gain (he services her for you)';
+    }
+    const sat = a.satisfaction || 0;
+    const crime = crimeMultiplier(actionId);
+    const ps = window.DMTHGame.playerStamina;
+    const nut = (ps && ps.costFor) ? ps.costFor(actionId) : 0;
+    const depXp = Math.max(1, Math.round((sat || 1) * crime));
+    const bits = [];
+    if (sat) { bits.push(`Satisfaction +${sat}`); bits.push(`Sex-drive +${sat}`); }
+    bits.push(`Depravity XP ~${depXp}`);
+    if (nut) bits.push(`Nut Reserve −${nut}`);
+    if (crime > 1) bits.push(`crime ×${crime}`);
+    return bits.join(' · ');
+  }
+
+  // The full thorough tooltip: headline label + full notes + 👤 HER line + 🎮 YOU line.
+  function actionTooltip(actionId, label) {
+    const a = ACTIONS[actionId];
+    if (!a) return label || '';
+    const lines = [];
+    if (label) lines.push(label);
+    if (a.notes && a.notes !== label) lines.push(a.notes);
+    const her = girlEffectLine(a);
+    if (her) lines.push('👤 HER: ' + her);
+    const you = playerEffectLine(actionId, a);
+    if (you) lines.push('🎮 YOU: ' + you);
+    return lines.join('\n');
+  }
+
+  // Thorough tooltip for a permanent OWNERSHIP MARK (brand / tattoo / piercing) — these live in
+  // MARK_SPECS, not ACTIONS, so they need their own builder. Leads with the PERMANENT flag.
+  function markTooltip(markKey, label) {
+    const s = MARK_SPECS[markKey];
+    if (!s) return label || '';
+    const lines = [];
+    lines.push(label || s.label);
+    lines.push('⛓️ PERMANENT · IRREVERSIBLE — ' + (s.notes || ''));
+    const her = girlEffectLine(s);
+    if (her) lines.push('👤 HER: ' + her);
+    const sat = s.satisfaction || 0;
+    lines.push('🎮 YOU: ' + (sat ? `Satisfaction +${sat} · Sex-drive +${sat} · ` : '') + 'Depravity XP ~8');
+    return lines.join('\n');
+  }
+
   function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
 
   // Defensive helper for any subsystem that needs to advance the body fields per-tick.
@@ -1384,6 +1462,10 @@
     matchDirectedAction,
     previewCost,
     tooltipForAction,
+    actionTooltip,
+    markTooltip,
+    girlEffectLine,
+    playerEffectLine,
     tickStaminaHealth,
     johnHappinessForGirl,
     LIMB_KEYS, LIMB_LABEL, NUGGET_HEAL_GATE,

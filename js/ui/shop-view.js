@@ -5,6 +5,43 @@
 
   const SUBCATS = ['blunt','sedation','restraint','containment','toys','drugs','food','player-boost','dungeon-upgrade','consumables','utility','tech'];
 
+  // TOOLTIPS-FULL.1 — build a THOROUGH shop-item tooltip (Gee: "drug types need to show theri
+  // modifiers ... toys show fx"). Starts from notes, then appends the item's REAL numbers when we
+  // can resolve them: a toy's HER/YOU fx (toys.toyTooltip), a drug's body modifiers + high/duration/
+  // use-case (action-effects + drug-scheduler), and a player-boost item's Nut Reserve refill.
+  const DRUGKEY_TO_ACTION = {
+    coke: 'drug-coke', weed: 'drug-weed', mdma: 'drug-mdma', acid: 'drug-acid',
+    whiskey: 'drug-whiskey', alcohol: 'drug-whiskey', ketamine: 'drug-ketamine', tranquilizer: 'drug-tranquilizer'
+  };
+  function shopItemTooltip(it) {
+    const AE = window.DMTHGame.actionEffects;
+    const lines = [`${it.emoji || ''} ${it.displayName}`.trim()];
+    if (it.notes) lines.push(it.notes);
+    // Toy → pull its HER / YOU / flag lines (skip the duplicate header + notes).
+    if (window.DMTHGame.toys?.TOYS?.[it.id] && window.DMTHGame.toys.toyTooltip) {
+      window.DMTHGame.toys.toyTooltip(it.id).split('\n')
+        .filter(l => /^(👤|🎮|⚠|🔒)/.test(l))
+        .forEach(l => lines.push(l));
+    }
+    // Drug → body modifiers (action-effects) + high / duration / use-case (drug-scheduler).
+    const dkey = window.DMTHGame.drugs?.ITEM_TO_DRUG?.[it.id];
+    if (dkey) {
+      const a = AE?.ACTIONS?.[DRUGKEY_TO_ACTION[dkey]];
+      if (a && AE.girlEffectLine) { const her = AE.girlEffectLine(a); if (her) lines.push('👤 HER: ' + her); }
+      const curve = window.DMTHGame.drugs.DRUG_CURVES?.[dkey];
+      if (curve) {
+        const mins = Math.round((curve.wearOffMs || 0) / 60000);
+        const uc = window.DMTHGame.drugs.useCaseOf ? window.DMTHGame.drugs.useCaseOf(dkey) : null;
+        lines.push(`💊 High +${curve.highContribution} · ~${mins}min${uc ? ' · use: ' + uc : ''}${curve.canOD ? ' · can OD' : ''}`);
+      }
+    }
+    // Player-boost refill → Nut Reserve gain.
+    if (typeof it.playerRefill === 'number') {
+      lines.push(`💦 Nut Reserve ${it.playerRefill >= 999 ? 'FULL refill' : '+' + it.playerRefill}`);
+    }
+    return lines.join('\n');
+  }
+
   function render(el, params) {
     const subcat = params.sub || 'sedation';
     const s = window.DMTHGame.state.current;
@@ -29,8 +66,8 @@
     };
     el.innerHTML = `
       <div class="panel">
-        <h2>🩸 The Flesh Fence</h2>
-        <p class="small muted">The fence's shady supply runs. Cheap staples (condoms / food) never run out — the good shit (high-tier tools, toys, chems) is level-locked and only a handful shows up each day. Stock refreshes every game-day. (Everything-unlocked start = the fence keeps everything fully stocked for you.)</p>
+        <h2>🏴 The Defilers' Bloc</h2>
+        <p class="small muted">An off-grid anarchist cell that arms the appetite no legitimate market will touch — kidnap chems, restraints, chamber implements, and the slop you keep your stock alive on. Cheap staples (condoms / food) never run out; the good shit (high-tier tools, toys, chems) is level-locked and only a handful drops each day. The Bloc restocks every game-day. (Everything-unlocked start = the Bloc keeps you fully armed.)</p>
         <div class="tabs">
           ${SUBCATS.map(c => `<a href="#shop?sub=${c}" class="tab ${c === subcat ? 'active' : ''}" data-tooltip="${SUBCAT_TOOLTIPS[c] || c}">${c}</a>`).join('')}
         </div>
@@ -41,7 +78,7 @@
           ${listings.map(it => {
             const have = s.inventory[it.id] || 0;
             const canAfford = s.wallet.money >= it.price;
-            const tooltip = (it.notes || it.displayName || '').replace(/"/g, '&quot;');
+            const tooltip = shopItemTooltip(it).replace(/"/g, '&quot;');
             // SHOPREWORK.1 — stock + level-lock state.
             const stockTxt = it.staple ? '∞' : (it.available > 0 ? `${it.available} today` : 'sold out today');
             const soldOut = !it.staple && it.available <= 0;

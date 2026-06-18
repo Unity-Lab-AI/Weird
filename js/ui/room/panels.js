@@ -76,7 +76,9 @@
       const isAtt = attached.includes(id);
       const have = inv[id] || 0;
       const lvlOk = T.levelOk(id);
-      const tip = `${t.notes}${t.gore ? ' · ⚠ gore/mutilation' : ''}${t.masoFlips ? ' · a masochist craves this' : ''}`.replace(/"/g, '&quot;');
+      // TOOLTIPS-FULL.1 — thorough fx-split tooltip (HER body/bond fx + YOU satisfaction/sex-drive/
+      // DEPRAVITY/WANTED) from the toy spec. Falls back to notes if the builder isn't loaded.
+      const tip = (T.toyTooltip ? T.toyTooltip(id) : `${t.notes}${t.gore ? ' · ⚠ gore/mutilation' : ''}${t.masoFlips ? ' · a masochist craves this' : ''}`).replace(/"/g, '&quot;');
       const lock = lvlOk ? '' : ` <span class="muted">🔒 L${t.levelReq}</span>`;
       let btns;
       if (isAtt) {

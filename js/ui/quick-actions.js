@@ -338,24 +338,19 @@
       </div>
       <div class="qa-grid">
         ${TABS[currentTab].actions.map((a, i) => {
-          // Build the tooltip: action text + compact stat-delta preview from action-effects
-          // for any action that routes through applyAction. Switched from native title to
-          // data-tooltip so the DMTHTooltips engine renders styled hover bubbles with
-          // multi-line layout (\\n → soft wrap). Stat codes: ST/HP/MD/AR/WT/BR/CL/BX/BD/SAT.
-          let cost = a.applyId && window.DMTHGame?.actionEffects?.previewCost
-            ? window.DMTHGame.actionEffects.previewCost(a.applyId)
-            : '';
-          // Ownership marks aren't in the ACTIONS table — build their tooltip from MARK_SPECS
-          // so the player sees the full (permanent, irreversible) effect cost.
-          if (!cost && a.markKey && window.DMTHGame?.actionEffects?.MARK_SPECS) {
-            const s = window.DMTHGame.actionEffects.MARK_SPECS[a.markKey];
-            if (s) {
-              const bits = [`HP${s.health}`, s.bruises ? `BR+${s.bruises}` : '', s.arousal ? `AR+${s.arousal}` : '',
-                            s.mood ? `MD${s.mood}` : '', `BD+${s.bondDebt}`, `SAT+${s.satisfaction}`].filter(Boolean);
-              cost = `PERMANENT · IRREVERSIBLE · ${bits.join(' · ')}`;
-            }
+          // TOOLTIPS-FULL.1 — thorough tooltip: action text + the act's full buffs/debuffs split
+          // into a 👤 HER line and a 🎮 YOU line (satisfaction / sex-drive / DEPRAVITY / Nut
+          // Reserve / crime-mult). data-tooltip → DMTHTooltips styled multi-line bubble, no
+          // native-title truncation. Ownership marks live in MARK_SPECS, not ACTIONS.
+          const ae = window.DMTHGame?.actionEffects;
+          let tip;
+          if (a.applyId && ae?.actionTooltip) {
+            tip = ae.actionTooltip(a.applyId, a.text);
+          } else if (a.markKey && ae?.markTooltip) {
+            tip = ae.markTooltip(a.markKey, a.text);
+          } else {
+            tip = a.text;
           }
-          const tip = cost ? `${a.text}\n📊 ${cost}` : a.text;
           // STATGATE.1 / FORCEGATE.1 — unified gate (Stockholm + HP-threshold both ways + after-
           // extreme + tool). Forceable gates open under the 💢 FORCE toggle (at a cost on use).
           const g = gateOf(a, girl, forceOn);

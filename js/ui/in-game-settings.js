@@ -52,9 +52,9 @@
                 <div class="stat-row small"><span>Ticks</span><b>${s.tickCount}</b></div>
               ` : `<div class="muted small">empty</div>`}
               <div class="btn-row">
-                ${s.id !== 'main' ? `<button class="btn-small" data-save-to="${s.id}">Save from main</button>` : ''}
-                ${s.exists && s.id !== 'main' ? `<button class="btn-small btn-primary" data-load-from="${s.id}">Load</button>` : ''}
-                ${s.exists && s.id !== 'main' ? `<button class="btn-small btn-danger" data-wipe="${s.id}">Wipe</button>` : ''}
+                ${s.id !== 'main' ? `<button class="btn-small" data-save-to="${s.id}" data-tooltip="Copy your live 'main' game into this backup slot, overwriting whatever's here.">Save from main</button>` : ''}
+                ${s.exists && s.id !== 'main' ? `<button class="btn-small btn-primary" data-load-from="${s.id}" data-tooltip="Load this slot into 'main' — your current live game is overwritten. Confirms first.">Load</button>` : ''}
+                ${s.exists && s.id !== 'main' ? `<button class="btn-small btn-danger" data-wipe="${s.id}" data-tooltip="Permanently delete this backup slot. Doesn't touch your live 'main' game.">Wipe</button>` : ''}
               </div>
             </div>
           `).join('')}
@@ -63,27 +63,27 @@
 
       <div class="panel">
         <h2>Ollama</h2>
-        <label class="field"><span>Model</span>
+        <label class="field" data-tooltip="The local Ollama model that voices every girl + NPC. Use an uncensored/abliterated build (dolphin / etc.) so it never refuses the content. Changing it reloads the game."><span>Model</span>
           <select id="s-model">${catalog.map(m => `<option value="${m.id}" ${m.id === cfg.OLLAMA.activeModel ? 'selected' : ''}>${m.displayName}</option>`).join('')}</select>
         </label>
-        <label class="field"><span>Temperature</span>
+        <label class="field" data-tooltip="Sampling temperature 0–2. Lower = more focused/consistent; higher = wilder/more varied. ~0.8–1.0 is the sweet spot for in-character filth. Reloads on change."><span>Temperature</span>
           <input type="number" id="s-temp" step="0.05" min="0" max="2" value="${cfg.OLLAMA.temperature}" />
         </label>
         <div class="stat-row" style="margin-top:10px">
-          <span>Model health</span>
+          <span data-tooltip="Whether the active model actually answers a real chat ping right now.">Model health</span>
           <span id="s-ollama-health" class="small muted">click check →</span>
-          <button class="btn-small" id="s-check-health">🩺 Check now</button>
-          <button class="btn-small btn-primary" id="s-repair-now">🔧 Re-pull (repair)</button>
+          <button class="btn-small" id="s-check-health" data-tooltip="Probe the active model with a real chat ping — tells you if it's healthy or its weights are missing/corrupt.">🩺 Check now</button>
+          <button class="btn-small btn-primary" id="s-repair-now" data-tooltip="Re-pull (re-download) the model weights — fixes a model whose files got deleted by disk cleanup, without leaving the game.">🔧 Re-pull (repair)</button>
         </div>
         <p class="small muted">Probes the active model with a real chat ping. If weights were deleted from disk (Windows Storage Sense, cleanup tools), re-pull fixes it without leaving the game.</p>
       </div>
 
       <div class="panel">
         <h2>Kokoro voice (default)</h2>
-        <label class="field"><span>Voice</span>
+        <label class="field" data-tooltip="Default Kokoro TTS voice for new captives (each girl can still be re-voiced in her room). Only girls speak aloud — johns/friends are text-only. Reloads on change."><span>Voice</span>
           <select id="s-voice">${voices.map(v => `<option value="${v.id}" ${v.id === cfg.KOKORO.defaultFemaleVoice ? 'selected' : ''}>${v.displayName} (${v.accent}) — ${v.timbre}</option>`).join('')}</select>
         </label>
-        <label class="field"><span>Speed</span>
+        <label class="field" data-tooltip="Playback speed 0.5–2× for the spoken voice. 1.0 = natural. Reloads on change."><span>Speed</span>
           <input type="number" id="s-speed" step="0.05" min="0.5" max="2" value="${cfg.KOKORO.defaultSpeed}" />
         </label>
       </div>
@@ -108,7 +108,7 @@
             </div>
           `;
         })()}
-        <label class="field"><span>${cfg.POLLINATIONS.apiKey ? 'Replace key' : 'API key'}</span>
+        <label class="field" data-tooltip="Optional Pollinations key (sk_ or pk_) for image generation — paste one to lift the anonymous rate limit + unlock better models. Without it images use the rate-limited anonymous endpoint. Reloads on save."><span>${cfg.POLLINATIONS.apiKey ? 'Replace key' : 'API key'}</span>
           <input type="password" id="s-polly" ${cfg.POLLINATIONS.apiKey ? `value="${'•'.repeat(Math.min(cfg.POLLINATIONS.apiKey.length, 48))}" data-masked="1"` : `placeholder="sk_... or pk_..."`} />
         </label>
       </div>
@@ -124,9 +124,9 @@
       <div class="panel">
         <h2>Danger zone</h2>
         <div class="btn-row">
-          <button class="btn-small btn-danger" id="new-game-btn">🔄 Start over (new game)</button>
-          <button class="btn-small btn-danger" id="wipe-all">💥 Wipe ALL saves + settings</button>
-          <button class="btn-small btn-danger" id="full-nuke" style="border:2px solid #ff3060;background:#3a0a14;">☢️ FULL NUKE — delete ALL user data (fresh slate)</button>
+          <button class="btn-small btn-danger" id="new-game-btn" data-tooltip="Wipe the current save + open new-game setup. KEEPS your Ollama / Kokoro / Pollinations settings. Confirms first.">🔄 Start over (new game)</button>
+          <button class="btn-small btn-danger" id="wipe-all" data-tooltip="Wipe IndexedDB + every dmth_* localStorage key (all saves AND settings). Age-gate stays accepted. Cannot be undone.">💥 Wipe ALL saves + settings</button>
+          <button class="btn-small btn-danger" id="full-nuke" style="border:2px solid #ff3060;background:#3a0a14;" data-tooltip="Burns the whole origin down — IndexedDB, ALL localStorage (incl. 18+ age verification + ToS acceptance), sessionStorage. You re-verify 18+ + re-accept ToS on next load. No traces. Double-confirms.">☢️ FULL NUKE — delete ALL user data (fresh slate)</button>
         </div>
         <p class="small muted">
           <b>Start over</b> — wipes the current save, opens the new-game setup. Keeps Ollama/Kokoro/Pollinations settings.<br>

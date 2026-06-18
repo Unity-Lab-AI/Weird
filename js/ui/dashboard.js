@@ -113,10 +113,10 @@
         <div class="btn-row">
           <a href="#town" class="btn-primary" data-tooltip="The map. Visit locations + own properties.">🌆 Town</a>
           <a href="#hunt" class="btn-small" data-tooltip="Pick a target + loadout. Run a 4-stage capture attempt.">🎯 Hunt</a>
-          <a href="#shop" class="btn-small" data-tooltip="The Flesh Fence — shady supply den. Tools, drugs, food, water, contraception, abortion supplies. High-tier stock is level-locked + limited per day.">🩸 The Flesh Fence</a>
+          <a href="#shop" class="btn-small" data-tooltip="The Defilers' Bloc — off-grid anarchist supply cell. Kidnap chems, restraints, chamber implements, drugs, food, water, contraception, abortion supplies. High-tier stock is level-locked + limited per day.">🏴 The Defilers' Bloc</a>
           <a href="#slave-market" class="btn-small" data-tooltip="Buy/sell captives. Untrained cheap, trained premium.">⛓️ Slave market</a>
           <a href="#achievements" class="btn-small" data-tooltip="Unlocked milestones.">🏆 Achievements</a>
-          <a href="#trophy-room" class="btn-small" data-tooltip="Keepsakes carved off the girls you've snuffed, buried, burned, or dumped for good — each grants stacking perks.">🏆 Trophy room</a>
+          <a href="#trophy-room" class="btn-small" data-tooltip="Keepsakes kept from the girls you've snuffed, buried, burned, or dumped for good — taken off her (panties, a lock of hair, jewelry) or cut off her (a tooth, a nipple) — each grants stacking perks.">🏆 Trophy room</a>
           ${window.DMTHGame.escapeRecovery && window.DMTHGame.escapeRecovery.recoverable().length > 0 ? `<a href="#escape-recovery" class="btn-small btn-danger" data-tooltip="Girls have escaped — recapture them before they alert authorities.">🏃 ${window.DMTHGame.escapeRecovery.recoverable().length} on the run</a>` : ''}
           ${captives.length > 0 ? `<a href="#room?girl=${captives[0].id}" class="btn-small" data-tooltip="Jump straight into ${captives[0].name}'s hold.">🚪 Enter ${captives[0].name}'s hold</a>` : ''}
         </div>
@@ -146,11 +146,11 @@
           : `<div class="girl-grid">${captives.map(g => {
               const preg = g.pregnancy || {};
               const pregLight = preg.status === 'pregnant'
-                ? `<span class="preg-light" title="🤰 Pregnant — gestation day ${preg.gestationDays}/280 (trimester ${preg.trimester})">🤰</span>`
-                : preg.status === 'aborted' ? `<span class="preg-light" title="Pregnancy aborted (day ${preg.outcomeHistory?.slice(-1)[0]?.day || '?'})">⚪</span>`
-                : preg.status === 'miscarried' ? `<span class="preg-light" title="Miscarried (complication)">🩸</span>`
-                : preg.status === 'birthed' ? `<span class="preg-light" title="Birthed">🍼</span>`
-                : preg.status === 'lost' ? `<span class="preg-light" title="Lost to authorities">🚨</span>`
+                ? `<span class="preg-light" data-tooltip="🤰 Pregnant — gestation day ${preg.gestationDays}/280 (trimester ${preg.trimester})">🤰</span>`
+                : preg.status === 'aborted' ? `<span class="preg-light" data-tooltip="Pregnancy aborted (day ${preg.outcomeHistory?.slice(-1)[0]?.day || '?'})">⚪</span>`
+                : preg.status === 'miscarried' ? `<span class="preg-light" data-tooltip="Miscarried (complication)">🩸</span>`
+                : preg.status === 'birthed' ? `<span class="preg-light" data-tooltip="Birthed">🍼</span>`
+                : preg.status === 'lost' ? `<span class="preg-light" data-tooltip="Lost to authorities">🚨</span>`
                 : '';
               return `<a class="girl-card" href="#room?girl=${g.id}">
                 <div class="girl-emoji">${g.mood.moodEmoji}${pregLight}</div>
@@ -158,7 +158,7 @@
                 <div class="girl-meta">
                   <span>L${g.bond.bondLevel}</span>
                   <span>${g.archetypeTemplate}</span>
-                  ${preg.status === 'pregnant' ? `<span class="muted small" title="gestation day ${preg.gestationDays}/280">T${preg.trimester}·d${preg.gestationDays}</span>` : ''}
+                  ${preg.status === 'pregnant' ? `<span class="muted small" data-tooltip="gestation day ${preg.gestationDays}/280">T${preg.trimester}·d${preg.gestationDays}</span>` : ''}
                 </div>
                 <div class="bar"><div class="bar-fill" style="width:${Math.round(((g.bond.bondXP % 50) / 50) * 100)}%"></div></div>
               </a>`;

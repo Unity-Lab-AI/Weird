@@ -110,21 +110,21 @@
       return `
         <div class="prop-card ${danger ? 'danger-outline' : ''} ${generous ? 'gold-outline' : ''}">
           <h3>${p.clientName} <span class="muted small">· budget $${p.budget}</span></h3>
-          <div class="stat-row small"><span>Wants archetype</span><b>${p.archetypesWanted.join(', ')}</b></div>
-          <div class="stat-row small"><span>Kinks</span><b>${p.kinksWanted.join(', ')}</b></div>
-          <div class="stat-row small"><span>Acts</span><b>${p.actsWanted.join(', ')}</b></div>
-          <div class="stat-row small"><span>Duration</span><b>${p.durationMinutes} min</b></div>
-          <div class="stat-row small"><span>Quirks</span><b>${p.quirks.join(', ') || '—'}</b></div>
+          <div class="stat-row small" data-tooltip="The girl-type this client is paying for — assign a matching archetype for the best satisfaction + payout."><span>Wants archetype</span><b>${p.archetypesWanted.join(', ')}</b></div>
+          <div class="stat-row small" data-tooltip="The kinks he's after — a girl whose discovered kink matches scores higher and pays more."><span>Kinks</span><b>${p.kinksWanted.join(', ')}</b></div>
+          <div class="stat-row small" data-tooltip="The acts he expects performed during the booking."><span>Acts</span><b>${p.actsWanted.join(', ')}</b></div>
+          <div class="stat-row small" data-tooltip="How long she's tied up on this booking before it resolves."><span>Duration</span><b>${p.durationMinutes} min</b></div>
+          <div class="stat-row small" data-tooltip="Client quirks that swing the deal — ⚠️ dangerous / bad-actor can hurt her + spike notoriety; 💰 generous pays over budget."><span>Quirks</span><b>${p.quirks.join(', ') || '—'}</b></div>
           <hr />
           <label class="field small"><span>Assign girl</span>
-            <select data-pick-girl-for="${p.id}">
+            <select data-pick-girl-for="${p.id}" data-tooltip="Match % = how well her archetype + kinks + stats fit this client. Higher match = more satisfaction + bigger payout.">
               <option value="">— choose —</option>
               ${matchScores.map(m => `<option value="${m.g.id}">${m.g.name} (${m.g.archetypeTemplate}) — match ${Math.round(m.s*100)}%</option>`).join('')}
             </select>
           </label>
           <div class="btn-row">
-            <button class="btn-small btn-primary" data-accept="${p.id}">Accept</button>
-            <button class="btn-small" data-reject="${p.id}">Reject</button>
+            <button class="btn-small btn-primary" data-accept="${p.id}" data-tooltip="Book the picked girl to this client for the duration. She's tied up until you resolve it; payout scales with her match + stats.">Accept</button>
+            <button class="btn-small" data-reject="${p.id}" data-tooltip="Turn the client away — no pay, no risk, no reputation gain.">Reject</button>
           </div>
         </div>
       `;

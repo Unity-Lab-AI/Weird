@@ -189,10 +189,42 @@
   // Toy ids that can turn up as world loot (find them) — fed into loot.FULL_POOL by loot.js.
   function lootableIds() { return Object.keys(TOYS); }
 
+  // TOOLTIPS-FULL.1 — thorough per-toy tooltip (Gee: "toys show fx"). Lays out the toy's full
+  // per-use effects split into a 👤 HER line (her body/bond fx) + a 🎮 YOU line (satisfaction /
+  // sex-drive / DEPRAVITY XP / WANTED heat), plus gore / masochist / level-gate flags. No
+  // truncation — the DMTHTooltips bubble pre-wraps.
+  const TOY_HER_LABELS = {
+    health: 'Health', stamina: 'Stamina', mood: 'Mood', arousal: 'Arousal',
+    wetness: 'Wetness', cumLoad: 'Cum-load', bruises: 'Bruises', bondDebt: 'Bond-debt', escapeRisk: 'Escape-risk'
+  };
+  const TOY_HER_ORDER = ['health', 'stamina', 'mood', 'arousal', 'wetness', 'cumLoad', 'bruises', 'bondDebt', 'escapeRisk'];
+  function fmtToyDelta(v) {
+    return Number.isInteger(v) ? (v > 0 ? '+' : '') + v : (v > 0 ? '+' : '') + (Math.round(v * 100) / 100);
+  }
+  function toyTooltip(toyId) {
+    const t = TOYS[toyId];
+    if (!t) return '';
+    const fx = t.fx || {};
+    const lines = [`${t.emoji} ${t.name}`];
+    if (t.notes) lines.push(t.notes);
+    const flags = [];
+    if (t.gore) flags.push('⚠ gore / mutilation tier');
+    if (t.masoFlips) flags.push('a masochist CRAVES this — bond-debt flips to bond gain + arousal surge');
+    if (flags.length) lines.push(flags.join(' · '));
+    const her = TOY_HER_ORDER.filter(k => fx[k]).map(k => `${TOY_HER_LABELS[k]} ${fmtToyDelta(fx[k])}`);
+    if (her.length) lines.push('👤 HER: ' + her.join(' · '));
+    const you = [];
+    if (fx.satisfaction) { you.push(`Satisfaction +${fx.satisfaction}`); you.push(`Sex-drive +${fx.satisfaction}`); you.push(`Depravity XP ~${Math.max(1, fx.satisfaction)}`); }
+    if (fx.wanted) you.push(`WANTED +${fx.wanted}`);
+    if (you.length) lines.push('🎮 YOU: ' + you.join(' · '));
+    if (t.levelReq) lines.push(`🔒 needs DEPRAVITY level ${t.levelReq}`);
+    return lines.join('\n');
+  }
+
   window.DMTHGame = window.DMTHGame || {};
   window.DMTHGame.toys = Object.freeze({
     TOYS, TOY_IMG, MAX_TOYS_PER_HOLD,
-    spec, owns, levelOk, buy, use, applyExternal, lootableIds,
+    spec, owns, levelOk, buy, use, applyExternal, lootableIds, toyTooltip,
     holdToys, holdToysAt, attachToHold, detachFromHold
   });
 })();
