@@ -13,6 +13,12 @@
 
 ---
 
+## 2026-06-18 — Session: LOOTPOP-TOGGLE.1 — setting to silence loot pop-ups — LOCAL ONLY (not pushed)
+
+- **LOOTPOP-TOGGLE.1** ✅ — Gee verbatim: *"and i want a setting to turn off things like loot pop ups as im sure itll get annoying to some in end game where its better to just let it go to inventory with out the annoying popups"*. Added a Settings → **Interface** toggle "🔕 Silence loot pop-ups" backed by `localStorage dmth_lootpops_off`; `DMTHLootPopup.show()` early-returns when the flag is set. The loot itself is added to inventory in `loot.js` BEFORE the popup call, so silencing only skips the popup — gains still land. No reload needed. `js/ui/loot-popup.js`, `js/ui/in-game-settings.js`. `node -c` clean.
+
+---
+
 ## 2026-06-18 — Session: FRIENDDIRECT.1 — friends are player-directed, never passive — LOCAL ONLY (not pushed)
 
 - **FRIENDDIRECT.1** ✅ — Gee verbatim: *"asnd friends have to be drirrected at the girlk the player wants them to use.. they dont just willy neely choose there own"*. Removed the passive ~15% friend auto-arrival from `tryArrival` — a passive per-tick arrival is ALWAYS a john now. Friends only ever act when the player DIRECTS them (the room's voiced gangbang "include a friend" / the NPC-direct box / the coming visitor list). `friendsAllowed` reframed as "friends available to direct at her" — updated the room toggle label ("🩸 Friends available") + tooltip + the opt-in confirm to match (no more "they'll come on their own"). `js/game/whore-out.js`, `js/ui/room.js`. REMAINING from the same directive: **VISITORLIST.1** (dungeon visitor list — simple john/friend selection) + **MULTIFRIENDGANG.1** (multiple friends stack damage → can kill her by chance/stat rolls). `node -c` clean.

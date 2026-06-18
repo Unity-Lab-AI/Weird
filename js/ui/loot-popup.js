@@ -25,6 +25,10 @@
 
   function show(message) {
     if (!message) return;
+    // LOOTPOP-TOGGLE (Gee) — the player can silence loot pop-ups (Settings → Interface). The loot
+    // itself is already added to inventory BEFORE this call, so silencing just skips the popup —
+    // "better to just let it go to inventory without the annoying popups" in end-game.
+    try { if (localStorage.getItem('dmth_lootpops_off') === '1') return; } catch (e) { /* storage blocked — show anyway */ }
     try {
       const o = ensure();
       const body = o.querySelector('#loot-popup-body');

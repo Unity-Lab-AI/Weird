@@ -114,6 +114,14 @@
       </div>
 
       <div class="panel">
+        <h2>Interface</h2>
+        <label class="field" style="flex-direction:row;align-items:center;gap:8px;cursor:pointer">
+          <input type="checkbox" id="s-lootpop-off" ${localStorage.getItem('dmth_lootpops_off') === '1' ? 'checked' : ''} />
+          <span>🔕 Silence loot pop-ups — loot still goes straight to your inventory, you just skip the click-away popup. Handy in end-game when the gains come fast.</span>
+        </label>
+      </div>
+
+      <div class="panel">
         <h2>Danger zone</h2>
         <div class="btn-row">
           <button class="btn-small btn-danger" id="new-game-btn">🔄 Start over (new game)</button>
@@ -127,6 +135,13 @@
         </p>
       </div>
     `;
+
+    // LOOTPOP-TOGGLE — silence loot pop-ups (loot still flows to inventory). No reload needed.
+    const lootPopChk = el.querySelector('#s-lootpop-off');
+    if (lootPopChk) lootPopChk.onchange = e => {
+      if (e.target.checked) localStorage.setItem('dmth_lootpops_off', '1');
+      else localStorage.removeItem('dmth_lootpops_off');
+    };
 
     el.querySelector('#s-model').onchange = e => { localStorage.setItem('dmth_ollama_model', e.target.value); location.reload(); };
     el.querySelector('#s-temp').onchange  = e => { localStorage.setItem('dmth_ollama_temp', e.target.value); location.reload(); };
