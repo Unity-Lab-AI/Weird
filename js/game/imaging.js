@@ -262,16 +262,24 @@
     const decayDays = decayMin / 1440;
     // Snuff cause-of-death marker (lifespan.snuffKill sets body.corpseMarker) — layered onto
     // the corpse appearance so the body shows HOW she was killed.
+    // Each marker layers the WOUND + the death IMPLEMENT/evidence into the corpse scene, so the
+    // body visibly shows HOW she was killed (Gee: a stabbing shows blood wounds + the knife near
+    // her or in her — and likewise the weapon/evidence for every other death method). Kept concise
+    // so the implement token doesn't drown the rest of the prompt.
     const CORPSE_CAUSE = {
-      'choked':        'deep ligature and fingertip bruising ringing the throat, pinpoint red petechiae in the eyes',
-      'bloody-throat': 'a deep gaping slit opened across the throat, dried blood sheeting down the neck and chest',
-      'beaten':        'face and body battered and swollen, split skin, blood crusted at the nose and mouth',
-      'bled-out':      'drained waxy-white pallor, dried blood pooled beneath her and smeared down the thighs',
-      'drowned':       'damp matted hair and waterlogged bluish skin, lips and fingertips tinged blue',
+      'choked':        'deep ligature and fingertip bruising ringing the throat, pinpoint red petechiae in the eyes, a cord or belt left looped beside her neck',
+      'bloody-throat': 'a deep gaping slit opened across the throat, blood sheeting down the neck and chest, a bloodied knife lying beside her in the pooled blood',
+      'beaten':        'face and body battered and swollen, split skin, blood crusted at the nose and mouth, a bloodied pipe or bat discarded on the floor nearby',
+      'bled-out':      'drained waxy-white pallor, blood pooled beneath her and smeared down the thighs, a bloodied blade discarded beside the pool',
+      'drowned':       'damp matted hair and waterlogged bluish skin, lips and fingertips tinged blue, a water-filled tub or basin beside her and the floor soaked',
       'broken-neck':   'head lolling at an unnatural broken angle, the neck visibly wrong',
-      'gutted':        'a deep open wound across the lower belly, abdomen torn open, dark blood pooled across the hips and thighs',
-      'flayed':        'raw skinless patches across the torso and limbs, exposed flesh, sheets of skin gone, blood-slick',
-      'impaled':       'a deep run-through wound, dark blood soaked from the point of entry, body limp around it',
+      'gutted':        'the lower belly torn open, abdomen split, dark blood pooled across the hips and thighs, a bloodied knife resting beside the open wound',
+      'flayed':        'raw skinless patches across the torso and limbs, exposed flesh, blood-slick, a flaying blade and sheets of removed skin laid nearby',
+      'impaled':       'a thick wooden stake run all the way through her body, dark blood soaked around the point of entry, body limp around the shaft',
+      'overdosed':     'a spent syringe and a loosened rubber tourniquet lying beside her arm, a fresh needle mark in the crook of the elbow, lips bluish and slack',
+      'crushed':       'the skull caved and misshapen on one side, blood haloed across the surface beneath the head, a bloodied cinderblock or hammer beside her',
+      'machine':       'a motorized fucking-machine still strapped to her hips with its shaft buried in her, body slumped inert against the rig',
+      'used-up':       'body wrung out and ruined, cum and dried blood crusted across her thighs and face, fucked literally to death',
       'peaceful':      'unmarked and slack, as if merely asleep',
       'wet':           'damp skin and hair'
     };
