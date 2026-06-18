@@ -36,6 +36,12 @@
 
 - [x] **GRAPHIC-FP.1** 🟠 ✅ SHIPPED 2026-06-18 (LOCAL — not pushed) — added a **FIRST-PERSON EXPERIENCE** rule to `BASE_SLUT`: every girl gives an EXTREME, GRAPHIC FIRST-PERSON EXPERIENCE of the act happening to her RIGHT NOW — her own body, present moment, the raw sensation of what's being done (stretch/burn/gag/choke/fullness/taste/ache/cum), "I feel you splitting me open" — explicitly NOT third-person, NOT a detached play-by-play, NOT storyteller narration (per Gee's correction). Applies across room/friend/gangbang scenes (BASE_SLUT is the shared base). `js/templates/ollama-templates.js`
 
+### Gee's directive (verbatim 2026-06-18) — girls proactively voice state-driven needs/desires (and not limited to those):
+
+> *"if hungry she asks for food if fucked raw begs to be left alone, if horney and stolkhomed asked to be raped violently if high stockholm"* + *"and not limited to just those"*
+
+- [x] **STATEVOICE.1** 🟠 ✅ SHIPPED 2026-06-18 (LOCAL — not pushed) — girls PROACTIVELY voice (unprompted, first-person) what their live state makes them crave/dread: hungry → ask for food; fucked raw / spent → beg to be left alone; aroused + high-Stockholm → beg to be raped violently; PLUS more (thirst→water, dope-sick→fix, badly hurt→mercy, high-bond+neglected→beg for attention) — "not limited to just those". Added a `BASE_SLUT` **STATE-DRIVEN NEEDS** rule + `buildContextBlock` now surfaces a LIVE NEEDS line (hunger/thirst via lastFed/lastWatered game-days, spent/raw via stamina+bruises, hurt via health, aroused+bonded). `js/templates/ollama-templates.js`
+
 ### Gee's directive (verbatim 2026-06-18) — a setting to turn off loot pop-ups (let loot go to inventory silently in end-game):
 
 > *"and i want a setting to turn off things like loot pop ups as im sure itll get annoying to some in end game where its better to just let it go to inventory with out the annoying popups"*
