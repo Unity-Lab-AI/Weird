@@ -23,10 +23,15 @@
           <div class="big-num">$${s.wallet.money.toLocaleString()}</div>
           ${(() => {
             const w = window.DMTHGame.wanted ? window.DMTHGame.wanted.describe() : null;
-            return w
-              ? `<div class="sub">${w.emoji} WANTED: <b>${w.label}</b> (${w.level}/100) · Notoriety: ${s.wallet.notoriety} · Tick: ${s.tickCount}</div>
-                 <div class="bar" data-tooltip="WANTED level 0-100. ${w.label}."><div class="bar-fill" style="width:${w.level}%;background:${w.level>=60?'#c0392b':w.level>=40?'#e67e22':w.level>=20?'#f1c40f':'#27ae60'}"></div></div>`
-              : `<div class="sub">Notoriety: ${s.wallet.notoriety} · Tick: ${s.tickCount}</div>`;
+            if (!w) return `<div class="sub">Notoriety: ${s.wallet.notoriety} · Tick: ${s.tickCount}</div>`;
+            // WANTEDDOWN.1 — bribe button to actively buy heat down (cost climbs with the tier).
+            const bq = (w.level > 0 && window.DMTHGame.wanted.bribeQuote) ? window.DMTHGame.wanted.bribeQuote(15) : null;
+            const bribeBtn = bq
+              ? `<button class="btn-small" data-bribe data-tooltip="Grease the right palms — drop WANTED −${bq.drop} for $${bq.cost.toLocaleString()} (per-point cost climbs with your tier). Lay off hunting + show your girls tenderness to cool it free over time.">💵 Bribe — WANTED −${bq.drop} ($${bq.cost.toLocaleString()})</button>`
+              : '';
+            return `<div class="sub">${w.emoji} WANTED: <b>${w.label}</b> (${w.level}/100) · Notoriety: ${s.wallet.notoriety} · Tick: ${s.tickCount}</div>
+                 <div class="bar" data-tooltip="WANTED level 0-100. ${w.label}. Lower it: bribe (below), lay off hunting (cools ~2.5× faster), or tenderness to your girls (love/feed/heal shave a little)."><div class="bar-fill" style="width:${w.level}%;background:${w.level>=60?'#c0392b':w.level>=40?'#e67e22':w.level>=20?'#f1c40f':'#27ae60'}"></div></div>
+                 ${bribeBtn ? `<div class="btn-row" style="margin-top:6px">${bribeBtn}</div>` : ''}`;
           })()}
         </section>
         <section class="panel" data-tooltip="DEPRAVITY — the player level. Earns XP from EVERY successful act (a kiss to a capture to a 'mass' drop). Higher level unlocks the heaviest depravities: branding (L3), extreme acts (L4), nugget-making (L6), dismemberment (L7). Cheat/sandbox start unlocks everything.">
@@ -188,6 +193,14 @@
     const bribeBtn = el.querySelector('[data-buy-bribe]');
     if (bribeBtn) bribeBtn.onclick = () => {
       const r = window.DMTHGame.arrest.buyBribeContacts();
+      if (!r.ok) { alert(r.reason); return; }
+      render(el);
+    };
+
+    // WANTEDDOWN.1 — bribe heat down directly.
+    const wantedBribe = el.querySelector('[data-bribe]');
+    if (wantedBribe) wantedBribe.onclick = () => {
+      const r = window.DMTHGame.wanted.bribe(15);
       if (!r.ok) { alert(r.reason); return; }
       render(el);
     };

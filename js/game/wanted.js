@@ -78,11 +78,44 @@
   // the single source of truth for how dangerous each band is.
   function raidChancePerTick() { return tier().raidChancePerTick; }
 
+  // WANTEDDOWN.1 (Gee) — active levers to keep WANTED a MANAGEABLE stat, not a wait-it-out timer.
+
+  // Lower WANTED by an amount (used by bribes + tenderness acts).
+  function reduce(amount, reason) {
+    if (!amount || !(get() > 0)) return 0;
+    if (window.DMTHGame.state.addWanted) window.DMTHGame.state.addWanted(-Math.abs(amount), reason || 'reduce');
+    return amount;
+  }
+
+  // Bribe the right palms — pay to make heat go away NOW. Drops up to `points` WANTED; the cost
+  // per point climbs with the current tier (deeper heat costs more to bury). Manageable, not free.
+  function bribeQuote(points) {
+    const cur = get();
+    const drop = Math.min(points || 15, cur);
+    const tierIdx = Math.max(0, TIERS.indexOf(tier()));
+    return { drop, cost: Math.round(drop * (14 + tierIdx * 8)) };
+  }
+  function bribe(points) {
+    const cur = get();
+    if (cur <= 0) return { ok: false, reason: 'no heat to bribe away' };
+    const { drop, cost } = bribeQuote(points);
+    if (!window.DMTHGame.state.spendMoney(cost, 'bribe')) return { ok: false, reason: `need $${cost.toLocaleString()} to grease the right palms` };
+    reduce(drop, 'bribe');
+    if (window.DMTHNotify) window.DMTHNotify.show(`💵 Greased the right palms — WANTED −${drop} ($${cost.toLocaleString()}). Now ${get()}/100.`, { type: 'success', durationMs: 5000 });
+    return { ok: true, drop, cost };
+  }
+
+  // Stamp the last time the player hunted — "time off from hunting" cools heat faster (below).
+  function noteHunt() { const s = window.DMTHGame.state.current; if (s) s._lastHuntTick = s.tickCount || 0; }
+
   // Slow decay — called from tick. Drift accumulator so sub-1 decay still applies over time.
+  // Time OFF from hunting cools heat ~2.5× faster (Gee) — lay low and it bleeds off quicker.
   function decayTick() {
     const s = window.DMTHGame.state.current;
     if (!s || !(s.wallet.wanted > 0)) return;
-    s._wantedDrift = (s._wantedDrift || 0) + DECAY_PER_TICK;
+    const ticksSinceHunt = (s.tickCount || 0) - (s._lastHuntTick || 0);
+    const layingLow = ticksSinceHunt > 20;   // ~haven't hunted in a while → heat cools faster
+    s._wantedDrift = (s._wantedDrift || 0) + DECAY_PER_TICK * (layingLow ? 2.5 : 1);
     if (s._wantedDrift >= 1) {
       const amount = Math.floor(s._wantedDrift);
       s.wallet.wanted = Math.max(0, s.wallet.wanted - amount);
@@ -100,6 +133,7 @@
   window.DMTHGame = window.DMTHGame || {};
   window.DMTHGame.wanted = Object.freeze({
     ACCRUAL, TIERS, DECAY_PER_TICK,
-    get, tier, tierFor, accrue, huntPenalty, raidChancePerTick, decayTick, describe
+    get, tier, tierFor, accrue, huntPenalty, raidChancePerTick, decayTick, describe,
+    reduce, bribe, bribeQuote, noteHunt
   });
 })();

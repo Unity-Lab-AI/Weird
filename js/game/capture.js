@@ -376,6 +376,8 @@
   function stackedAttempt({ girl, toolIds, locationId, desperationTier = 0 }) {
     const ids = (toolIds || []).filter(id => SIMPLE_CAPTURE_CHANCE[id] != null);
     if (!ids.length) return { outcome: 'fail', reason: 'no-tools-selected', desperationTier };
+    // WANTEDDOWN.1 — stamp hunting activity so "time off from hunting" cools WANTED faster.
+    if (window.DMTHGame.wanted?.noteHunt) window.DMTHGame.wanted.noteHunt();
     const inv = window.DMTHGame.state.current.inventory || {};
     for (const id of ids) {
       if ((inv[id] || 0) < 1) return { outcome: 'fail', reason: 'no-tool:' + id, desperationTier };

@@ -540,6 +540,12 @@
     if (!isProxyAct && window.DMTHGame.playerStamina) {
       try { window.DMTHGame.playerStamina.drainForAction(actionId); } catch (e) { /* non-fatal */ }
     }
+    // WANTEDDOWN.1 — TENDERNESS cools heat a little (Gee): caring for a captive (love-/feed-/
+    // water-/heal — keeping her cared-for, alive, unmarked) quietly bleeds a sliver of WANTED off,
+    // so heat is a managed stat, not a wait-it-out timer.
+    if (!isProxyAct && window.DMTHGame.wanted && (/^(love-|feed-|water-)/.test(actionId) || actionId === 'heal')) {
+      window.DMTHGame.wanted.reduce(0.6, 'tenderness:' + actionId);
+    }
 
     // Stamp the recent-act aftermath tag so the NEXT image of her renders what was just
     // done (imaging.js actAftermathTokens — TTL-faded). Latest tagged act wins.

@@ -23,6 +23,13 @@
 
 ---
 
+## 2026-06-18 — Session: WANTEDDOWN.1 — manageable WANTED levers (bribe / time off / tenderness)
+
+- **WANTEDDOWN.1** ✅ — Gee (verbatim 2026-06-18): *"need a somewhat easy way to lower wanted level too like bribes, time off from hunting, and certain acts like tenderness to the girls can slightlty lower wanted levels so that its a managable stat not just a wait for it do go down over time"*. Three active levers added to `wanted.js`: (1) **Bribe** — `wanted.bribe(points)` spends money to drop WANTED now, with a tier-scaled cost (~$14/point off-radar → ~$46/point at MOST WANTED); a 💵 Bribe button sits right under the WANTED bar in the dashboard Treasury panel. (2) **Time off from hunting** — `noteHunt()` stamps the last capture attempt; if you haven't hunted in a while (~20 ticks) WANTED decays **~2.5× faster** — lay low and it cools. (3) **Tenderness** — every love-/feed-/water-/heal act on a captive shaves a sliver (−0.6) of WANTED, so caring for your girls quietly bleeds heat off. WANTED is now a managed stat, not a wait-it-out timer. `js/game/wanted.js`, `js/game/action-effects.js`, `js/game/capture.js`, `js/ui/dashboard.js`
+- 4 files `node -c` clean. LAW #1 clean. Pushed to `UpdateWork`.
+
+---
+
 ## 2026-06-18 — Session: Torture category + crime-scaled perks + tool-gate mechanism — TORTURECAT.1 + CRIMEPERK.1 + TOOLGATE.1
 
 - **TORTURECAT.1** ✅ — Gee: *"a straight up evil tourture otpions as a whole category that severly damage health"*. New dedicated **⛓️ Torture** quick-actions tab (gated under the existing 'extreme' DEPRAVITY unlock), distinct from the sexual Extreme tab: rack / cook-her-skin / break-joints / waterboard / electrocute / nails / acid / flay — each a new ACTIONS spec with SEVERE health damage + big bond-debt + mood crater + premium satisfaction/film value. All count toward extreme-act tolerance + are kill-capable via the `health<=damage` gate; torture acts stamp a battered/welted aftermath on her next image. `js/game/action-effects.js` (ACTIONS + AFTERMATH_TAGS + TORTURE_ACTS), `js/ui/quick-actions.js` (tab + gating)
