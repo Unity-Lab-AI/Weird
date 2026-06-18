@@ -283,6 +283,13 @@ Per Gee: every new action/stat/button ships with a tooltip that is **non-intrusi
 - ✅ **PERIOD.1** new `period.js` 5-game-day cycle (~1-day bleed), staggered per girl, pregnancy-paused; `period-fuck` + `period-oral` balanced acts; room 🩸 Cycle panel + on-the-rag-gated bloody-fuck buttons (Ollama-narrated). Standing rule: Gee's "big/major boosts" = appropriately balanced.
 - ⏳ **PERIOD.2** more depraved ragging options to come ("make her suck blood off" = shipped as period-oral; more as Gee specifies).
 
+## EPIC AH — Deeper sim: stat-gated actions + money sweet-spot + friend kink/dislike matching ⏳
+> *"some tender options only open up after something extreme ... only allow certain actions once something is high enough stats or low enough stats.. keeping girls in a happy zone of low health high cum level and high stockholm all have a sweet spot ... no one wants a fresh sority girl they want a half dead one ... friends nee to have a dislike and a kink unique to them that effect thier payment and their loot drops so u dont want to put a nazi frined in with a black person, or hell maybe the nazi guy has a kink for dark meat.. this is just one of many options i want you to explore and also add"*
+- ⏳ **STATGATE.1** actions gated by stat thresholds both ways (high/low enough) + tender-unlocks-after-extreme.
+- ⏳ **MONEYSWEETSPOT.1** earnings peak at low-health + high-cum + high-Stockholm; fresh girl worth less, half-dead worth most.
+- ⏳ **FRIENDKINK.1** each friend a unique kink + dislike vs the girl's traits → swings pay + loot (explore + add many).
+- (see also FORCEGATE.1 — force option + tender mood-unlock chain.)
+
 ## EPIC AG — Friends 2.0: directed-only + visitor list + multi-friend lethality + creep levels ⏳
 > *"asnd friends have to be drirrected at the girlk the player wants them to use.. they dont just willy neely choose there own when a friend is at a dungeon there should be a visitor list with easy and simple selctions for gangbang s and selecting johns and friends ie multiple frindes can gangbang but if they both do max damage that bitch is dead,by chance and stat rolls"* + *"and friends need like creep levels where the higher the creep they are and level up on successful fucks and actions they come back ie first fuck success 1 levle up next level 2 fucks next level 3 fuckes next level 4 fucks and so on to levle 10 creep frineds"*
 - ✅ **FRIENDDIRECT.1** (LOCAL) friends are player-directed only — passive friend auto-arrival removed; `friendsAllowed` = "available to direct".
