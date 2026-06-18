@@ -145,6 +145,18 @@
 
 > *"u have to rare loot jrop find them or purchase them from what ever fucked up thing u named the clothing store"* + *"remember tho theri capture d in clothes are not thier skimpy special outfit"*
 
+> *"every tool, drug, item, equipment is totaly available as loot drops based on the ie girl type and type of loot drop where its a success frind fuck corpsing creates higher loot levels and better types, and higher tier girls have beeter loot on capture"* + correction *"cant loot already capturesd girls that u kill can only loot them on capture"*
+
+- [x] **LOOTALL.1** 🟠 ✅ SHIPPED 2026-06-18 (LOCAL — not pushed) — the ENTIRE catalog is lootable (every tool/drug/item/equipment), built at runtime from `DMTHAssets.ITEMS` + the toys module, partitioned by item tier. Quality scales by (a) GIRL TYPE — `ARCHETYPE_LOOT_BIAS` favors type-fitting loot; (b) DROP SOURCE ladder — capture < friend-fuck < corpsing kill raises max tier (`grantNpcGift`: routine john → tier 3, generous friend → tier 4, KILL → tier 5, type-biased); (c) GIRL TIER — `girlLootTier` maps ARCHETYPE_DIFFICULTY → maxTier 2-5, so a harder/more-vibrant girl drops a bigger, higher-tier bonus haul on capture (`grantCaptureHaul`). **Correction applied:** NO corpse-loot — you can ONLY loot a girl ON CAPTURE, never by killing an already-captured one; the "corpsing = best loot" is the friend's KILLWIN GIFT on a kill, not stripping her body. `js/game/loot.js`, `js/game/whore-out.js` (girlId threaded)
+
+> *"i actually want to split the town up into zones so u have to be a certain level to unlock certain locations and sume u have to pay to unlock"*
+
+- [ ] **ZONES.1** 🟠 — split the town into ZONES; some locations require a DEPRAVITY LEVEL to unlock, some require PAYING to unlock. `catalog.js` LOCATIONS unlock fields (add minLevel + zone grouping), `town-view.js` zone presentation + lock states.
+
+> *"and buying out the location comes with perks like less witnesses, less wanted level, and other bossts and perks u come up with all with fucked up sexually depraved like taboo names"*
+
+- [ ] **BUYLOCATION.1** 🟠 — buying out / owning a location grants perks (fewer witnesses = lower exposure, less WANTED from hunts there, + invented extras: private-stock spawns, capture-odds boost, passive income, discreet disposal) each with a fucked-up sexually-depraved taboo NAME. Wire owned-location perks into hunt exposure/wanted + surface in town-view.
+
 - [x] **OUTFITLOOT.1** 🟠 ✅ SHIPPED 2026-06-18 (LOCAL — not pushed) — the special/skimpy outfits are obtained TWO ways: (1) PURCHASE from the clothing store (🧵 The Carcass Closet, already live — every skimpy outfit is in the OUTFITS catalog), (2) RARE LOOT FIND — `wardrobe.grantOutfit` (free add to a girl's wardrobe) + `skimpyForArchetype`/`skimpyOutfitIds` helpers; ~10% on capture she's "stashing" a type-matched special outfit (`hunt.escortToHold`), and a generous/kill john/friend gift has a ~6-12% chance to gift her one (`loot.grantNpcGift` + girlId threaded from `whore-out`). CAPCLOTHES.1 invariant kept: her captured-at 'default' outfit stays her NORMAL clothes — a looted/bought skimpy is an ADDITIONAL wardrobe entry, never auto-equipped. `js/game/wardrobe.js`, `js/game/hunt.js`, `js/game/loot.js`, `js/game/whore-out.js`
 
 - [x] **SKIMPYEXOTIC.1** 🟡 ✅ SHIPPED 2026-06-18 (LOCAL — not pushed) — every special/skimpy outfit authored NOT modest: exotic, beyond-sexy variations of the type's normal look at max exposed nudity (cardigan-open-over-nothing, body-chain-only, stripped-mid-workout, leather-harness-bare, nude-fishnets, etc.). All the original SKIMPYWEAR outfits were already topless/bottomless/bare-naked max-nudity; the new backfill + stripper batch hold the same exotic bar. `js/game/wardrobe.js`

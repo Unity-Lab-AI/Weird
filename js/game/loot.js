@@ -58,6 +58,75 @@
     else if (window.DMTHNotify) window.DMTHNotify.show(msg, { type: 'success', durationMs: 5000 });
   }
 
+  // ── LOOTALL.1 (Gee) — the ENTIRE catalog is lootable, not a curated subset. ───────────────
+  // Loot quality + type scale by (a) the GIRL TYPE (archetype biases the pool), (b) the DROP
+  // SOURCE on an escalating ladder — capture < friend-fuck < CORPSING — which raises the max item
+  // TIER + count, and (c) the GIRL'S TIER (a harder/more-vibrant archetype drops better on capture).
+  // Pools are built at runtime from the live catalog (DMTHAssets.ITEMS + the toys module) so any
+  // new item is automatically lootable. dungeon-upgrade + location items are excluded (not carryable).
+  const LOOT_EXCLUDE_SUBCATS = new Set(['dungeon-upgrade']);
+  function lootByTierPools() {
+    const pools = { 1: [], 2: [], 3: [], 4: [], 5: [] };
+    const items = (window.DMTHAssets && window.DMTHAssets.ITEMS) || [];
+    for (const it of items) {
+      if (it.category !== 'item' || LOOT_EXCLUDE_SUBCATS.has(it.subcategory)) continue;
+      const t = Math.max(1, Math.min(5, it.tier || 1));
+      pools[t].push(it.id);
+    }
+    // Toys (chamber implements) are lootable too — tier them by their DEPRAVITY level requirement.
+    if (window.DMTHGame.toys && window.DMTHGame.toys.lootableIds) {
+      for (const id of window.DMTHGame.toys.lootableIds()) {
+        const spec = window.DMTHGame.toys.spec ? window.DMTHGame.toys.spec(id) : null;
+        const t = Math.max(1, Math.min(5, Math.ceil((spec && spec.levelReq || 0) / 1.5) + 1));
+        if (!pools[t].includes(id)) pools[t].push(id);
+      }
+    }
+    return pools;
+  }
+  // Per-archetype thematic bias — favors loot that FITS the girl-type (a nurse drops meds, a club
+  // girl party drugs, a gym girl gear, etc.). Falls back to no-bias (pure tier roll) off-list.
+  const ARCHETYPE_LOOT_BIAS = {
+    nurse:    ['rohypnol', 'ketamine', 'ether', 'chloroform', 'blue-pill'],
+    club:     ['mdma', 'coke-bumps', 'wine', 'condom-french-tickler'],
+    stripper: ['coke-bumps', 'mdma', 'wine', 'wand-vibrator', 'ben-wa-balls'],
+    'private-party': ['mdma', 'coke-bumps', 'acid', 'wine'],
+    street:   ['pipe', 'duct-tape', 'zip-ties', 'weed', 'rope'],
+    gym:      ['rope', 'harness', 'shackles', 'energy-shot'],
+    sorority: ['mdma', 'wine', 'the-good-coke', 'cheerleader-outfit'],
+    cheerleader: ['mdma', 'wine', 'the-good-coke'],
+    office:   ['wine', 'handcuffs', 'blue-pill'],
+    teacher:  ['wine', 'handcuffs', 'rohypnol'],
+    police:   ['handcuffs', 'shackles', 'harness', 'pipe'],
+    maid:     ['rope', 'duct-tape', 'wine'],
+    model:    ['the-good-coke', 'mdma', 'oyster-tonic', 'latex-fetish'],
+    library:  ['duct-tape', 'rope', 'weed'],
+    barista:  ['weed', 'wine', 'energy-shot'],
+    waitress: ['coke-bumps', 'wine', 'weed'],
+    remote:   ['pipe', 'ether', 'chloroform', 'tranquilizer']
+  };
+  function pickLootByTier(maxTier, biasIds) {
+    const pools = lootByTierPools();
+    let candidates = [];
+    for (let t = 1; t <= Math.max(1, Math.min(5, maxTier)); t++) candidates = candidates.concat(pools[t] || []);
+    if (!candidates.length) return null;
+    if (biasIds && biasIds.length && Math.random() < 0.55) {
+      const inTier = biasIds.filter(id => candidates.includes(id));
+      if (inTier.length) return pick(inTier);
+    }
+    return pick(candidates);
+  }
+  // Girl's loot tier on capture — a harder/more-vibrant archetype (higher ARCHETYPE_DIFFICULTY)
+  // drops better gear. maps 0..1 difficulty → maxTier 2..5.
+  function girlLootTier(girl) {
+    const diff = (window.DMTHGame.hunt && window.DMTHGame.hunt.ARCHETYPE_DIFFICULTY
+      && window.DMTHGame.hunt.ARCHETYPE_DIFFICULTY[girl && girl.archetypeTemplate]) ?? 0.45;
+    return Math.max(2, Math.min(5, 2 + Math.round(diff * 3)));
+  }
+  // NOTE (Gee / LOOTALL.1): there is intentionally NO corpse-loot function. A girl is only lootable
+  // ON CAPTURE (grantCaptureHaul) — you can't loot an already-captured girl by killing her. The
+  // "corpsing = best loot" tier lives in grantNpcGift below (the friend's KILLWIN gift on a kill),
+  // which is the friend rewarding you, NOT stripping her body.
+
   // Loot dropped on a SUCCESSFUL capture — location-aware. ~40% find something; 1-in-4 of
   // those is cash she had on her, otherwise a location-appropriate tool.
   function rollCaptureLoot(locationId) {
@@ -207,11 +276,20 @@
         toy = { id: toyId, name: (spec && spec.name) || label(toyId), emoji: (spec && spec.emoji) || '🧰' };
       }
     }
+    // LOOTALL.1 — higher-TIER girls drop BETTER loot on capture: a tier-scaled bonus pull from the
+    // FULL catalog (type-biased), on top of her stash + any toy. A harder/more-vibrant archetype
+    // (higher ARCHETYPE_DIFFICULTY) → higher max item tier + more drops.
+    const lootTier = girlLootTier(girl);
+    const bonusN = 1 + (lootTier >= 4 ? 1 : 0) + (lootTier >= 5 ? 1 : 0);
+    const bias = ARCHETYPE_LOOT_BIAS[girl && girl.archetypeTemplate] || null;
+    const bonus = [];
+    for (let i = 0; i < bonusN; i++) { const id = pickLootByTier(lootTier, bias); if (id) { window.DMTHGame.state.addItem(id, 1); bonus.push(id); } }
     if (window.DMTHNotify) {
       if (granted.length) lootPop(`🎒 Stripped her stash: ${granted.map(g => `${g.qty}× ${label(g.id)}`).join(', ')}.`);
       if (toy) lootPop(`${toy.emoji} She was carrying her own toy — looted 1× ${toy.name}!`);
+      if (bonus.length) lootPop(`💎 Premium haul off a ${girl.archetypeTemplate} (loot tier ${lootTier}): ${bonus.map(label).join(', ')}.`);
     }
-    return { items: granted, toy };
+    return { items: granted, toy, bonus };
   }
 
   // FRIENDGIFT.1 — johns AND friends GIFT high-tier gear/toys/drugs on a successful use (the perk
@@ -241,7 +319,13 @@
         if (r && r.ok) { lootPop(`👗 ${opts.from || 'A client'} gifted ${g ? g.name : 'her'} a ${r.outfit.displayName} to wear for him.`); return { id: oid, qty: 1, outfit: true }; }
       }
     }
-    const id = pick(HIGH_TIER_GIFTS);
+    // LOOTALL.1 — gift quality climbs the source ladder: a CORPSING kill drops the BEST (tier 5),
+    // a generous friend tier 4, a routine john tier 3. Pulled from the FULL catalog, type-biased to
+    // the girl when we have her; HIGH_TIER_GIFTS is the fallback bias/pool.
+    const gMaxTier = opts.kill ? 5 : (opts.generous ? 4 : 3);
+    const gGirl = opts.girlId ? window.DMTHGame.state.getGirl(opts.girlId) : null;
+    const gBias = (ARCHETYPE_LOOT_BIAS[gGirl && gGirl.archetypeTemplate] || HIGH_TIER_GIFTS);
+    const id = pickLootByTier(gMaxTier, gBias) || pick(HIGH_TIER_GIFTS);
     // A kill is an EPIC WIN for the john/friend (Gee) — they tip bigger, so a kill-gift skews to 2×.
     const qty = 1 + ((opts.generous && Math.random() < 0.4) || (opts.kill && Math.random() < 0.7) ? 1 : 0);
     window.DMTHGame.state.addItem(id, qty);
@@ -298,6 +382,7 @@
     LOCATION_LOOT, FULL_POOL, ARCHETYPE_GIFTS, REQUEST_TEMPLATES, TIER_BASE,
     rollCaptureLoot, scavengeLocation, tickArchetypeGifts,
     requestOptions, requestItem, grantCaptureHaul,
-    HIGH_TIER_GIFTS, grantNpcGift
+    HIGH_TIER_GIFTS, grantNpcGift,
+    lootByTierPools, pickLootByTier, girlLootTier
   });
 })();

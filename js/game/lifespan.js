@@ -260,6 +260,9 @@
     if (window.DMTHGame.state.addBuzz) window.DMTHGame.state.addBuzz(opts.filmed ? -1 : -3, 'snuff:' + methodId);
     if (window.DMTHGame.wanted) window.DMTHGame.wanted.accrue('captive-death');
     if (window.DMTHGame.progression) window.DMTHGame.progression.grantXp(m.xp + (opts.filmed ? 4 : 0), 'snuff:' + methodId);
+    // LOOTALL.1 (Gee) — NO corpse-loot here: you can only loot a girl ON CAPTURE, never by killing an
+    // already-captured one (she was stripped when you took her). The "corpsing = best loot" ladder is
+    // the friend/john GIFT on a kill (loot.grantNpcGift{kill}), not looting her body.
     if (window.DMTHNotify) window.DMTHNotify.show(`☠️ ${girl.name} — ${m.displayName}${opts.filmed ? ' (premium snuff film listed)' : ''}. Her body's in the hold for postmortem use until you dispose of it.`, { type: 'error', durationMs: 7000 });
     return { ok: true, methodId, filmed: !!opts.filmed, filmId };
   }
@@ -290,6 +293,9 @@
     if (window.DMTHGame.state.addBuzz) window.DMTHGame.state.addBuzz(-2, 'act-death:' + cause);
     if (window.DMTHGame.wanted) window.DMTHGame.wanted.accrue('captive-death');
     if (window.DMTHGame.progression) window.DMTHGame.progression.grantXp(14, 'act-death');
+    // LOOTALL.1 (Gee) — NO corpse-loot: a captured girl is only lootable ON CAPTURE, not by killing
+    // her later. NPC kills still pay the SNUFF BONUS + the friend's KILLWIN gift (grantNpcGift), which
+    // is the friend rewarding you — not looting her corpse.
     if (window.DMTHNotify) {
       window.DMTHNotify.show(`☠️ ${girl.name} died ${opts.byLabel ? 'under ' + opts.byLabel : 'mid-act'} — snuff content sells for +$${snuffBonus.toLocaleString()}. Her body stays in the hold for postmortem use until you dispose of it.`, { type: 'error', durationMs: 8000 });
     }
