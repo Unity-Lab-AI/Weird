@@ -262,6 +262,18 @@ Per Gee: every new action/stat/button ships with a tooltip that is **non-intrusi
 > *"running memory with each girl ... persist between visits with a clear button ... send past responses of bothe the user and the girl back to the model"*
 - **CHATHIST.1/.2** ✅ — turns persist in IDB + clear button (both sides) + last 16 turns fed to the model.
 
+## EPIC AA — Girl specialization upgrades + milk balance + Tit Sucker ⏳ QUEUED
+> *"specilized girls for certain things like one could have bigs tits so they make 2x the milk when preggo and afor a few days after birth"* · *"dont make it so ill have littearly 1000000 liters of milk. one suck tit ... timed ... u can suck a tit dry ... dont want ... endless milk until i have like 5+ preggos"* · *"\"Tit sucker\"(name of the machine)(lootable and attachable one to each hold and buy able"*
+- ⏳ **SPECIALIZE.1** per-girl specialization upgrades (big-tits = 2× milk preggo + post-birth, + more) · **MILKBAL.1** breasts refill over time / suck-dry / no endless milk (abundance only at 5+ preggos) · **TITSUCKER.1** rename milk-sucker → "Tit Sucker", one per hold, bottles + stores slowly.
+
+## EPIC AB — Shop rework (daily limited stock) + shady rename ⏳ QUEUED
+> *"i dont want the market to have unlimited of everything things are level locked and there are max per day you can buy ... high teir ... only a hand full apera in store each day ... refreshes every day with a different variety ... but dont make it to weere i have to wait weeks ... make the markst not a market but some shady fucked up name"*
+- ⏳ **SHOPREWORK.1** cheap staples unlimited, high-tier level-locked + handful/day + per-day buy caps + daily-refresh varied stock (no weeks-long waits) · **SHOPNAME.1** rename shop to a shady depraved name.
+
+## EPIC X (cont.) — gangbang-only NPC voice + same-dungeon ⏳
+> *"not all johns talk to u only in gang bang sessions when u chose the # johns and girls available in the dugeon, ie cant have a gang bang with girls in differnt dugeons"*
+- ⏳ **GANGVOICE.1** voiced multi-party is the chosen gangbang session only (passive johns stay ledger-only) · **GANGSAMEDUNGEON.1** gangbang girls must be same dungeon.
+
 ## EPIC LEGACY — reconciliation ⏳
 - ⏳ **LEGACY-AUDIT.1** audit old unchecked backlog vs FINALIZED (most shipped in mega-build); re-verify ESCAPE-GAME.1 / CLOTHING.1 / TOOLTIPS.1. **TUTORIAL.1 stays DEFERRED.**
 
