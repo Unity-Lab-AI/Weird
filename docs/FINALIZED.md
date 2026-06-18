@@ -23,6 +23,14 @@
 
 ---
 
+## 2026-06-18 — Session: Capture loadout extras — CAPDEBUFF.1 + CAPWANTED.1
+
+- **CAPDEBUFF.1** ✅ — Gee (verbatim 2026-06-18): *"once u slect ur drugs/tools/equipemnts u want to all use on that peticular girl with the combined effects whelter mood consiousness health ect ect and other things in totality debuff the girls stats on first capteur"*. The whole snatch loadout now debuffs her STARTING captive stats in totality: `applyCaptureDebuffs(girl, toolIds)` sums every tool's effect (health/bruises + drugs → dazed `high`↑ / mood↓ / stamina↓ / sedated, restraints → escape-risk↓) and applies it before escort, so a rohi+pipe+cuffs grab leaves her bruised, doped, and bound at the start of captivity. Replaces the old single-heaviest-injury model. `js/game/capture.js`
+- **CAPWANTED.1** ✅ — Gee (verbatim 2026-06-18): *"dont forget wanted level based on durgs/tools/equipemnt used hier teir items have less negatives more possivitves"*. WANTED heat from a grab now scales by the BEST tool tier used — `captureHeat = max(0, 3 - tier*0.7)`, so tier-4+ gear (quiet sedatives, pro restraints) is a clean snatch with near-zero heat while a crude low-tier pipe-in-the-open draws the most; a botched grab with tier-3+ gear adds no suspicion/heat at all. Higher tier = fewer negatives. `js/game/capture.js`
+- These extend the just-shipped CAPSTACK loadout (Gee confirmed: *"rofi cuffs and a led pipe are like a shur fire waty to capture ... mix and match items and tools to get the best outcome percentage of capture shown before u actuallt hit the capture button"* — already shipped). CAPCONVO (conversation-with-pre-captured-girls triggers the actions) logged as a deferred idea (Gee: *"might be a hard templet to design"*). `node -c` clean. Pushed to `UpdateWork`.
+
+---
+
 ## 2026-06-18 — Session: Capture de-grind (EPIC AC) — CAPEASE.1 + CAPSTACK.1 + CAPNAME.1
 
 - **CAPEASE.1** ✅ — Gee: *"i dont want there to be many failures at capture ... a failed attemp ... make u more \"desperate\" and more likely to be successuful on the next one ... two filed captures in a row the third is basicly a easy win basicly mostley and kinda gauranteed.. i just dont want people getting stuck endless trying to capture"*. REVERSED the old tightening escalation (was ×0.85/0.70/0.55 then escape at tier 4). New **desperation** model: each miss adds a stacking additive bonus to the next grab (`DESPERATION_BONUS=[0,+0.22,+0.45,+0.90,+0.90]`) — even a 50% tool ≈ 95% on the 3rd grab. **She no longer escapes from repeated attempts** — the snatch loop can't get the player stuck. Misses still cost a little location suspicion + WANTED heat. `js/game/capture.js`, `js/ui/hunt-view.js`

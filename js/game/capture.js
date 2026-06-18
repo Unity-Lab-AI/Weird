@@ -297,36 +297,64 @@
   function desperationLabel(tier) { return DESPERATION_LABELS[Math.min(tier || 0, DESP_MAX_TIER)] || 'frenzied'; }
   function desperationNarration(tier) { return DESPERATION_NARRATION[Math.min(tier || 0, DESP_MAX_TIER)]; }
 
-  // Per-tool injury applied to the girl AT capture. Blunt tools (lead pipe) do real damage
-  // that must heal over time via care/heal actions; chemical tools leave her sick/groggy
-  // (small health hit, no bruises); restraints leave minor marks. Health floors at 1 — a
-  // capture never insta-kills. Healing is the existing rest/heal/feed/love loop.
+  // CAPDEBUFF.1 — per-tool debuff applied to the girl AT the grab. Gee: the COMBINED effects of
+  // every drug/tool/equipment you used (consciousness, mood, health, etc.) debuff her starting
+  // captive stats in TOTALITY — a rohi + pipe + cuffs grab leaves her bruised, dazed, sedated and
+  // bound at the start of captivity. Blunt tools do real health damage + bruises; chemicals leave
+  // her groggy/sedated (high↑ = doped, mood↓, stamina↓); restraints suppress escape-risk + small
+  // marks. Health floors at 1 — a grab never insta-kills. Healing is the rest/heal/feed/love loop.
   const CAPTURE_INJURY = Object.freeze({
-    pipe:         { health: -25, bruises: 6, tag: 'beaten' },
-    handcuffs:    { health: -2,  bruises: 2 },
-    shackles:     { health: -3,  bruises: 2 },
-    'zip-ties':   { health: -2,  bruises: 1 },
-    rope:         { health: -1,  bruises: 1 },
-    'duct-tape':  { health: -1,  bruises: 1 },
-    harness:      { health: -2,  bruises: 1 },
-    rohypnol:     { health: -4,  bruises: 0 },
-    chloroform:   { health: -5,  bruises: 0 },
-    ether:        { health: -5,  bruises: 0 },
-    ketamine:     { health: -6,  bruises: 0 },
-    tranquilizer: { health: -4,  bruises: 0 }
+    pipe:         { health: -25, bruises: 6, mood: -8, stamina: -10, tag: 'beaten' },
+    handcuffs:    { health: -2,  bruises: 2, escapeRisk: -0.10 },
+    shackles:     { health: -3,  bruises: 2, escapeRisk: -0.14 },
+    'zip-ties':   { health: -2,  bruises: 1, escapeRisk: -0.08 },
+    rope:         { health: -1,  bruises: 1, escapeRisk: -0.06 },
+    'duct-tape':  { health: -1,  bruises: 1, escapeRisk: -0.05 },
+    harness:      { health: -2,  bruises: 1, escapeRisk: -0.10 },
+    rohypnol:     { health: -4,  bruises: 0, mood: -6,  high: 35, stamina: -25, escapeRisk: -0.12 },
+    chloroform:   { health: -5,  bruises: 0, mood: -8,  high: 45, stamina: -35, escapeRisk: -0.18 },
+    ether:        { health: -5,  bruises: 0, mood: -8,  high: 45, stamina: -35, escapeRisk: -0.18 },
+    ketamine:     { health: -6,  bruises: 0, mood: -10, high: 50, stamina: -40, escapeRisk: -0.20 },
+    tranquilizer: { health: -4,  bruises: 0, mood: -6,  high: 55, stamina: -45, escapeRisk: -0.22 }
   });
 
-  function applyCaptureInjury(girl, toolId) {
-    const inj = CAPTURE_INJURY[toolId];
-    if (!inj || !girl.body) return;
-    girl.body.health = Math.max(1, (girl.body.health ?? 100) + (inj.health || 0));
-    girl.body.bruises = Math.min(99, (girl.body.bruises ?? 0) + (inj.bruises || 0));
-    // A heavy blunt hit shows as fresh damage in her first images (heals as she recovers).
-    if (inj.tag) {
-      girl.body.recentActTag = inj.tag;
+  // Apply the COMBINED debuff from EVERY tool in the loadout (summed + clamped) to the fresh
+  // captive — the "in totality" debuff on first capture. Mutates girl.body in place (caller
+  // escorts her right after, so the debuffed stats persist into her starting captive state).
+  function applyCaptureDebuffs(girl, toolIds) {
+    if (!girl.body) return;
+    const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+    let tag = null;
+    for (const id of (toolIds || [])) {
+      const inj = CAPTURE_INJURY[id];
+      if (!inj) continue;
+      girl.body.health  = Math.max(1, (girl.body.health ?? 100) + (inj.health || 0));
+      girl.body.bruises = Math.min(99, (girl.body.bruises ?? 0) + (inj.bruises || 0));
+      if (inj.high)    girl.body.high    = clamp((girl.body.high ?? 0) + inj.high, 0, 100);
+      if (inj.stamina) girl.body.stamina = clamp((girl.body.stamina ?? 70) + inj.stamina, 0, girl.body.health);
+      if (inj.mood && girl.mood) girl.mood.moodPressure = clamp((girl.mood.moodPressure || 0) + inj.mood, -60, 60);
+      if (inj.escapeRisk && girl.escape) girl.escape.currentRisk = clamp((girl.escape.currentRisk ?? 0.1) + inj.escapeRisk, 0, 1);
+      if (inj.tag) tag = inj.tag;
+    }
+    if (tag) {
+      girl.body.recentActTag = tag;
       if (window.DMTHGame.gameClock) girl.body.recentActAt = window.DMTHGame.gameClock.now();
     }
   }
+
+  // CAPWANTED.1 — heat from a grab scales by the BEST tool tier used. Higher-tier gear is cleaner
+  // (quiet sedatives, pro restraints) → far less WANTED heat + suspicion; crude low-tier grabs
+  // (a pipe in the open, tape) draw the most. "higher teir items have less negatives more positives."
+  function bestToolTier(toolIds) {
+    let max = 0;
+    for (const id of (toolIds || [])) {
+      const it = window.DMTHAssets && window.DMTHAssets.getById ? window.DMTHAssets.getById('item', id) : null;
+      if (it && typeof it.tier === 'number' && it.tier > max) max = it.tier;
+    }
+    return max;   // 0-5
+  }
+  // Heat for a successful grab — 0..~3, shrinking with tier. Tier 4+ = a clean, quiet snatch.
+  function captureHeat(toolIds) { return Math.max(0, 3 - bestToolTier(toolIds) * 0.7); }
 
   // CAPSTACK.1 — combine MULTIPLE selected drugs+tools into one grab. Each one stacks toward the
   // snatch (probabilistic OR — every tool is an independent shot at landing her, so more gear =
@@ -361,10 +389,12 @@
     const roll = Math.random();
     if (roll < chance) {
       try {
-        // Injury — apply only the SINGLE heaviest tool's injury so a big loadout doesn't
-        // over-wreck her at the grab. Heals via the rest/heal/feed/love loop. Apply BEFORE escort.
-        const heaviest = ids.reduce((a, b) => ((CAPTURE_INJURY[b]?.health || 0) < (CAPTURE_INJURY[a]?.health || 0) ? b : a), ids[0]);
-        applyCaptureInjury(girl, heaviest);
+        // CAPDEBUFF.1 — the COMBINED debuff from the whole loadout hits her starting captive stats
+        // (health/bruises/dazed/sedated/mood/escape) in totality. Apply BEFORE escort so it persists.
+        applyCaptureDebuffs(girl, ids);
+        // CAPWANTED.1 — heat from the grab scales by tool tier (higher tier = cleaner = less heat).
+        const heat = captureHeat(ids);
+        if (heat > 0 && window.DMTHGame.state.addWanted) window.DMTHGame.state.addWanted(heat, 'snatch:' + bestToolTier(ids));
         const escort = window.DMTHGame.hunt.escortToHold(girl);
         // LOOT.1 — a successful grab drops location-aware loot (a tool from the scene, or cash).
         let loot = null;
@@ -380,10 +410,14 @@
       }
     }
     // Miss — desperation rises (next grab easier), a little location heat. NO escape (CAPEASE.1).
+    // CAPWANTED.1 — a clean high-tier loadout botches QUIETLY: tier 3+ adds no suspicion/heat,
+    // crude low-tier grabs draw the usual blip.
     const s = window.DMTHGame.state.current;
-    s.wallet.suspicionByLocation[locationId] = (s.wallet.suspicionByLocation[locationId] || 0) + 1;
-    if (window.DMTHGame.wanted) window.DMTHGame.wanted.accrue('botched-capture');
-    return { outcome: 'miss', toolIds: ids, chance, roll, suspicionDelta: 1, desperationTier: (desperationTier || 0) + 1, consumed };
+    const tier = bestToolTier(ids);
+    const susBump = tier >= 3 ? 0 : 1;
+    s.wallet.suspicionByLocation[locationId] = (s.wallet.suspicionByLocation[locationId] || 0) + susBump;
+    if (susBump > 0 && window.DMTHGame.wanted) window.DMTHGame.wanted.accrue('botched-capture');
+    return { outcome: 'miss', toolIds: ids, chance, roll, suspicionDelta: susBump, desperationTier: (desperationTier || 0) + 1, consumed };
   }
 
   // Back-compat single-tool wrapper — delegates to the stacked engine. No escape end-state.
