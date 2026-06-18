@@ -162,6 +162,10 @@
             bm -= draw; produced += draw; patch.body.breastMilk = bm;
             // Trophy-history — running total of milk she's produced for you.
             patch.body.milkProducedTotal = (g.body?.milkProducedTotal || 0) + draw;
+            // GIRLHIST.2 — itemize milk made into her LIVE activity history.
+            if (window.DMTHGame.state.appendActivity) {
+              window.DMTHGame.state.appendActivity(g.id, { kind: 'milk', label: `bottled ${draw}L milk`, detail: `total ${Math.round(patch.body.milkProducedTotal)}L produced` });
+            }
           }
           // Being machine-milked is a small ongoing degradation for a non-indoctrinated girl
           // (never touches health). A bonded one weathers it fine.

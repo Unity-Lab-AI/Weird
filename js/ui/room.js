@@ -221,6 +221,16 @@
               `<div class="stat-pill"><span>${k}</span><b>${v}</b></div>`
             ).join('')}
           </div>
+
+          ${(() => {
+            // GIRLHIST.1 — LIVE per-girl activity history. A running list of every act done to/by her
+            // + her current buffs/debuffs/perks, on the fly (no waiting for a trophy). Auto-scrolls to
+            // newest unless the user scrolls up (then it pauses until they scroll back to the bottom).
+            // Populated + scroll-managed in JS (renderActivity / activityStick).
+            return `<h3>📜 Activity history <span class="muted small">(live)</span></h3>
+              <div id="activity-buffs" class="small" style="margin-bottom:4px"></div>
+              <div id="activity-log" class="log" style="max-height:220px;overflow-y:auto"></div>`;
+          })()}
           <h3>Hold supplies</h3>
           ${(() => {
             // Supplies live in the HOLD (not the
@@ -771,8 +781,10 @@
       if (status) status.textContent = on ? '⏳ waiting for her to finish…' : '';
     }
 
-    // Shared send path used by both the typed input and the quick-action clicks
-    async function sendTurn(text) {
+    // Shared send path used by both the typed input and the quick-action clicks.
+    // opts.detectAction (typed path only) runs the commonality engine on the typed line to register
+    // a real action (TYPEDACT.1). Quick-actions pass nothing — they already carry their own effect.
+    async function sendTurn(text, opts = {}) {
       if (!text) return;
       // Block chat while tranquilized. She can't speak.
       const tranqNow = window.DMTHGame.drugs.isUnconscious && window.DMTHGame.drugs.isUnconscious(
@@ -807,6 +819,25 @@
         renderLog();
         window.DMTHRouter.handle();
         return;
+      }
+
+      // TYPEDACT.1 — the COMMONALITY ENGINE picks up a typed player ACTION ("let me wash you" →
+      // love-bathe-her) and REGISTERS it: applies its stat spec (which logs to her activity history),
+      // so the typed line is actually DONE, not just narrated. Gated on a STRONG match (score ≥ 3,
+      // an id-token hit) so plain dialogue ("you look pretty") never fires an action. Not run during a
+      // multi-girl scene (that path targets multiple girls). Ollama still narrates her reaction below.
+      if (opts.detectAction && window.DMTHGame.actionEffects?.matchDirectedAction
+          && !liveSceneGirls(window.DMTHGame.state.getGirl(girl.id)).length) {
+        try {
+          const m = window.DMTHGame.actionEffects.matchDirectedAction(text, { includeCare: true });
+          if (m && m.matched && m.score >= 3 && window.DMTHGame.actionEffects.applyAction) {
+            window.DMTHGame.actionEffects.applyAction(girl.id, m.actionId);
+            if (window.DMTHNotify) {
+              const lbl = String(m.action?.notes || m.actionId).split(/[—.]/)[0].trim();
+              window.DMTHNotify.show(`✋ Registered: ${lbl}`, { type: 'info', durationMs: 1800 });
+            }
+          }
+        } catch (e) { /* non-fatal — detection never blocks the chat turn */ }
       }
 
       renderLog();
@@ -1388,10 +1419,10 @@
     }
     renderNpcDirect();
 
-    // Typed-input send button just delegates to the shared path
+    // Typed-input send button delegates to the shared path WITH typed-action detection (TYPEDACT.1).
     el.querySelector('#send').onclick = () => {
       const text = el.querySelector('#user-in').value.trim();
-      sendTurn(text);
+      sendTurn(text, { detectAction: true });
     };
 
     // Also: Enter-to-send in the textarea (shift-enter newlines), still one-hand friendly
@@ -2100,9 +2131,50 @@
       }, 1000);
     }
 
+    // GIRLHIST.1 — LIVE activity-history panel. Auto-scrolls to the newest entry UNLESS the user
+    // has scrolled up to read back (then it pauses until they return to the bottom — mirrors the
+    // chat-log selection-safe pattern). Buffs/debuffs/perks line refreshes alongside.
+    const activityLogEl = el.querySelector('#activity-log');
+    const activityBuffsEl = el.querySelector('#activity-buffs');
+    let activityStick = true;
+    if (activityLogEl) {
+      activityLogEl.addEventListener('scroll', () => {
+        // "At the bottom" within a small tolerance → keep sticking; scrolled up → pause auto-scroll.
+        activityStick = (activityLogEl.scrollHeight - activityLogEl.scrollTop - activityLogEl.clientHeight) < 24;
+      });
+    }
+    const ACTIVITY_KIND_EMOJI = { action: '✋', john: '💸', friend: '🩸', milk: '🥛', cash: '💰', capture: '⛓️', birth: '🍼', death: '☠️', buff: '✨' };
+    function activityBuffsLine() {
+      const g = window.DMTHGame.state.getGirl(girlId);
+      if (!g) return '';
+      const out = [];
+      const drugs = window.DMTHGame.drugs?.summarize ? window.DMTHGame.drugs.summarize(g) : [];
+      drugs.forEach(d => out.push(`💊 ${escapeHtml(d.name)} (${d.remainingMin}m)`));
+      if (window.DMTHGame.specialize?.list) window.DMTHGame.specialize.list(g).forEach(s => out.push(`${s.emoji} ${escapeHtml(s.displayName)}`));
+      if (window.DMTHGame.milk?.buffActive && window.DMTHGame.milk.buffActive()) out.push('🥛 warm-milk high');
+      if (window.DMTHGame.period?.isOnPeriod && window.DMTHGame.period.isOnPeriod(g)) out.push('🩸 on the rag');
+      if (g.pregnancy?.status === 'pregnant') out.push('🤰 pregnant');
+      if (g.body?.isNugget) out.push('🪓 nugget');
+      const xlim = window.DMTHGame.actionEffects?.XTOL_LIMIT || 10;
+      if ((g.body?.extremeStreak || 0) >= xlim) out.push('⚠️ spent');
+      return out.length ? `<b>Now:</b> ${out.map(t => `<span class="stat-pill" style="display:inline-block;margin:1px">${t}</span>`).join('')}` : '<span class="muted">no active buffs / debuffs / perks</span>';
+    }
+    function renderActivity() {
+      if (activityBuffsEl) activityBuffsEl.innerHTML = activityBuffsLine();
+      if (!activityLogEl) return;
+      const items = window.DMTHGame.state.getActivity ? window.DMTHGame.state.getActivity(girlId, 80) : [];
+      activityLogEl.innerHTML = items.length ? items.map(a => {
+        const t = (window.DMTHGame.gameClock?.formatStamp && a.gameMin != null) ? window.DMTHGame.gameClock.formatStamp(a.gameMin) : '';
+        return `<div class="log-entry"><b>${ACTIVITY_KIND_EMOJI[a.kind] || '·'} ${escapeHtml(a.label || '')}</b>${a.detail ? ` <span class="muted small">${escapeHtml(a.detail)}</span>` : ''}${t ? ` <span class="muted small">· ${escapeHtml(t)}</span>` : ''}</div>`;
+      }).join('') : '<div class="muted small">nothing yet — interact with her and it logs here live.</div>';
+      if (activityStick) activityLogEl.scrollTop = activityLogEl.scrollHeight;
+    }
+    renderActivity();
+
     const unsub = window.DMTHGame.state.onChange(() => {
       if (!location.hash.startsWith('#room')) return;
       renderLog();
+      renderActivity();   // GIRLHIST.1 — keep the live activity history + buffs current
       // Refresh body stat bars in place — without this, the bars stay frozen at
       // render-time values even though applyAction is correctly mutating
       // girl.body.{arousal,wetness,cumLoad,bruises,high,stamina,health}. The bars are

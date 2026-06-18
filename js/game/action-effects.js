@@ -635,6 +635,19 @@
 
     window.DMTHGame.state.updateGirl(girlId, { body, bond, mood, escape });
 
+    // GIRLHIST.1 — record this act into her LIVE activity history (player acts only; johns/friends
+    // log themselves via the whore-out ledger + their own activity entries). Compact label + the
+    // buff/debuff deltas it carried, so the running list shows what was done + how it moved her.
+    if (!isProxyAct && window.DMTHGame.state.appendActivity) {
+      const niceLabel = String(action.notes || actionId).split(/[—.]/)[0].trim() || actionId;
+      const bits = [];
+      for (const k of ['health', 'stamina', 'mood', 'arousal', 'wetness', 'cumLoad', 'bruises', 'bondXP', 'bondDebt']) {
+        const v = action[k];
+        if (v) bits.push(`${k}${v > 0 ? '+' : ''}${v}`);
+      }
+      window.DMTHGame.state.appendActivity(girlId, { kind: 'action', label: niceLabel, detail: bits.join(' · ') });
+    }
+
     // FRIENDKILL.1 / SNUFFBONUS.1 — the player's OWN extreme act finishes her when it crosses her
     // death floor (health hit 0 on a kill-capable act she wasn't already too healthy to survive).
     // She got the DEATHWARN confirm first, so a confirmed lethal act SHOULD kill her — and a girl
@@ -1238,7 +1251,15 @@
     burn: ['burn'], rack: ['rack'], stretch: ['rack'], flay: ['flay'], skin: ['flay'],
     break: ['break'], waterboard: ['waterboard'], drown: ['waterboard'], electro: ['electro'], shock: ['electro'], nail: ['nail'], acid: ['acid'],
     tie: ['restrain'], bind: ['restrain'], cuff: ['restrain'], restrain: ['restrain'],
-    fuck: ['sex','rough'], sex: ['sex'], use: ['rough'], ride: ['sex']
+    fuck: ['sex','rough'], sex: ['sex'], use: ['rough'], ride: ['sex'],
+    // TYPEDACT.1 — care/affection synonyms so a typed player line ("let me wash you", "kiss her")
+    // matches the corresponding care act. Only consulted when matchDirectedAction is called with
+    // { includeCare: true } (the typed-chat path), never for a directed JOHN.
+    wash: ['bathe'], bathe: ['bathe'], clean: ['bathe'], rinse: ['bathe'], shower: ['bathe'], wipe: ['wipe'],
+    kiss: ['kiss'], cuddle: ['cuddle'], snuggle: ['cuddle'], hug: ['hold'], hold: ['hold'],
+    massage: ['massage'], rub: ['massage'], praise: ['praise'], compliment: ['praise'],
+    brush: ['hair'], hair: ['hair'], lullaby: ['lullaby'], sing: ['lullaby'],
+    feed: ['feed'], water: ['water'], heal: ['heal'], bandage: ['heal'], comfort: ['hold','caress']
   };
   function tokenizeDirected(text) {
     const toks = String(text || '').toLowerCase().match(/[a-z]+/g) || [];
@@ -1257,10 +1278,18 @@
   const DIRECTED_CANDIDATES = Object.keys(ACTIONS).filter(id =>
     /^(sex-|extreme-|torture-|john-)/.test(id) || ['slap','choke','whip','punch','restrain'].includes(id)
   );
-  function matchDirectedAction(text) {
+  // TYPEDACT.1 — care/affection acts are matchable too, but ONLY for a typed PLAYER line (a john
+  // never gets directed to "wash" her). matchDirectedAction(text, {includeCare:true}) widens the pool.
+  const CARE_CANDIDATES = Object.keys(ACTIONS).filter(id =>
+    /^(love-|feed-|water-)/.test(id) || ['heal', 'wipe-down'].includes(id)
+  );
+  // opts.includeCare → also score the care pool (typed-chat path). The caller decides whether the
+  // result is strong enough to register (TYPEDACT gates on score; a directed NPC always acts).
+  function matchDirectedAction(text, opts = {}) {
     const want = tokenizeDirected(text);
+    const pool = opts.includeCare ? DIRECTED_CANDIDATES.concat(CARE_CANDIDATES) : DIRECTED_CANDIDATES;
     let best = null;
-    for (const id of DIRECTED_CANDIDATES) {
+    for (const id of pool) {
       const action = ACTIONS[id];
       if (!action) continue;
       const idToks = id.split('-').filter(t => t.length >= 2);

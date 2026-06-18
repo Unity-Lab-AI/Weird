@@ -1,5 +1,7 @@
 # resume.md — DUNGEON MASTER: THE HUNT — session handoff
 
+> 🛑 **STANDING CONSTRAINT (Gee, 2026-06-18): DO NOT `git push` to `UpdateWork` (or any feature branch) until Gee explicitly says to.** Keep working + local commits are fine; just hold ALL pushes until further notice. *"quit pushing to the feature branch until i tell you to do it just work without pushing to repo feature branch until further notice , just get the work done"*
+
 **Last session:** 2026-06-18 · **Branch:** `UpdateWork` · **Last commit:** `39d39b9`. **State:** every changed JS passes `node -c`; `.claude/` gitignored. Remote: `git@git.unityailab.com:UnityAILab/Weird.git` (Forgejo, SSH).
 
 > Huge autonomous build run (~20 commits) off "keep working / we're doing it all" + a firehose of mid-flight Gee directives — every one caught + folded in, nothing dropped. **Doc split:** `supertodo.md` = master map (EPICs, verbatim) · `TODO.md` = live tasks + verbatim fragments · `FINALIZED.md` = per-batch archive. Board (`/tasks`, #124-193) mirrors TODO.

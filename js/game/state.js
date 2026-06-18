@@ -84,6 +84,7 @@
     },
 
     turns: {},                     // { girlId: [{role, text, ts}] }  per-girl chat log (bounded)
+    activity: {},                  // GIRLHIST.1 — { girlId: [{ts, gameMin, kind, label, detail}] } per-girl activity history (bounded)
 
     // REQUEST.1 — pre-capture item-request cooldown log. Keyed by `${locationId}|${archetype}`,
     // value = the game-day number the last request was made. Enforces "once a day per girl-type
@@ -156,6 +157,7 @@
     else { s.propositioners.inbox ||= []; s.propositioners.active ||= []; s.propositioners.completed ||= []; s.propositioners.repeatClients ||= {}; }
     if (!s.disposals) s.disposals = [];
     if (!s.turns) s.turns = {};
+    if (!s.activity) s.activity = {};   // GIRLHIST.1 — backfill the activity log for pre-feature saves
     if (!s.itemRequestLog || typeof s.itemRequestLog !== 'object') s.itemRequestLog = {};
     if (!Array.isArray(s.usedNames)) s.usedNames = [];
     if (!s.locationSpawns || typeof s.locationSpawns !== 'object') s.locationSpawns = {};
@@ -433,6 +435,33 @@
     });
   }
 
+  // GIRLHIST.1 — per-girl ACTIVITY history (distinct from the chat `turns` log). A running list of
+  // everything DONE to/by her — player acts (+ the buff/debuff each caused), johns/friends, milk
+  // bottled, cash made, captures, births. Surfaced LIVE in the room (no waiting for a trophy) AND
+  // in her trophy/dossier via a shared renderer. Bounded; stamps both real-ms ts + game-minutes.
+  //   entry: { kind, label, detail?, delta? }  — kind groups it (action|john|friend|milk|cash|capture|birth|death|buff)
+  function appendActivity(girlId, entry) {
+    if (!girlId || !entry) return;
+    mutate(s => {
+      if (!s.activity) s.activity = {};
+      if (!s.activity[girlId]) s.activity[girlId] = [];
+      const e = { ts: Date.now(), kind: entry.kind || 'action', label: entry.label || '' };
+      if (entry.detail) e.detail = entry.detail;
+      if (entry.delta) e.delta = entry.delta;
+      const clk = window.DMTHGame.gameClock;
+      if (clk && typeof clk.now === 'function') e.gameMin = clk.now();
+      s.activity[girlId].push(e);
+      if (s.activity[girlId].length > 300) s.activity[girlId] = s.activity[girlId].slice(-300);
+    });
+  }
+  function getActivity(girlId, n) {
+    const arr = (state?.activity && state.activity[girlId]) || [];
+    return n ? arr.slice(-n) : arr.slice();
+  }
+  function clearActivity(girlId) {
+    mutate(s => { if (s.activity && s.activity[girlId]) delete s.activity[girlId]; });
+  }
+
   // films
   function addFilm(film) { mutate(s => { s.films.push(film); }); }
   function updateFilm(id, patch) {
@@ -572,6 +601,7 @@
     addDungeon, updateDungeon, getDungeon,
     addGirl, updateGirl, getGirl, removeGirl,
     appendTurn, getTurns, clearTurns,
+    appendActivity, getActivity, clearActivity,
     addFilm, updateFilm, getFilm,
     addDisposal,
     addTrophy, getTrophies,

@@ -423,6 +423,10 @@
     }
 
     window.DMTHGame.state.updateGirl(girl.id, { whoreOut: newWo });
+    // GIRLHIST.1/.2 — log the john into her LIVE activity history (+ the cash he paid, itemized).
+    if (window.DMTHGame.state.appendActivity) {
+      window.DMTHGame.state.appendActivity(girl.id, { kind: 'john', label: (npc ? npc.handle : arc.displayName), detail: `${acts.join(', ')} · +$${totalPaid}${condomUsed ? ' · 🎈' : ''}` });
+    }
     return encounter;
   }
 
@@ -577,6 +581,10 @@
     if (window.DMTHGame.loot && window.DMTHGame.loot.grantNpcGift && (killed || Math.random() < 0.5)) {
       window.DMTHGame.loot.grantNpcGift({ from: (npc ? npc.handle : arc.displayName), generous: true, kill: killed });
     }
+    // GIRLHIST.1/.2 — log the friend visit into her LIVE activity history.
+    if (window.DMTHGame.state.appendActivity) {
+      window.DMTHGame.state.appendActivity(girl.id, { kind: 'friend', label: `FRIEND — ${arc.displayName}`, detail: `${killed ? 'KILLED her' : `wrecked her −${drop} HP`} · +$${payment}` });
+    }
     return encounter;
   }
 
@@ -720,6 +728,10 @@
     window.DMTHGame.state.addMoney(amount, `whore-out:cashout:${girlId}`);
     const newWo = { ...wo, unclaimedEarnings: 0 };
     window.DMTHGame.state.updateGirl(girlId, { whoreOut: newWo });
+    // GIRLHIST.2 — itemized cash she made, into her LIVE activity history.
+    if (window.DMTHGame.state.appendActivity) {
+      window.DMTHGame.state.appendActivity(girlId, { kind: 'cash', label: `cashed out $${amount.toLocaleString()}`, detail: 'whore-out earnings → treasury' });
+    }
     return { ok: true, amount };
   }
 
