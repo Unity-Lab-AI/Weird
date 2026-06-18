@@ -560,13 +560,25 @@
     const girl0 = window.DMTHGame.state.getGirl(girlId);
     if (!girl0) return { ok: false, reason: 'no such girl' };
     if (!getWhoreOut(girl0).enabled) return { ok: false, reason: 'whore-out is off for her' };
-    const count = Math.max(2, Math.min(8, n));
+    // GANGSCALE.1 (Gee) — a bigger dungeon + more girls held throws a BIGGER gangbang. The crowd
+    // ceiling scales with the active dungeon's hold count + total captives, so a fledgling
+    // hole-in-the-wall draws a few johns while a full operation packs the room.
+    const dungeon = window.DMTHGame.state.getDungeon(girl0.assignedDungeonId);
+    const holdCount = dungeon?.holds?.length || 1;
+    const captives = (window.DMTHGame.state.current?.roster || []).filter(g => g.encounterState === 'captive').length;
+    const scaledMax = Math.max(2, Math.min(10, 2 + Math.floor(holdCount / 2) + Math.floor(captives / 3)));
+    const count = Math.max(2, Math.min(scaledMax, n || scaledMax));
     const encs = [];
     for (let i = 0; i < count; i++) {
       const enc = tryArrival(window.DMTHGame.state.getGirl(girlId));
       if (enc) encs.push(enc); else break;
     }
     let gross = encs.reduce((t, e) => t + (e.totalPaid || 0), 0);
+    // GANGSCALE.1 — a bigger gangbang = better satisfaction (the crowd is the thrill). Scales
+    // with how many johns actually took her this session.
+    if (encs.length >= 2 && window.DMTHGame.state.addSatisfaction) {
+      window.DMTHGame.state.addSatisfaction(Math.min(20, encs.length * 2.5), 'gangbang-scale');
+    }
 
     // GANGBUKKAKE.1 — a gangbang ends in a stacked bukkake / cum-fill finale: every john empties
     // onto/into her at once. Floods her cum-load toward her cap, stamps the bukkake aftermath so
