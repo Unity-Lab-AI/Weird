@@ -153,6 +153,14 @@
 
 - [x] **FRIENDLOOT.1** 🟠 ✅ SHIPPED 2026-06-18 (LOCAL — not pushed) — friend encounters: ALWAYS pay cash at a minimum (floor $40 even on a bigoted kink-mismatch / cheap visit), ALMOST ALWAYS leave loot (drops floored at ≥1, kink-match still drops more), and a MURDER guarantees GOOD loot (the kill drop fires `grantNpcGift{kill}` → tier-5 best haul). `js/game/whore-out.js`
 
+> *"all items equipment and upgrades and clothing and toys are all lotable from all lot drops jsut toys are reeair money is normal druges are common and clothing is also rari and equipemtn tools and items like food and water are commonplace"* + *"even the milk sucker is lootable"*
+
+- [x] **LOOTRARITY.1** 🟠 ✅ SHIPPED 2026-06-18 (LOCAL — not pushed) — category-rarity weighting on the loot picker (`weightedPickLoot`/`lootRarityClass`): toys = RARE (incl. the Tit Sucker), drugs = COMMON, food/water/tools/restraints/sedation/utility/tech/player-boost = COMMONPLACE; clothing (also rare) drops via the OUTFITLOOT `grantOutfit` path. Whole catalog already lootable (LOOTALL); this weights HOW OFTEN each category appears. `js/game/loot.js`
+
+> *"and also i want to also have pre preggo girls you can capture so like visiting some location idk where do pregnant women hang out at"*
+
+- [x] **PREGGOCAP.1** 🟠 ✅ SHIPPED 2026-06-18 (LOCAL — not pushed) — added a **🤰 Prenatal Clinic** location (catalog LOCATIONS @ grid 3,1, The Brood Ward zone, level-4 gated) that spawns "normal women" archetypes — and `hunt.rollFreshSet` stamps every girl encountered there ALREADY PREGNANT (random gestation day 40-240 → trimester), so she's captured belly-and-all. `js/assets/catalog.js`, `js/game/hunt.js`, `js/game/progression.js` (gate)
+
 > *"i actually want to split the town up into zones so u have to be a certain level to unlock certain locations and sume u have to pay to unlock"*
 
 - [x] **ZONES.1** 🟠 ✅ SHIPPED 2026-06-18 (LOCAL — not pushed) — town split into named ZONES (The Gutter / The Meat District / The Quarter / The Heights / The Brood Ward / The Sticks), shown on each town slot. Location gating (level / captives-held / pay-to-unlock) already existed in `progression.LOCATION_GATES`; added a `strip-club` level-2 gate + a `prenatal-clinic` level-4 gate. `js/ui/town-view.js` (zone map + per-slot zone label), `js/game/progression.js` (gates)

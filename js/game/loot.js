@@ -104,6 +104,25 @@
     waitress: ['coke-bumps', 'wine', 'weed'],
     remote:   ['pipe', 'ether', 'chloroform', 'tranquilizer']
   };
+  // LOOTRARITY.1 (Gee) — category rarity weighting: drugs are COMMON, food/water/tools/restraints/
+  // consumables/tech are COMMONPLACE, toys are RARE (clothing — also rare — drops via OUTFITLOOT's
+  // grantOutfit path, not the item pool). Higher weight = shows up more often in a roll.
+  const RARITY_WEIGHT = { commonplace: 5, common: 3, rare: 1 };
+  function lootRarityClass(id) {
+    if (window.DMTHGame.toys && window.DMTHGame.toys.spec && window.DMTHGame.toys.spec(id)) return 'rare';   // toys = rare (incl. the Tit Sucker if it's a toy)
+    const items = (window.DMTHAssets && window.DMTHAssets.ITEMS) || [];
+    const it = items.find(x => x.id === id);
+    if (!it) return 'common';
+    if (it.subcategory === 'drugs') return 'common';
+    if (it.subcategory === 'toys') return 'rare';
+    return 'commonplace';   // food / water / sedation / restraint / containment / utility / tech / player-boost / consumables
+  }
+  function weightedPickLoot(candidates) {
+    if (!candidates || !candidates.length) return null;
+    const bag = [];
+    for (const id of candidates) { const w = RARITY_WEIGHT[lootRarityClass(id)] || 2; for (let i = 0; i < w; i++) bag.push(id); }
+    return bag.length ? pick(bag) : pick(candidates);
+  }
   function pickLootByTier(maxTier, biasIds) {
     const pools = lootByTierPools();
     let candidates = [];
@@ -113,7 +132,7 @@
       const inTier = biasIds.filter(id => candidates.includes(id));
       if (inTier.length) return pick(inTier);
     }
-    return pick(candidates);
+    return weightedPickLoot(candidates);   // LOOTRARITY.1 — category-rarity-weighted pull
   }
   // Girl's loot tier on capture — a harder/more-vibrant archetype (higher ARCHETYPE_DIFFICULTY)
   // drops better gear. maps 0..1 difficulty → maxTier 2..5.

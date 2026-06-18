@@ -18,7 +18,10 @@
     'hotel-lobby': [{ arche: 'sorority', w: 0.3 }, { arche: 'model', w: 0.25 }, { arche: 'office', w: 0.2 }, { arche: 'club', w: 0.15 }, { arche: 'library', w: 0.1 }],
     'private-party':[{ arche: 'sorority', w: 0.3 }, { arche: 'club', w: 0.22 }, { arche: 'college-student', w: 0.18 }, { arche: 'second-cousin', w: 0.12 }, { arche: 'model', w: 0.1 }, { arche: 'street', w: 0.08 }],
     'school-campus':[{ arche: 'college-student', w: 0.24 }, { arche: 'sorority', w: 0.16 }, { arche: 'cheerleader', w: 0.14 }, { arche: 'schoolgirl', w: 0.12 }, { arche: 'teacher', w: 0.12 }, { arche: 'highschool-grad', w: 0.12 }, { arche: 'library', w: 0.1 }],
-    'neighborhood': [{ arche: 'neighbor', w: 0.45 }, { arche: 'family-friend', w: 0.25 }, { arche: 'second-cousin', w: 0.15 }, { arche: 'college-student', w: 0.15 }]
+    'neighborhood': [{ arche: 'neighbor', w: 0.45 }, { arche: 'family-friend', w: 0.25 }, { arche: 'second-cousin', w: 0.15 }, { arche: 'college-student', w: 0.15 }],
+    // PREGGOCAP.1 — the only place to catch an already-pregnant girl. Spawns "normal women"
+    // archetypes; rollFreshSet flags every girl here PREGNANT after generation.
+    'prenatal-clinic': [{ arche: 'neighbor', w: 0.28 }, { arche: 'family-friend', w: 0.22 }, { arche: 'office', w: 0.18 }, { arche: 'college-student', w: 0.16 }, { arche: 'sorority', w: 0.16 }]
   };
 
   // Additional archetype locations for new archetypes
@@ -48,6 +51,16 @@
       taken.add(String(girl.name).toLowerCase());
       girl.encounterState = 'encountered';
       girl.encounteredAt = { locationId, ts: Date.now() };
+      // PREGGOCAP.1 — girls at the prenatal clinic are ALREADY PREGNANT: stamp a real pregnancy
+      // (random gestation day → trimester) so she arrives breeding, captured belly-and-all.
+      if (locationId === 'prenatal-clinic') {
+        const gd = 40 + Math.floor(Math.random() * 200);   // ~day 40-240
+        girl.pregnancy = {
+          status: 'pregnant', gestationDays: gd,
+          trimester: gd < 94 ? 1 : gd < 187 ? 2 : 3,
+          conceptionSource: 'pre-capture', outcomeHistory: []
+        };
+      }
       girls.push(girl);
     }
     return girls;
@@ -145,7 +158,8 @@
     'hotel-lobby': 'in the service elevator bay, the lobby piano playing on the other side',
     'private-party': 'upstairs in a bedroom while the party thumps downstairs',
     'school-campus': 'behind the science building where the security cameras don\'t reach',
-    'strip-club':  'in the back hallway past the dressing rooms, mirror bulbs and discarded heels, bass thudding through the wall from the main floor'
+    'strip-club':  'in the back hallway past the dressing rooms, mirror bulbs and discarded heels, bass thudding through the wall from the main floor',
+    'prenatal-clinic': 'in the clinic parking lot at dusk as she waddles to her car after an appointment, nobody else around, one hand on her swollen belly'
   };
 
   // --- Destination hideout flavor ---
@@ -214,6 +228,7 @@
     teacher:  0.55,
     police:   0.78,      // trained, armed, connected — the hardest grab
     maid:     0.35,      // isolated + compliant
+    'prenatal-clinic': 0.55,   // pregnant girls — slower, but the clinic's watched
     unity_seed: 0.10     // Unity wants it
   };
 

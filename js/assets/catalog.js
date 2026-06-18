@@ -145,6 +145,15 @@
       notes: 'Hard. Invitation-only. Insider spawns. Risk of being recognized.'
     },
     {
+      id: 'prenatal-clinic', displayName: 'Prenatal Clinic', emoji: '🤰',
+      category: 'location', subcategory: 'hard',
+      prompt: 'exterior establishing shot of a quiet suburban prenatal / OB-GYN clinic at dusk, soft-lit waiting-room windows, a half-empty parking lot, tasteful signage, clinical-suburban photography, muted color grade',
+      personEnvPrompt: 'in the waiting room of a prenatal clinic, soft pastel walls and framed ultrasound posters behind her, a reception desk and parenting magazines on a low table, warm clinical lighting, suburban OB-GYN atmosphere',
+      cost: 900, unlock: { minNotoriety: 2 },
+      gridPlacement: { x: 3, y: 1 },
+      notes: 'Hard. Where expecting mothers come and go — the only place to catch an already-PREGNANT girl. Level-gated.'
+    },
+    {
       id: 'school-campus', displayName: 'Campus Quad', emoji: '🎓',
       category: 'location', subcategory: 'medium',
       prompt: 'wide shot of a university campus quad, ivy-covered brick buildings, students crossing with backpacks, autumn trees, cathedral-like clock tower in background, collegiate editorial photography',
