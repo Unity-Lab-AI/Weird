@@ -393,6 +393,21 @@
     'period-oral':           'bloodied-mouth'
   });
 
+  // KINKMATRIX.1 — classify an action into the broad category her hidden kink like/dislike keys on.
+  // Returns null for acts that don't map to a kink category (feed/water/heal/rest/drug-curve admin).
+  function actionCategory(actionId) {
+    if (!actionId) return null;
+    if (/^drug-/.test(actionId)) return 'drugs';
+    if (/^love-|^heal$|^wipe-down$|^sex-gentle$/.test(actionId)) return 'tenderness';
+    if (/rough|masochist/.test(actionId)) return 'rough';
+    if (/anal/.test(actionId)) return 'anal';
+    if (/oral|facefuck/.test(actionId)) return 'oral';
+    if (/choke/.test(actionId)) return 'choke';
+    if (/^slap$|^whip$|^punch$|beatdown|^torture-/.test(actionId)) return 'pain';
+    if (/degrad/.test(actionId)) return 'degradation';
+    return null;
+  }
+
   // Threshold below which actions become gated. Returns the minimum stamina required
   // for the action to land cleanly. Stamina < required = action still runs but takes
   // a bigger health hit + bigger mood penalty.
@@ -633,7 +648,36 @@
     // are counted separately in the whore-out ledger). Persists into her death record + trophy.
     if (!isProxyAct) body.actsCommitted = (body.actsCommitted || 0) + 1;
 
-    window.DMTHGame.state.updateGirl(girlId, { body, bond, mood, escape });
+    // KINKMATRIX.1 / KINKDISC.1 — her hidden like/dislike modifies the act + is DISCOVERED on it.
+    // A like buffs (mood/arousal/bond + satisfaction); a dislike debuffs (mood −, bond-debt +). The
+    // first time each fires, it's revealed as a status notice. Skipped for proxy (john/friend) acts.
+    let kinkPatch = null;
+    if (!isProxyAct && girl.kink) {
+      const cat = actionCategory(actionId);
+      if (cat && cat === girl.kink.like) {
+        // PREGNEED.1 (finishing the deferred part) — a PREGNANT girl gets a BIGGER kink payoff
+        // ("pregoo girls ... get bonius to kink"): hornier + more satisfaction on her loved act.
+        const preg = girl.pregnancy && girl.pregnancy.status === 'pregnant';
+        mood.moodPressure = clamp((mood.moodPressure || 0) + (preg ? 9 : 6), -60, 60);
+        body.arousal = clamp((body.arousal ?? 0) + (preg ? 13 : 8), 0, 100);
+        bond.bondXP = (bond.bondXP || 0) + 2;
+        if (window.DMTHGame.state.addSatisfaction) window.DMTHGame.state.addSatisfaction(preg ? 3 : 2, 'kink-like:' + cat);
+        if (!girl.kink.likeFound) {
+          kinkPatch = { ...girl.kink, likeFound: true };
+          if (window.DMTHNotify) window.DMTHNotify.show(`💖 Discovered — ${girl.name} secretly LOVES ${cat}: it turns her on and bonds her faster.`, { type: 'success', durationMs: 5500 });
+        }
+      } else if (cat && cat === girl.kink.dislike) {
+        mood.moodPressure = clamp((mood.moodPressure || 0) - 8, -60, 60);
+        body.arousal = clamp((body.arousal ?? 0) - 5, 0, 100);
+        bond.bondDebt = (bond.bondDebt || 0) + 3;
+        if (!girl.kink.dislikeFound) {
+          kinkPatch = { ...girl.kink, dislikeFound: true };
+          if (window.DMTHNotify) window.DMTHNotify.show(`💢 Discovered — ${girl.name} HATES ${cat}: it sets her back and piles on bond-debt.`, { type: 'warn', durationMs: 5500 });
+        }
+      }
+    }
+
+    window.DMTHGame.state.updateGirl(girlId, kinkPatch ? { body, bond, mood, escape, kink: kinkPatch } : { body, bond, mood, escape });
 
     // GIRLHIST.1 — record this act into her LIVE activity history (player acts only; johns/friends
     // log themselves via the whore-out ledger + their own activity entries). Compact label + the

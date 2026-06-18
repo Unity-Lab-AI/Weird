@@ -263,11 +263,21 @@
     };
     const ethnicity = ETHNICITIES[Math.floor(r() * ETHNICITIES.length)];
 
+    // KINKMATRIX.1 / KINKDISC.1 — a hidden LIKE + DISLIKE keyed to action categories, discovered
+    // when the player performs that category on her (becomes a status notice). A like buffs the act
+    // (mood/arousal/bond); a dislike debuffs it (mood/bond-debt). Picked distinct at generation.
+    const KINK_CATEGORIES = ['tenderness', 'rough', 'anal', 'oral', 'choke', 'pain', 'degradation', 'drugs'];
+    const kLike = KINK_CATEGORIES[Math.floor(r() * KINK_CATEGORIES.length)];
+    let kDislike = KINK_CATEGORIES[Math.floor(r() * KINK_CATEGORIES.length)];
+    if (kDislike === kLike) kDislike = KINK_CATEGORIES[(KINK_CATEGORIES.indexOf(kLike) + 1) % KINK_CATEGORIES.length];
+    const kink = { like: kLike, dislike: kDislike, likeFound: false, dislikeFound: false };
+
     return {
       id,
       name,
       age,
       ethnicity,
+      kink,
       archetypeTemplate: archetype,
       captiveAffect,
       voiceId,

@@ -191,6 +191,7 @@
           </div>
           <div class="stat-row"><span>Mood</span><b>${girl.mood.mood}</b></div>
           ${girl.captiveAffect ? `<div class="stat-row"><span>Captive-affect</span><b>${girl.captiveAffect}</b></div>` : ''}
+          ${girl.kink && (girl.kink.likeFound || girl.kink.dislikeFound) ? `<div class="stat-row small" data-tooltip="Her discovered kink (KINKDISC). A LIKE buffs that category of act (mood/arousal/bond); a DISLIKE debuffs it (mood + bond-debt). Found by performing the act on her."><span>Kinks</span><b>${girl.kink.likeFound ? `💖 loves ${girl.kink.like}` : ''}${girl.kink.likeFound && girl.kink.dislikeFound ? ' · ' : ''}${girl.kink.dislikeFound ? `💢 hates ${girl.kink.dislike}` : ''}</b></div>` : ''}
           <div class="stat-row"><span>Stockholm rating</span><b>${(girl.bond.bondLevel || 0) + 1}/10</b> <span class="muted small">(${['terrified','wary','acclimating','curious','ambivalent','reciprocated','dependent','partner','devoted','fully-bonded'][girl.bond.bondLevel]} · xp ${girl.bond.bondXP}, debt ${girl.bond.bondDebt})</span></div>
           ${(() => {
             const er = Math.round((girl.escape?.currentRisk || 0) * 100);

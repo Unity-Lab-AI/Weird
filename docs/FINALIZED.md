@@ -13,6 +13,13 @@
 
 ---
 
+## 2026-06-18 — Session: KINKMATRIX.1 + KINKDISC.1 + PREGNEED.1 (kink-bonus) — per-girl discovered like/dislike — LOCAL ONLY (not pushed)
+
+- **KINKDISC.1 + KINKMATRIX.1** ✅ — Gee verbatim: *"girls need a certain kink they have theats discovered apon that act event and becomes a status notice on the girl for both dislikes and likes ie a timid girl might like her pussy petted but not like face fucking"* + *"each girl has a plus and negative action and same with toys and drugs ... individual actions or whole caterigoresis ..."*. Each girl gets a hidden `kink = {like, dislike, likeFound, dislikeFound}` at generation (distinct categories) — backfilled on legacy saves. `actionCategory(actionId)` maps every act to one of 8 categories (tenderness / rough / anal / oral / choke / pain / degradation / drugs); in `applyAction`, hitting her LIKE category buffs the act (+mood pressure, +arousal, +bondXP, +satisfaction), hitting her DISLIKE debuffs it (−mood, +bond-debt, −arousal). The FIRST time each fires it's DISCOVERED → a 💖 "she LOVES X" / 💢 "she HATES Y" toast, and a persistent **Kinks** status row shows in the room. `js/game/girl-gen.js`, `js/game/state.js`, `js/game/action-effects.js`, `js/ui/room.js`
+- **PREGNEED.1 (kink-bonus, finishing the deferred part)** ✅ — Gee verbatim: *"pregoo girls ... get bonius to kink"*. A PREGNANT girl now gets a bigger kink-LIKE payoff (mood +9 / arousal +13 / satisfaction +3 vs the base +6/+8/+2) when you hit her loved category — the deferred half of PREGNEED.1, unblocked now that the kink system exists. `js/game/action-effects.js`. `node -c` clean.
+
+---
+
 ## 2026-06-18 — Session: FRIENDCUMWAD.1 + PLAYERCUMLVL.1 + LEVELVIEW.1 — cum-wad scaling + level perks viewable — LOCAL ONLY (not pushed)
 
 - **FRIENDCUMWAD.1** ✅ — Gee verbatim: *"a frinde have a much large cum wad for cum fill than normal johns"*. Friends now bust a `FRIEND_CUM_WAD` = **3.5** raw load (vs a john's ~1.2): a heavy `pregnancy.addVaginalCum` toward breeding + a `body.cumLoad` bump (capped), alive girls only — they never glove up so it always floods her raw. `cumLoadAdded` on the ledger reflects it. `js/game/whore-out.js`

@@ -261,6 +261,13 @@
       if (!Array.isArray(g.body.ownershipMarks)) g.body.ownershipMarks = [];
       // Forced-addiction map (DEP-EXP.2) — own object per girl. { [drugKey]: 0-100 }.
       if (!g.body.addiction || typeof g.body.addiction !== 'object') g.body.addiction = {};
+      // KINKMATRIX.1 / KINKDISC.1 — backfill a hidden like/dislike on pre-feature captives.
+      if (!g.kink || typeof g.kink !== 'object') {
+        const KC = ['tenderness', 'rough', 'anal', 'oral', 'choke', 'pain', 'degradation', 'drugs'];
+        const li = Math.floor(Math.random() * KC.length);
+        let di = Math.floor(Math.random() * KC.length); if (di === li) di = (li + 1) % KC.length;
+        g.kink = { like: KC[li], dislike: KC[di], likeFound: false, dislikeFound: false };
+      }
       // bond / mood / escape minimal shape
       g.bond = g.bond || { bondLevel: 0, bondXP: 0, bondDebt: 0, milestones: [] };
       if (g.bond.bondLevel == null) g.bond.bondLevel = 0;
