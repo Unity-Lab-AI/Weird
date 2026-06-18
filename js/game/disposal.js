@@ -13,7 +13,7 @@
         return isolation > 0.9 ? 0 : isolation > 0.7 ? 1 : 3;
       },
       suspicionSpike: 0,
-      notes: 'On-property burial. Safest when dungeon isolation is high.'
+      notes: 'Dig a hole on the property and drop her in the dirt. Safest when the dungeon\'s isolated — nobody to hear the shovel.'
     },
     'lose-at-sea': {
       displayName: 'Lose at Sea',
@@ -21,7 +21,7 @@
       moneyCost: 200,
       notorietyFactor: () => 1,
       suspicionSpike: 0,
-      notes: 'Boat + weight + coastal access required. Clean method.'
+      notes: 'Chain a weight to her ankles and feed her to the deep — boat + coastal access required. No body, no case.'
     },
     incinerate: {
       displayName: 'Incinerate',
@@ -30,7 +30,7 @@
       notorietyFactor: () => 0,
       suspicionSpike: 0,
       requiresFacility: 'incinerator',
-      notes: 'Requires an incinerator facility upgrade. Cleanest method.'
+      notes: 'Feed her to the furnace and watch her cook down to ash — needs an incinerator. Nothing left to find.'
     },
     trade: {
       displayName: 'Trade Away',
@@ -39,7 +39,7 @@
       refundOnGirl: true,                    // wired to slave-market listing
       notorietyFactor: () => 0,
       suspicionSpike: 0,
-      notes: 'Route to the slave market as a listing.'
+      notes: 'Sell her off down the slave-market pipeline — used meat, someone else\'s problem now.'
     },
     release: {
       displayName: 'Release',
@@ -47,16 +47,16 @@
       moneyCost: 0,
       notorietyFactor: (girl) => girl.bond.bondLevel >= 9 ? 0 : 10,
       suspicionSpike: 5,
-      notes: 'Let her go. Bond L9 = she won\'t rat. Anything less = major notoriety + suspicion hit.'
+      notes: 'Dump her back on the street. Only a fully-broken L9 keeps her mouth shut — anything less and she runs straight to the cops (major heat + suspicion).'
     },
     'finalization-film': {
-      displayName: 'Finalization Film',
+      displayName: 'Snuff Film',
       emoji: '🎬',
       moneyCost: 0,
       generatesFilm: true,
       notorietyFactor: () => 2,
       suspicionSpike: 0,
-      notes: 'Record the ending as premium content. Sells at 3–5× base. Single-use per girl.'
+      notes: 'Roll the camera and film her last breath — premium snuff content, sells at 3–5× base. One per girl: it\'s the last thing she ever does.'
     },
     dismember: {
       displayName: 'Dismember + Harvest',

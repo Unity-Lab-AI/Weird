@@ -26,7 +26,7 @@
         if (!ks.length) return '';
         return `<div class="panel">
           <h2>🏆 Keepsake — choose 1 to keep</h2>
-          <p class="small muted">She's got ${ks.length === 1 ? 'one keepsake' : ks.length + ' keepsakes'} on her. Pick the one you want mounted in your trophy room — permanent, never lost, small stacking buff. (Only kept on a terminal disposal.)</p>
+          <p class="small muted">She's got ${ks.length === 1 ? 'one keepsake' : ks.length + ' keepsakes'} on her. Pick the one you want mounted in your trophy room — permanent, never lost, small stacking buff. (Only when you finish her for good — bury her, burn her, dump her at sea, or shoot a snuff finale.)</p>
           ${ks.map((k, i) => `<label class="stat-row" style="cursor:pointer" data-tooltip="${(k.flavor || '').replace(/"/g, '&quot;')} · ${k.perks.map(p => (p.key === 'huntBonus' ? (p.target ? 'hunt vs ' + p.target : 'hunt') : p.key) + ' +' + Math.round(p.value * 100) + '%').join(' · ')}">
             <span><input type="radio" name="keepsake-pick" value="${k.keepsakeId}" ${i === 0 ? 'checked' : ''}/> ${k.rarityEmoji || ''} ${k.emoji} ${escapeHtml(k.name)}${k.gore ? ' <span class="warn">⚠ gore</span>' : ''}</span>
             <b class="ok">${k.perks.map(p => '+' + Math.round(p.value * 100) + '%').join(' ')}</b>

@@ -38,7 +38,7 @@
 
       <div class="panel">
         <h2>Active perks (stacked)</h2>
-        ${perkRows.length ? perkRows.join('') : `<p class="muted small">No perks yet — terminally dispose of a captive (bury / incinerate / lose-at-sea / finalization film) to mint your first trophy.</p>`}
+        ${perkRows.length ? perkRows.join('') : `<p class="muted small">No perks yet — put a captive in the ground for good (bury / incinerate / dump at sea / snuff finale) to carve your first trophy off her.</p>`}
       </div>
 
       <div class="panel">

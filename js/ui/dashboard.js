@@ -102,7 +102,7 @@
           <a href="#shop" class="btn-small" data-tooltip="The Flesh Fence — shady supply den. Tools, drugs, food, water, contraception, abortion supplies. High-tier stock is level-locked + limited per day.">🩸 The Flesh Fence</a>
           <a href="#slave-market" class="btn-small" data-tooltip="Buy/sell captives. Untrained cheap, trained premium.">⛓️ Slave market</a>
           <a href="#achievements" class="btn-small" data-tooltip="Unlocked milestones.">🏆 Achievements</a>
-          <a href="#trophy-room" class="btn-small" data-tooltip="Trophies minted from terminally-disposed girls — each grants stacking perks.">🏆 Trophy room</a>
+          <a href="#trophy-room" class="btn-small" data-tooltip="Keepsakes carved off the girls you've snuffed, buried, burned, or dumped for good — each grants stacking perks.">🏆 Trophy room</a>
           ${window.DMTHGame.escapeRecovery && window.DMTHGame.escapeRecovery.recoverable().length > 0 ? `<a href="#escape-recovery" class="btn-small btn-danger" data-tooltip="Girls have escaped — recapture them before they alert authorities.">🏃 ${window.DMTHGame.escapeRecovery.recoverable().length} on the run</a>` : ''}
           ${captives.length > 0 ? `<a href="#room?girl=${captives[0].id}" class="btn-small" data-tooltip="Jump straight into ${captives[0].name}'s hold.">🚪 Enter ${captives[0].name}'s hold</a>` : ''}
         </div>

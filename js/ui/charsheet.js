@@ -164,7 +164,7 @@
           <div class="stat-row" data-tooltip="Captives currently held across all dungeons."><span>🔗 Owned Meat</span><b>${captives.length}</b></div>
           <div class="stat-row" data-tooltip="Girls killed into corpses (snuff / OD / disposal). Still usable postmortem until disposed."><span>⚰️ Cold Meat</span><b>${corpses}</b></div>
           <div class="stat-row" data-tooltip="Captives who slipped the leash and are loose — a WANTED liability until recaptured."><span>🐀 Loose Rats</span><b class="${escaped>0?'bad':''}">${escaped}</b></div>
-          <div class="stat-row" data-tooltip="Trophies minted from terminal disposals — each grants stacking perks."><span>🏆 Mounted Souls</span><b>${trophies.length}</b></div>
+          <div class="stat-row" data-tooltip="Trophies cut off the girls you've snuffed, buried, burned, or fed to the sea for good — each grants stacking perks."><span>🏆 Mounted Souls</span><b>${trophies.length}</b></div>
           <div class="stat-row" data-tooltip="Organs + limbs harvested via the dismember disposal path, sold on the body-part market."><span>🦴 Harvested Cuts</span><b>${bodyParts.length}</b></div>
           <div class="stat-row" data-tooltip="Films currently listed — each pays passive income per tick."><span>🎬 Filth Reels Live</span><b>${listedFilms}</b></div>
           <div class="stat-row" data-tooltip="Cumulative film payouts across the entire save."><span>💵 Lifetime Filth Take</span><b>$${totalEarned.toLocaleString()}</b></div>

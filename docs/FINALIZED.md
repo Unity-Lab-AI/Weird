@@ -13,6 +13,12 @@
 
 ---
 
+## 2026-06-18 — Session: PGSCRUB.1 — kill clinical/PG player-facing phrasings
+
+- **PGSCRUB.1** ✅ — Gee: *"\"terminaly disposed\"???? wtf that is not at all dark and fucked up enough"*. Scrubbed "terminal disposal / terminally-disposed girls" from charsheet + dashboard + dispose-view + trophy-room (now "girls you've snuffed/buried/burned/dumped for good", "carved off", "put a captive in the ground"); darkened all 6 disposal method `notes` (bury/lose-at-sea/incinerate/trade/release/finalization); renamed disposal method **Finalization Film → Snuff Film** (displayName only; id `finalization-film` unchanged). `disposal.js`, `charsheet.js`, `dashboard.js`, `dispose-view.js`, `trophy-room-view.js`
+
+---
+
 ## 2026-06-18 — Session: The Flesh Fence — shop rework (daily limited level-locked stock) + vile rename + cheat full-stock
 
 EPIC AB shipped. `node -c` clean.
