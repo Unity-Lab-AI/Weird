@@ -85,6 +85,7 @@
 
     turns: {},                     // { girlId: [{role, text, ts}] }  per-girl chat log (bounded)
     activity: {},                  // GIRLHIST.1 — { girlId: [{ts, gameMin, kind, label, detail}] } per-girl activity history (bounded)
+    friendCreep: {},               // FRIENDCREEP.1 — { friendArchetypeId: {level 0-10, into} } per-friend creep progression
 
     // REQUEST.1 — pre-capture item-request cooldown log. Keyed by `${locationId}|${archetype}`,
     // value = the game-day number the last request was made. Enforces "once a day per girl-type
@@ -158,6 +159,7 @@
     if (!s.disposals) s.disposals = [];
     if (!s.turns) s.turns = {};
     if (!s.activity) s.activity = {};   // GIRLHIST.1 — backfill the activity log for pre-feature saves
+    if (!s.friendCreep) s.friendCreep = {};   // FRIENDCREEP.1 — backfill the creep-level store
     if (!s.itemRequestLog || typeof s.itemRequestLog !== 'object') s.itemRequestLog = {};
     if (!Array.isArray(s.usedNames)) s.usedNames = [];
     if (!s.locationSpawns || typeof s.locationSpawns !== 'object') s.locationSpawns = {};
@@ -462,6 +464,32 @@
     mutate(s => { if (s.activity && s.activity[girlId]) delete s.activity[girlId]; });
   }
 
+  // FRIENDCREEP.1 — per-friend-archetype CREEP level 0-10. A friend levels up on successful visits
+  // with a TRIANGULAR cost (Gee: "first fuck success 1 levle up next level 2 fucks next level 3
+  // fuckes ... to levle 10"): reaching L1 takes 1 success, L1→L2 takes 2 more, L2→L3 takes 3 more,
+  // … L9→L10 takes 10 more. Higher creep = he returns + hits harder + pays more + better loot.
+  function getFriendCreep(archetypeId) {
+    const fc = (state?.friendCreep && state.friendCreep[archetypeId]) || null;
+    return { level: (fc && fc.level) || 0, into: (fc && fc.into) || 0 };
+  }
+  // Record a successful friend visit → advance his creep progress; returns { level, leveled }.
+  function noteFriendCreepSuccess(archetypeId) {
+    let out = { level: 0, leveled: false };
+    if (!archetypeId) return out;
+    mutate(s => {
+      if (!s.friendCreep) s.friendCreep = {};
+      const fc = s.friendCreep[archetypeId] || { level: 0, into: 0 };
+      if ((fc.level || 0) >= 10) { s.friendCreep[archetypeId] = fc; out = { level: 10, leveled: false }; return; }
+      fc.into = (fc.into || 0) + 1;
+      const need = (fc.level || 0) + 1;            // L0→1 needs 1, L1→2 needs 2, … L9→10 needs 10
+      let leveled = false;
+      if (fc.into >= need) { fc.level = (fc.level || 0) + 1; fc.into = 0; leveled = true; }
+      s.friendCreep[archetypeId] = fc;
+      out = { level: fc.level, leveled };
+    });
+    return out;
+  }
+
   // films
   function addFilm(film) { mutate(s => { s.films.push(film); }); }
   function updateFilm(id, patch) {
@@ -602,6 +630,7 @@
     addGirl, updateGirl, getGirl, removeGirl,
     appendTurn, getTurns, clearTurns,
     appendActivity, getActivity, clearActivity,
+    getFriendCreep, noteFriendCreepSuccess,
     addFilm, updateFilm, getFilm,
     addDisposal,
     addTrophy, getTrophies,

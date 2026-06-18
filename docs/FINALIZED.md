@@ -13,6 +13,12 @@
 
 ---
 
+## 2026-06-18 — Session: FRIENDCREEP.1 — friend creep levels 1-10 (engine) — LOCAL ONLY (not pushed)
+
+- **FRIENDCREEP.1** ✅ (engine; UI creep display lands with VISITORLIST.1) — Gee verbatim: *"and friends need like creep levels where the higher the creep they are and level up on successful fucks and actions they come back ie first fuck success 1 levle up next level 2 fucks next level 3 fuckes next level 4 fucks and so on to levle 10 creep frineds"* + *"the higher the friend level the more damage they do. a maxed out 10 creep should kill any girl under 60% health garanteed"* + *"and the more money they pay"* + *"and the better loot tand more of it they drop when paying"*. New per-friend-archetype creep store on `state` (`friendCreep:{}` + `getFriendCreep` + `noteFriendCreepSuccess`) with TRIANGULAR leveling (L0→1 needs 1 success, L1→2 needs 2, … L9→10 needs 10). `resolveFriendEncounter` reads his creep level and scales: **damage** drop ×(1 + creep·0.08) and the survivor cap 50→up to 80 HP; **pay** ×(1 + creep·0.1) (L10 = 2×); **loot** 1 gift + 1 extra per ~3 creep (L10 ≈ 4 drops); plus the **L10 guaranteed-kill gate** (`creep>=10 && startHealth < 60% of maxHealth` → killed). Each successful visit advances his creep + fires a level-up toast; the activity log tags his creep level. `js/game/state.js`, `js/game/whore-out.js`. `node -c` clean.
+
+---
+
 ## 2026-06-18 — Session: LOOTPOP-TOGGLE.1 — setting to silence loot pop-ups — LOCAL ONLY (not pushed)
 
 - **LOOTPOP-TOGGLE.1** ✅ — Gee verbatim: *"and i want a setting to turn off things like loot pop ups as im sure itll get annoying to some in end game where its better to just let it go to inventory with out the annoying popups"*. Added a Settings → **Interface** toggle "🔕 Silence loot pop-ups" backed by `localStorage dmth_lootpops_off`; `DMTHLootPopup.show()` early-returns when the flag is set. The loot itself is added to inventory in `loot.js` BEFORE the popup call, so silencing only skips the popup — gains still land. No reload needed. `js/ui/loot-popup.js`, `js/ui/in-game-settings.js`. `node -c` clean.

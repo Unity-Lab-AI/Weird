@@ -447,6 +447,10 @@
     // NPCDIRECT-PAID.1 — reuse the passed identity so a directed friend is the SAME man from the scene.
     const npc = opts.npc || (window.DMTHJohnArchetypes.mintNpcIdentity ? window.DMTHJohnArchetypes.mintNpcIdentity(friendId, { isFriend: true }) : null);
 
+    // FRIENDCREEP.1 — his current creep level 0-10 scales how hard he hits, how much he pays, and how
+    // good/plentiful his loot is. A maxed L10 creep is a guaranteed kill on a girl under 60% health.
+    const creep = (window.DMTHGame.state.getFriendCreep ? window.DMTHGame.state.getFriendCreep(friendId).level : 0) || 0;
+
     const moodBefore = girl.mood?.mood || 'neutral';
     const bondXPBefore = girl.bond?.bondXP || 0;
     const bondDebtBefore = girl.bond?.bondDebt || 0;
@@ -461,12 +465,16 @@
       try { window.DMTHGame.actionEffects.applyAction(girl.id, arc.johnActionId, { byJohn: true, strain: true }); } catch (e) { /* non-fatal */ }
     }
 
-    const drop = arc.healthDrop[0] + Math.floor(Math.random() * (arc.healthDrop[1] - arc.healthDrop[0] + 1));
+    // FRIENDCREEP.1 — base drop scaled by creep level (L0 ×1 → L10 ×1.8): higher creep does MORE damage.
+    let drop = arc.healthDrop[0] + Math.floor(Math.random() * (arc.healthDrop[1] - arc.healthDrop[0] + 1));
+    drop = Math.round(drop * (1 + creep * 0.08));
 
-    // FRIENDKILL.1 gate (Gee) — LETHAL only when her ARRIVAL health is not greater than his intended
-    // damage (drop >= startHealth). A girl at ~20% servicing a friend is almost certainly a corpse;
-    // a healthy girl just gets wrecked. The Executioner's huge drop makes him most likely to cross it.
-    const killed = drop >= startHealth;
+    // FRIENDKILL.1 gate (Gee) — LETHAL when her ARRIVAL health is not greater than his intended damage
+    // (drop >= startHealth). A girl at ~20% servicing a friend is almost certainly a corpse; a healthy
+    // girl just gets wrecked. FRIENDCREEP.1 — a MAXED L10 creep is a GUARANTEED kill on any girl under
+    // 60% of her max health (Gee: "a maxed out 10 creep should kill any girl under 60% health garanteed").
+    const maxH = (window.DMTHGame.actionEffects && window.DMTHGame.actionEffects.maxHealthFor) ? window.DMTHGame.actionEffects.maxHealthFor(girl) : 100;
+    const killed = drop >= startHealth || (creep >= 10 && startHealth < maxH * 0.6);
     let snuffBonus = 0;
     let newHealth = startHealth;
     let chamberToyName = null;
@@ -496,7 +504,8 @@
       // random acts + the chamber toy he piles on. The friend's WHOLE-visit health damage is capped
       // at 50 HP (and at least 1 HP, never to 0 — that's the lethal path) — recomputed from her
       // arrival health, OVERRIDING whatever applyAction + the toy independently subtracted.
-      const loss = Math.min(50, Math.max(1, drop), startHealth - 1);
+      // FRIENDACTS.1 cap (≤50 HP/visit) raised by creep (L10 → up to 80) — higher creep hits harder.
+      const loss = Math.min(50 + creep * 3, Math.max(1, drop), startHealth - 1);
       newHealth = Math.max(1, startHealth - loss);
       const g1 = window.DMTHGame.state.getGirl(girl.id) || girl;
       const body = { ...(g1.body || {}), health: newHealth, bruises: (g1.body?.bruises || 0) + (arc.bruisesAdded || 0), recentActTag: 'beaten' };
@@ -522,7 +531,8 @@
     const basePay = arc.payRange[0] + Math.floor(Math.random() * (arc.payRange[1] - arc.payRange[0]));
     const sat = window.DMTHGame.state.getSatisfaction ? window.DMTHGame.state.getSatisfaction() : 50;
     // SNUFFBONUS.1 snuff bonus + FRIENDTOY.1 chamber-toy premium both fold into his payout.
-    const payment = Math.round(basePay * (1 + ((sat - 50) / 50) * 0.12)) + snuffBonus + chamberPremium;
+    // FRIENDCREEP.1 — higher creep PAYS MORE (L0 ×1 → L10 ×2).
+    const payment = Math.round(basePay * (1 + ((sat - 50) / 50) * 0.12) * (1 + creep * 0.1)) + snuffBonus + chamberPremium;
 
     const encounter = {
       id: 'frnd_' + Date.now().toString(36) + '_' + Math.floor(Math.random() * 0xffff).toString(36),
@@ -580,14 +590,24 @@
         if (newHealth <= 8) window.DMTHNotify.show(`⚠️ ${girl.name} is barely alive (${newHealth} HP) — heal her now or lose her.`, { type: 'danger', durationMs: 8000 });
       }
     }
-    // FRIENDGIFT.1 — friends are generous: ~50% leave a high-tier gift (gear/toys/drugs) for the use.
-    // A KILL is an EPIC WIN (Gee) — a friend who finishes her ALWAYS leaves loot + tips bigger.
-    if (window.DMTHGame.loot && window.DMTHGame.loot.grantNpcGift && (killed || Math.random() < 0.5)) {
-      window.DMTHGame.loot.grantNpcGift({ from: (npc ? npc.handle : arc.displayName), generous: true, kill: killed });
+    // FRIENDGIFT.1 + FRIENDCREEP.1 — friends always leave loot; higher creep drops BETTER + MORE of it
+    // (generous gift + one extra per ~3 creep levels, L10 ≈ 4 drops). A KILL is an epic win on top.
+    if (window.DMTHGame.loot && window.DMTHGame.loot.grantNpcGift) {
+      const drops = 1 + Math.floor(creep / 3);
+      for (let i = 0; i < drops; i++) {
+        window.DMTHGame.loot.grantNpcGift({ from: (npc ? npc.handle : arc.displayName), generous: true, kill: killed && i === 0 });
+      }
     }
-    // GIRLHIST.1/.2 — log the friend visit into her LIVE activity history.
+    // FRIENDCREEP.1 — a successful visit advances his creep level (triangular). Higher creep = he
+    // returns harder, pays more, drops better loot, and at L10 guarantees a kill under 60% health.
+    const creepAfter = window.DMTHGame.state.noteFriendCreepSuccess
+      ? window.DMTHGame.state.noteFriendCreepSuccess(friendId) : { level: creep, leveled: false };
+    if (creepAfter.leveled && window.DMTHNotify) {
+      window.DMTHNotify.show(`😈 ${arc.displayName} is now CREEP ${creepAfter.level}/10 — hits harder, pays more, better loot${creepAfter.level >= 10 ? ', GUARANTEED kill under 60% HP' : ''}.`, { type: 'info', durationMs: 5000 });
+    }
+    // GIRLHIST.1/.2 — log the friend visit into her LIVE activity history (with his creep level).
     if (window.DMTHGame.state.appendActivity) {
-      window.DMTHGame.state.appendActivity(girl.id, { kind: 'friend', label: `FRIEND — ${arc.displayName}`, detail: `${killed ? 'KILLED her' : `wrecked her −${drop} HP`} · +$${payment}` });
+      window.DMTHGame.state.appendActivity(girl.id, { kind: 'friend', label: `FRIEND — ${arc.displayName} (creep ${creepAfter.level}/10)`, detail: `${killed ? 'KILLED her' : `wrecked her −${drop} HP`} · +$${payment}` });
     }
     return encounter;
   }
