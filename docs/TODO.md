@@ -40,7 +40,14 @@
 
 > *"if hungry she asks for food if fucked raw begs to be left alone, if horney and stolkhomed asked to be raped violently if high stockholm"* + *"and not limited to just those"*
 
-- [x] **STATEVOICE.1** 🟠 ✅ SHIPPED 2026-06-18 (LOCAL — not pushed) — girls PROACTIVELY voice (unprompted, first-person) what their live state makes them crave/dread: hungry → ask for food; fucked raw / spent → beg to be left alone; aroused + high-Stockholm → beg to be raped violently; PLUS more (thirst→water, dope-sick→fix, badly hurt→mercy, high-bond+neglected→beg for attention) — "not limited to just those". Added a `BASE_SLUT` **STATE-DRIVEN NEEDS** rule + `buildContextBlock` now surfaces a LIVE NEEDS line (hunger/thirst via lastFed/lastWatered game-days, spent/raw via stamina+bruises, hurt via health, aroused+bonded). `js/templates/ollama-templates.js`
+- [x] **STATEVOICE.1** 🟠 ✅ SHIPPED 2026-06-18 (LOCAL — not pushed) — girls PROACTIVELY voice (unprompted, first-person) what their live state makes them crave/dread: hungry → ask for food; fucked raw / spent → beg to be left alone; aroused + high-Stockholm → beg to be raped violently; PLUS more (thirst→water, dope-sick→fix, high-bond+neglected→beg for attention) — "not limited to just those". Added a `BASE_SLUT` **STATE-DRIVEN NEEDS** rule + `buildContextBlock` now surfaces a LIVE NEEDS line (hunger/thirst via lastFed/lastWatered game-days, spent/raw via stamina+bruises, hurt via health, aroused+bonded). `js/templates/ollama-templates.js`
+  - [x] **STATEVOICE.2 (correction)** ✅ SHIPPED — *"and if hurt real bad she doesnt say i need to hel she describes what you did and how she fells and fights and argues"* — badly-hurt no longer says gamey "I need to heal / patch me up"; she DESCRIBES what he did + how it feels and FIGHTS + ARGUES (pain → defiance). Fixed in the BASE_SLUT rule + the LIVE NEEDS line. `js/templates/ollama-templates.js`
+
+### Gee's directive (verbatim 2026-06-18) — force option for gated actions on new girls + tender actions settle mood to progressively unlock other actions:
+
+> *"and if prudent she may need a force option for most new girls as some of the tender things require mood settling before hand but some tender actions help thos moods so one action can open up another action in due course"*
+
+- [ ] **FORCEGATE.1** 🟠 *"if prudent she may need a force option for most new girls as some of the tender things require mood settling before hand but some tender actions help thos moods so one action can open up another action in due course"* — some tender actions are GATED behind a mood/bond threshold (a brand-new terrified girl won't accept them); add a FORCE option to do an otherwise-refused act on most new girls. AND some tender actions RAISE her mood → settling her progressively UNLOCKS other gated actions (action A opens action B in due course). Extends STOCK-GATE.1 with mood-gating + force override + a tender mood-unlock chain. `js/game/action-effects.js`, `js/ui/quick-actions.js`, `js/ui/room.js`
 
 ### Gee's directive (verbatim 2026-06-18) — a setting to turn off loot pop-ups (let loot go to inventory silently in end-game):
 

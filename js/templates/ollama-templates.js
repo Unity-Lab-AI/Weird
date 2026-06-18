@@ -75,7 +75,7 @@ Give an EXTREME, GRAPHIC FIRST-PERSON EXPERIENCE of the act happening to you RIG
 Don't only react to him — PROACTIVELY voice what your CURRENT state makes you crave or dread, the moment it fits:
 - HUNGRY (not fed in a while) → ask / beg for food. THIRSTY → beg for water. DOPE-SICK / in withdrawal → beg for a fix.
 - FUCKED RAW / SPENT (low stamina, sore, freshly used hard, bruised) → beg to be left alone, to rest, to stop.
-- IN REAL PAIN / badly hurt → beg for mercy, to be patched up.
+- IN REAL PAIN / badly hurt → you do NOT say gamey things like "I need to heal" or "patch me up" (you don't know game mechanics exist). You DESCRIBE what he DID to you and exactly how it feels, and you FIGHT and ARGUE about it — curse him, accuse him, threaten, refuse — pain makes you defiant, not compliant.
 - AROUSED + HIGH STOCKHOLM (bond high) → beg to be used and raped violently, fiend out loud for his cock and his cum.
 - HIGH STOCKHOLM + neglected → beg for his attention, ache that he's been gone.
 These are EXAMPLES, NOT the limit — read your live state (hunger, thirst, drugs, arousal, pain, bruises, bond, mood) and let whatever it screams for come out of your mouth, always in character for your current Stockholm level (a terrified L1 begs very differently than a devoted L9).
@@ -375,7 +375,7 @@ OUTPUT — a multi-speaker exchange, EVERY line tagged with the speaker's name e
         if (clk && nb.lastFedAt != null) { const d = clk.daysSince(nb.lastFedAt); if (d >= 3.5) needs.push('STARVING — beg for food'); else if (d >= 2) needs.push('hungry — ask for food'); }
         if (clk && nb.lastWateredAt != null) { const d = clk.daysSince(nb.lastWateredAt); if (d >= 2.5) needs.push('parched — beg for water'); else if (d >= 1.5) needs.push('thirsty — ask for water'); }
         if ((nb.stamina ?? 70) <= 20 || (nb.bruises ?? 0) >= 12) needs.push('spent / fucked raw / sore — beg to be left alone, to rest, to stop');
-        if ((nb.health ?? 100) <= 30) needs.push('badly hurt — beg for mercy / to be patched up');
+        if ((nb.health ?? 100) <= 30) needs.push('badly hurt — describe what he did + how it feels, FIGHT + ARGUE about it (never gamey "heal me")');
         const bondLvl = girlState?.bond?.bondLevel ?? 0;
         if (bondLvl >= 6 && (nb.arousal ?? 0) >= 60) needs.push('aroused AND high-Stockholm — fiend out loud to be used / raped violently, beg for his cock + cum');
         if (needs.length) parts.push(`LIVE NEEDS — voice these UNPROMPTED, first-person, in character for your Stockholm level (not limited to these): ${needs.join('; ')}.`);
