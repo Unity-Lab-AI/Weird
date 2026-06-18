@@ -83,9 +83,21 @@
       (t.milkProduced > 0) ? hr('🥛 Milk', `${t.milkProduced}L`) : '',
       (t.chatTurns > 0) ? hr('💬 Chat turns', t.chatTurns) : ''
     ].filter(Boolean);
-    if (!rows.length) return '';
-    return `<div class="small muted" style="margin-top:6px">Her history</div>
-      <div style="max-height:140px;overflow-y:auto;padding-right:4px;margin-top:2px">${rows.join('')}</div>`;
+    // GIRLHIST.2 — her full ACTIVITY TIMELINE (same running log as the live room panel + the
+    // death dossier), so trophy / dossier / live view all share one unified layout.
+    let timeline = '';
+    const acts = (window.DMTHGame.state.getActivity && rec.girlId) ? window.DMTHGame.state.getActivity(rec.girlId, 60) : [];
+    if (acts.length) {
+      const EM = { action: '✋', john: '💸', friend: '🩸', milk: '🥛', cash: '💰', capture: '⛓️', birth: '🍼', death: '☠️', buff: '✨' };
+      timeline = `<div class="small muted" style="margin-top:6px">Activity timeline (${acts.length})</div>
+        <div style="max-height:140px;overflow-y:auto;padding-right:4px;margin-top:2px">${acts.map(a => {
+          const tm = (window.DMTHGame.gameClock?.formatStamp && a.gameMin != null) ? window.DMTHGame.gameClock.formatStamp(a.gameMin) : '';
+          return `<div class="stat-row small"><span>${EM[a.kind] || '·'} ${escapeHtml(a.label || '')}${a.detail ? ` <span class="muted">${escapeHtml(a.detail)}</span>` : ''}</span>${tm ? `<b class="muted">${escapeHtml(tm)}</b>` : ''}</div>`;
+        }).join('')}</div>`;
+    }
+    if (!rows.length && !timeline) return '';
+    return `${rows.length ? `<div class="small muted" style="margin-top:6px">Her history</div>
+      <div style="max-height:140px;overflow-y:auto;padding-right:4px;margin-top:2px">${rows.join('')}</div>` : ''}${timeline}`;
   }
 
   function escapeHtml(s) {

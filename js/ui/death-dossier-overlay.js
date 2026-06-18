@@ -67,6 +67,18 @@
               (t.chatTurns > 0) ? row('💬 Chat turns', t.chatTurns) : ''
             ].filter(Boolean).join('') || `<div class="small muted">No notable history.</div>`}
           </div>
+          ${(() => {
+            // GIRLHIST.2 — her full ACTIVITY TIMELINE (same running log as the live room panel),
+            // rendered here so the trophy/dossier and the live view share one unified layout.
+            const acts = (window.DMTHGame.state.getActivity && girlId) ? window.DMTHGame.state.getActivity(girlId, 60) : [];
+            if (!acts.length) return '';
+            const EM = { action: '✋', john: '💸', friend: '🩸', milk: '🥛', cash: '💰', capture: '⛓️', birth: '🍼', death: '☠️', buff: '✨' };
+            return `<div style="color:#c8a0ff;font-size:0.8rem;text-transform:uppercase;letter-spacing:.05em;margin:10px 0 4px">Activity timeline (${acts.length})</div>
+              <div style="max-height:160px;overflow-y:auto;padding-right:4px">${acts.map(a => {
+                const tm = (window.DMTHGame.gameClock?.formatStamp && a.gameMin != null) ? window.DMTHGame.gameClock.formatStamp(a.gameMin) : '';
+                return `<div style="font-size:0.82rem;padding:2px 0;border-bottom:1px solid #222">${EM[a.kind] || '·'} ${esc(a.label || '')}${a.detail ? ` <span style="color:#888">${esc(a.detail)}</span>` : ''}${tm ? ` <span style="color:#666">· ${esc(tm)}</span>` : ''}</div>`;
+              }).join('')}</div>`;
+          })()}
         </div>
         <div style="display:flex;gap:8px;padding:14px 18px;border-top:1px solid #2a2a30">
           <button id="dossier-dispose" style="flex:1;padding:9px;background:#7a1f1f;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:600">⚱️ Dispose / claim trophy →</button>

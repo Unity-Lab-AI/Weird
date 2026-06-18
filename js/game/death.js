@@ -69,6 +69,7 @@
     const ls = window.DMTHGame.lifespan;
     const turns = window.DMTHGame.state.getTurns ? window.DMTHGame.state.getTurns(girl.id, 200).length : 0;
     return {
+      girlId: girl.id,                 // GIRLHIST.2 — so the trophy/dossier can pull her activity timeline
       name: girl.name,
       archetype: girl.archetypeTemplate,
       affect: girl.captiveAffect || null,

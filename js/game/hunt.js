@@ -332,6 +332,11 @@
     girl.captureDate = Date.now();
     // Seed dungeon-occupancy history for the death dossier's "held longest at" stat (DEATHSTATS.1).
     girl.dungeonHistory = [...(girl.dungeonHistory || []), { dungeonId: dungeon.id, at: Date.now() }];
+    // GIRLHIST.2 — log the capture as the first entry in her LIVE activity history.
+    if (window.DMTHGame.state.appendActivity) {
+      const loc = (girl.encounteredAt && girl.encounteredAt.locationId) || 'the streets';
+      window.DMTHGame.state.appendActivity(girl.id, { kind: 'capture', label: `⛓️ captured at ${loc}`, detail: `dragged into the dungeon` });
+    }
     girl.mood.mood = 'terrified';
     girl.mood.moodEmoji = '😱';
     // STOCK-START.1 — new captives start at Stockholm 1-3 (internal bond 0-2) depending on the
