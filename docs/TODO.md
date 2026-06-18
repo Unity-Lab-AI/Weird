@@ -149,6 +149,10 @@
 
 - [x] **LOOTALL.1** 🟠 ✅ SHIPPED 2026-06-18 (LOCAL — not pushed) — the ENTIRE catalog is lootable (every tool/drug/item/equipment), built at runtime from `DMTHAssets.ITEMS` + the toys module, partitioned by item tier. Quality scales by (a) GIRL TYPE — `ARCHETYPE_LOOT_BIAS` favors type-fitting loot; (b) DROP SOURCE ladder — capture < friend-fuck < corpsing kill raises max tier (`grantNpcGift`: routine john → tier 3, generous friend → tier 4, KILL → tier 5, type-biased); (c) GIRL TIER — `girlLootTier` maps ARCHETYPE_DIFFICULTY → maxTier 2-5, so a harder/more-vibrant girl drops a bigger, higher-tier bonus haul on capture (`grantCaptureHaul`). **Correction applied:** NO corpse-loot — you can ONLY loot a girl ON CAPTURE, never by killing an already-captured one; the "corpsing = best loot" is the friend's KILLWIN GIFT on a kill, not stripping her body. `js/game/loot.js`, `js/game/whore-out.js` (girlId threaded)
 
+> *"and mind you...friends almost always leave some kind of loot, and always pay cash at a minimum but on a murder they for sure drop good loot"*
+
+- [x] **FRIENDLOOT.1** 🟠 ✅ SHIPPED 2026-06-18 (LOCAL — not pushed) — friend encounters: ALWAYS pay cash at a minimum (floor $40 even on a bigoted kink-mismatch / cheap visit), ALMOST ALWAYS leave loot (drops floored at ≥1, kink-match still drops more), and a MURDER guarantees GOOD loot (the kill drop fires `grantNpcGift{kill}` → tier-5 best haul). `js/game/whore-out.js`
+
 > *"i actually want to split the town up into zones so u have to be a certain level to unlock certain locations and sume u have to pay to unlock"*
 
 - [ ] **ZONES.1** 🟠 — split the town into ZONES; some locations require a DEPRAVITY LEVEL to unlock, some require PAYING to unlock. `catalog.js` LOCATIONS unlock fields (add minLevel + zone grouping), `town-view.js` zone presentation + lock states.

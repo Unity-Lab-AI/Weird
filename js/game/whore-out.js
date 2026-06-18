@@ -558,7 +558,9 @@
     // SNUFFBONUS.1 snuff bonus + FRIENDTOY.1 chamber-toy premium both fold into his payout.
     // FRIENDCREEP.1 — higher creep PAYS MORE (L0 ×1 → L10 ×2). FRIENDKINK.1 — his kink/dislike vs
     // this girl swings it further (premium for a fetish-match, scraps for one he's bigoted against).
-    const payment = Math.round(basePay * (1 + ((sat - 50) / 50) * 0.12) * (1 + creep * 0.1) * match.payMult) + snuffBonus + chamberPremium;
+    // FRIENDLOOT.1 (Gee) — a friend ALWAYS pays cash at a minimum (a floor of $40), even a bigoted
+    // kink-mismatch or a cheap visit; a kill stacks the snuff bonus on top.
+    const payment = Math.max(40, Math.round(basePay * (1 + ((sat - 50) / 50) * 0.12) * (1 + creep * 0.1) * match.payMult)) + snuffBonus + chamberPremium;
 
     const encounter = {
       id: 'frnd_' + Date.now().toString(36) + '_' + Math.floor(Math.random() * 0xffff).toString(36),
@@ -619,8 +621,10 @@
     // FRIENDGIFT.1 + FRIENDCREEP.1 — friends always leave loot; higher creep drops BETTER + MORE of it
     // (generous gift + one extra per ~3 creep levels, L10 ≈ 4 drops). A KILL is an epic win on top.
     if (window.DMTHGame.loot && window.DMTHGame.loot.grantNpcGift) {
-      // FRIENDKINK.1 — kink-match drops more loot, dislike-hit drops less (floored at 0).
-      const drops = Math.max(0, 1 + Math.floor(creep / 3) + (match.lootDelta || 0));
+      // FRIENDKINK.1 + FRIENDLOOT.1 (Gee) — friends ALMOST ALWAYS leave loot: floor at 1 drop even
+      // on a kink-mismatch (kink-match still drops MORE). A MURDER guarantees GOOD loot — the i===0
+      // drop fires grantNpcGift{kill} (tier-5 best haul).
+      const drops = Math.max(1, 1 + Math.floor(creep / 3) + (match.lootDelta || 0));
       for (let i = 0; i < drops; i++) {
         window.DMTHGame.loot.grantNpcGift({ from: (npc ? npc.handle : arc.displayName), generous: true, kill: killed && i === 0, girlId: girl.id });
       }
