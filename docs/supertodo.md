@@ -274,6 +274,10 @@ Per Gee: every new action/stat/button ships with a tooltip that is **non-intrusi
 > *"not all johns talk to u only in gang bang sessions when u chose the # johns and girls available in the dugeon, ie cant have a gang bang with girls in differnt dugeons"*
 - ⏳ **GANGVOICE.1** voiced multi-party is the chosen gangbang session only (passive johns stay ledger-only) · **GANGSAMEDUNGEON.1** gangbang girls must be same dungeon.
 
+## EPIC AC — De-grind capture (desperation escalation + additive stacking + rename) ⏳ QUEUED
+> *"i dont want the catch mechonism to be overly complicated ... a failed attemp ... make u more \"desperate\" and more likely to be successuful on the next one ... two filed captures in a row the third is basicly a easy win ... select differnt drugs and tools and each once additively incresased the capture chance ... (capture is too tame)"*
+- ⏳ **CAPEASE.1** reverse escalation → fails add a desperation bonus, ~3rd attempt guaranteed (no endless-stuck) · **CAPSTACK.1** pre-select multiple drugs+tools, each additively boosts the chance · **CAPNAME.1** rename "capture/acquire" to a darker verb.
+
 ## EPIC LEGACY — reconciliation ⏳
 - ⏳ **LEGACY-AUDIT.1** audit old unchecked backlog vs FINALIZED (most shipped in mega-build); re-verify ESCAPE-GAME.1 / CLOTHING.1 / TOOLTIPS.1. **TUTORIAL.1 stays DEFERRED.**
 
