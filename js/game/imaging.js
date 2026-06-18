@@ -124,7 +124,15 @@
     bukkake:   'face and hair drenched and overflowing with load after load of cum, pooling in her open mouth, dripping off her chin and lashes, blinking through the mess',
     fisted:    'cunt stretched obscenely wide and gaping, puffy and slick and ruined, trembling around the emptiness, fresh-fisted and wrecked',
     prolapsed: 'wrecked hole fucked inside-out, swollen pink and slick and distended, pushed past its limit and gaping',
-    pissed:    'soaked and dripping, hair plastered to her flushed face, glistening wet and degraded, kneeling in the puddle'
+    pissed:    'soaked and dripping, hair plastered to her flushed face, glistening wet and degraded, kneeling in the puddle',
+    // PERIOD.1 / IMGAFTERMATH.1 — on-the-rag aftermath. SLIGHT smear modifiers layered onto her
+    // locked seed/face (TTL-faded), so the bloody act shows without altering who she is.
+    'bloodied-mouth': 'a smear of period blood across her lips, mouth and chin with a red streak up one cheek, wiping her mouth, otherwise unchanged',
+    'bloody-fucked':  'faint streaks of period blood smeared across her inner thighs and hips and his handprints, freshly-used flush, otherwise unchanged',
+    // IMGAFTERMATH.1 (Gee: "all adjectives need to be added ... in any case where her apperance has
+    // changes for actions and a new image is needed") — caretaking that CLEANS her up is itself an
+    // appearance change, so it stamps a fresh-and-clean look (washing the mess away).
+    'cleaned':   'freshly bathed and wiped down, skin clean and soft, hair damp and combed, the mess washed away, calm and cared-for'
   };
   const ACT_AFTERMATH_TTL_GAMEMIN = 120;   // ~2 game-hours before the look fades
   function actAftermathTokens(body) {

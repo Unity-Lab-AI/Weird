@@ -369,6 +369,16 @@
     'love-massage':          'caressed',
     'love-hold-her':         'caressed',
     'love-hair-brush':       'caressed',
+    // IMGAFTERMATH.1 — fill the appearance-changing gaps so EVERY such act marks her next image.
+    'love-aftercare':        'cleaned',   // water + blanket + bruises treated → cleaned-up look
+    'love-bathe-her':        'cleaned',
+    'wipe-down':             'cleaned',
+    'heal':                  'cleaned',   // patched up + bruises reset → fresh, cared-for
+    'love-lullaby':          'caressed',
+    'love-feed-by-hand':     'caressed',
+    'love-promise-sweet':    'kissed',
+    'john-gentle':           'used',
+    'john-quick':            'used',
     // TORTURECAT.1 — torture leaves visible damage on her next image (battered / welted-raw).
     'torture-rack':          'beaten',
     'torture-burn':          'beaten',
@@ -376,7 +386,11 @@
     'torture-electro':       'beaten',
     'torture-nail':          'beaten',
     'torture-flay':          'whipped',
-    'torture-acid':          'whipped'
+    'torture-acid':          'whipped',
+    'torture-waterboard':    'beaten',
+    // PERIOD.1 / IMGAFTERMATH.1 — bloody-fuck acts mark her next image (blood smear), TTL-faded.
+    'period-fuck':           'bloody-fucked',
+    'period-oral':           'bloodied-mouth'
   });
 
   // Threshold below which actions become gated. Returns the minimum stamina required
