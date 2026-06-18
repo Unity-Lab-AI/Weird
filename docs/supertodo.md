@@ -199,6 +199,74 @@ Per Gee: every new action/stat/button ships with a tooltip that is **non-intrusi
 
 ---
 
+# PART 6 — 2026-06-18 SESSION DIRECTIVES (depravity polish → johns/friends multi-party → girl/player-need systems)
+
+> The session that followed the mega-build. Granular task IDs + full verbatim fragments live in [`TODO.md`](./TODO.md); this is the master-map summary. ✅ = shipped+pushed this session; ⏳ = queued.
+
+## EPIC M — Action depravity + missing extreme acts + chat/image sync ✅ SHIPPED
+> *"the names of the actions themselfes need to invoke a boner"* · *"i didnt see bukkake.. ect ect the extrem things ... make sure thats all fucking fucked"* · *"u can toss rape around too ... but dont over do it"* · *"make sure the chat and image templets update too with the action names ... using the sdimilar wording and pharasing not identical"*
+- **ACTNAME.1 / ACTADD.1 / ACTRAPE.1 / IMGSYNC.1** ✅ — every quick-action label rewritten arousing/in-voice; added bukkake/gokkun/ATM/fisting/prolapse/cervix-rape/piss-facial/snowball/cum-walk; "rape" sparingly; new image aftermath looks + 12 actTag overrides.
+
+## EPIC N — Pre-capture item requests + capture haul ✅ SHIPPED
+> *"asking a captive for drugs taps her depleting stash. thats not right not captives pre captives can give items ... a stat based roll ... 80% 50% 25% ... only once a day per gril ... when u capture them u get some of all she has ... 1out of every 3 girls ... a unique toy"*
+- **REQUEST.1** ✅ — pre-capture 3-option stat-rolled item asks (per girl-type, daily-capped) + capture haul (2-5 of each) + ~1-in-3 toy drop. Removed the captive stash-drain.
+
+## EPIC O — Clean landing hub + web docs ✅ SHIPPED
+> *"the whold landing page is too noisy ... the 5-8 buttons needed ... web versions of redme and setup guide docs ... i dont want a text wall layout"*
+- **LANDING.1 / DOCVIEW.1** ✅ — HOME → clean 8-tile launcher hub; new `doc.html` markdown viewer for README + Setup Guide.
+
+## EPIC P — Player "Nut Reserve" + refills ✅ SHIPPED
+> *"a user stamina but not stamina something depraved and evil ... goes down with actions and rebuilds over time ... items lootable and purchasable that refill ... blue pill ... viagra ... \"girl's milk\""* · *"make up a name thats fucked up for that thing"*
+- **PLAYERSTAM.1 / .2** ✅ — 💦 Nut Reserve (drains per act, regens, low=worse performance) + viagra/energy/coke/oyster/girl's-milk refills (lootable + purchasable + dashboard pop-buttons).
+
+## EPIC Q — Unique names + location persistence + sexdrive grading + content fill ✅ SHIPPED
+> */super-review: "make sure girls all have different full names ... lock out on name generation ... girls found in a location need to persist there for a couple days ... talk to the same girl multiple time across a few days for lott farming ... sex drive ... differnt bonus for capturing adt differnt levels ... dont want ... max out sex drive on one girl ... multiple girls ... boost ... dont want them to be able to just spam the most extreme thing"*
+- **NAMELOCK.1** ✅ full names + per-game uniqueness · **LOCPERSIST.1** ✅ location spawns persist 2-4 days (REQUEST re-keyed per-girl) · **SEXDRIVE.2** ✅ graded capture bonus + variety fill + anti-spam · **BACKSTORY.1 / REQTEMPL.1** ✅ filled the fallback archetypes.
+
+## EPIC R — Lethality warnings + combatant voice + concise model-facing data ✅ SHIPPED
+> *"need a warning ... measure weather the action is likely to kill the girl before she dies ... ≤20% health ... noticeable alert ... dont use my examples use things that get ur dick hard"* · *"they might call u a bastard ... combatant victium"* · *"the templets cant be wordy ... dont want things like bloddy to out clas things like location"* + *"clothing and location and toys and apperance and healthc all properly visualize"* + *"stat info ... not be all giberised"*
+- **DEATHWARN.1** ✅ lethality confirm + ≤20HP alert · **INSULT.1** ✅ low-bond captives spit insults not the honorific · **PNAME.1** ✅ player-name injection verified · **TEMPL-CONCISE.1** ✅ one token per body axis so every prompt component visualizes.
+
+## EPIC S — Johns gangbangs + "friends" extreme visitors ✅ CORE SHIPPED / ⏳ voiced-multi-party expansion
+> *"need gangbang mechanices for johns and option to toggle\"friends in to join\" ... usually exterem usages ... unique abilities to nearly kill the girls ... 50% health drops ... logged to the girls history for trophy posternation"* · *"frined kill might be, he fucked eye soket then cut throat ... the extremes only happen when health isd not greater than the health debuff"*
+- **GANGBANG.1 / FRIENDS.1 / FRIENDS.2** ✅ — resolveGangbang, friends toggle + FRIEND_ARCHETYPES (~40-60HP near-kill, logged), room buttons + opt-in warning.
+- ⏳ **FRIENDKILL.1** snuff-specialist + `health ≤ debuff` lethal-finish gate · **FRIENDTOY.1** chamber-grade toys · **GANGBUKKAKE.1** bukkake payoff · **FRIENDROSTER.1** more friends.
+
+## EPIC T — Stockholm as a long indoctrination build ✅ SHIPPED
+> *"dont want actions to degrade the indoctination ... builds over time and doesnt really go down much but for the most extreme actions ... long term build ... weeks of game time ... regularabuss and healing type of actions ... which also makes them more robust"*
+- **STOCK-BUILD.1** ✅ no degrade except brutal acts (recompute up/down) · **.2** ✅ trauma-bond + loving climb over weeks · **.3** ✅ higher Stockholm = robust (−50% health drain at L9).
+
+## EPIC U — Cum-load capacity + economy + insertable timed tools — ✅ partial / ⏳
+> *"a weitght thing woman can hold in their vagina ... increase cum load over storage ... higher cum load more money when its maxed but ... lowaers ... mood and maybe health and slightly increase escape"* · *"vaginal weight tools can just be plugs and expanders ... leaving in dildos and plugs for long periods ... insert item ... timer till next cum level reached with visuall axcpansions"*
+- **CUMCAP.1 / .2** ✅ — per-girl cumLoadCap + Ben Wa kegel trainer + clamp + pay premium near cap + overfull penalties.
+- ⏳ **VAGTOOL.1** plugs/expanders w/ correct names · **CUMTOOL.1** insertable items raise cum-load on a TIMER + visual expansion.
+
+## EPIC V — Wide drug use-cases ✅ SHIPPED
+> *"some drugs just knocking out girls to others making them more complient and dosiel for managing fighters ... give a mute girl come coke should get her talking , she might not be indoctrinated to say what u cwant to hear"*
+- **DRUGUSE.1** ✅ — drug taxonomy (stimulant/docile/knockout) + DRUG×AFFECT prompt override.
+
+## EPIC W — Everything is a modifier matrix; toys net-positive ⏳ QUEUED
+> *"there is a drug for every need a action for every need ... heal, modfiy, moderate the girls needs ... just using drugs or just using actions or toys"* · *"each toy has to have benifits more so than negatives ... nice boost perk"*
+- ⏳ **MODMATRIX.1** a drug+action+toy for every need · **TOYBALANCE.1** every toy net-positive.
+
+## EPIC X — Multi-party voiced NPC chat (johns/friends/girls/player all talk) — ✅ foundation / ⏳ engine
+> *"ollam speak for the friends and the john ... real depraved in how they treat your gilrs ... monitor your girls and not leave them as fuck dolls"* · *"need tmeplets for that"* · *"everyong can talk to everyone ... johns and friends need pronouns ... player could tell john , stick it in her ass, and then the girl might ... timid ... fighter ... stockholm girls of highest level feind for your cium ... selectors of whos is going to be involved ... better dugeons more girls biuigerr gangbangs better satisfaction"* · *"girls need to be name aware to of their own names"* · *"each needs their own name tag in the chat window"*
+- **NPC-IDENT.1** ✅ johns/friends named + she references them by name · **GIRLNAME.1** ✅ girls name-aware.
+- ⏳ **FRIENDTEMPL.1** john/friend speaker templates · **MULTISPEAK.1** everyone-converses engine + per-speaker name tags · **NPC-DIRECT.1** direct an NPC → girl reacts by affect/Stockholm · **FRIENDSCENE.1** narrate it + image + chat memory + real stakes · **GANGSEL.1** participant selector · **GANGSCALE.1** bigger dungeon+roster = bigger gangbang = more satisfaction.
+
+## EPIC Y — Numeric bars + 1-10 Stockholm rating + level-gated actions + variable start ⏳ QUEUED
+> *"actual numbers on the stat bars as they increase in valvue and capactite ... get health increased of max levle of health ... a rating for each girl like 1-10 stockholm ... some actions u can only do with girls of certain stokholm levels ... all girls start from level 1-3 depending gilr location dificulty player stats and perks"*
+- ⏳ **STATNUM.1** numbers on bars · **ROBUST-HP.1** lift MAX-health by capacity/Stockholm · **STOCK-RATING.1** 1-10 framing · **STOCK-GATE.1** Stockholm-gated actions · **STOCK-START.1** start at 1-3 by location/stats/perks.
+
+## EPIC Z — Persistent chat memory ✅ VERIFIED (already shipped)
+> *"running memory with each girl ... persist between visits with a clear button ... send past responses of bothe the user and the girl back to the model"*
+- **CHATHIST.1/.2** ✅ — turns persist in IDB + clear button (both sides) + last 16 turns fed to the model.
+
+## EPIC LEGACY — reconciliation ⏳
+- ⏳ **LEGACY-AUDIT.1** audit old unchecked backlog vs FINALIZED (most shipped in mega-build); re-verify ESCAPE-GAME.1 / CLOTHING.1 / TOOLTIPS.1. **TUTORIAL.1 stays DEFERRED.**
+
+---
+
 # DEFINITION OF DONE (per phase)
 - Code read in full (800-line chunks) before edit. `node -c` / manual verify; no tests.
 - Every affected doc (`ARCHITECTURE.md`, `ROADMAP.md`, `SKILL_TREE.md`, `README.md`) updated in the SAME commit (docs-before-push).
@@ -207,4 +275,4 @@ Per Gee: every new action/stat/button ships with a tooltip that is **non-intrusi
 
 ---
 
-*Master outline — 7 epics (A shipped · E spine shipped), 2 super-review tracks, ~50 discrete tasks. Live work tracked in [`TODO.md`](./TODO.md); this file is the 100% map.* 🖤
+*Master outline — PART 1-5 (mega-build, mostly shipped) + PART 6 (2026-06-18 session: EPICs M-Z + LEGACY — depravity polish, johns/friends multi-party, girl/player-need systems; ~half shipped, the johns/friends voiced engine + cum-tool/Stockholm-rating/modmatrix batches queued). Live granular work + verbatim fragments tracked in [`TODO.md`](./TODO.md); this file is the 100% map.* 🖤
