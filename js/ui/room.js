@@ -610,8 +610,8 @@
               <p class="small muted">Throw a gangbang that PLAYS OUT in the chat log — each named man speaks in his OWN voice, ${escapeHtml(girl.name)} reacts to each BY NAME (only SHE is voiced aloud). Pays + cum-fills + bukkakes for real. Then direct any man to a specific act below.</p>
               <div class="stat-row" data-tooltip="How many men pile in. Capped by your dungeon's size + how many captives you hold (a bigger operation draws a bigger crowd).">
                 <span>🎯 Crowd size</span>
-                <select id="vgang-size" class="inline-select">${[2,3,4,5,6,8,10].map(n => `<option value="${n}"${n === 4 ? ' selected' : ''}>${n} men</option>`).join('')}</select>
-                ${wo.friendsAllowed ? `<label style="margin-left:8px" data-tooltip="Add one of your extreme 'friends' to the crowd — he'll wreck her (near-kill, fortune pay) alongside the johns.">🩸 <input type="checkbox" id="vgang-friend"/> include a friend</label>` : ''}
+                <select id="vgang-size" class="inline-select">${[2,3,4,5,6,8,10].map(n => `<option value="${n}"${n === 4 ? ' selected' : ''}>${n} johns</option>`).join('')}</select>
+                ${wo.friendsAllowed ? `<span style="margin-left:8px" data-tooltip="How many of your extreme 'friends' join the gangbang. Each wrecks her (near-kill, fortune pay) — and their damage STACKS: 2+ friends together can easily KILL her by chance + stat rolls. They never use condoms.">🩸 <select id="vgang-friends" class="inline-select">${[0,1,2,3].map(n => `<option value="${n}"${n === 0 ? ' selected' : ''}>${n} friend${n === 1 ? '' : 's'}</option>`).join('')}</select></span>` : ''}
               </div>
               <div class="btn-row" style="margin-top:4px">
                 <button id="vgang-run" class="btn-small btn-primary" data-tooltip="Resolves the real gangbang (pay / stamina / health / cum-fill / bukkake) AND voices it in the chat log. Each man talks in character; only ${escapeHtml(girl.name)} is read aloud by Kokoro.">🎭 Throw a voiced gangbang</button>
@@ -1315,9 +1315,11 @@
       }
     }
 
-    // GANGSEL — throw a voiced gangbang: resolve the REAL mechanics (pay/health/cum-fill/bukkake via
-    // resolveGangbang) to get the actual men, optionally add a friend, then play it out voiced.
-    async function runVoicedGangbang(size, withFriend) {
+    // GANGSEL / MULTIFRIENDGANG — throw a voiced gangbang: resolve the REAL mechanics (pay/health/
+    // cum-fill/bukkake via resolveGangbang) for the johns, then add `friendCount` FRIENDS resolved
+    // SEQUENTIALLY — each re-reads her freshly-lowered health, so their damage STACKS and 2+ friends
+    // can finish her by chance + stat rolls (a single one stays ≤50%/visit). Then play it out voiced.
+    async function runVoicedGangbang(size, friendCount) {
       if (inFlight) return;
       if (window.DMTHVoiceQueue) window.DMTHVoiceQueue.cancel();
       setInFlight(true);
@@ -1325,17 +1327,22 @@
         const statusEl = el.querySelector('#stream-status');
         const g = window.DMTHGame.state.getGirl(girl.id);
         const hp = g?.body?.health ?? 100;
-        if (hp <= 35 && !confirm(`${girl.name} is already wrecked (${Math.round(hp)} HP). A gangbang could finish her — let the pack have her anyway?`)) return;
+        const nF = Math.max(0, friendCount | 0);
+        if ((hp <= 35 || nF >= 2) && !confirm(`${girl.name} is at ${Math.round(hp)} HP${nF >= 2 ? ` and you're sending ${nF} FRIENDS` : ''}. ${nF >= 2 ? 'Multiple friends stack damage — this can easily KILL her.' : 'A gangbang could finish her.'} Let the pack have her anyway?`)) return;
         const r = window.DMTHGame.whoreOut.resolveGangbang(girl.id, size);
         if (!r.ok) { alert(r.reason || 'gangbang failed'); return; }
         let sceneNpcs = (r.npcs || []).map(npcForScene);
         // GANGSAMEDUNGEON — resolveGangbang only draws this girl's own arrivals, so every man is
         // bound to her active dungeon by construction (no cross-dungeon crowd).
-        if (withFriend && window.DMTHJohnArchetypes.rollFriendArchetype) {
+        // MULTIFRIENDGANG.1 — resolve each friend in turn; each reads her CURRENT (already-lowered)
+        // health, so stacked friend damage crosses her remaining HP → kill by chance + stat rolls.
+        for (let fi = 0; fi < nF && window.DMTHJohnArchetypes.rollFriendArchetype; fi++) {
+          const live = window.DMTHGame.state.getGirl(girl.id);
+          if (!live || live.encounterState !== 'captive') break;   // she died to a prior friend — stop
           const fid = window.DMTHJohnArchetypes.rollFriendArchetype(Math.random);
           const fnpc = window.DMTHJohnArchetypes.mintNpcIdentity(fid, { isFriend: true });
-          const fe = window.DMTHGame.whoreOut.resolveFriendEncounter(window.DMTHGame.state.getGirl(girl.id), fid, { npc: fnpc });
-          if (fe) sceneNpcs.push(npcForScene(fnpc));
+          const fe = window.DMTHGame.whoreOut.resolveFriendEncounter(live, fid, { npc: fnpc });
+          if (fe) sceneNpcs.push(npcForScene(fnpc));   // refused (kink/dislike) → fe null → skip him
         }
         if (!sceneNpcs.length) { if (statusEl) statusEl.textContent = 'no johns showed — raise her buzz / cadence and try again'; return; }
         lastSceneNpcs.set(girl.id, sceneNpcs);
@@ -1413,8 +1420,8 @@
     if (vgangBtn) {
       vgangBtn.onclick = () => {
         const size = parseInt(el.querySelector('#vgang-size')?.value, 10) || 4;
-        const withFriend = !!el.querySelector('#vgang-friend')?.checked;
-        runVoicedGangbang(size, withFriend);
+        const friendCount = parseInt(el.querySelector('#vgang-friends')?.value, 10) || 0;
+        runVoicedGangbang(size, friendCount);
       };
     }
     renderNpcDirect();
