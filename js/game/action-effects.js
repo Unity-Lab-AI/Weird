@@ -332,6 +332,13 @@
   const XTOL_LIMIT = 10;
   const EXTREME_ACTS_FOR_TOL = new Set(['extreme-facefuck', 'extreme-rough-anal', 'extreme-breeding-rape', 'extreme-degrade', 'extreme-beatdown', 'extreme-choke-out', 'masochist-overload']);
 
+  // STOCK-BUILD.1 — the ONLY way Stockholm degrades: the most extreme BRUTAL acts traumatize her
+  // and subtract bond XP (recomputed into a possible level drop). Routine use never degrades it.
+  const STOCKHOLM_SETBACK = { 'extreme-beatdown': -30, 'extreme-choke-out': -22 };
+  // STOCK-BUILD.2 — trauma bonding: a rough act that isn't a brutal setback grants a sliver of
+  // bond XP, so REGULAR ABUSE (alongside loving/care acts) slowly indoctrinates over game-weeks.
+  const STOCKHOLM_TRAUMA_XP = 1;
+
   // Apply an action's deltas to a girl. Optional opts:
   //   { strain: true } — applies a strain multiplier (1.5x cost on negative effects)
   function applyAction(girlId, actionId, opts = {}) {
@@ -372,7 +379,8 @@
     if (action.arousal) body.arousal = clamp((body.arousal ?? 0) + action.arousal, 0, 100);
     if (action.wetness) body.wetness = clamp((body.wetness ?? 0) + action.wetness, 0, 100);
     if (action.bruises) body.bruises = clamp((body.bruises ?? 0) + (action.bruises < 0 ? action.bruises : action.bruises * strainMul), 0, 99);
-    if (action.cumLoad) body.cumLoad = Math.max(0, (body.cumLoad ?? 0) + action.cumLoad);
+    // CUMCAP.1 — clamp cumLoad to her trained storage capacity (default 10).
+    if (action.cumLoad) body.cumLoad = Math.max(0, Math.min(body.cumLoadCap ?? 10, (body.cumLoad ?? 0) + action.cumLoad));
 
     // Mood was previously declared in 30+ ACTIONS entries but never applied. moodPressure
     // tracks cumulative drift so the model name reclassifies
@@ -407,6 +415,20 @@
     if (action.bondDebt) {
       const d = action.bondDebt < 0 ? action.bondDebt : action.bondDebt * strainMul;
       bond.bondDebt = Math.max(0, (bond.bondDebt ?? 0) + d);
+    }
+    // STOCK-BUILD.2 — trauma bonding: a rough act (positive bondDebt) that ISN'T a brutal setback
+    // and carries no explicit bondXP still grants a sliver, so regular abuse slowly indoctrinates.
+    if (!STOCKHOLM_SETBACK[actionId] && action.bondDebt > 0 && !action.bondXP) {
+      bond.bondXP = (bond.bondXP ?? 0) + STOCKHOLM_TRAUMA_XP;
+    }
+    // STOCK-BUILD.1 — the most extreme brutal acts SET BACK indoctrination (the only degrade path).
+    if (STOCKHOLM_SETBACK[actionId]) {
+      bond.bondXP = Math.max(0, (bond.bondXP ?? 0) + STOCKHOLM_SETBACK[actionId]);
+    }
+    // Recompute the level from XP (up from the climb, down from a setback) so it stays in sync
+    // without waiting for the next Ollama delta.
+    if (window.DMTHGame.balancing && window.DMTHGame.balancing.bondLevelForXp) {
+      bond.bondLevel = window.DMTHGame.balancing.bondLevelForXp(bond.bondXP);
     }
 
     if (action.notoriety && window.DMTHGame.state.addNotoriety) {
@@ -740,6 +762,24 @@
     }
   }
 
+  // CUMCAP.1 — train her cum-load STORAGE capacity with the Ben Wa balls (kegel trainer). Requires
+  // owning 'ben-wa-balls'. Each session raises cumLoadCap +2 up to a trained max of 30. Net-positive
+  // (bigger payouts later); the downside lives in the economy (a full girl gets moody/restless).
+  const CUMCAP_MAX = 30;
+  function trainCumCapacity(girlId) {
+    const girl = window.DMTHGame.state.getGirl(girlId);
+    if (!girl) return { ok: false, reason: 'no such girl' };
+    const inv = window.DMTHGame.state.current && window.DMTHGame.state.current.inventory || {};
+    if (!(inv['ben-wa-balls'] > 0)) return { ok: false, reason: 'you need Ben Wa balls — buy them in the shop' };
+    const body = { ...(girl.body || {}) };
+    const cur = body.cumLoadCap ?? 10;
+    if (cur >= CUMCAP_MAX) return { ok: false, reason: 'her storage capacity is already maxed' };
+    body.cumLoadCap = Math.min(CUMCAP_MAX, cur + 2);
+    window.DMTHGame.state.updateGirl(girlId, { body });
+    if (window.DMTHNotify) window.DMTHNotify.show(`⚪ ${girl.name} trained — cum-load capacity ${body.cumLoadCap}/${CUMCAP_MAX}.`, { type: 'success', durationMs: 3500 });
+    return { ok: true, cap: body.cumLoadCap };
+  }
+
   function previewCost(actionId) {
     const a = ACTIONS[actionId];
     if (!a) return '';
@@ -890,11 +930,28 @@
         healthDelta += ACTIONS['chronic-bruise-tick'].health;
         reasons.push('chronic-injury');
       }
+      // CUMCAP.2 — a girl stuffed near her cum-load capacity is uncomfortable: small stamina +
+      // health drain (the escape + mood cost is applied to the patch below).
+      const cumRatio = (body.cumLoad || 0) / (body.cumLoadCap || 10);
+      const overfull = cumRatio >= 0.85;
+      if (overfull) {
+        staminaDelta += -1;
+        healthDelta += -1;
+        reasons.push('overfull-cum');
+      }
 
       // Passive rest regen — when no negative pressure this tick.
       if (staminaDelta === 0 && healthDelta === 0) {
         staminaDelta += ACTIONS['rest-tick'].stamina;
         healthDelta += ACTIONS['rest-tick'].health;
+      }
+
+      // STOCK-BUILD.3 — higher Stockholm makes her MORE ROBUST: negative health drain (neglect /
+      // chronic injury) is softened by her bond level. A fully-bonded captive (L9) endures ~50%
+      // less; a fresh terrified one takes the full hit. Positive regen is left untouched.
+      if (healthDelta < 0) {
+        const robustness = 1 - Math.min(0.5, (girl.bond?.bondLevel || 0) * 0.055);
+        healthDelta *= robustness;
       }
 
       // Apply deltas. Note `body` was already shallow-cloned at the top of the
@@ -936,7 +993,17 @@
       // XTOL.1 — the extreme-act streak heals down over time (rest / food / water / time).
       if ((body.extremeStreak || 0) > 0) body.extremeStreak = Math.max(0, body.extremeStreak - 0.5);
 
-      window.DMTHGame.state.updateGirl(girl.id, { body, bonuses, _lastStaminaReasons: reasons });
+      // CUMCAP.2 — overfull also makes her restless + moody: small escape bump + mood dip.
+      const tickPatch = { body, bonuses, _lastStaminaReasons: reasons };
+      if (overfull) {
+        const escape = { ...(girl.escape || {}) };
+        escape.currentRisk = clamp((escape.currentRisk ?? 0.1) + 0.02, 0, 1);
+        const mood = { ...(girl.mood || {}) };
+        mood.moodPressure = Math.max(-60, (mood.moodPressure || 0) - 2);
+        tickPatch.escape = escape;
+        tickPatch.mood = mood;
+      }
+      window.DMTHGame.state.updateGirl(girl.id, tickPatch);
 
       if (payout > 0) {
         window.DMTHGame.state.addMoney(payout);
@@ -1018,6 +1085,7 @@
     LIMB_KEYS, LIMB_LABEL, NUGGET_HEAL_GATE,
     limbState, limbsRemoved, isNugget, delimb,
     MARK_SPECS, ownershipMarksOf, hasMark, applyMark,
-    wouldBeLethal, lethalWarningLine, lowHealthAlertSweep
+    wouldBeLethal, lethalWarningLine, lowHealthAlertSweep,
+    trainCumCapacity, CUMCAP_MAX
   });
 })();

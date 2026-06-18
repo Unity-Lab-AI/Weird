@@ -252,7 +252,11 @@
     // gains" half of the satisfaction loop (hunting bonus lives in hunt.js).
     const sat = window.DMTHGame.state.getSatisfaction ? window.DMTHGame.state.getSatisfaction() : 50;
     const satMul = 1 + ((sat - 50) / 50) * 0.12;
-    const payment = Math.round(basePay * happiness.multiplier * necroMult * satMul);
+    // CUMCAP.2 — a filled-up girl (cumLoad near her trained capacity) is premium content: johns
+    // pay more the closer she is to maxed (up to +35% at cap).
+    const cumRatio = Math.min(1, (girl.body?.cumLoad || 0) / (girl.body?.cumLoadCap || 10));
+    const cumMul = 1 + 0.35 * cumRatio;
+    const payment = Math.round(basePay * happiness.multiplier * necroMult * satMul * cumMul);
     const tipRoll = Math.random() < arc.tipChance;
     const tip = tipRoll ? Math.round(payment * (arc.tipMul - 1.0)) : 0;
 

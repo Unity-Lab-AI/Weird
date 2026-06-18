@@ -204,7 +204,8 @@
         { emoji: '🤗',  label: 'just hold her',          text: '*sits on the floor next to her, no words, just an arm around her shoulders*', applyId: 'love-hold-her' },
         { emoji: '🌷',  label: 'aftercare (full)',       text: '*water, blanket, clean every bruise, hold her until she sleeps. one full session of care.*', applyId: 'love-aftercare' },
         { emoji: '🤫',  label: 'sweet promise',          text: 'shh. I\'ve got you. nothing\'s going to hurt you tonight. I promise.', applyId: 'love-promise-sweet' },
-        { emoji: '🤱',  label: 'suck her milk',          text: '*latches onto her breast and sucks the warm milk straight from her nipple*', milkSuck: true }
+        { emoji: '🤱',  label: 'suck her milk',          text: '*latches onto her breast and sucks the warm milk straight from her nipple*', milkSuck: true },
+        { emoji: '⚪',  label: 'train her kegels',        text: '*works the weighted balls into her and makes her hold them, training her to take and store more*', cumTrain: true }
       ]
     },
     extreme: {
@@ -335,6 +336,11 @@
         // Girl-milk feed — soothing drug-like effect. Consumes 1L from inventory; refused if none.
         if (action.milkDrink && girl?.id && window.DMTHGame?.milk?.drinkGirl) {
           const r = window.DMTHGame.milk.drinkGirl(girl.id);
+          if (!r.ok) { alert(r.reason); return; }
+        }
+        // CUMCAP.1 — train her cum-load storage capacity (needs Ben Wa balls). Refused if unowned/maxed.
+        if (action.cumTrain && girl?.id && window.DMTHGame?.actionEffects?.trainCumCapacity) {
+          const r = window.DMTHGame.actionEffects.trainCumCapacity(girl.id);
           if (!r.ok) { alert(r.reason); return; }
         }
         // Suck milk straight from her breast (MILK.2) — bonus boost, no rig needed. Refused

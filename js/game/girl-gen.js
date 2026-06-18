@@ -271,7 +271,7 @@
       // lastFedAt + lastWateredAt are seeded to the current game-clock timestamp so the
       // grace-period model in tickStaminaHealth starts the 5-day/3-day countdown from
       // capture time, not from epoch.
-      body: { arousal: 14, wetness: 8, cumLoad: 0, bruises: 0, high: 0, stamina: 70, health: 100, activeDrugs: [], pose: 'seated, knees together', outfitState: 'intact', lastFedAt: window.DMTHGame?.gameClock?.now() ?? 0, lastWateredAt: window.DMTHGame?.gameClock?.now() ?? 0 },
+      body: { arousal: 14, wetness: 8, cumLoad: 0, cumLoadCap: 10, bruises: 0, high: 0, stamina: 70, health: 100, activeDrugs: [], pose: 'seated, knees together', outfitState: 'intact', lastFedAt: window.DMTHGame?.gameClock?.now() ?? 0, lastWateredAt: window.DMTHGame?.gameClock?.now() ?? 0 },
       mood: { mood: 'terrified', moodEmoji: '😱', history: [] },
       stats,
       bond: { bondLevel: 0, bondXP: 0, bondDebt: 0, milestones: [] },

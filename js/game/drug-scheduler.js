@@ -321,9 +321,21 @@
     }
   }
 
+  // DRUGUSE.1 — drug use-case taxonomy. Drives the "wide range of use cases" — knockout drugs put
+  // her under (manage anyone), docile drugs calm fighters (escape-risk already drops on administer),
+  // stimulants loosen tongues (a mute talks — see the DRUG×AFFECT OVERRIDE prompt block). All three
+  // already have mechanical hooks (knockout via isUnconscious; docile via instant.escapeRisk;
+  // stimulant via speechEffect + the prompt rule). This map exposes the intent for UI/tooltips.
+  const DRUG_USE_CASE = Object.freeze({
+    coke: 'stimulant', mdma: 'stimulant',
+    weed: 'docile', whiskey: 'docile', alcohol: 'docile', acid: 'docile',
+    ketamine: 'knockout', tranquilizer: 'knockout', chloroform: 'knockout', ether: 'knockout', rohypnol: 'knockout'
+  });
+  function useCaseOf(drugKey) { return DRUG_USE_CASE[drugKey] || 'stimulant'; }
+
   window.DMTHGame = window.DMTHGame || {};
   window.DMTHGame.drugs = Object.freeze({
-    DRUG_CURVES, ADDICTIVENESS, ITEM_TO_DRUG, administer, offer, currentEffect, tickAll, tickSelfServe, summarize,
+    DRUG_CURVES, ADDICTIVENESS, ITEM_TO_DRUG, DRUG_USE_CASE, useCaseOf, administer, offer, currentEffect, tickAll, tickSelfServe, summarize,
     isUnconscious, unconsciousRemainingMs, addictionState, withdrawalState
   });
 })();

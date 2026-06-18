@@ -273,6 +273,14 @@
       notes: 'An aphrodisiac stamina tonic — restores a solid chunk of your Nut Reserve.'
     },
 
+    {
+      id: 'ben-wa-balls', displayName: 'Ben Wa Balls (kegel trainer)', emoji: '⚪',
+      category: 'item', subcategory: 'consumables',
+      prompt: 'product photograph of a pair of small linked metallic weighted balls on a plain backdrop, intimate-wellness commerce style, soft lighting',
+      cost: 90, tier: 1, cumTrainer: true,
+      notes: 'Reusable — make her hold these to train her muscles. Each session raises her cum-load STORAGE capacity (more load = more money, but a full girl gets moody + restless). Buy once, use repeatedly.'
+    },
+
     // --- BLUNT ---
     {
       id: 'pipe', displayName: 'Lead Pipe', emoji: '🔧',

@@ -213,7 +213,10 @@
         // + the sustained-fill maintain counter that the preggo timer reads.
         vaginalCum: 0, preggoFillMaintained: 0,
         // XTOL.1 — running count of extreme acts since her last recovery (heal/care/rest).
-        extremeStreak: 0
+        extremeStreak: 0,
+        // CUMCAP.1 — per-girl cum-load STORAGE capacity (trained up by vaginal-weight tools).
+        // cumLoad is clamped to this; near-cap = pay premium, sustained high = mood/health/escape cost.
+        cumLoadCap: 10
       };
       for (const [k, v] of Object.entries(BODY_DEFAULTS)) {
         if (g.body[k] == null) g.body[k] = v;
