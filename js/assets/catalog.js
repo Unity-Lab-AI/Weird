@@ -55,6 +55,15 @@
       notes: 'Medium-difficulty. Drug-forward spawns. Loud, crowded.'
     },
     {
+      id: 'strip-club', displayName: 'The Velvet Cage (strip club)', emoji: '💃',
+      category: 'location', subcategory: 'medium',
+      prompt: 'exterior establishing shot of a seedy strip club at night, red neon outline of a dancer, blacked-out windows, a bouncer at the door, wet alley beside it, gritty nightlife photography, cinematic color grade',
+      personEnvPrompt: 'inside a dim strip club, red and purple stage lighting, a brass pole and mirrored stage behind her, velvet booths in shadow, dollar bills scattered on the floor, hazy smoke, bass-thumping nightclub interior, sleazy neon glow on bare skin',
+      cost: 800, unlock: { minNotoriety: 1 },
+      gridPlacement: { x: 2, y: 0 },
+      notes: 'Medium. Strippers spawn here — they work nude or near-nude, so they\'re captured already bare. Bouncers + cameras around.'
+    },
+    {
       id: 'library', displayName: 'Old Library', emoji: '📚',
       category: 'location', subcategory: 'medium',
       prompt: 'interior photograph of a vintage public library reading room, tall wooden shelves, warm reading lamps, late-afternoon light through arched windows, quiet studious atmosphere, shallow depth of field',

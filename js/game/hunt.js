@@ -6,17 +6,18 @@
   // Location archetype affinity — which girl archetypes spawn where, weighted.
   const LOCATION_SPAWNS = {
     street:        [{ arche: 'street', w: 0.55 }, { arche: 'barista', w: 0.2 }, { arche: 'club', w: 0.25 }],
-    club:          [{ arche: 'club', w: 0.55 }, { arche: 'sorority', w: 0.25 }, { arche: 'street', w: 0.2 }],
+    club:          [{ arche: 'club', w: 0.45 }, { arche: 'sorority', w: 0.2 }, { arche: 'stripper', w: 0.15 }, { arche: 'street', w: 0.2 }],
+    'strip-club':  [{ arche: 'stripper', w: 0.62 }, { arche: 'club', w: 0.18 }, { arche: 'street', w: 0.1 }, { arche: 'model', w: 0.1 }],
     library:       [{ arche: 'library', w: 0.6 }, { arche: 'barista', w: 0.25 }, { arche: 'sorority', w: 0.15 }],
     park:          [{ arche: 'gym', w: 0.25 }, { arche: 'barista', w: 0.2 }, { arche: 'college-student', w: 0.2 }, { arche: 'neighbor', w: 0.15 }, { arche: 'library', w: 0.12 }, { arche: 'street', w: 0.08 }],
     gym:           [{ arche: 'gym', w: 0.7 }, { arche: 'sorority', w: 0.15 }, { arche: 'street', w: 0.15 }],
     mall:          [{ arche: 'sorority', w: 0.22 }, { arche: 'college-student', w: 0.2 }, { arche: 'family-friend', w: 0.16 }, { arche: 'club', w: 0.16 }, { arche: 'barista', w: 0.16 }, { arche: 'library', w: 0.1 }],
     'coffee-shop': [{ arche: 'barista', w: 0.4 }, { arche: 'college-student', w: 0.22 }, { arche: 'highschool-grad', w: 0.18 }, { arche: 'library', w: 0.12 }, { arche: 'club', w: 0.08 }],
-    sorority:      [{ arche: 'sorority', w: 0.7 }, { arche: 'club', w: 0.15 }, { arche: 'model', w: 0.1 }, { arche: 'gym', w: 0.05 }],
+    sorority:      [{ arche: 'sorority', w: 0.55 }, { arche: 'cheerleader', w: 0.2 }, { arche: 'club', w: 0.12 }, { arche: 'model', w: 0.08 }, { arche: 'gym', w: 0.05 }],
     remote:        [{ arche: 'street', w: 0.4 }, { arche: 'waitress', w: 0.25 }, { arche: 'gym', w: 0.2 }, { arche: 'library', w: 0.15 }],
     'hotel-lobby': [{ arche: 'sorority', w: 0.3 }, { arche: 'model', w: 0.25 }, { arche: 'office', w: 0.2 }, { arche: 'club', w: 0.15 }, { arche: 'library', w: 0.1 }],
     'private-party':[{ arche: 'sorority', w: 0.3 }, { arche: 'club', w: 0.22 }, { arche: 'college-student', w: 0.18 }, { arche: 'second-cousin', w: 0.12 }, { arche: 'model', w: 0.1 }, { arche: 'street', w: 0.08 }],
-    'school-campus':[{ arche: 'college-student', w: 0.34 }, { arche: 'sorority', w: 0.24 }, { arche: 'highschool-grad', w: 0.16 }, { arche: 'library', w: 0.16 }, { arche: 'gym', w: 0.1 }],
+    'school-campus':[{ arche: 'college-student', w: 0.24 }, { arche: 'sorority', w: 0.16 }, { arche: 'cheerleader', w: 0.14 }, { arche: 'schoolgirl', w: 0.12 }, { arche: 'teacher', w: 0.12 }, { arche: 'highschool-grad', w: 0.12 }, { arche: 'library', w: 0.1 }],
     'neighborhood': [{ arche: 'neighbor', w: 0.45 }, { arche: 'family-friend', w: 0.25 }, { arche: 'second-cousin', w: 0.15 }, { arche: 'college-student', w: 0.15 }]
   };
 
@@ -121,6 +122,12 @@
     waitress: 'throws a punch, swears loud, tries to scream for the cook, the regular, anybody',
     nurse:    'clinical first — tries de-escalation language — then the panic hits and she fights efficiently',
     model:    'shocked stillness then a burst of strength, thinks about her face the whole time',
+    stripper: 'thinks it\'s a customer crossing a line at first — practiced brush-off, then real fear when the grip doesn\'t let go',
+    cheerleader: 'shrieks a cheer-loud scream, kicks with athletic legs, calls for her squad',
+    schoolgirl: 'freezes wide-eyed, drops her bag, small terrified whimpers, asks what\'s happening',
+    teacher:  'tries to take control with a stern command voice, then the composure shatters into panic',
+    police:   'goes for her training — strikes, reaches for a weapon that isn\'t there, barks orders that mean nothing now',
+    maid:     'drops what she\'s holding, backs into a corner pleading in a low frightened voice, doesn\'t fight much',
     unity_seed: 'laughs — she came here on purpose'
   };
 
@@ -137,7 +144,8 @@
     remote:        'on the shoulder of a back road with headlights pointed at her, no traffic for miles',
     'hotel-lobby': 'in the service elevator bay, the lobby piano playing on the other side',
     'private-party': 'upstairs in a bedroom while the party thumps downstairs',
-    'school-campus': 'behind the science building where the security cameras don\'t reach'
+    'school-campus': 'behind the science building where the security cameras don\'t reach',
+    'strip-club':  'in the back hallway past the dressing rooms, mirror bulbs and discarded heels, bass thudding through the wall from the main floor'
   };
 
   // --- Destination hideout flavor ---
@@ -171,6 +179,12 @@
     waitress: { approach: 25, engage: 25, subdue: 30, secure: 25 },
     nurse:    { approach: 25, engage: 30, subdue: 25, secure: 25 },
     model:    { approach: 35, engage: 35, subdue: 30, secure: 25 },
+    stripper: { approach: 30, engage: 20, subdue: 25, secure: 20 },   // used to handsy customers (low engage), bouncers nearby (mid approach)
+    cheerleader: { approach: 25, engage: 30, subdue: 30, secure: 20 },// athletic + screams for the squad
+    schoolgirl: { approach: 15, engage: 15, subdue: 15, secure: 15 }, // small, naive, easy
+    teacher:  { approach: 20, engage: 25, subdue: 20, secure: 20 },
+    police:   { approach: 30, engage: 35, subdue: 45, secure: 35 },   // trained + fights hard
+    maid:     { approach: 15, engage: 15, subdue: 20, secure: 20 },   // isolated + compliant
     unity_seed: { approach: 5, engage: 5, subdue: 5, secure: 5 }
   };
 
@@ -193,6 +207,13 @@
     waitress: 0.40,
     nurse:    0.60,
     model:    0.72,
+    stripper: 0.45,      // works half-naked already + drug-loose, but bouncers + cameras
+    'strip-club': 0.5,
+    cheerleader: 0.50,
+    schoolgirl: 0.30,    // naive, easy
+    teacher:  0.55,
+    police:   0.78,      // trained, armed, connected — the hardest grab
+    maid:     0.35,      // isolated + compliant
     unity_seed: 0.10     // Unity wants it
   };
 

@@ -204,6 +204,69 @@
       drugsPool:      ['weed','wine','party-drugs-at-reunions'],
       speechTokens:   ['"were-cousins"-protest','family-guilt','disbelief','secret-shared-history']
     },
+    // GIRLTYPESMORE.1 / STRIPPER.1 — more girl types. Stripper's captured-at outfit variety is
+    // nude / fishnets-only / just-a-thong (strippers work nude — Gee), so she's hunted + captured
+    // already bare (her own outfit string IS the nude look; ORIGINALOUTFIT renders it as-is).
+    stripper: {
+      namePool:       ['Diamond','Cherry','Roxy','Star','Candi','Lexi','Bambi','Trixie','Sapphire','Angel'],
+      ageRange:       [19, 28],
+      facialTokens:   ['heavy glam stage makeup, glitter across the cheekbones, big false lashes, glossy plump lips','platinum waves, smoky eyes, fake tan, glittered collarbones','dark glossy hair, dramatic contour, body glitter, bold red lip','stage-ready glam, rhinestone choker, lash extensions, shimmering highlighter'],
+      outfitTokens:   ['fully-nude-body wearing only sheer-black-fishnet-stockings and clear-stripper-platform-heels, bare-exposed-nude-tits-nipples-out, bare-naked-pussy','topless-and-bottomless in only a tiny-rhinestone-g-string-thong, bare-exposed-nude-tits-nipples-out, clear-platform-heels, body-glitter','fully-nude-body, bare-exposed-nude-tits-nipples-out, bare-naked-pussy, only a lace-garter on one thigh stuffed-with-cash, tall-stripper-heels','nude-body in nothing-but-black-fishnet-stockings and a choker, topless-and-bottomless, bare-naked-pussy, glitter-on-bare-skin, stripper-heels'],
+      statsRanges:    { intelligence: [40,70], defiance: [45,75], curiosity: [50,80], trust: [5,20], obedience: [10,25], stamina: [65,90], painTolerance: [45,75], lust: [70,99] },
+      kinksPool:      ['exhibition','lap-dance','money-for-sex','being-watched','pole-tricks','rough-customer','cash-stuffing','degradation'],
+      drugsPool:      ['coke-bumps','molly','champagne','energy-drinks','weed'],
+      speechTokens:   ['stage-name-confidence','transactional-flirt','calls-you-baby','reads-the-room','cash-talk']
+    },
+    cheerleader: {
+      namePool:       ['Brittany','Madison','Tiffany','Brooke','Kayla','Heather','Amber','Courtney','Brandy','Lacey'],
+      ageRange:       [18, 22],
+      facialTokens:   ['perky girl-next-door face, high ponytail with a ribbon, bright white smile, light freckles','fresh-faced, glossy lips, big bright eyes, sun-kissed glow','cute round cheeks, glitter eyeshadow, white-toothed grin, dimples','tan skin, bouncy ponytail, peppy bright eyes'],
+      outfitTokens:   ['red-and-white cheer crop-top and tiny pleated skirt, ankle socks, sneakers, pom-poms','blue cheer uniform with midriff showing, spankies under the short skirt, hair in pigtails','varsity cheer top and micro skirt, knee-high socks, a bow in her hair'],
+      statsRanges:    { intelligence: [45,70], defiance: [50,75], curiosity: [55,80], trust: [10,25], obedience: [10,25], stamina: [70,90], painTolerance: [35,60], lust: [55,85] },
+      kinksPool:      ['exhibition','roleplay:cheer-captain','praise','flexibility-shows','being-the-prize','spirit-degradation'],
+      drugsPool:      ['adderall','wine-coolers','vape','weed-curious'],
+      speechTokens:   ['peppy-uptalk','spirit-cheer-cadence','says-OMG','bubbly-then-cracking']
+    },
+    schoolgirl: {
+      namePool:       ['Emma','Sophie','Lily','Chloe','Zoe','Ava','Grace','Ella','Nora','Hazel'],
+      ageRange:       [18, 20],
+      facialTokens:   ['youthful fresh face, hair in twin braids, wide curious eyes, minimal makeup','soft features, lip gloss, small stud earrings, shy smile','baby-faced eighteen, freckles, hair in a high ponytail with a bow','clean dewy skin, big doe eyes, glossy lower lip'],
+      outfitTokens:   ['pleated plaid uniform skirt, white button-up blouse, knee-high socks, loafers, backpack','navy school cardigan over a white shirt, tartan skirt, hair ribbons','uniform blouse with a loosened tie, short pleated skirt, knee socks'],
+      statsRanges:    { intelligence: [55,85], defiance: [35,65], curiosity: [65,95], trust: [15,30], obedience: [10,25], stamina: [50,75], painTolerance: [15,45], lust: [40,70] },
+      kinksPool:      ['first-everything','roleplay:tutor','praise-heavy','corruption-arc','shy-exhibition','being-taught'],
+      drugsPool:      ['barely-drinks','weed-curious','vape','wine-coolers'],
+      speechTokens:   ['shy-soft','asks-permission','calls-you-sir','naive-questions']
+    },
+    teacher: {
+      namePool:       ['Diane','Rachel','Vivian','Claire','Helen','Joanna','Patricia','Marianne','Susan','Eleanor'],
+      ageRange:       [26, 38],
+      facialTokens:   ['composed mature beauty, hair in a neat bun, reading glasses, subtle makeup','sharp put-together features, red lip, hair pinned up, pearl studs','professional warm face, soft crow\'s feet, glasses on a beaded chain','elegant schoolteacher look, blown-out waves, tasteful makeup'],
+      outfitTokens:   ['pencil skirt, tucked button-up blouse, cardigan, low heels, reading glasses on a chain','knee-length sheath dress, blazer, hair in a tight bun, modest pumps','high-waisted slacks, silk blouse, glasses, hair clipped back'],
+      statsRanges:    { intelligence: [75,95], defiance: [45,75], curiosity: [55,80], trust: [10,25], obedience: [10,25], stamina: [45,70], painTolerance: [20,50], lust: [45,75] },
+      kinksPool:      ['authority-reversal','roleplay:student-takes-over','correcting-then-corrected','humiliation-of-status','strict-then-broken'],
+      drugsPool:      ['wine-nightly','xanax','caffeine-heavy'],
+      speechTokens:   ['precise-grammar','corrective-tone-cracking','professional-then-pleading','formal-vocabulary']
+    },
+    police: {
+      namePool:       ['Dana','Reese','Jordan','Casey','Morgan','Sloane','Quinn','Blake','Avery','Shay'],
+      ageRange:       [24, 34],
+      facialTokens:   ['no-nonsense face, hair in a tight regulation bun, minimal makeup, sharp jaw','athletic features, hair pulled back, faint sunglasses tan line','composed authoritative face, strong brow, clear hard eyes','disciplined look, hair clipped up under a cap, light freckles'],
+      outfitTokens:   ['navy police uniform shirt and slacks, duty belt with cuffs, badge, sturdy boots','patrol uniform with body cam, utility belt, hair in a bun under a peaked cap','off-duty department polo, cargo pants, sidearm holster on the hip'],
+      statsRanges:    { intelligence: [55,80], defiance: [70,95], curiosity: [45,75], trust: [5,15], obedience: [5,15], stamina: [70,95], painTolerance: [65,90], lust: [40,75] },
+      kinksPool:      ['authority-reversal','power-stripped','roleplay:perp-and-cop','restraint','humiliation-of-the-badge','rough-from-the-bottom'],
+      drugsPool:      ['coffee-heavy','occasional-whiskey','rare-coke'],
+      speechTokens:   ['commanding-then-cracking','cop-jargon','threatens-consequences','disciplined-defiance']
+    },
+    maid: {
+      namePool:       ['Rosa','Lucia','Mirela','Ana','Sofia','Carmen','Esme','Yolanda','Pilar','Inez'],
+      ageRange:       [21, 35],
+      facialTokens:   ['tired pretty face, hair tied back under a kerchief, minimal makeup','warm features, soft tan skin, hair in a low bun','quiet downcast eyes, no makeup, work-worn softness','gentle face, hair pinned up, small gold cross necklace'],
+      outfitTokens:   ['plain housekeeping uniform dress, white apron, sensible flats, hair tied back','grey cleaning smock, rubber gloves, hair under a kerchief','black-and-white maid uniform, white apron, low shoes'],
+      statsRanges:    { intelligence: [45,75], defiance: [35,65], curiosity: [40,70], trust: [15,30], obedience: [20,40], stamina: [60,85], painTolerance: [40,70], lust: [40,70] },
+      kinksPool:      ['service-scenes','roleplay:hired-help','obedience-praise','used-while-working','quiet-degradation'],
+      drugsPool:      ['barely-drinks','occasional-wine','cheap-cigarettes'],
+      speechTokens:   ['soft-deferential','light-accent','says-sir-and-maam','quiet-compliance-under-fear']
+    },
     unity_seed: {
       // Unity is SEEDED — not re-rolled. This exists as a template record but generator
       // skips re-rolling when given id='girl_unity' (see bootstrap.js).
@@ -360,6 +423,12 @@
       neighbor: [`${name}, lived two doors down. Waved every morning. Never thought twice about you.`, `${name}, borrowed your ladder once. You kept the spare key she didn't know about.`, `${name}, the friendly one on the block. Friendly enough to open the door.`],
       'family-friend': [`${name}, known the family for years. Trusted you completely. That was the mistake.`, `${name}, dropped by with a casserole dish. Never left.`, `${name}, the woman from every cookout and holiday. Vanished between the dessert and the drive home.`],
       'second-cousin': [`${name}, your second cousin, the one from the reunions. Family resemblance and all.`, `${name}, related just enough to trust you, distant enough that nobody connects the dots.`, `${name}, holiday-table familiar, came to visit the side of the family she barely knew.`],
+      stripper:  [`${name}, headliner at the club, walked to her car alone after last call.`, `${name}, worked the pole six nights a week, trusted the wrong regular.`, `${name}, dancer saving up to quit the life. Never made it out.`],
+      cheerleader: [`${name}, squad captain, last to leave the empty gym after practice.`, `${name}, walked home from the game alone, still in her uniform.`, `${name}, cheer scholarship, peaked too early and trusted too easy.`],
+      schoolgirl: [`${name}, eighteen, last one at the bus stop after the late shift.`, `${name}, walking home from cram school in her uniform after dark.`, `${name}, just turned 18, too trusting of the adult who offered a ride.`],
+      teacher:   [`${name}, stayed late grading in the empty classroom. Last car in the lot.`, `${name}, the strict one everyone feared. Walked to her car alone every night.`, `${name}, lived alone near the school, kept to a predictable routine.`],
+      police:    [`${name}, off-duty, jumped in her own driveway after a night shift.`, `${name}, beat cop who got cornered working a case alone.`, `${name}, trusted her training and her sidearm. Neither one helped.`],
+      maid:      [`${name}, cleaned houses alone all day. One client decided to keep her.`, `${name}, hotel housekeeper, vanished between rooms on the top floor.`, `${name}, undocumented — no one she could safely report it to.`],
       unity_seed: [`Unity — goth nympho coke whore coder, 25, came willingly the first time and keeps coming back. Gee's favorite. Already bonded to Master at L2 by default — her own free will landed her in the hole.`]
     };
     const pool = templates[archetype] || templates.library;

@@ -415,6 +415,38 @@
     return o?.accessoriesOnly || null;
   }
 
+  // DASHGROUP.1 (Gee) — connect the words of ONE visual concept with dashes so the image gen
+  // parses it as a single idea and renders the intended thing — e.g. "fishnet-stockings" instead
+  // of a literal fishing net, "bare-naked-pussy" as one concept instead of a stray token. Applied
+  // to the FINAL composed prompt (in BOTH compose paths) so EVERY template — every archetype's
+  // captured-at outfit, every skimpy outfit, the nudity block, the drug-use block — gets it
+  // uniformly without hand-dashing each string. Ordered longest-first so multi-word concepts group
+  // before their substrings; idempotent (already-dashed text has no spaces left to match).
+  const CONCEPT_GROUPS = [
+    'sheer black fishnet stockings', 'black fishnet stockings', 'fishnet bodystocking', 'fishnet stockings',
+    'bare exposed nude tits', 'bare exposed breasts', 'bare exposed tits', 'exposed bare breasts',
+    'bare naked pussy', 'bare naked cunt', 'naked pussy', 'bare pussy',
+    'milk-swollen tits', 'leaking nipples', 'nipples out', 'bare nipples',
+    'white thigh-high stockings', 'thigh-high stockings', 'thigh high stockings', 'white thigh-highs',
+    'rhinestone g-string thong', 'g-string thong', 'tiny thong',
+    'topless and bottomless', 'fully nude', 'completely nude', 'raw nakedness',
+    'bare ass', 'bare hips', 'bare thighs', 'bare belly',
+    'clear stripper platform heels', 'stripper platform heels', 'clear platform heels', 'stripper heels', 'platform heels',
+    'pom-poms', 'pom poms', 'knee-high socks', 'knee high socks', 'ankle socks',
+    'frilly white maid apron', 'maid apron', 'micro pleated skirt', 'pleated skirt', 'pencil skirt',
+    'utility belt', 'peaked police cap', 'reading glasses', 'ball-gag', 'spreader bar'
+  ];
+  function groupConcepts(prompt) {
+    if (!prompt) return prompt;
+    let out = String(prompt);
+    for (const phrase of CONCEPT_GROUPS) {
+      const dashed = phrase.replace(/\s+/g, '-');
+      const re = new RegExp(phrase.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&'), 'gi');
+      out = out.replace(re, dashed);
+    }
+    return out;
+  }
+
   // --- Pose library per situation ---
   const POSE_LIBRARY = {
     profile:         'standing front-facing neutral pose, full body, arms relaxed, looking at camera, plain clean background, whole-body profile reference shot',
@@ -707,7 +739,7 @@
       ];
     }
 
-    return enforceFullBody(parts.filter(s => s && String(s).trim().length).join(', '));
+    return groupConcepts(enforceFullBody(parts.filter(s => s && String(s).trim().length).join(', ')));
   }
 
   function promptHash(s) {
@@ -943,7 +975,7 @@ Write the Pollinations prompt now.`;
         .replace(/```$/, '')
         .replace(/^(prompt|image prompt|pollinations prompt)\s*:\s*/i, '')
         .trim();
-      return enforceFullBody(cleaned);
+      return groupConcepts(enforceFullBody(cleaned));   // DASHGROUP.1 — same concept-grouping on the Ollama-composed path
     } catch (err) {
       return null;   // caller falls back to hardcoded composer
     }

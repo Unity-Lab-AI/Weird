@@ -270,6 +270,13 @@
       description: 'an open strappy harness framing a heavily pregnant swollen belly and huge milk-swollen tits, bare exposed breasts with leaking nipples out, bottomless, bare naked pussy under the bump, barefoot', multiplier: 1.4, roleplay: 'pregnant',
       nude: 'accessories', accessoriesOnly: 'an open strappy harness framing her heavily pregnant swollen belly and milk-swollen tits, bare exposed breasts with fat leaking nipples out, topless, bottomless, bare naked pussy below the bump, barefoot', syncArchetype: 'pregnant'
     },
+    // STRIPPER.1 / SKIMPYEXOTIC.1 (Gee) — the stripper's signature: she works NUDE. Exotic, not
+    // modest — fully nude in nothing but fishnets + clear heels. DASHGROUP-friendly concept words.
+    {
+      id: 'skimpy-stripper', displayName: 'Stripper: Nude + Fishnets Only', emoji: '💃', price: 150, tier: 3,
+      description: 'fully-nude-body wearing only sheer-black-fishnet-stockings and clear-stripper-platform-heels, bare-exposed-nude-tits-nipples-out, bare-naked-pussy, a rhinestone choker, body-glitter on bare skin', multiplier: 1.45, roleplay: 'stripper',
+      nude: 'accessories', accessoriesOnly: 'fully-nude-body wearing only sheer-black-fishnet-stockings pulled up the thighs and clear-stripper-platform-heels, bare-exposed-nude-tits-nipples-out, bare-naked-pussy, a rhinestone choker, a lace-garter stuffed-with-cash on one thigh, body-glitter shimmering on bare skin', syncArchetype: 'stripper'
+    },
     {
       id: 'goth-outfit',
       displayName: 'Goth Fit',
