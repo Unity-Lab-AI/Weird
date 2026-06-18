@@ -225,6 +225,19 @@
         { emoji: '💦', label: 'piss + cum facial',         text: '*glazes her face with cum then pisses over the top of it while she kneels with her mouth open and thanks me through the stream*', applyId: 'extreme-degrade', actTag: 'pissed' }
       ]
     },
+    torture: {
+      label: '⛓️ Torture',
+      actions: [
+        { emoji: '🪢', label: 'rack her until she pops',   text: '*straps her spread to the rack and cranks the winch notch by notch until her shoulders pop and her joints scream apart*', applyId: 'torture-rack' },
+        { emoji: '🔥', label: 'cook her skin',             text: '*works the glowing iron and a lit cigarette across her tits and inner thighs, savoring every blister and shriek*', applyId: 'torture-burn' },
+        { emoji: '🔨', label: 'break her one joint at a time', text: '*takes her hand and snaps each finger backward slow, then her toes, listening to every crack and sob*', applyId: 'torture-break' },
+        { emoji: '🌊', label: 'waterboard the fight out',   text: '*tips her head back, lays the cloth, and pours until she\'s drowning on dry land — again, and again, until she\'s nothing but terror*', applyId: 'torture-waterboard' },
+        { emoji: '⚡', label: 'electrocute the wet parts',  text: '*touches the live leads to her nipples and dripping cunt and watches her whole body lock and convulse against the restraints*', applyId: 'torture-electro' },
+        { emoji: '📌', label: 'nails under her nails',      text: '*drives steel pins up under her fingernails and through the soft webbing one at a time, precise and unhurried*', applyId: 'torture-nail' },
+        { emoji: '🧪', label: 'splash her with acid',       text: '*tips the caustic across her shoulder and tit and watches it eat down into the meat, the skin hissing and sloughing*', applyId: 'torture-acid' },
+        { emoji: '🩸', label: 'flay strips off her',        text: '*pins the blade flat and peels long strips of skin off her back and thighs while she howls herself raw*', applyId: 'torture-flay', reqItem: 'bone-saw' }
+      ]
+    },
     nugget: {
       label: '🪓 Nugget',
       actions: [
@@ -264,7 +277,7 @@
     // up (cheat/sandbox start bypasses). A locked tab can't be opened; it shows the required
     // level in a tooltip. Tab keys map 1:1 to progression UNLOCK keys.
     const prog = window.DMTHGame.progression;
-    const GATED_TABS = { extreme: 'extreme', nugget: 'nugget', own: 'own' };
+    const GATED_TABS = { extreme: 'extreme', torture: 'extreme', nugget: 'nugget', own: 'own' };
     const tabLocked = (k) => !!(GATED_TABS[k] && prog && !prog.isUnlocked(GATED_TABS[k]));
     let currentTab = container.dataset.qaTab || 'force';
     if (tabLocked(currentTab)) currentTab = 'force';   // never sit on a locked tab
@@ -300,8 +313,13 @@
           // STOCK-GATE.1 — some acts need her indoctrinated to a minimum Stockholm (1-10). Lock
           // the button + show why until she's broken in enough.
           const stockRating = ((girl && girl.bond && girl.bond.bondLevel) || 0) + 1;
-          const locked = a.minStock && stockRating < a.minStock;
-          const lockTip = `🔒 Stockholm ${a.minStock}/10 required — she's only ${stockRating}/10. Indoctrinate her first.`;
+          // TOOLGATE seed — an act can require a tool/drug in inventory first (e.g. flay needs a saw).
+          const invQA = window.DMTHGame.state.current?.inventory || {};
+          const needsItem = a.reqItem && (invQA[a.reqItem] || 0) < 1;
+          const locked = (a.minStock && stockRating < a.minStock) || needsItem;
+          const lockTip = needsItem
+            ? `🔒 needs a ${a.reqItem.replace(/-/g, ' ')} — buy one first`
+            : `🔒 Stockholm ${a.minStock}/10 required — she's only ${stockRating}/10. Indoctrinate her first.`;
           return `<button class="qa-btn${locked ? ' locked' : ''}" data-qa-idx="${i}" ${locked ? 'disabled' : ''} data-tooltip="${escapeHtml(locked ? lockTip : tip)}">
             <span class="qa-emoji">${locked ? '🔒' : a.emoji}</span>
             <span class="qa-label">${escapeHtml(a.label)}</span>
@@ -326,6 +344,10 @@
         if (action.minStock) {
           const stockRating = ((girl && girl.bond && girl.bond.bondLevel) || 0) + 1;
           if (stockRating < action.minStock) { alert(`🔒 ${girl?.name || 'She'} is only Stockholm ${stockRating}/10 — this needs ${action.minStock}/10. Indoctrinate her more first.`); return; }
+        }
+        // TOOLGATE seed — block an act that requires a tool/drug you don't own.
+        if (action.reqItem && (window.DMTHGame.state.current?.inventory?.[action.reqItem] || 0) < 1) {
+          alert(`🔒 You need a ${action.reqItem.replace(/-/g, ' ')} for that — buy one first.`); return;
         }
         // DEATHWARN.1 — if this act would likely KILL her, throw a depraved confirm first.
         if (action.applyId && girl?.id && window.DMTHGame?.actionEffects?.wouldBeLethal

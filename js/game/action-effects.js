@@ -233,6 +233,45 @@
     },
 
     // -----------------------------------------------------------------
+    // TORTURE (TORTURECAT.1) — straight-up evil, NON-sexual torture. SEVERE health damage + huge
+    // bond-debt + mood crater + premium film/satisfaction value. These are the acts that wreck a
+    // girl fast — spread across the roster or heal her between, or they kill her (several are
+    // ACT_CAN_KILL). Distinct from the sexual Extreme tab. 18+ fiction.
+    // -----------------------------------------------------------------
+    'torture-rack': {
+      stamina: -14, health: -14, mood: -16, bruises: +5, bondDebt: +9, satisfaction: +7,
+      notes: 'The rack — winch her joints apart until tendons tear and shoulders pop. Agonizing, crippling, premium content.'
+    },
+    'torture-flay': {
+      stamina: -16, health: -20, mood: -20, bruises: +8, bondDebt: +12, satisfaction: +9,
+      notes: 'Flay strips of skin off her back and thighs — needs a blade. Massive health crater, top-tier gore film value. Can kill a low-health girl.'
+    },
+    'torture-burn': {
+      stamina: -10, health: -12, mood: -16, bruises: +6, bondDebt: +9, satisfaction: +7,
+      notes: 'Iron, lighter, cigarettes — cook her skin until it blisters and weeps. Lasting burns, big bond-debt.'
+    },
+    'torture-break': {
+      stamina: -10, health: -10, mood: -14, bruises: +6, bondDebt: +8, satisfaction: +6,
+      notes: 'Break her fingers and toes one joint at a time — slow, methodical, crippling.'
+    },
+    'torture-waterboard': {
+      stamina: -12, health: -8, mood: -18, bondDebt: +9, satisfaction: +6,
+      notes: 'Waterboard her to the edge of drowning over and over — terror + helplessness, low marks, huge mood + bond-debt toll.'
+    },
+    'torture-electro': {
+      stamina: -10, health: -12, mood: -14, bruises: +4, bondDebt: +9, escapeRisk: -0.10, satisfaction: +7,
+      notes: 'Live current to the wet parts — convulsions, scorch marks, instant compliance. Lowers her escape will.'
+    },
+    'torture-nail': {
+      stamina: -10, health: -10, mood: -15, bruises: +5, bondDebt: +9, satisfaction: +7,
+      notes: 'Drive nails and pins under her nails and through soft tissue — precise, excruciating, leaves her shaking.'
+    },
+    'torture-acid': {
+      stamina: -14, health: -16, mood: -18, bruises: +6, bondDebt: +11, satisfaction: +8,
+      notes: 'Caustic splashed across her skin — eats down to the meat, scars forever. Can kill a low-health girl.'
+    },
+
+    // -----------------------------------------------------------------
     // RESTRAINT — low stamina, mood drop
     // -----------------------------------------------------------------
     'restrain': {
@@ -318,7 +357,15 @@
     'love-cuddle':           'caressed',
     'love-massage':          'caressed',
     'love-hold-her':         'caressed',
-    'love-hair-brush':       'caressed'
+    'love-hair-brush':       'caressed',
+    // TORTURECAT.1 — torture leaves visible damage on her next image (battered / welted-raw).
+    'torture-rack':          'beaten',
+    'torture-burn':          'beaten',
+    'torture-break':         'beaten',
+    'torture-electro':       'beaten',
+    'torture-nail':          'beaten',
+    'torture-flay':          'whipped',
+    'torture-acid':          'whipped'
   });
 
   // Threshold below which actions become gated. Returns the minimum stamina required
@@ -331,11 +378,25 @@
   // pushing past the limit piles extra damage on top.
   const XTOL_LIMIT = 10;
   const EXTREME_ACTS_FOR_TOL = new Set(['extreme-facefuck', 'extreme-rough-anal', 'extreme-breeding-rape', 'extreme-degrade', 'extreme-beatdown', 'extreme-choke-out', 'masochist-overload']);
+  // TORTURECAT.1 — the dedicated evil-torture acts. They count toward extreme-act tolerance too.
+  const TORTURE_ACTS = new Set(['torture-rack', 'torture-flay', 'torture-burn', 'torture-break', 'torture-waterboard', 'torture-electro', 'torture-nail', 'torture-acid']);
+  for (const t of TORTURE_ACTS) EXTREME_ACTS_FOR_TOL.add(t);
+
   // FRIENDKILL.1 / DEATHBAL.1 — acts that CAN finish a captive when they cross her death floor.
   // The kill only lands when her remaining health <= the act's damage (the player already got the
   // DEATHWARN confirm), so a managed/healed girl never dies to a routine act — death is a risk you
   // choose, not attrition. A girl corpsing under the player's own hands pays a snuff bonus too.
   const ACT_CAN_KILL = new Set([...EXTREME_ACTS_FOR_TOL, 'whip', 'punch', 'choke']);
+
+  // CRIMEPERK (Gee) — the more fucked-up the crime, the BIGGER the player's stat gains. This
+  // multiplier scales satisfaction + sex-drive + DEPRAVITY XP by how depraved the act is, so
+  // torture/extreme acts pump the player's stats far harder than vanilla use. Rewards going dark.
+  function crimeMultiplier(actionId) {
+    if (TORTURE_ACTS.has(actionId)) return 1.6;             // straight-up torture — the worst, the best stats
+    if (EXTREME_ACTS_FOR_TOL.has(actionId)) return 1.35;     // extreme/depraved sexual acts
+    if (actionId === 'whip' || actionId === 'punch' || actionId === 'choke' || actionId === 'slap') return 1.15;
+    return 1;                                                // vanilla care/sex — baseline
+  }
 
   // STOCK-BUILD.1 — the ONLY way Stockholm degrades: the most extreme BRUTAL acts traumatize her
   // and subtract bond XP (recomputed into a possible level drop). Routine use never degrades it.
@@ -461,8 +522,10 @@
     // stat bonus: she's the ultimate helpless fuck-object, so every act on her hits +50% satisfaction
     // + sex-drive. The reward for committing to the slow saw-work of nuggeting her.
     const nuggetMul = girl.body?.isNugget ? 1.5 : 1;
+    // CRIMEPERK — the more fucked-up the act, the bigger the player's stat gains (torture > extreme > vanilla).
+    const crimeMul = crimeMultiplier(actionId);
     const perfMul = ((!isProxyAct && window.DMTHGame.playerStamina)
-      ? window.DMTHGame.playerStamina.performanceMul() : 1) * nuggetMul;
+      ? window.DMTHGame.playerStamina.performanceMul() : 1) * nuggetMul * crimeMul;
     if (action.satisfaction && !isProxyAct && window.DMTHGame.state.addSatisfaction) {
       window.DMTHGame.state.addSatisfaction(action.satisfaction * perfMul, actionId);
     }
@@ -577,7 +640,8 @@
 
     // DEPRAVITY XP (PLVL.2) — every successful act feeds the player's level, weighted by how
     // depraved it is: a gentle kiss a sliver, an extreme act a lot. satisfaction is the proxy.
-    if (window.DMTHGame.progression) window.DMTHGame.progression.grantXp(Math.max(1, action.satisfaction || 1), 'action:' + actionId);
+    // CRIMEPERK — depraved acts also level the player's DEPRAVITY faster (scaled by crimeMul).
+    if (window.DMTHGame.progression && !isProxyAct) window.DMTHGame.progression.grantXp(Math.max(1, Math.round((action.satisfaction || 1) * crimeMul)), 'action:' + actionId);
 
     return { ok: true, action, strain: !!opts.strain, escapeRiskDelta };
   }
