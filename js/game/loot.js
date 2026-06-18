@@ -227,6 +227,20 @@
     'tit-sucker'
   ];
   function grantNpcGift(opts = {}) {
+    // OUTFITLOOT.1 — RARE: instead of gear, a generous client gifts the girl a slutty special
+    // outfit (added free to HER wardrobe). Needs a girl context (opts.girlId); type-matched when
+    // possible. ~12% on a generous/kill gift, lower otherwise. Falls through to a normal gift if
+    // she already owns the rolled outfit or no girl is in context.
+    if (opts.girlId && window.DMTHGame.wardrobe?.grantOutfit && Math.random() < (opts.generous || opts.kill ? 0.12 : 0.06)) {
+      const ids = window.DMTHGame.wardrobe.skimpyOutfitIds ? window.DMTHGame.wardrobe.skimpyOutfitIds() : [];
+      const g = window.DMTHGame.state.getGirl(opts.girlId);
+      const oid = window.DMTHGame.wardrobe.skimpyForArchetype(g && g.archetypeTemplate)
+        || (ids.length ? ids[Math.floor(Math.random() * ids.length)] : null);
+      if (oid) {
+        const r = window.DMTHGame.wardrobe.grantOutfit(opts.girlId, oid);
+        if (r && r.ok) { lootPop(`👗 ${opts.from || 'A client'} gifted ${g ? g.name : 'her'} a ${r.outfit.displayName} to wear for him.`); return { id: oid, qty: 1, outfit: true }; }
+      }
+    }
     const id = pick(HIGH_TIER_GIFTS);
     // A kill is an EPIC WIN for the john/friend (Gee) — they tip bigger, so a kill-gift skews to 2×.
     const qty = 1 + ((opts.generous && Math.random() < 0.4) || (opts.kill && Math.random() < 0.7) ? 1 : 0);

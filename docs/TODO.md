@@ -143,6 +143,10 @@
 
 > *"special clothing should be very much not modest at all. like exotic variations of normal outfits that are beyond sexy as all fuck"*
 
+> *"u have to rare loot jrop find them or purchase them from what ever fucked up thing u named the clothing store"* + *"remember tho theri capture d in clothes are not thier skimpy special outfit"*
+
+- [x] **OUTFITLOOT.1** 🟠 ✅ SHIPPED 2026-06-18 (LOCAL — not pushed) — the special/skimpy outfits are obtained TWO ways: (1) PURCHASE from the clothing store (🧵 The Carcass Closet, already live — every skimpy outfit is in the OUTFITS catalog), (2) RARE LOOT FIND — `wardrobe.grantOutfit` (free add to a girl's wardrobe) + `skimpyForArchetype`/`skimpyOutfitIds` helpers; ~10% on capture she's "stashing" a type-matched special outfit (`hunt.escortToHold`), and a generous/kill john/friend gift has a ~6-12% chance to gift her one (`loot.grantNpcGift` + girlId threaded from `whore-out`). CAPCLOTHES.1 invariant kept: her captured-at 'default' outfit stays her NORMAL clothes — a looted/bought skimpy is an ADDITIONAL wardrobe entry, never auto-equipped. `js/game/wardrobe.js`, `js/game/hunt.js`, `js/game/loot.js`, `js/game/whore-out.js`
+
 - [x] **SKIMPYEXOTIC.1** 🟡 ✅ SHIPPED 2026-06-18 (LOCAL — not pushed) — every special/skimpy outfit authored NOT modest: exotic, beyond-sexy variations of the type's normal look at max exposed nudity (cardigan-open-over-nothing, body-chain-only, stripped-mid-workout, leather-harness-bare, nude-fishnets, etc.). All the original SKIMPYWEAR outfits were already topless/bottomless/bare-naked max-nudity; the new backfill + stripper batch hold the same exotic bar. `js/game/wardrobe.js`
 
 > *"so might need detailed decriptions and some times it helps to word things like-this with a dash betwwen connecting all the words of one idea so the ai understands it better and doesnt like show a fishing net instead of nude-tits-nude-fishnet-stalkings"* + *"not just that stripper use that for all the fucking templets right now"*

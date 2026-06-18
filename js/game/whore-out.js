@@ -420,9 +420,9 @@
     // A KILL is an EPIC WIN for him (Gee) — he ALWAYS leaves loot + tips bigger when she dies on him.
     if (window.DMTHGame.loot && window.DMTHGame.loot.grantNpcGift) {
       if (johnKillBonus > 0) {
-        window.DMTHGame.loot.grantNpcGift({ from: npc ? npc.handle : arc.displayName, generous: true, kill: true });
+        window.DMTHGame.loot.grantNpcGift({ from: npc ? npc.handle : arc.displayName, generous: true, kill: true, girlId: girl.id });
       } else if (!isPostmortem && Math.random() < (0.05 + (arc.intensity || 0) * 0.02)) {
-        window.DMTHGame.loot.grantNpcGift({ from: npc ? npc.handle : arc.displayName, generous: (arc.tipChance || 0) > 0.4 });
+        window.DMTHGame.loot.grantNpcGift({ from: npc ? npc.handle : arc.displayName, generous: (arc.tipChance || 0) > 0.4, girlId: girl.id });
       }
     }
 
@@ -622,7 +622,7 @@
       // FRIENDKINK.1 — kink-match drops more loot, dislike-hit drops less (floored at 0).
       const drops = Math.max(0, 1 + Math.floor(creep / 3) + (match.lootDelta || 0));
       for (let i = 0; i < drops; i++) {
-        window.DMTHGame.loot.grantNpcGift({ from: (npc ? npc.handle : arc.displayName), generous: true, kill: killed && i === 0 });
+        window.DMTHGame.loot.grantNpcGift({ from: (npc ? npc.handle : arc.displayName), generous: true, kill: killed && i === 0, girlId: girl.id });
       }
     }
     // FRIENDCREEP.1 — a successful visit advances his creep level (triangular). Higher creep = he

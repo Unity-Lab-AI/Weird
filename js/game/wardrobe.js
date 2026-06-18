@@ -472,6 +472,33 @@
     return { ok: true, outfit };
   }
 
+  // OUTFITLOOT.1 (Gee) — the skimpy/special outfits are obtained two ways: bought in the Carcass
+  // Closet (buyForGirl) OR found as RARE loot / NPC gifts (granted free to a girl's wardrobe).
+  // These expose the skimpy set + a free grant for the loot/gift paths.
+  function skimpyOutfitIds() { return OUTFITS.filter(o => o.nude === 'accessories' && o.syncArchetype).map(o => o.id); }
+  function skimpyForArchetype(arc) {
+    if (!arc) return null;
+    const a = String(arc).toLowerCase();
+    const m = OUTFITS.filter(o => o.nude === 'accessories').find(o => {
+      const tags = [o.syncArchetype, o.roleplay].filter(Boolean).map(s => String(s).toLowerCase());
+      return tags.some(t => t === a || a.includes(t) || t.includes(a));
+    });
+    return m ? m.id : null;
+  }
+  // Add an outfit to a girl's wardrobe for FREE (loot find / NPC gift). No-op if she already owns it.
+  function grantOutfit(girlId, outfitId) {
+    const girl = window.DMTHGame.state.getGirl(girlId);
+    const outfit = getById(outfitId);
+    if (!girl || !outfit) return { ok: false, reason: 'no such girl/outfit' };
+    if ((girl.wardrobe || []).some(w => w.id === outfitId)) return { ok: false, reason: 'already owns this outfit' };
+    const newWardrobe = [...(girl.wardrobe || []), {
+      id: outfit.id, displayName: outfit.displayName, description: outfit.description,
+      source: 'looted', multiplier: outfit.multiplier, acquiredAt: Date.now()
+    }];
+    window.DMTHGame.state.updateGirl(girlId, { wardrobe: newWardrobe });
+    return { ok: true, outfit };
+  }
+
   function equip(girlId, outfitId) {
     const girl = window.DMTHGame.state.getGirl(girlId);
     if (!girl) throw new Error('no such girl');
@@ -568,6 +595,7 @@
   window.DMTHGame.wardrobe = Object.freeze({
     OUTFITS, catalog, getById, buyForGirl, equip, derobe, stripEverything,
     currentMultiplier, outfitBonuses, builtIns, isNude,
+    skimpyOutfitIds, skimpyForArchetype, grantOutfit,
     NUDE_PSEUDO_ID, NUDE_PSEUDO,
     NO_WARDROBE_PSEUDO_ID, NO_WARDROBE_PSEUDO,
     CONDOM_PSEUDO_ID, CONDOM_PSEUDO

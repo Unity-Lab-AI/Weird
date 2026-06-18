@@ -382,6 +382,18 @@
     const newHolds = dungeon.holds.slice();
     newHolds[openIdx] = { ...newHolds[openIdx], captiveGirlId: girl.id };
     window.DMTHGame.state.updateDungeon(dungeon.id, { holds: newHolds });
+    // OUTFITLOOT.1 (Gee) — RARE: she comes with her own slutty special outfit stashed (type-matched
+    // when possible, else any skimpy). The special outfits are also buyable in the Carcass Closet;
+    // this is the rare-loot-find path. ~10% on capture.
+    if (window.DMTHGame.wardrobe?.grantOutfit && Math.random() < 0.10) {
+      const ids = window.DMTHGame.wardrobe.skimpyOutfitIds ? window.DMTHGame.wardrobe.skimpyOutfitIds() : [];
+      const oid = window.DMTHGame.wardrobe.skimpyForArchetype(girl.archetypeTemplate)
+        || (ids.length ? ids[Math.floor(Math.random() * ids.length)] : null);
+      if (oid) {
+        const r = window.DMTHGame.wardrobe.grantOutfit(girl.id, oid);
+        if (r && r.ok && window.DMTHLootPopup) window.DMTHLootPopup.show(`👗 Rare find — ${girl.name} had a ${r.outfit.displayName} stashed. It's hers now.`);
+      }
+    }
     // Fire-and-forget capture memorial + profile image — Pollinations overlay, silent if unavailable.
     if (window.DMTHGame.imaging && window.DMTHGame.imaging.isAvailable()) {
       window.DMTHGame.imaging.generateFor(girl.id, { situation: 'capture' }).catch(() => {});
