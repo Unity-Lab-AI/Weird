@@ -1,10 +1,15 @@
-// DUNGEON MASTER: THE HUNT — loot system (LOOT.1). Tools/items don't only come from the
-// shop — you LOOT them from specific locations and specific actions, in a fiendishly clever way:
+// DUNGEON MASTER: THE HUNT — loot system. Tools/items don't only come from the shop — you
+// LOOT them from the world:
 //   • A successful capture drops loot keyed to WHERE you took her (club → party drugs, a
 //     remote spot → heavy chems, the street → a pipe), or cash she was carrying.
-//   • "Ask a captive for drugs" — she may be holding a stash (archetype-based, and it DEPLETES);
-//     low bond she hides it, higher bond she gives it up.
 //   • scavengeLocation() is exposed for a hunt "search the area" action.
+//   • REQUEST.1 — PRE-CAPTURE item requests. While you're sizing up a girl you haven't taken
+//     yet, you can ask her for ONE item. Each girl TYPE has three templated options (cheap →
+//     prize); each is a stat-based roll whose odds scale with your DEPRAVITY level, the
+//     location difficulty, and her difficulty/stats. Cheap gear is likely (~80%), prizes are a
+//     long shot (~25%). Never impossible, never endless — hard-capped to once per game-day per
+//     girl-type per location. (This REPLACES the old "ask a captive for drugs" stash-drain,
+//     which was wrong — captives don't hand you items; pre-capture girls do.)
 // All item ids below are real catalog / drug-scheduler inventory ids.
 
 (function () {
@@ -26,16 +31,6 @@
     sorority:        ['mdma', 'wine'],
     gym:             ['rope', 'duct-tape'],
     remote:          ['pipe', 'ether', 'chloroform']
-  };
-  // What a captive of each archetype tends to be holding + how big her stash is.
-  const DRUG_STASH = {
-    club:              { drugs: ['mdma', 'coke-bumps'], size: 4 },
-    'private-party':   { drugs: ['mdma', 'wine'],       size: 3 },
-    street:            { drugs: ['weed', 'coke-bumps'], size: 3 },
-    barista:           { drugs: ['weed'],               size: 2 },
-    sorority:          { drugs: ['mdma', 'wine'],       size: 2 },
-    'college-student': { drugs: ['weed'],               size: 2 },
-    gym:               { drugs: ['coke-bumps'],         size: 1 }
   };
   // Full-catalog rare-find pool (LOOT.2) — ANY tool / equipment / drug / consumable can turn
   // up as loot, not just the location-flavored basics. Scavenges + conversation-wins
@@ -84,53 +79,122 @@
     return { ok: true, id, qty, rare };
   }
 
-  // Conversation-win loot (LOOT.2) — winning a pre-capture talk can shake loose an item: a
-  // pill from her purse, a tool from the scene, cash. ~40% on a win. Bonded/charmed targets
-  // give up more. Returns { ok, kind, id?, qty?, amount? } or { ok:false }.
-  function rollConversationWin(girl, locationId) {
-    if (Math.random() > 0.4) return { ok: false, reason: 'she gave up nothing this time' };
-    // 1-in-4: cash she was carrying.
-    if (Math.random() < 0.25) {
-      const cash = 15 + Math.floor(Math.random() * 90);
-      window.DMTHGame.state.addMoney(cash, 'loot:talk-cash');
-      if (window.DMTHNotify) window.DMTHNotify.show(`🎁 Talked $${cash} out of ${girl?.name || 'her'}.`, { type: 'success', durationMs: 4500 });
-      return { ok: true, kind: 'cash', amount: cash };
-    }
-    // Prefer her archetype drug-stash, else the location pool, else a rare full-pool find.
-    const stash = DRUG_STASH[girl?.archetypeTemplate];
-    const rare = Math.random() < 0.2;
-    const pool = stash ? stash.drugs : rare ? FULL_POOL : (LOCATION_LOOT[locationId] || GENERIC);
-    const id = pick(pool);
-    const qty = 1 + Math.floor(Math.random() * 2);
-    window.DMTHGame.state.addItem(id, qty);
-    if (window.DMTHNotify) window.DMTHNotify.show(`🎁 ${girl?.name || 'She'} let slip ${qty}× ${label(id)}${rare ? ' — nice find!' : ''}.`, { type: 'success', durationMs: 4500 });
-    return { ok: true, kind: 'item', id, qty, rare };
+  // ── REQUEST.1 — PRE-CAPTURE item requests ────────────────────────────────────────────────
+  // Each girl TYPE has three templated options spanning cheap → prize. Tier sets the base odds;
+  // your DEPRAVITY level + the location difficulty + her difficulty/stats modify them. Item ids
+  // are real catalog / drug-scheduler ids. Themed to what that kind of girl plausibly carries.
+  const REQUEST_TEMPLATES = {
+    club:            [{ id: 'weed', tier: 'cheap' },        { id: 'mdma', tier: 'mid' },        { id: 'coke-bumps', tier: 'prize' }],
+    street:          [{ id: 'zip-ties', tier: 'cheap' },    { id: 'pipe', tier: 'mid' },        { id: 'chloroform', tier: 'prize' }],
+    library:         [{ id: 'duct-tape', tier: 'cheap' },   { id: 'rope', tier: 'mid' },        { id: 'handcuffs', tier: 'prize' }],
+    sorority:        [{ id: 'wine', tier: 'cheap' },        { id: 'mdma', tier: 'mid' },        { id: 'coke-bumps', tier: 'prize' }],
+    gym:             [{ id: 'bottled-water', tier: 'cheap' },{ id: 'rope', tier: 'mid' },       { id: 'coke-bumps', tier: 'prize' }],
+    barista:         [{ id: 'weed', tier: 'cheap' },        { id: 'wine', tier: 'mid' },        { id: 'mdma', tier: 'prize' }],
+    office:          [{ id: 'zip-ties', tier: 'cheap' },    { id: 'wine', tier: 'mid' },        { id: 'handcuffs', tier: 'prize' }],
+    waitress:        [{ id: 'basic-meal', tier: 'cheap' },  { id: 'wine', tier: 'mid' },        { id: 'weed', tier: 'prize' }],
+    model:           [{ id: 'condom-standard', tier: 'cheap' },{ id: 'wine', tier: 'mid' },     { id: 'mdma', tier: 'prize' }],
+    nurse:           [{ id: 'basic-meal', tier: 'cheap' },  { id: 'rohypnol', tier: 'mid' },    { id: 'ketamine', tier: 'prize' }],
+    neighbor:        [{ id: 'duct-tape', tier: 'cheap' },   { id: 'rope', tier: 'mid' },        { id: 'wine', tier: 'prize' }],
+    unity_seed:      [{ id: 'weed', tier: 'cheap' },        { id: 'coke-bumps', tier: 'mid' },  { id: 'mdma', tier: 'prize' }],
+    _default:        [{ id: 'duct-tape', tier: 'cheap' },   { id: 'rope', tier: 'mid' },        { id: 'zip-ties', tier: 'prize' }]
+  };
+  // Base success odds per tier — the 80 / 50 / 25 the player asked for.
+  const TIER_BASE = { cheap: 0.80, mid: 0.50, prize: 0.25 };
+  const TIER_LABEL = { cheap: 'easy ask', mid: 'fair ask', prize: 'long shot' };
+  // Location difficulty (0 easy … ~0.15 hard) — harder grounds make her warier.
+  const LOCATION_REQ_DIFF = {
+    street: 0, library: 0, park: 0.02, 'coffee-shop': 0.02, mall: 0.04, gym: 0.04,
+    neighborhood: 0.05, club: 0.06, sorority: 0.08, 'school-campus': 0.10,
+    'hotel-lobby': 0.12, 'private-party': 0.12, remote: 0.15
+  };
+
+  function requestTemplateFor(arch) { return REQUEST_TEMPLATES[arch] || REQUEST_TEMPLATES._default; }
+  function currentGameDay() {
+    const gc = window.DMTHGame.gameClock;
+    return gc ? Math.floor(gc.now() / (gc.MIN_PER_DAY || 1440)) + 1 : 1;
+  }
+  function requestKey(locationId, arch) { return (locationId || '?') + '|' + (arch || '?'); }
+
+  // Stat-based success chance for one option. base(tier) + char-level bonus − location diff −
+  // girl-type diff − her defiance/intelligence. Clamped 5–95% — never impossible, never certain.
+  function requestSuccessChance(option, girl, locationId) {
+    const base = TIER_BASE[option.tier] ?? 0.40;
+    const lvl = window.DMTHGame.progression ? window.DMTHGame.progression.getLevel() : 0;
+    const charBonus = Math.min(0.15, lvl * 0.015);   // smoother talker as you climb DEPRAVITY
+    const locDiff = LOCATION_REQ_DIFF[locationId] || 0;
+    const archDiff = (window.DMTHGame.hunt && window.DMTHGame.hunt.ARCHETYPE_DIFFICULTY[girl && girl.archetypeTemplate]) ?? 0.5;
+    const girlDiff = archDiff * 0.18;                 // harder girl type = harder ask
+    const defiance = (girl && girl.stats && girl.stats.defiance != null ? girl.stats.defiance : 50) / 100;
+    const intel = (girl && girl.stats && girl.stats.intelligence != null ? girl.stats.intelligence : 50) / 100;
+    const statPenalty = defiance * 0.12 + intel * 0.05;
+    const p = base + charBonus - locDiff - girlDiff - statPenalty;
+    return Math.max(0.05, Math.min(0.95, p));
   }
 
-  // Ask a captive for drugs (the "actions" loot path). She may be holding a stash (archetype-
-  // based + DEPLETING). Low bond = she hides/refuses; higher bond = she gives it up.
-  function askGirlForDrugs(girlId) {
-    const girl = window.DMTHGame.state.getGirl(girlId);
-    if (!girl) return { ok: false, reason: 'no such girl' };
-    const cfg = DRUG_STASH[girl.archetypeTemplate];
-    const loot = { ...(girl.loot || {}) };
-    if (loot.drugStash == null) loot.drugStash = cfg ? cfg.size : 0;   // lazy init from archetype
-    if (!cfg || loot.drugStash <= 0) {
-      window.DMTHGame.state.updateGirl(girlId, { loot });
-      return { ok: false, reason: 'she has nothing left on her' };
+  // The three options for this girl + their live odds + whether today's ask is already spent.
+  function requestOptions(girl, locationId) {
+    const tpl = requestTemplateFor(girl && girl.archetypeTemplate);
+    const usedToday = window.DMTHGame.state.lastItemRequestDay(requestKey(locationId, girl && girl.archetypeTemplate)) === currentGameDay();
+    return {
+      usedToday,
+      options: tpl.map(o => ({
+        id: o.id, tier: o.tier, label: label(o.id),
+        tierLabel: TIER_LABEL[o.tier], chance: requestSuccessChance(o, girl, locationId)
+      }))
+    };
+  }
+
+  // Make the request for option `index`. Burns the daily attempt up front (success OR fail) per
+  // (location, girl-type) so you can't re-roll by leaving and coming back. Grants 1× on success.
+  function requestItem(girl, locationId, index) {
+    const tpl = requestTemplateFor(girl && girl.archetypeTemplate);
+    const opt = tpl[index];
+    if (!opt) return { ok: false, reason: 'no such option' };
+    const key = requestKey(locationId, girl && girl.archetypeTemplate);
+    const day = currentGameDay();
+    if (window.DMTHGame.state.lastItemRequestDay(key) === day) {
+      return { ok: false, usedToday: true, reason: 'you already worked this type here today — come back tomorrow' };
     }
-    // Cooperation odds rise with Stockholm bond — terrified captives hide their stash.
-    const coop = Math.min(0.9, 0.2 + (girl.bond?.bondLevel || 0) * 0.09);
-    if (Math.random() > coop) {
-      window.DMTHGame.state.updateGirl(girlId, { loot });
-      return { ok: false, reason: 'she swears she doesn\'t have any', held: true };
+    window.DMTHGame.state.noteItemRequest(key, day);   // spend the daily attempt regardless of outcome
+    const chance = requestSuccessChance(opt, girl, locationId);
+    const roll = Math.random();
+    if (roll > chance) {
+      return { ok: false, id: opt.id, chance, roll, reason: 'won\'t give it up' };
     }
-    const id = pick(cfg.drugs);
-    loot.drugStash -= 1;
-    window.DMTHGame.state.updateGirl(girlId, { loot });
-    window.DMTHGame.state.addItem(id, 1);
-    if (window.DMTHNotify) window.DMTHNotify.show(`🎁 ${girl.name} gave up 1× ${label(id)} from her stash.`, { type: 'success', durationMs: 4500 });
-    return { ok: true, id, qty: 1 };
+    window.DMTHGame.state.addItem(opt.id, 1);
+    if (window.DMTHNotify) window.DMTHNotify.show(`🎁 ${(girl && girl.name) || 'She'} hands over 1× ${label(opt.id)}.`, { type: 'success', durationMs: 4500 });
+    return { ok: true, id: opt.id, qty: 1, chance, roll };
+  }
+
+  // On CAPTURE you strip her stash — you get SOME OF ALL she had on her: 2-5 of EACH item her
+  // girl-type offered (the same per-type template the pre-capture request draws from). Keyed to
+  // the girl, not the location, so the haul matches the kind of girl you just took.
+  function grantCaptureHaul(girl) {
+    const tpl = requestTemplateFor(girl && girl.archetypeTemplate);
+    const granted = [];
+    for (const o of tpl) {
+      const qty = 2 + Math.floor(Math.random() * 4);   // 2-5 of each
+      window.DMTHGame.state.addItem(o.id, qty);
+      granted.push({ id: o.id, qty });
+    }
+    // ~1 in 3 girls is carrying her own sex toy — a rare bonus drop on top of the normal haul.
+    // Pulled from the toys catalog, filtered to ones usable at the player's current level.
+    let toy = null;
+    if (Math.random() < 1 / 3 && window.DMTHGame.toys && window.DMTHGame.toys.lootableIds) {
+      const usable = window.DMTHGame.toys.lootableIds().filter(id =>
+        window.DMTHGame.toys.levelOk ? window.DMTHGame.toys.levelOk(id) : true);
+      if (usable.length) {
+        const toyId = pick(usable);
+        window.DMTHGame.state.addItem(toyId, 1);
+        const spec = window.DMTHGame.toys.spec ? window.DMTHGame.toys.spec(toyId) : null;
+        toy = { id: toyId, name: (spec && spec.name) || label(toyId), emoji: (spec && spec.emoji) || '🧰' };
+      }
+    }
+    if (window.DMTHNotify) {
+      if (granted.length) window.DMTHNotify.show(`🎒 Stripped her stash: ${granted.map(g => `${g.qty}× ${label(g.id)}`).join(', ')}.`, { type: 'success', durationMs: 6000 });
+      if (toy) window.DMTHNotify.show(`${toy.emoji} She was carrying her own toy — looted 1× ${toy.name}!`, { type: 'success', durationMs: 6000 });
+    }
+    return { items: granted, toy };
   }
 
   // ── ARCHGIFT.1 — passive per-archetype loot gifts ──────────────────────────────────────
@@ -179,7 +243,8 @@
 
   window.DMTHGame = window.DMTHGame || {};
   window.DMTHGame.loot = Object.freeze({
-    LOCATION_LOOT, DRUG_STASH, FULL_POOL, ARCHETYPE_GIFTS,
-    rollCaptureLoot, scavengeLocation, askGirlForDrugs, rollConversationWin, tickArchetypeGifts
+    LOCATION_LOOT, FULL_POOL, ARCHETYPE_GIFTS, REQUEST_TEMPLATES, TIER_BASE,
+    rollCaptureLoot, scavengeLocation, tickArchetypeGifts,
+    requestOptions, requestItem, grantCaptureHaul
   });
 })();

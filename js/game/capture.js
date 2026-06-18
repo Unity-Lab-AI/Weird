@@ -358,9 +358,12 @@
         // she was carrying). Non-fatal if loot module isn't present.
         let loot = null;
         if (window.DMTHGame.loot) { try { loot = window.DMTHGame.loot.rollCaptureLoot(locationId); } catch (e) { /* non-fatal */ } }
+        // REQUEST.1 — strip her stash on capture: 2-5 of EACH item her girl-type offered.
+        let haul = null;
+        if (window.DMTHGame.loot && window.DMTHGame.loot.grantCaptureHaul) { try { haul = window.DMTHGame.loot.grantCaptureHaul(girl); } catch (e) { /* non-fatal */ } }
         // DEPRAVITY XP (PLVL.2) — a successful capture is a big level boost.
         if (window.DMTHGame.progression) window.DMTHGame.progression.grantXp(25, 'capture');
-        return { outcome: 'success', toolId, baseChance: base, chance, roll, escort, escalationTier, loot };
+        return { outcome: 'success', toolId, baseChance: base, chance, roll, escort, escalationTier, loot, haul };
       } catch (err) {
         return { outcome: 'success-no-room', toolId, baseChance: base, chance, roll, error: err.message, escalationTier };
       }

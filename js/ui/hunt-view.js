@@ -177,6 +177,31 @@
         </div>
       `;
 
+      // REQUEST.1 — pre-capture "ask her for something" panel. Three type-specific options,
+      // stat-rolled odds shown per option, once per game-day per girl-type per location.
+      const reqInfo = (window.DMTHGame.loot && window.DMTHGame.loot.requestOptions)
+        ? window.DMTHGame.loot.requestOptions(girl, locId) : { usedToday: false, options: [] };
+      const reqHtml = `
+        <div class="panel">
+          <h2>Ask her for something</h2>
+          <p class="small muted">Sweet-talk one item out of her before you make your move. What she carries depends on her type — cheap gear comes easy, the good stuff rarely. One ask per girl-type here per day.</p>
+          ${reqInfo.usedToday
+            ? `<p class="small warn">You already worked a ${escapeHtml(girl.archetypeTemplate)} here today. Come back tomorrow.</p>`
+            : `<div class="btn-col" style="gap:6px;">
+                ${reqInfo.options.map((o, i) => {
+                  const pct = Math.round(o.chance * 100);
+                  const cc = pct >= 70 ? '' : pct >= 40 ? 'warn' : 'danger';
+                  return `
+                    <button class="btn-small req-item-btn" data-req="${i}" data-tooltip="${o.tierLabel} — ${pct}% she gives it up (scales with your level, this location, and her stats)" style="display:flex;align-items:center;gap:8px;padding:9px 13px;">
+                      <span style="flex:1;text-align:left;">🙏 ask for <b>${escapeHtml(o.label)}</b> <span class="small muted">(${o.tierLabel})</span></span>
+                      <span class="bar-fill ${cc}" style="padding:3px 9px;border-radius:4px;font-weight:700;">${pct}%</span>
+                    </button>`;
+                }).join('')}
+              </div>`}
+          <div id="req-result"></div>
+        </div>
+      `;
+
       el.innerHTML = `
         <div class="panel">
           <h2>Approach: ${moodEmoji(girl)} ${girl.name}</h2>
@@ -196,6 +221,8 @@
             <button data-action="walk" class="btn-small" data-tooltip="Leave the encounter. No cost, no notoriety, no inventory loss.">🚪 Walk away</button>
           </div>
         </div>
+
+        ${reqHtml}
 
         <div class="panel">
           <h2>Capture</h2>
@@ -217,10 +244,28 @@
           girl, sceneKey: 'first_encounter', sceneVars: { LOCATION: locName },
           userText: '', resultEl, heading: `${girl.name} says:`
         });
-        // LOOT.2 — winning the conversation can shake loose an item / cash from the target.
-        if (window.DMTHGame.loot) { try { window.DMTHGame.loot.rollConversationWin(girl, locId); } catch (e) { /* non-fatal */ } }
       };
       el.querySelector('[data-action="walk"]').onclick = () => window.DMTHRouter.go('hunt');
+
+      // REQUEST.1 — ask-for-an-item handlers. Roll the chosen option, show the result, then
+      // re-render so the now-spent daily attempt locks the panel until tomorrow.
+      el.querySelectorAll('.req-item-btn').forEach(btn => {
+        btn.onclick = () => {
+          el.querySelectorAll('.req-item-btn').forEach(b => { b.disabled = true; });
+          const idx = parseInt(btn.dataset.req, 10);
+          const r = window.DMTHGame.loot.requestItem(girl, locId, idx);
+          const rr = el.querySelector('#req-result');
+          const rolled = (r.roll != null && r.chance != null) ? ` <span class="muted">(rolled ${Math.round(r.roll * 100)} vs ${Math.round(r.chance * 100)}%)</span>` : '';
+          if (r.ok) {
+            rr.innerHTML = `<div class="panel"><p class="small gold">🎁 She gives it up — 1× ${escapeHtml(String(r.id).replace(/-/g, ' '))} added to your kit.${rolled}</p></div>`;
+          } else if (r.usedToday) {
+            rr.innerHTML = `<div class="panel"><p class="small warn">${escapeHtml(r.reason)}.</p></div>`;
+          } else {
+            rr.innerHTML = `<div class="panel"><p class="small">😒 ${escapeHtml(girl.name)} ${escapeHtml(r.reason || 'refuses')}.${rolled}</p></div>`;
+          }
+          setTimeout(rerender, 1100);
+        };
+      });
 
       el.querySelectorAll('.simple-capture-btn').forEach(btn => {
         btn.onclick = async () => {

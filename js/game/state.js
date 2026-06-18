@@ -79,6 +79,11 @@
 
     turns: {},                     // { girlId: [{role, text, ts}] }  per-girl chat log (bounded)
 
+    // REQUEST.1 — pre-capture item-request cooldown log. Keyed by `${locationId}|${archetype}`,
+    // value = the game-day number the last request was made. Enforces "once a day per girl-type
+    // per location" so pre-capture item asks are a trickle, never an endless faucet.
+    itemRequestLog: {},
+
     settings: {
       mode: 'sexy',                // 'sexy' | 'hurtme' | 'sexy_with_damage'
       activeGirlId: null,
@@ -134,6 +139,7 @@
     else { s.propositioners.inbox ||= []; s.propositioners.active ||= []; s.propositioners.completed ||= []; s.propositioners.repeatClients ||= {}; }
     if (!s.disposals) s.disposals = [];
     if (!s.turns) s.turns = {};
+    if (!s.itemRequestLog || typeof s.itemRequestLog !== 'object') s.itemRequestLog = {};
     // Dungeon-level backfill — the shared supply POOL (POOL-SUPPLY.1) + per-hold toy mounts
     // (TOY-HOLD.1) + condom/drug reserves. Defense-in-depth so any future unguarded read on an
     // old save can't hit undefined.
@@ -467,6 +473,10 @@
   }
   function getPlayerName() { return (state && state.settings && state.settings.playerName) || 'Master'; }
 
+  // REQUEST.1 — pre-capture item-request daily cooldown. `key` = `${locationId}|${archetype}`.
+  function noteItemRequest(key, day) { mutate(s => { if (!s.itemRequestLog) s.itemRequestLog = {}; s.itemRequestLog[key] = day; }); }
+  function lastItemRequestDay(key) { return (state && state.itemRequestLog && state.itemRequestLog[key]) || null; }
+
   window.DMTHGame = window.DMTHGame || {};
   window.DMTHGame.state = {
     get current() { return state; },
@@ -491,6 +501,7 @@
     listGirlForSale, unlistGirl,
     bumpTick,
     setGameOver, isGameOver,
-    setPlayerName, getPlayerName
+    setPlayerName, getPlayerName,
+    noteItemRequest, lastItemRequestDay
   };
 })();

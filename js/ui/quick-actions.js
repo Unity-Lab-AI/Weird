@@ -238,8 +238,7 @@
         { emoji: '🔓',  label: 'loosen one restraint',  text: '*unclips one cuff* behave.', sat: 1 },
         { emoji: '🛐',  label: 'kneel and worship',     text: 'on your knees. mouth open. now.', applyId: 'sex-oral' },
         { emoji: '👀',  label: 'inspect her',           text: '*walks slow circles around her, examining every inch of her body*', sat: 2 },
-        { emoji: '❤️‍🩹',label: 'show a little mercy',    text: '*softens for a second — tucks hair behind her ear, thumb on her cheek*', applyId: 'love-forehead-kiss' },
-        { emoji: '🙏',  label: 'ask her for drugs',      text: 'you holding? hand it over. now.', askDrugs: true }
+        { emoji: '❤️‍🩹',label: 'show a little mercy',    text: '*softens for a second — tucks hair behind her ear, thumb on her cheek*', applyId: 'love-forehead-kiss' }
       ]
     }
   };
@@ -317,11 +316,6 @@
         if (action.milkDrink && girl?.id && window.DMTHGame?.milk?.drinkGirl) {
           const r = window.DMTHGame.milk.drinkGirl(girl.id);
           if (!r.ok) { alert(r.reason); return; }
-        }
-        // Ask-for-drugs loot (LOOT.1) — she may give up a stash item (notifies on success).
-        // Non-blocking: the chat turn still fires so she answers / refuses / lies in character.
-        if (action.askDrugs && girl?.id && window.DMTHGame?.loot?.askGirlForDrugs) {
-          try { window.DMTHGame.loot.askGirlForDrugs(girl.id); } catch (e) { /* non-fatal */ }
         }
         // Suck milk straight from her breast (MILK.2) — bonus boost, no rig needed. Refused
         // (turn not sent) if she isn't lactating.
