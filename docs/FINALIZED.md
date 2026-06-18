@@ -13,6 +13,12 @@
 
 ---
 
+## 2026-06-18 — Session: FRIENDDIRECT.1 — friends are player-directed, never passive — LOCAL ONLY (not pushed)
+
+- **FRIENDDIRECT.1** ✅ — Gee verbatim: *"asnd friends have to be drirrected at the girlk the player wants them to use.. they dont just willy neely choose there own"*. Removed the passive ~15% friend auto-arrival from `tryArrival` — a passive per-tick arrival is ALWAYS a john now. Friends only ever act when the player DIRECTS them (the room's voiced gangbang "include a friend" / the NPC-direct box / the coming visitor list). `friendsAllowed` reframed as "friends available to direct at her" — updated the room toggle label ("🩸 Friends available") + tooltip + the opt-in confirm to match (no more "they'll come on their own"). `js/game/whore-out.js`, `js/ui/room.js`. REMAINING from the same directive: **VISITORLIST.1** (dungeon visitor list — simple john/friend selection) + **MULTIFRIENDGANG.1** (multiple friends stack damage → can kill her by chance/stat rolls). `node -c` clean.
+
+---
+
 ## 2026-06-18 — Session: EPIC AF — typed-action engine + live girl history (TYPEDACT.1 + GIRLHIST.1 + GIRLHIST.2 data layer) — LOCAL ONLY (not pushed)
 
 > ⚠️ Committed LOCALLY only — Gee paused all pushes to `UpdateWork` until further notice. These land on the remote when he lifts the hold.

@@ -179,11 +179,12 @@
     // Bond-debt overflow — girl protests, no more johns until debt clears
     if ((girl.bond?.bondDebt || 0) > BONDDEBT_EXCESS) return null;
 
-    // FRIENDS.1 — if the player has let "friends" in for this girl, a slice of arrivals is a
-    // friend instead of a john (rarer, extreme, near-kill). ~15% of arrivals when allowed.
-    if (wo.friendsAllowed && window.DMTHJohnArchetypes.rollFriendArchetype && Math.random() < 0.15) {
-      return resolveFriendEncounter(girl, window.DMTHJohnArchetypes.rollFriendArchetype(Math.random));
-    }
+    // FRIENDDIRECT.1 (Gee) — friends are PLAYER-DIRECTED, never passive: "friends have to be
+    // drirrected at the girl the player wants them to use.. they dont just willy neely choose there
+    // own". So a passive per-tick arrival is ALWAYS a john now — friends only ever act when the
+    // player directs them at a specific girl (the room's voiced gangbang "include a friend" / the
+    // NPC-direct box / the visitor list). `friendsAllowed` now just means "friends are available to
+    // direct at this girl", it no longer auto-fires a friend visit. (Was: ~15% of arrivals.)
 
     const isPregnant = girl.pregnancy?.status === 'pregnant';
     let archetypeId = window.DMTHJohnArchetypes.rollJohnArchetype(Math.random, { isPregnant });
