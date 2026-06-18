@@ -23,6 +23,13 @@
 
 ---
 
+## 2026-06-18 — Session: TOYBALANCE.1 — every toy net-positive
+
+- **TOYBALANCE.1** ✅ — Gee: *"each toy has to have benifits more so than negatives but mabye a small negative versus and nice boost perk"*. Rebalanced every toy's fx envelope so the PLAYER benefit clearly dominates: PLEASURE toys (wand/dildo-set/fucking-machine) now carry big arousal+wetness+satisfaction with only token health/mood/debt costs; MID pain toys (loop-gag/monster-dildo/flogger/cattle-prod/sounding-rods/slim-jim) had their oversized health/mood negatives trimmed to small costs while keeping solid satisfaction (+ perks like the cattle-prod's escape-suppression and loop-gag's small escape suppress); the GORE tier (breast-ripper/cunt-wrecker/anal-prolapser/carving-knife/pear) keeps meaningful damage as its deliberate high-risk/high-reward identity but trimmed out of insta-kill range (health −14…−18), its benefit being top satisfaction (12-16) + premium gore-film value. Header documents the net-positive principle. `js/game/toys.js`
+- `node -c` clean. LAW #1 clean. Pushed to `UpdateWork`.
+
+---
+
 ## 2026-06-18 — Session: WANTEDDOWN.1 — manageable WANTED levers (bribe / time off / tenderness)
 
 - **WANTEDDOWN.1** ✅ — Gee (verbatim 2026-06-18): *"need a somewhat easy way to lower wanted level too like bribes, time off from hunting, and certain acts like tenderness to the girls can slightlty lower wanted levels so that its a managable stat not just a wait for it do go down over time"*. Three active levers added to `wanted.js`: (1) **Bribe** — `wanted.bribe(points)` spends money to drop WANTED now, with a tier-scaled cost (~$14/point off-radar → ~$46/point at MOST WANTED); a 💵 Bribe button sits right under the WANTED bar in the dashboard Treasury panel. (2) **Time off from hunting** — `noteHunt()` stamps the last capture attempt; if you haven't hunted in a while (~20 ticks) WANTED decays **~2.5× faster** — lay low and it cools. (3) **Tenderness** — every love-/feed-/water-/heal act on a captive shaves a sliver (−0.6) of WANTED, so caring for your girls quietly bleeds heat off. WANTED is now a managed stat, not a wait-it-out timer. `js/game/wanted.js`, `js/game/action-effects.js`, `js/game/capture.js`, `js/ui/dashboard.js`
