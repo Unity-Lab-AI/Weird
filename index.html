@@ -76,6 +76,7 @@
       <a href="#home" data-route="home">🏠 Home</a>
       <a href="#setup" data-route="setup">⚡ Setup</a>
       <a href="#about" data-route="about">ℹ️ About</a>
+      <a href="wiki.html">📖 Wiki</a>
       <a href="#terms" data-route="terms">📜 Terms</a>
       <a href="#privacy" data-route="privacy">🔒 Privacy</a>
       <a href="#settings" data-route="settings">⚙️ Settings</a>
@@ -418,25 +419,39 @@
 
       <h3>Game loop</h3>
       <ul>
-        <li><b>Hunt</b> — visit Town, pick a location, run a 4-stage capture attempt against girls who spawn there</li>
-        <li><b>Hold</b> — bring captives back to your dungeons, assign them holds, upgrade their conditions across 12+ tracks</li>
-        <li><b>Interact</b> — talk to them via real Ollama-powered dialogue with persistent body state, drugs, mood, bond</li>
-        <li><b>Record</b> — every session can be recorded as a film; films sell on the content market forever</li>
-        <li><b>Sell / dispose</b> — list captives on slave market, accept propositioner gigs, dispose via various methods</li>
-        <li><b>Expand</b> — buy more dungeons, own properties around town, upgrade everything</li>
+        <li><b>Hunt</b> — visit Town, pick a hunting ground, run a 4-stage capture attempt against girls who spawn there (some grounds unlock with your DEPRAVITY level, a roster size, or bought access)</li>
+        <li><b>Hold</b> — bring captives back to your dungeons, assign holds, upgrade conditions across 12 tracks; stock each hold or a shared dungeon supply pool with food / water / condoms / drugs</li>
+        <li><b>Interact</b> — real Ollama-powered dialogue with persistent body state, drugs + addiction, mood, Stockholm bond, ownership marks, and a roomful of toys/implements you mount per hold</li>
+        <li><b>Progress</b> — every act feeds your DEPRAVITY level, which gates the heaviest depravities (branding, extreme acts, nugget-making, dismemberment, snuff); pay a fee to unlock tiers early</li>
+        <li><b>Record / earn</b> — record any session as a film; films sell on the content market forever; rent captives to johns (gentle → sadistic, who use your stocked toys + drugs); farm milk; sell harvested body parts</li>
+        <li><b>Sell / dispose / retire</b> — slave-market trades, transport captives (or corpses) between dungeons, snuff into a postmortem corpse, dispose by many methods, and keep one of her 1–3 keepsakes as a permanent-buff trophy</li>
+        <li><b>Survive</b> — keep her escape-risk down and stay under the WANTED line; raids hit at high heat — pre-buy a lawyer, dirty-cop connections, or an escape kit, or it's jail = game over</li>
+        <li><b>Expand</b> — buy more dungeons, own properties around town, upgrade everything. There is no win state.</li>
       </ul>
 
       <h3>Tech stack</h3>
       <ul>
-        <li><b>Frontend</b> — single-file HTML game with bundled JS, no build step</li>
+        <li><b>Frontend</b> — vanilla-JS browser game (IIFE modules on <code>window.DMTHGame.*</code>), no build step</li>
         <li><b>Ollama</b> at localhost:11434 — local uncensored LLM (dolphin-mistral / abliterated variants)</li>
-        <li><b>Kokoro</b> — in-browser TTS with 16 voice options</li>
-        <li><b>Pollinations</b> — optional image generation via your own key</li>
-        <li><b>Persistence</b> — IndexedDB save state, fully local</li>
+        <li><b>Kokoro</b> — in-browser TTS, a distinct voice per girl</li>
+        <li><b>Pollinations</b> — optional image generation via your own key (seeded face + outfit for visual consistency)</li>
+        <li><b>Persistence</b> — IndexedDB save state, fully local; pause freezes time, progress reloads when you return</li>
       </ul>
 
+      <h3>Unity AI Lab — the crew</h3>
+      <p class="small muted">A small independent AI lab — "four engineers, one workshop." Founded 2020 out of a forum thread. Self-hosted, self-funded, open-source. Creed: <i>no filters, no telemetry, no apologies — open source or it didn't happen.</i> Full folio at <a href="https://unityailab.com/about" target="_blank" rel="noopener">unityailab.com/about ↗</a>.</p>
+      <ul>
+        <li><b>SpongeBong</b> <span class="small muted">(@hackall360)</span> — Co-founder · Engineer. Started Unity; owns the infrastructure, the prompt archive, and the on-call pager. If something's held together by a shell script, there's a fair chance he wrote it. <i>Developer · Ethical Hacker · Sys Admin · Founder.</i></li>
+        <li><b>GFourteen</b> <span class="small muted">(@gfourteen)</span> — Co-founder · Engineer. The other half of Unity's spine; brings finance discipline to a lab that would otherwise spend every dollar on GPUs and regret nothing. <i>Developer · Founder · Financial Advisor.</i></li>
+        <li><b>Alfreddo</b> <span class="small muted">(@alfredo)</span> — Engineer · Agentic systems. Lives inside the planner / executor / critic loop; when the agent stack does something nobody expected, he can usually tell you why before you finish asking. <i>Developer · Agentic Systems · Researcher.</i></li>
+        <li><b>Red</b> <span class="small muted">(@red)</span> — Engineer · Security. The reason every Unity deployment has a closed door, a logged door, and a second key somebody else holds. Threat models cheerfully; sleeps well. <i>Security · Sys Admin · Researcher.</i></li>
+      </ul>
+
+      <h3>The game wiki</h3>
+      <p>Full gameplay reference — every system, item, toy, action, concept, plus how to play, how to keep your slaves, and how to stay out of jail — lives in the <a href="wiki.html">📖 Game Wiki</a>.</p>
+
       <h3>Version</h3>
-      <p>v0.0.1 — Phase 21 in flight. See <a href="#setup">⚡ Setup</a> for environment configuration.</p>
+      <p>v0.0.1 — local build. See <a href="#setup">⚡ Setup</a> for environment configuration.</p>
     </section>
 
     <!-- ============= TERMS SECTION ============= -->

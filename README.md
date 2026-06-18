@@ -4,7 +4,9 @@
 
 A massive multi-page text+emoji adult game where you run a sex-slave operation. Start in a basic dungeon, hunt girls across town, capture them with progressively better tools, hold them in upgradeable rooms, form Stockholm bonds, record films, sell them on the slave market, dispose of the ones you tire of. Every captive has her own persona driven by a real local LLM with persistent body state, drug pharmacokinetics, pregnancy, and a memory of every john she's seen.
 
-> **Cross-references:** [`SETUP-README.md`](./SETUP-README.md) (technical setup) · [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) (system design) · [`docs/ROADMAP.md`](./docs/ROADMAP.md) (phase plan) · [`docs/SKILL_TREE.md`](./docs/SKILL_TREE.md) (capability matrix) · [`docs/TODO.md`](./docs/TODO.md) (active backlog) · [`docs/FINALIZED.md`](./docs/FINALIZED.md) (completion archive)
+> 📖 **The complete, browsable reference is the in-game [Game Wiki](./wiki.html)** — every system, item, toy, action and concept, plus how-to-play, how-to-keep-your-slaves, and how-to-stay-out-of-jail. This README is the markdown overview; the wiki is the full encyclopedia.
+
+> **Cross-references:** [`wiki.html`](./wiki.html) (full game wiki) · [`SETUP-README.md`](./SETUP-README.md) (technical setup) · [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) (system design) · [`docs/ROADMAP.md`](./docs/ROADMAP.md) (phase plan) · [`docs/SKILL_TREE.md`](./docs/SKILL_TREE.md) (capability matrix) · [`docs/TODO.md`](./docs/TODO.md) (active backlog) · [`docs/FINALIZED.md`](./docs/FINALIZED.md) (completion archive)
 
 ---
 
@@ -125,6 +127,29 @@ Six body bars (arousal / wetness / cum-load / bruises / high), plus stamina + he
 ```
 
 There is no win state. The game is the ever-growing collection and the ever-upgrading dungeon empire.
+
+---
+
+## Latest build — major systems (2026-06-18)
+
+The sections below this one document the original feature set in depth. The 2026-06-18 mega-build layered a full progression spine + depravity/economy/logistics systems on top. Each is covered fully in the [Game Wiki](./wiki.html); here's the map:
+
+- **😈 DEPRAVITY progression** — the player level. Every act earns XP; higher levels gate the heaviest depravities (🏷️ ownership marks L3 · ☠️ extreme acts L4 · 🪓 nugget-making L6 · 🔪 dismember L7 · ⚰️ snuff L7). Pay a steep fee to unlock a tier early. Some hunting grounds gate on level / roster size / bought access.
+- **📑 Character Sheet** — one screen of your whole build: DEPRAVITY, every buff + debuff (mapped to the real hunt/income math), unlocked tiers, operation tallies — all depraved-named.
+- **🍆 Player drives** — a sex-drive NEED (ceiling scales with roster + level; maxed = boosts, deprived = debuffs), satisfaction, and 🐝 BUZZ.
+- **🏷️ Ownership marks** — permanent brand / tattoo / piercings, render in every image, film premium.
+- **💊 Addiction & withdrawal** — forced dosing builds addiction; cut-off withdrawal hits mood/stamina/escape-risk. **OD death** — fast hard-dosing (≈10× molly) kills her → corpse. Captives **self-dose** from the dungeon drug pool to survive (never self-OD).
+- **💦 Breeding** — vaginal-only cum-fill meter + sustained-fill timer → guaranteed conception. **Typed + TIMED condoms** (wear off ~4h); a sabotaged **holed** condom breeds her instantly on one load. Full **newborn-disposal** catalog at term.
+- **🥛 Milk economy** — farm/drink/sell/suckle lactating captives.
+- **🧰 Toys & implements** — buy / loot / find them, **mount up to 5 per hold**, use only on that hold's girl; they **render on her image** while in use (gag, clamps, machine…). From a wand to torture-chamber implements; gore tiers DEPRAVITY-gated. Johns grab them too.
+- **🏪 Two-tier supplies** — per-hold reserve + a shared dungeon **pool** (food/water/condoms/drugs) every hold draws from.
+- **👯 Multi-girl scenes** — gather captives held in the same location into one room; each answers her own turn in her own voice.
+- **🚚 Transport** — move captives (risk gamble) or corpses (clean haul) between dungeons + hold-to-hold.
+- **⚰️ Snuff & death dossier** — 14 snuff methods (filmed or not) → a postmortem corpse (keeps her "sleeping" look, ~5-day decay window, narration-only). Every death saves a **dossier** (final stats + history + likeness) attached to her **trophy**.
+- **🏆 Keepsake trophies** — each girl carries 1–3 keepsakes (themed items + gore trophies); pick one at disposal for a permanent stacking buff.
+- **👥 John variety** — gentle → sadistic archetypes; pay scales with extremity; johns use your stocked toys + drugs; only glove up if condoms are stocked.
+- **🚨 Heat & arrest valves** — high WANTED triggers raids → fines → jail. Pre-buy a ⚖️ lawyer, 💰 dirty-cop connections, or a 🏃 escape kit.
+- **⏸ Pause & persist** — freeze time; progress saves + reloads when you return.
 
 ---
 
@@ -410,16 +435,19 @@ Dashboard + roster cards show 🤰 next to her name when pregnant + post-status 
 
 Open a captive to general-public john arrivals. Continuous passive flow distinct from the Propositioner (bespoke single deals).
 
-### Rate options
+### Cadence options (game-time)
 
-| Rate | Arrival chance | Max per tick |
-|---|---|---|
-| low | 10% | 1 |
-| standard | 25% | 2 |
-| premium | 40% | 3 |
-| all-comers | 60% | 4 |
+Cadence is set in game-time, with your 🐝 BUZZ multiplying arrivals on top (BUZZ 100 ≈ 2×):
 
-### 10 john archetypes
+| Cadence | Arrival pace |
+|---|---|
+| off | none |
+| trickle | 1 john / ~120 game min |
+| casual | 1 john / ~60 game min |
+| steady | 1 john / ~30 game min |
+| rapid | 1 john / ~10 game min |
+
+### 12 john archetypes
 
 | Archetype | Pay range | Tip chance | Condom compliance | Bias |
 |---|---|---|---|---|
@@ -432,7 +460,10 @@ Open a captive to general-public john arrivals. Continuous passive flow distinct
 | Quick Visit | $50-90 | 15% | 80% | low stamina drain |
 | Talker | $70-130 | 35% | 85% | overshares |
 | Breeder | $120-250 | 40% (1.5× mul) | **5%** | 1.8× pregnant bias |
+| Sadist | $130-260 | 25% (1.5× mul) | 30% | cruel — uses the room's mounted toys on her, bruises +4, premium pay |
 | Degrader | $90-180 | 20% | 40% | mood -15 |
+
+Plus a hidden **Postmortem Client** archetype (premium corpse content) that only appears for a deceased captive. JOHN-VARIETY: depraved johns (intensity ≥ 3) grab a mounted toy and/or a pool drug and use it on her — pay scales with the extremity of their whims; vaginal acts fill her cum-meter, anal/oral don't; johns only glove up if condoms are stocked.
 
 ### "Better stats = happier johns = more money"
 

@@ -1,6 +1,6 @@
 # ROADMAP — weird project
 
-**Generated:** 2026-04-21 · **Last revised:** 2026-05-14 (post-Phase-21 closeout)
+**Generated:** 2026-04-21 · **Last revised:** 2026-06-18 (DEPRAVITY-spine mega-build shipped; pushed to branch `UpdateWork`)
 **Title: DUNGEON MASTER: THE HUNT** (Gee verbatim 2026-04-21).
 
 > **Cross-references:** [`../README.md`](../README.md) (gameplay wiki) · [`../SETUP-README.md`](../SETUP-README.md) (technical setup) · [`ARCHITECTURE.md`](./ARCHITECTURE.md) (system design) · [`SKILL_TREE.md`](./SKILL_TREE.md) (capability matrix) · [`TODO.md`](./TODO.md) (active backlog) · [`FINALIZED.md`](./FINALIZED.md) (completion archive)
@@ -48,18 +48,33 @@ Unity is one girl in the roster — the goth nympho coke whore template, seeded 
 
 ## Current Status
 
+> **This table was rewritten 2026-06-18 — the prior "Phase 0 / nothing built" status was years stale.** The game is feature-complete.
+
 | Metric | Value |
 |--------|-------|
-| **Phase** | Phase 0 — Workflow system redirected |
-| **On-disk** | `weird.html` (rough sketch) + local-tooling workflow folder (gitignored) + `docs/` (this doc) |
-| **Server** | Not built |
-| **Ollama wired** | No |
-| **Voice wired** | No |
-| **Memory wired** | No |
-| **Selfies wired** | No |
-| **Drug scheduler** | Not built |
-| **Mode switching** | CLI-only (`/unity`, `/hurtme`, `/sexy`); not wired into UI |
-| **Next milestone** | Phase 1 — Node server + first real Ollama response in the UI |
+| **Phase** | Feature-complete — all Phases 1–21 + the 2026-06-18 DEPRAVITY-spine mega-build shipped |
+| **On-disk** | `index.html` (landing) + `game.html` (game) + `wiki.html` (wiki) + full `js/` engine+UI + `css/` + `docs/`. (`weird.html` sketch retired.) |
+| **Architecture** | Pure static vanilla-JS client — no server; everything on `window.DMTHGame.*` |
+| **Ollama wired** | ✅ live streaming dialogue per turn |
+| **Voice wired** | ✅ Kokoro TTS, per-girl voice |
+| **Memory wired** | ✅ per-girl chat log + embedding-assisted recall |
+| **Images wired** | ✅ Pollinations seeded face/outfit + state/aftermath/toy/corpse tokens |
+| **Drug scheduler** | ✅ curves + addiction/withdrawal + OD + self-serve |
+| **Mode switching** | ✅ in-UI (sexy / hurtme / sexy_with_damage) |
+| **Validation** | Entire `js/` tree passes `node -c` |
+| **Remaining** | TUTORIAL.1 (deferred by Gee until further notice) |
+
+---
+
+## 2026-06-18 Mega-Build — DEPRAVITY spine + depravity/economy/logistics (✅ shipped)
+
+Layered on top of the completed Phase 1–21 base. All shipped + `node -c` validated; pushed to branch `UpdateWork`. Full detail in `FINALIZED.md` (newest entry) + `resume.md`; player-facing reference in `../wiki.html`.
+
+- **Progression spine** — DEPRAVITY level (XP from every act) + tier gating + pay-to-unlock + level/roster/cost hunting-ground gates; player Character Sheet; scaling sex-drive NEED; extreme-act tolerance.
+- **Bodies / breeding / death** — ownership marks; addiction + withdrawal + OD death + drug self-serve; vaginal cum-fill + breeding timer; typed + timed condoms (holed = instant breed); snuff (14 methods) + corpse window + death dossier; dismember + body-part market; newborn-disposal catalog; milk economy.
+- **Logistics / law / pacing** — true multi-speaker multi-girl scenes (same-location) + inter-dungeon transport + corpse moves; two-tier hold/dungeon supply pool; john variety (sadist, johns use stocked toys/drugs, extremity pay, condom-stock gating); arrest escape valves (lawyer/bribe/flee); pause + save/reload; balance pass (escape pacing tuned, drains/curves audited).
+- **Items / UI** — toys & implements (buy/loot/find, hold-mounted ≤5, render on her image); keepsake trophies (1–3 per girl, pick one, permanent stacking buff); landing About+team + full `wiki.html`; room/panels.js extraction + migration backfill + john-credit fix (ship-readiness pass).
+- **Deferred** — TUTORIAL.1 (guided onboarding) — by Gee, until further notice.
 
 ---
 
