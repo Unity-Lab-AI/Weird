@@ -197,27 +197,37 @@
     return resolveEncounter(girl, archetypeId);
   }
 
-  function resolveEncounter(girl, archetypeId) {
+  // `opts` (NPCDIRECT-PAID.1) lets the caller force a DIRECTED encounter:
+  //   opts.npc           reuse an already-minted identity (the SAME named man from the scene)
+  //   opts.forcedActs    ledger act tags to use verbatim (bypasses the rolled-acts + whitelist path)
+  //   opts.forcedActionId  the COMMONALITY-ENGINE-matched action whose stat spec applyAction uses
+  //   opts.directiveNote   the player's raw typed directive, appended to the history-event notes
+  function resolveEncounter(girl, archetypeId, opts = {}) {
     const arc = window.DMTHJohnArchetypes.JOHN_ARCHETYPES[archetypeId];
     if (!arc) return null;
     const wo = getWhoreOut(girl);
     // NPC-IDENT.1 — mint this john a name so she can reference him + a multi-party scene can address him.
-    const npc = window.DMTHJohnArchetypes.mintNpcIdentity ? window.DMTHJohnArchetypes.mintNpcIdentity(archetypeId) : null;
+    // NPCDIRECT-PAID.1 — reuse the passed identity so a directed john is the SAME man, not a fresh name.
+    const npc = opts.npc || (window.DMTHJohnArchetypes.mintNpcIdentity ? window.DMTHJohnArchetypes.mintNpcIdentity(archetypeId) : null);
 
-    // Pick acts — intersection of john's preferences + player's permittedActs (if non-empty)
-    // When player has a non-empty permittedActs whitelist and no
-    // john preference matches, the john leaves without service (whitelist is binding now,
-    // not "john gets his preferences anyway"). Prevents the player's whitelist from being
-    // silently ignored.
-    let acts = window.DMTHJohnArchetypes.rollJohnActs(archetypeId);
-    if (wo.permittedActs.length > 0) {
-      const filtered = acts.filter(a => wo.permittedActs.includes(a));
-      if (filtered.length === 0) {
-        // Whitelist couldn't match — john leaves dissatisfied. No encounter persisted,
-        // no pay, no stamina drain. Light mood/notoriety blip from declining work.
-        return null;
+    // Pick acts — intersection of john's preferences + player's permittedActs (if non-empty).
+    // When player has a non-empty permittedActs whitelist and no john preference matches, the john
+    // leaves without service (whitelist is binding). A DIRECTED encounter (opts.forcedActs) is the
+    // player's explicit order — it uses the forced acts verbatim and bypasses the whitelist entirely.
+    let acts;
+    if (opts.forcedActs && opts.forcedActs.length) {
+      acts = opts.forcedActs.slice();
+    } else {
+      acts = window.DMTHJohnArchetypes.rollJohnActs(archetypeId);
+      if (wo.permittedActs.length > 0) {
+        const filtered = acts.filter(a => wo.permittedActs.includes(a));
+        if (filtered.length === 0) {
+          // Whitelist couldn't match — john leaves dissatisfied. No encounter persisted,
+          // no pay, no stamina drain. Light mood/notoriety blip from declining work.
+          return null;
+        }
+        acts = filtered;
       }
-      acts = filtered;
     }
 
     // Condom use (CONDOM-STOCK.1) — a john can only glove up if her hold / the dungeon POOL is
@@ -270,7 +280,9 @@
     const bondXPBefore = girl.bond?.bondXP || 0;
     if (window.DMTHGame.actionEffects?.applyAction) {
       const strain = (girl.body?.stamina ?? 70) <= window.DMTHGame.actionEffects.STAMINA_THRESHOLD_FOR_STRAIN;
-      window.DMTHGame.actionEffects.applyAction(girl.id, arc.johnActionId, { strain });
+      // NPCDIRECT-PAID.1 — a directed encounter applies the COMMONALITY-ENGINE-matched action's stat
+      // spec (so "face fuck her" → extreme-facefuck deltas) instead of the john's default act.
+      window.DMTHGame.actionEffects.applyAction(girl.id, opts.forcedActionId || arc.johnActionId, { strain });
     }
     // Re-read girl after applyAction mutations
     const refreshed = window.DMTHGame.state.getGirl(girl.id);
@@ -346,6 +358,8 @@
       johnDescription: arc.displayName,
       johnName: npc ? npc.name : null,
       johnHandle: npc ? npc.handle : arc.displayName,
+      npc,                                    // NPCDIRECT-PAID.1 — exposed so a gangbang/scene can voice the actual man
+      directed: !!opts.directiveNote,         // NPCDIRECT-PAID.1 — flags a player-directed history event
       acts: johnExtraActs.length ? [...acts, ...johnExtraActs] : acts,
       duration_min: arc.intensity * 5 + Math.floor(Math.random() * 10),
       payment,
@@ -360,7 +374,7 @@
       bruisesAdded: arc.bruisesAdded || 0,
       cumLoadAdded: hasVaginalCum ? 1.2 : (acts.includes('oral') ? 1.0 : 0),
       staminaDrained: Math.abs(window.DMTHGame.actionEffects?.ACTIONS?.[arc.johnActionId]?.stamina || 5),
-      notes: `${arc.displayName} — ${arc.dialogueTone}. Acts: ${acts.join(', ')}.${condomUsed ? ' [condom used]' : ' [no condom]'}`,
+      notes: `${arc.displayName} — ${arc.dialogueTone}. Acts: ${acts.join(', ')}.${condomUsed ? ' [condom used]' : ' [no condom]'}${opts.directiveNote ? ` [directed: ${opts.directiveNote}]` : ''}`,
       pregnancyHookFired
     };
 
@@ -415,11 +429,15 @@
   // FRIENDS.1/.2 — resolve a "friend" visit: the friend's EXTREME act + a direct near-kill
   // health drop (~40-60), a fortune in pay, logged to her ledger + a friendVisits counter so the
   // death-dossier / trophy reflects how hard she was used. Alive captives only.
-  function resolveFriendEncounter(girl, friendId) {
+  // `opts` (NPCDIRECT-PAID.1) — "same for friends": a directed friend reuses opts.npc, records the
+  // forced act tags (opts.forcedActs) + the raw directive (opts.directiveNote) into her history event,
+  // and otherwise resolves exactly like a normal extreme friend visit (near-kill, fortune, can corpse).
+  function resolveFriendEncounter(girl, friendId, opts = {}) {
     const arc = window.DMTHJohnArchetypes.FRIEND_ARCHETYPES[friendId];
     if (!arc || girl.encounterState === 'dead') return null;
     // NPC-IDENT.1 — mint the friend an identity (title + name) for chat memory + multi-party scenes.
-    const npc = window.DMTHJohnArchetypes.mintNpcIdentity ? window.DMTHJohnArchetypes.mintNpcIdentity(friendId, { isFriend: true }) : null;
+    // NPCDIRECT-PAID.1 — reuse the passed identity so a directed friend is the SAME man from the scene.
+    const npc = opts.npc || (window.DMTHJohnArchetypes.mintNpcIdentity ? window.DMTHJohnArchetypes.mintNpcIdentity(friendId, { isFriend: true }) : null);
 
     const moodBefore = girl.mood?.mood || 'neutral';
     const bondXPBefore = girl.bond?.bondXP || 0;
@@ -491,6 +509,8 @@
     }
     actTags.push(killed ? 'snuff' : 'friend-extreme');
     if (chamberToyName) actTags.push('chamber-toy');
+    // NPCDIRECT-PAID.1 — a directed friend records the player's order (verbatim) + matched action up front.
+    if (opts.forcedActs && opts.forcedActs.length) actTags.unshift(...opts.forcedActs);
     const basePay = arc.payRange[0] + Math.floor(Math.random() * (arc.payRange[1] - arc.payRange[0]));
     const sat = window.DMTHGame.state.getSatisfaction ? window.DMTHGame.state.getSatisfaction() : 50;
     // SNUFFBONUS.1 snuff bonus + FRIENDTOY.1 chamber-toy premium both fold into his payout.
@@ -502,6 +522,10 @@
       isFriend: true,
       johnArchetype: friendId,
       johnDescription: 'FRIEND — ' + arc.displayName,
+      johnName: npc ? npc.name : null,            // NPC-IDENT.1 — name she can reference in chat
+      johnHandle: npc ? npc.handle : arc.displayName,
+      npc,                                        // NPCDIRECT-PAID.1 — exposed so a scene can voice the actual friend
+      directed: !!opts.directiveNote,             // NPCDIRECT-PAID.1 — flags a player-directed history event
       acts: actTags,
       duration_min: 30 + Math.floor(Math.random() * 30),
       payment, tip: 0, johnExtraPay: 0, totalPaid: payment,
@@ -512,12 +536,15 @@
       bondDebtAdded: (refreshed.bond?.bondDebt || 0) - bondDebtBefore,
       bruisesAdded: arc.bruisesAdded || 0,
       cumLoadAdded: 0,
-      healthDropped: killed ? curHealth : drop,
+      // healthDropped — on a kill she dropped her whole arrival health; otherwise the rolled drop.
+      // (Was a latent ReferenceError: `curHealth` never existed; a friend KILL would throw here.)
+      healthDropped: killed ? startHealth : drop,
       killed, snuffBonus,
       staminaDrained: 0,
-      notes: killed
+      notes: (killed
         ? `FRIEND ${arc.displayName} KILLED her — ${arc.killLine || arc.ability}. Snuff content +$${snuffBonus}. ${arc.dialogueTone}.`
-        : `FRIEND ${arc.displayName} — ${arc.ability}. Health −${drop}. ${arc.dialogueTone}.`,
+        : `FRIEND ${arc.displayName} — ${arc.ability}. Health −${drop}. ${arc.dialogueTone}.`)
+        + (opts.directiveNote ? ` [directed: ${opts.directiveNote}]` : ''),
       pregnancyHookFired: false
     };
 
@@ -604,7 +631,35 @@
     if (window.DMTHNotify) {
       window.DMTHNotify.show(`💦 Gangbang on ${girl0.name}: ${encs.length} john${encs.length === 1 ? '' : 's'} took turns${bukkake ? ` and finished in a bukkake — glazed, dripping, cum-filled (+$${bukkake.pay})` : ''} — $${gross}.`, { type: encs.length ? 'success' : 'info', durationMs: 6500 });
     }
-    return { ok: true, count: encs.length, gross, bukkake };
+    // GANGSEL / GANGVOICE — expose the ACTUAL men who took her this session so the room can voice
+    // the real participants (each named NPC speaks in his own voice) instead of inventing a crowd.
+    const npcs = encs.map(e => e.npc).filter(Boolean);
+    return { ok: true, count: encs.length, gross, bukkake, npcs };
+  }
+
+  // NPCDIRECT-PAID.1 (Gee: a directed NPC "needs to do that action and have that action be paid for
+  // when done with its stat changes take effect on the girl and into her history as an event" +
+  // "same for friends"). The player types a directive at a NAMED man in a voiced scene; this resolves
+  // it as a REAL encounter — he performs the act, gets paid, her stats shift, it logs to her ledger.
+  // The COMMONALITY-ENGINE syncs the free-typed directive to the closest existing action for its spec.
+  function resolveDirectedEncounter(girlId, opts = {}) {
+    const girl = window.DMTHGame.state.getGirl(girlId);
+    if (!girl) return { ok: false, reason: 'no such girl' };
+    const npc = opts.npc;
+    const directive = String(opts.directive || '').trim();
+    if (!npc || !npc.archetype) return { ok: false, reason: 'no NPC to direct' };
+    if (!directive) return { ok: false, reason: 'type what to make him do' };
+    // Sync the directive to the closest existing action so it inherits real stat modifiers.
+    const match = (window.DMTHGame.actionEffects && window.DMTHGame.actionEffects.matchDirectedAction)
+      ? window.DMTHGame.actionEffects.matchDirectedAction(directive) : null;
+    const forcedActionId = match ? match.actionId : null;
+    // Both the verbatim directive AND the matched action land in her history event.
+    const forcedActs = [`directed:${directive}`].concat(forcedActionId ? [forcedActionId] : []);
+    const encounter = npc.isFriend
+      ? resolveFriendEncounter(girl, npc.archetype, { npc, forcedActs, directiveNote: directive })
+      : resolveEncounter(girl, npc.archetype, { npc, forcedActs, forcedActionId, directiveNote: directive });
+    if (!encounter) return { ok: false, reason: 'he balked — nothing happened' };
+    return { ok: true, encounter, match, killed: !!encounter.killed, paid: encounter.totalPaid || encounter.payment || 0 };
   }
 
   // -----------------------------------------------------------------------
@@ -710,6 +765,7 @@
     resolveEncounter,
     resolveFriendEncounter,
     resolveGangbang,
+    resolveDirectedEncounter,
     runJohnTick,
     cashout,
     summarizeLedger,

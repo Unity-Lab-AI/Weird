@@ -8,6 +8,10 @@
   // image were both wiped every time the 30-second tick fired and triggered a re-render.
   const customPoseDrafts = new Map();    // girlId → draft text
   const customPoseResults = new Map();   // girlId → { url, staging, ts }
+  // EPIC X — the named men from the last voiced gangbang/scene for this girl, so the NPC-DIRECT box
+  // can target the SAME men (each carries {name, handle, tone, isFriend, archetype}). Persists across
+  // state.onChange re-renders of the room template (module-scoped, like the pose caches).
+  const lastSceneNpcs = new Map();       // girlId → [{name, handle, tone, isFriend, archetype}]
 
   // MULTIGIRL.2 — how many OTHER captives can be pulled into the active girl's room for a
   // true multi-speaker scene (host + this many partners). Each present girl answers in her
@@ -561,6 +565,29 @@
                   <button class="btn-small" id="scene-add" data-tooltip="Pull this captive into the scene. She answers in her own voice alongside ${escapeHtml(host.name)}.">👯 Bring her in</button>
                 </div>
               ` : full ? `<p class="small muted">Scene full (${MAX_SCENE_PARTNERS} partners max). Send one back to swap.</p>` : (!available.length ? `<p class="small muted">${elsewhere ? `No other captives in THIS dungeon. 🚚 Transfer one of your ${elsewhere} captive${elsewhere === 1 ? '' : 's'} held elsewhere into this dungeon to team her up.` : 'No other captives available — capture more to run multi-girl scenes.'}</p>` : '')}
+            </div>`;
+          })()}
+
+          ${(() => {
+            // EPIC X — voiced gangbang + NPC-DIRECT (GANGSEL / MULTISPEAK / GANGVOICE / NPC-DIRECT).
+            // Only for an alive, whored-out captive. The crowd selector + run button live here; the
+            // NPC-DIRECT box is populated by renderNpcDirect() after a scene runs. The scene itself
+            // plays out in the main chat log (per-speaker name-tagged), girl-only TTS.
+            if (!window.DMTHGame.whoreOut) return '';
+            const wo = window.DMTHGame.whoreOut.getWhoreOut(girl);
+            if (!wo.enabled || girl.encounterState !== 'captive') return '';
+            return `<div class="panel" style="margin-top:8px">
+              <h3>🎭 Voiced gangbang</h3>
+              <p class="small muted">Throw a gangbang that PLAYS OUT in the chat log — each named man speaks in his OWN voice, ${escapeHtml(girl.name)} reacts to each BY NAME (only SHE is voiced aloud). Pays + cum-fills + bukkakes for real. Then direct any man to a specific act below.</p>
+              <div class="stat-row" data-tooltip="How many men pile in. Capped by your dungeon's size + how many captives you hold (a bigger operation draws a bigger crowd).">
+                <span>🎯 Crowd size</span>
+                <select id="vgang-size" class="inline-select">${[2,3,4,5,6,8,10].map(n => `<option value="${n}"${n === 4 ? ' selected' : ''}>${n} men</option>`).join('')}</select>
+                ${wo.friendsAllowed ? `<label style="margin-left:8px" data-tooltip="Add one of your extreme 'friends' to the crowd — he'll wreck her (near-kill, fortune pay) alongside the johns.">🩸 <input type="checkbox" id="vgang-friend"/> include a friend</label>` : ''}
+              </div>
+              <div class="btn-row" style="margin-top:4px">
+                <button id="vgang-run" class="btn-small btn-primary" data-tooltip="Resolves the real gangbang (pay / stamina / health / cum-fill / bukkake) AND voices it in the chat log. Each man talks in character; only ${escapeHtml(girl.name)} is read aloud by Kokoro.">🎭 Throw a voiced gangbang</button>
+              </div>
+              <div id="npc-direct-panel" style="margin-top:8px"></div>
             </div>`;
           })()}
 
@@ -1128,6 +1155,219 @@
       regenHostImageIfChanged();
       if (statusEl) { statusEl.textContent = 'done'; setTimeout(() => { if (statusEl) statusEl.textContent = ''; }, 2000); }
     }
+
+    // ---- EPIC X — voiced multi-party scene engine (gangbang + NPC-DIRECT) ----
+
+    // MULTISPEAK — parse a `Name: line` multi-speaker transcript into ordered {speaker, text}.
+    // Strips the delta block + code-fence scaffolding first; a line with no `Name:` prefix is
+    // appended to the previous speaker's text as a continuation.
+    function parseSpeakerLines(raw) {
+      let body = String(raw || '')
+        .replace(/<delta>[\s\S]*?<\/delta>/g, '')
+        .replace(/<delta>[\s\S]*$/g, '')
+        .replace(/```[a-z]*\n?|```/gi, '')
+        .trim();
+      const out = [];
+      let cur = null;
+      for (const ln of body.split('\n')) {
+        const m = ln.match(/^\s*([^:]{1,40}?):\s*(.*)$/);
+        if (m && m[2] !== undefined) {
+          out.push({ speaker: m[1].trim(), text: m[2].trim() });
+          cur = out[out.length - 1];
+        } else if (cur && ln.trim()) {
+          cur.text += ' ' + ln.trim();
+        }
+      }
+      return out.filter(e => e.text);
+    }
+
+    // Enrich a minted NPC identity into the npcSpeakerBlock shape {name, handle, tone, isFriend,
+    // archetype}, pulling his archetype's dialogueTone so each man keeps his own distinct voice.
+    function npcForScene(npc) {
+      const arc = npc.isFriend
+        ? window.DMTHJohnArchetypes.FRIEND_ARCHETYPES[npc.archetype]
+        : window.DMTHJohnArchetypes.JOHN_ARCHETYPES[npc.archetype];
+      return { name: npc.name, handle: npc.handle, tone: arc && arc.dialogueTone || null, isFriend: !!npc.isFriend, archetype: npc.archetype, pronouns: npc.pronouns };
+    }
+
+    const BOND_NAMES = ['terrified','wary','acclimating','curious','ambivalent','reciprocated','dependent','partner','devoted','fully-bonded'];
+
+    // Run a VOICED multi-party scene through Ollama (NOT hardcoded — jailbreak-grade template).
+    // Renders each parsed line into the chat log: the men's lines are TEXT-ONLY, name-tagged; only
+    // the girl's lines are spoken aloud by Kokoro (Gee: girls only in TTS, johns/friends text-chat
+    // only). Her lines persist speaker-less in her own log so her future context stays first-person.
+    async function runVoicedScene(sceneKey, sceneNpcs, kickText) {
+      const statusEl = el.querySelector('#stream-status');
+      if (statusEl) statusEl.textContent = 'the room fills… (Ollama)';
+      const live = window.DMTHGame.state.getGirl(girl.id);
+      if (!live) return;
+      const mode = window.DMTHGame.state.current.settings.mode || 'sexy';
+      const dgn = window.DMTHGame.state.getDungeon(live.assignedDungeonId);
+      const dTpl = dgn && window.DMTHAssets.getById('dungeon', dgn.templateId);
+      const sceneVars = {
+        GIRLNAME: live.name,
+        NPC_NAME: (sceneNpcs[0] && sceneNpcs[0].name) || 'he',
+        NPC_ROSTER: sceneNpcs.map(n => n.handle).join(', '),
+        ROOM_AMBIENCE: `${dTpl?.displayName || 'hideout'}, ${dTpl?.plotTokens || 'bare'}`,
+        BOND_LEVEL: live.bond.bondLevel,
+        BOND_NAME: BOND_NAMES[live.bond.bondLevel] || 'wary',
+        BODY_SUMMARY: `arousal=${live.body.arousal}, wetness=${live.body.wetness}, bruises=${live.body.bruises}, high=${live.body.high}`,
+        MOOD: live.mood.mood
+      };
+      const streamDiv = document.createElement('div');
+      streamDiv.className = 'log-entry assistant streaming';
+      streamDiv.innerHTML = `<b>scene:</b> <span class="stream-txt"></span>`;
+      logEl.appendChild(streamDiv);
+      const txtEl = streamDiv.querySelector('.stream-txt');
+      logEl.scrollTop = logEl.scrollHeight;
+      try {
+        const { raw, parsed } = await window.DMTHGame.ollama.runScene({
+          girl: live, mode, sceneKey, sceneVars, opts: { npcs: sceneNpcs },
+          kickText, room: { ambience: dTpl?.plotTokens || '', upgrades: {} },
+          onChunk: (chunk, full) => {
+            let view = full
+              .replace(/<delta>[\s\S]*?<\/delta>/g, '')
+              .replace(/<delta>[\s\S]*$/g, '')
+              .replace(/```[a-z]*\n?|```/gi, '')
+              .trim();
+            txtEl.textContent = view;
+            logEl.scrollTop = logEl.scrollHeight;
+          }
+        });
+        streamDiv.remove();
+        const entries = parseSpeakerLines(raw);
+        const girlLower = live.name.toLowerCase();
+        const girlLines = [];
+        for (const e of entries) {
+          const isGirl = e.speaker.toLowerCase().includes(girlLower);
+          if (isGirl) {
+            // Her line — speaker-less in her own log (renders as her name, feeds her context).
+            window.DMTHGame.state.appendTurn(live.id, 'assistant', e.text);
+            girlLines.push(e.text);
+          } else {
+            // A man's line — TEXT-ONLY, name-tagged so the log shows who said it. Never spoken.
+            window.DMTHGame.state.appendTurn(live.id, 'assistant', e.text, e.speaker);
+          }
+        }
+        if (parsed.delta) window.DMTHGame.delta.applyDelta(live.id, parsed.delta);
+        if (mode === 'hurtme') window.DMTHGame.damage.accumulateFromText(live.id, girlLines.join(' '));
+        // Girl-only TTS — ONLY her lines feed Kokoro; the men are text-chat only (Gee).
+        const herVoice = girlLines.join(' ').trim();
+        if (herVoice) speakLine(live, herVoice, mode);
+        renderLog();
+        regenHostImageIfChanged();
+        if (statusEl) { statusEl.textContent = 'done'; setTimeout(() => { if (statusEl) statusEl.textContent = ''; }, 2000); }
+      } catch (err) {
+        streamDiv.classList.remove('streaming');
+        const cls = err.classification;
+        txtEl.textContent = cls ? `[${cls.label}] ${cls.detail || err.message}` : `[ollama error: ${err.message}]`;
+        if (statusEl) statusEl.textContent = cls ? cls.label : `error: ${err.message}`;
+      }
+    }
+
+    // GANGSEL — throw a voiced gangbang: resolve the REAL mechanics (pay/health/cum-fill/bukkake via
+    // resolveGangbang) to get the actual men, optionally add a friend, then play it out voiced.
+    async function runVoicedGangbang(size, withFriend) {
+      if (inFlight) return;
+      if (window.DMTHVoiceQueue) window.DMTHVoiceQueue.cancel();
+      setInFlight(true);
+      try {
+        const statusEl = el.querySelector('#stream-status');
+        const g = window.DMTHGame.state.getGirl(girl.id);
+        const hp = g?.body?.health ?? 100;
+        if (hp <= 35 && !confirm(`${girl.name} is already wrecked (${Math.round(hp)} HP). A gangbang could finish her — let the pack have her anyway?`)) return;
+        const r = window.DMTHGame.whoreOut.resolveGangbang(girl.id, size);
+        if (!r.ok) { alert(r.reason || 'gangbang failed'); return; }
+        let sceneNpcs = (r.npcs || []).map(npcForScene);
+        // GANGSAMEDUNGEON — resolveGangbang only draws this girl's own arrivals, so every man is
+        // bound to her active dungeon by construction (no cross-dungeon crowd).
+        if (withFriend && window.DMTHJohnArchetypes.rollFriendArchetype) {
+          const fid = window.DMTHJohnArchetypes.rollFriendArchetype(Math.random);
+          const fnpc = window.DMTHJohnArchetypes.mintNpcIdentity(fid, { isFriend: true });
+          const fe = window.DMTHGame.whoreOut.resolveFriendEncounter(window.DMTHGame.state.getGirl(girl.id), fid, { npc: fnpc });
+          if (fe) sceneNpcs.push(npcForScene(fnpc));
+        }
+        if (!sceneNpcs.length) { if (statusEl) statusEl.textContent = 'no johns showed — raise her buzz / cadence and try again'; return; }
+        lastSceneNpcs.set(girl.id, sceneNpcs);
+        window.DMTHGame.state.appendTurn(girl.id, 'user', `*throws ${girl.name} to ${sceneNpcs.length} of them: ${sceneNpcs.map(n => n.handle).join(', ')}*`);
+        renderLog();
+        // She may have died in the resolved mechanics (low HP + the crowd / an added friend) — a corpse
+        // can't be voiced, so skip the scene and re-render to the postmortem room.
+        if ((window.DMTHGame.state.getGirl(girl.id)?.encounterState) === 'dead') { window.DMTHRouter.handle(); return; }
+        await runVoicedScene('gangbang_scene', sceneNpcs, `${sceneNpcs.map(n => n.handle).join(', ')} are all using ${girl.name} at once — they take turns, egg each other on, and order her around.`);
+        if ((window.DMTHGame.state.getGirl(girl.id)?.encounterState) === 'dead') { window.DMTHRouter.handle(); return; }
+        renderNpcDirect();
+      } finally { setInFlight(false); }
+    }
+
+    // NPC-DIRECT — render the "direct a man" box from the last scene's men. Re-callable after a
+    // re-render (men persist in lastSceneNpcs). Empties itself when there's no remembered crowd.
+    function renderNpcDirect() {
+      const panel = el.querySelector('#npc-direct-panel');
+      if (!panel) return;
+      const sceneNpcs = lastSceneNpcs.get(girl.id) || [];
+      const g = window.DMTHGame.state.getGirl(girl.id);
+      if (!sceneNpcs.length || !g || g.encounterState !== 'captive') { panel.innerHTML = ''; return; }
+      panel.innerHTML = `
+        <h3>🎯 Direct a man</h3>
+        <p class="small muted">Type an order at one of the men in the room — he DOES it (paid on completion, her stats shift, logged to her history), then the scene voices her reaction. e.g. "face fuck her", "stick it in her ass", "choke her out".</p>
+        <div class="stat-row">
+          <span>Order</span>
+          <select id="npc-direct-who" class="inline-select">${sceneNpcs.map((n, i) => `<option value="${i}">${escapeHtml(n.handle)}${n.isFriend ? ' 🩸' : ''}</option>`).join('')}</select>
+        </div>
+        <div class="input-row">
+          <textarea id="npc-direct-in" rows="2" placeholder="e.g. face fuck her / stick it in her ass / choke her out"></textarea>
+          <button id="npc-direct-send" class="btn-primary">Order him</button>
+        </div>`;
+      const sendBtn = panel.querySelector('#npc-direct-send');
+      const inEl = panel.querySelector('#npc-direct-in');
+      sendBtn.onclick = () => {
+        const idx = parseInt(panel.querySelector('#npc-direct-who').value, 10) || 0;
+        const directive = (inEl.value || '').trim();
+        if (!directive) return;
+        inEl.value = '';
+        directNpc(sceneNpcs[idx], directive);
+      };
+      inEl.addEventListener('keydown', (ev) => {
+        if (ev.key === 'Enter' && !ev.shiftKey) { ev.preventDefault(); sendBtn.click(); }
+      });
+    }
+
+    // Resolve a player-directed NPC act (NPCDIRECT-PAID.1): he performs it for REAL (paid, stats hit
+    // her, logged as a history event via resolveDirectedEncounter + the commonality engine), then a
+    // focused voiced scene plays out her reaction (girl-only TTS).
+    async function directNpc(npc, directive) {
+      if (inFlight) return;
+      if (window.DMTHVoiceQueue) window.DMTHVoiceQueue.cancel();
+      setInFlight(true);
+      try {
+        const statusEl = el.querySelector('#stream-status');
+        const r = window.DMTHGame.whoreOut.resolveDirectedEncounter(girl.id, { npc, directive });
+        if (!r.ok) { if (statusEl) { statusEl.textContent = r.reason; setTimeout(() => { if (statusEl) statusEl.textContent = ''; }, 2500); } return; }
+        window.DMTHGame.state.appendTurn(girl.id, 'user', `*orders ${npc.handle}:* ${directive}`);
+        renderLog();
+        if (window.DMTHNotify) {
+          window.DMTHNotify.show(`🎯 ${npc.handle} ${r.killed ? 'FINISHED' : 'did'} "${directive}" — paid $${r.paid}${r.killed ? ' (she\'s a corpse)' : ''}.`, { type: r.killed ? 'error' : 'success', durationMs: 5000 });
+        }
+        // If the directed act killed her, she can't react — skip the voiced reaction, re-render to corpse state.
+        if (r.killed || (window.DMTHGame.state.getGirl(girl.id)?.encounterState) === 'dead') { window.DMTHRouter.handle(); return; }
+        const sceneKey = npc.isFriend ? 'friend_scene' : 'gangbang_scene';
+        await runVoicedScene(sceneKey, [npc], `Master orders ${npc.handle}: "${directive}". He does EXACTLY that to ${girl.name} right now while she reacts.`);
+        if ((window.DMTHGame.state.getGirl(girl.id)?.encounterState) === 'dead') { window.DMTHRouter.handle(); return; }
+        renderNpcDirect();
+      } finally { setInFlight(false); }
+    }
+
+    // Wire the voiced-gangbang run button + restore the NPC-DIRECT box if a scene's men persist.
+    const vgangBtn = el.querySelector('#vgang-run');
+    if (vgangBtn) {
+      vgangBtn.onclick = () => {
+        const size = parseInt(el.querySelector('#vgang-size')?.value, 10) || 4;
+        const withFriend = !!el.querySelector('#vgang-friend')?.checked;
+        runVoicedGangbang(size, withFriend);
+      };
+    }
+    renderNpcDirect();
 
     // Typed-input send button just delegates to the shared path
     el.querySelector('#send').onclick = () => {

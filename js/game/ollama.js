@@ -6,8 +6,11 @@
   function cfg() { return window.DMTHConfig.OLLAMA; }
 
   // Build the system prompt from persona scaffolding + girl overlay + mode + scene.
-  function buildSystemPrompt(girl, mode, sceneKey, sceneVars) {
-    return window.DMTHTemplates.buildSystemPrompt(girl, mode, sceneKey, sceneVars);
+  // `opts` threads through to the templates layer — opts.npcs injects the voiced multi-party
+  // NPC-speaker block (friend_scene / gangbang_scene). Without this pass-through the FRIENDTEMPL
+  // npcBlock injection is dead code, so the men in a voiced scene never get distinct voices.
+  function buildSystemPrompt(girl, mode, sceneKey, sceneVars, opts) {
+    return window.DMTHTemplates.buildSystemPrompt(girl, mode, sceneKey, sceneVars, opts);
   }
 
   function buildContextBlock(girl, girlState, room, recentTurns, memory) {
@@ -157,8 +160,9 @@
   }
 
   // High-level: run a turn for a girl — assembles full prompt, streams, returns parsed.
-  async function runTurn({ girl, mode, sceneKey, sceneVars, userText, room, onChunk }) {
-    const system = buildSystemPrompt(girl, mode, sceneKey, sceneVars);
+  // `opts` (optional) threads to buildSystemPrompt — e.g. opts.npcs for a voiced multi-party scene.
+  async function runTurn({ girl, mode, sceneKey, sceneVars, userText, room, onChunk, opts }) {
+    const system = buildSystemPrompt(girl, mode, sceneKey, sceneVars, opts);
     const girlState = { body: girl.body, mood: girl.mood, bond: girl.bond, stats: girl.stats };
     // Only this girl's OWN turns feed her context. Speaker-tagged turns are partner-captive
     // lines mirrored into a HOST girl's shared log by the multi-girl scene (MULTIGIRL.2) —
@@ -209,6 +213,32 @@ NOW REACT — to the line between >>> <<< above. Your reply names what he did an
     return result;
   }
 
+  // High-level: run a VOICED MULTI-PARTY SCENE (friend_scene / gangbang_scene). Unlike runTurn —
+  // which bookends a single Master act for the girl to react to — a scene asks the model to write a
+  // short multi-speaker transcript where EVERY line is `Name: ...` tagged (the named men + the girl),
+  // voicing each man in his own distinct voice from opts.npcs. The caller (room.js) parses the tagged
+  // lines, renders per-speaker name tags, and feeds ONLY the girl's lines to Kokoro (girl-only TTS).
+  // `kickText` is the player's framing/direction ("they take turns on her" / a typed NPC directive).
+  async function runScene({ girl, mode, sceneKey, sceneVars, opts, kickText, room, onChunk }) {
+    const system = buildSystemPrompt(girl, mode, sceneKey, sceneVars, opts);
+    const girlState = { body: girl.body, mood: girl.mood, bond: girl.bond, stats: girl.stats };
+    // Her own recent lines for continuity (speaker-tagged roommate lines filtered out, same as runTurn).
+    const recentTurns = window.DMTHGame.state.getTurns(girl.id, 16)
+      .filter(t => !t.speaker).slice(-6).map(t => ({ role: t.role, text: t.text }));
+    const context = buildContextBlock(girl, girlState, room, recentTurns, []);
+    const messages = [
+      { role: 'user', content:
+`RUN THE SCENE described in your system prompt now. ${kickText || 'The men use her, talking the whole time.'}
+
+(supporting context — ${girl.name}'s current body / bond / drugs / location):
+${context}
+
+OUTPUT the multi-speaker exchange now — EVERY line tagged exactly like \`Name: ...\` (each named man, and ${girl.name}). Voice each man in HIS distinct voice. ${girl.name} reacts to each man BY NAME. End with the <delta> block for ${girl.name} only.`
+      }
+    ];
+    return chatStream({ system, messages, onChunk });
+  }
+
   window.DMTHGame = window.DMTHGame || {};
-  window.DMTHGame.ollama = Object.freeze({ chat, chatStream, runTurn, buildSystemPrompt, buildContextBlock, truncateResponse });
+  window.DMTHGame.ollama = Object.freeze({ chat, chatStream, runTurn, runScene, buildSystemPrompt, buildContextBlock, truncateResponse });
 })();

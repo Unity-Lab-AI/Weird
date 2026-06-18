@@ -1186,6 +1186,75 @@
     };
   }
 
+  // -------------------------------------------------------------------------
+  // COMMONALITY ENGINE — sync a free-typed directed act to the closest existing action.
+  // A directed NPC act ("face fuck her", "stick it in her ass", "choke her out") is free text;
+  // it has no stat spec of its own. This matches it to the most similar EXISTING ACTIONS entry so
+  // the directed encounter inherits that action's stat modifiers. Scores token overlap (directive
+  // tokens + synonym expansion) against each candidate's id-tokens (weighted heaviest) + notes.
+  // Returns { actionId, action, score, matched }.
+  // -------------------------------------------------------------------------
+  const DIRECTED_STOPWORDS = new Set(['the','her','a','an','to','him','on','in','it','his','my','your','and','with','of','do','make','have','get','that','this','then','some','for','at','up','off','out','into','while','as','is','are','be','give','let','go']);
+  // Synonym → canonical tokens that appear in action ids / notes, so colloquial directives reach
+  // the right spec: "face fuck" → 'extreme-facefuck', "in her ass" → 'sex-anal', "choke" → 'choke'.
+  const DIRECTED_SYNONYMS = {
+    face: ['facefuck','oral','throat'], facefuck: ['facefuck','oral','throat'], throat: ['facefuck','oral','throat'],
+    mouth: ['oral','facefuck'], suck: ['oral'], blow: ['oral'], blowjob: ['oral'], deepthroat: ['facefuck','oral','throat'],
+    ass: ['anal'], asshole: ['anal'], anal: ['anal'], sodom: ['anal'], sodomize: ['anal'], butt: ['anal'],
+    pussy: ['gentle'], cunt: ['gentle'], vaginal: ['gentle'],
+    choke: ['choke'], strangle: ['choke','out'], throttle: ['choke'], choking: ['choke'], asphyxiate: ['choke','out'],
+    slap: ['slap'], spank: ['slap'],
+    punch: ['punch','beatdown'], hit: ['punch'], beat: ['beatdown','punch'], beating: ['beatdown'], beatdown: ['beatdown'],
+    whip: ['whip'], flog: ['whip'], lash: ['whip'],
+    rough: ['rough'], pound: ['rough'], wreck: ['rough'], hard: ['rough'], rape: ['rough'], destroy: ['rough'], ravage: ['rough'],
+    gentle: ['gentle'], soft: ['gentle'], slow: ['gentle'], tender: ['gentle'],
+    breed: ['breeding','cum','inside'], creampie: ['cum','inside'], knock: ['breeding'], cum: ['cum','inside'], inside: ['inside','cum'], seed: ['breeding','cum'], impregnate: ['breeding','cum'],
+    degrade: ['degrade'], humiliate: ['degrade'], humiliation: ['degrade'], demean: ['degrade'],
+    burn: ['burn'], rack: ['rack'], stretch: ['rack'], flay: ['flay'], skin: ['flay'],
+    break: ['break'], waterboard: ['waterboard'], drown: ['waterboard'], electro: ['electro'], shock: ['electro'], nail: ['nail'], acid: ['acid'],
+    tie: ['restrain'], bind: ['restrain'], cuff: ['restrain'], restrain: ['restrain'],
+    fuck: ['sex','rough'], sex: ['sex'], use: ['rough'], ride: ['sex']
+  };
+  function tokenizeDirected(text) {
+    const toks = String(text || '').toLowerCase().match(/[a-z]+/g) || [];
+    const out = new Set();
+    for (const t of toks) {
+      if (DIRECTED_STOPWORDS.has(t) || t.length < 2) continue;
+      out.add(t);
+      const syn = DIRECTED_SYNONYMS[t];
+      if (syn) for (const s of syn) out.add(s);
+    }
+    return out;
+  }
+  // Candidate pool — acts an NPC can actually be DIRECTED to perform on her (sexual / violence /
+  // extreme / torture / john-*). Caretaking, drugs, and love acts are excluded: a john doesn't get
+  // told to brush her hair. Built once from the ACTIONS keys.
+  const DIRECTED_CANDIDATES = Object.keys(ACTIONS).filter(id =>
+    /^(sex-|extreme-|torture-|john-)/.test(id) || ['slap','choke','whip','punch','restrain'].includes(id)
+  );
+  function matchDirectedAction(text) {
+    const want = tokenizeDirected(text);
+    let best = null;
+    for (const id of DIRECTED_CANDIDATES) {
+      const action = ACTIONS[id];
+      if (!action) continue;
+      const idToks = id.split('-').filter(t => t.length >= 2);
+      const noteToks = (action.notes || '').toLowerCase().match(/[a-z]+/g) || [];
+      let score = 0;
+      for (const t of want) {
+        if (idToks.includes(t)) score += 3;          // id-token match weighted heaviest
+        else if (noteToks.includes(t)) score += 1;   // notes-token match
+      }
+      if (!best || score > best.score) best = { actionId: id, action, score };
+    }
+    // No token hit → a directed act is almost always aggressive; default to rough sex.
+    if (!best || best.score === 0) {
+      const fallback = ACTIONS['sex-rough'] ? 'sex-rough' : DIRECTED_CANDIDATES[0];
+      return { actionId: fallback, action: ACTIONS[fallback], score: 0, matched: false };
+    }
+    return { actionId: best.actionId, action: best.action, score: best.score, matched: true };
+  }
+
   window.DMTHGame = window.DMTHGame || {};
   window.DMTHGame.actionEffects = Object.freeze({
     ACTIONS,
@@ -1193,6 +1262,7 @@
     XTOL_LIMIT,
     COST_CODES,
     applyAction,
+    matchDirectedAction,
     previewCost,
     tooltipForAction,
     tickStaminaHealth,

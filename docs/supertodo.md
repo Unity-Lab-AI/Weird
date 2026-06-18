@@ -274,6 +274,10 @@ Per Gee: every new action/stat/button ships with a tooltip that is **non-intrusi
 > *"not all johns talk to u only in gang bang sessions when u chose the # johns and girls available in the dugeon, ie cant have a gang bang with girls in differnt dugeons"*
 - ⏳ **GANGVOICE.1** voiced multi-party is the chosen gangbang session only (passive johns stay ledger-only) · **GANGSAMEDUNGEON.1** gangbang girls must be same dungeon.
 
+## EPIC X (cont.) — directed NPC acts resolve for real (paid + stats + history event) ⏳
+> *"so if i direct an npc to "Face fuck a girl" via directly typing that to them the john needs to do that action and have that action be paid for when done with its stat changes take effect on the girl and into her history as an event"* + *"same for friends"*
+- ⏳ **NPCDIRECT-PAID.1** when the player DIRECTS a named NPC (typed at him), the john/friend PERFORMS that exact act (voiced), it is PAID FOR on completion, its stat changes take effect on the girl, AND it is logged into her history as an event (ledger). Same for FRIENDS (extreme near-kill friend path). Extends NPC-DIRECT.1 from narration into a real resolved encounter.
+
 ## EPIC AC — De-grind capture (desperation escalation + additive stacking + rename) ✅ SHIPPED
 > *"i dont want the catch mechonism to be overly complicated ... a failed attemp ... make u more \"desperate\" and more likely to be successuful on the next one ... two filed captures in a row the third is basicly a easy win ... select differnt drugs and tools and each once additively incresased the capture chance ... (capture is too tame)"*
 - ✅ **CAPEASE.1** REVERSED escalation → desperation bonus `[0,+0.22,+0.45,+0.90,+0.90]`, ~3rd grab guaranteed, no escape-from-misses (never stuck) · ✅ **CAPSTACK.1** `stackedAttempt`/`stackedChance` — toggle multiple drugs+tools into a loadout, each stacks (prob-OR + desperation), one "Drag her under" button · ✅ **CAPNAME.1** renamed to "Snatch / drag her under / SNATCHED" (internal ids intact).
