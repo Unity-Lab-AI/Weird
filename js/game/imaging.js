@@ -559,7 +559,10 @@
 
     const vi = girl.visualIdentity || {};
     const faceBlock   = vi.facialDescription || 'natural face, soft features';
-    const baseOutfit  = vi.defaultOutfitDescription || 'plain comfortable outfit';
+    // ORIGINALOUTFIT.1 — her captured-at, type-unique outfit (defaultOutfitDescription) is the
+    // baseline; the fallback is explicitly FULLY DRESSED so a girl lacking outfit data is never
+    // rendered in underwear (Gee: hunt images must show her in real clothes, not her underwear).
+    const baseOutfit  = vi.defaultOutfitDescription || 'fully clothed in casual street clothes, fully dressed';
     // Condom-on is a state overlay, not a visible outfit.
     // When equipped, render her in her PREVIOUS outfit (tracked at equip time) so the image
     // matches what she actually looks like. The contraception flag stays effective for the
@@ -569,7 +572,11 @@
       : girl.currentOutfit;
     const currentOutfitEntry = (girl.wardrobe || []).find(w => w.id === effectiveOutfitId);
 
-    const nudeStrength = nudeStateOf(girl);
+    // ORIGINALOUTFIT.1 — a PRE-CAPTURE girl (out in the world being hunted: a hunt location is set,
+    // or she's not yet a captive) is ALWAYS shown CLOTHED in her own captured-at outfit — never nude
+    // or in her underwear (Gee). Only a captive in your hold can be derobed/nude.
+    const preCapture = !!options.locationId || (girl.encounterState && girl.encounterState !== 'captive' && girl.encounterState !== 'dead');
+    const nudeStrength = preCapture ? '' : nudeStateOf(girl);
 
     // Postmortem state suppresses live-body marker emissions — no arousal flush, no drug-
     // glow, no pregnancy bump emphasis, no involuntary signs of life. The postmortem
