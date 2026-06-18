@@ -24,12 +24,12 @@
   let activeToken = 0;
   let activeAudio = null;
 
-  // Threshold under which we pass the whole text to Kokoro as ONE generation. Under
-  // this length, sentence-splitting adds 4-6 extra Kokoro round-trips for no benefit —
-  // the network + render latency stacks up to 20-30 sec instead of ~3-5 sec for the
-  // same audio. Kokoro's soft truncation ceiling sits around 350-400 chars; 280 leaves
-  // safe headroom. Long paragraphs (rare in chat) still get sentence-split.
-  const SINGLE_SHOT_MAX_CHARS = 280;
+  // Threshold under which we pass the whole text to Kokoro as ONE generation. Gee (2026-06-18):
+  // play the FULL response in a single clip — chat replies (girls + johns) are short, so
+  // per-sentence splitting just stacked 5-6 separate Kokoro round-trips and a wall of loading
+  // time for one little reply. Raised way up so a whole turn is one fast generation; only a rare
+  // genuine wall of text (> this) still gets sentence-split as a Kokoro hard-truncation safety.
+  const SINGLE_SHOT_MAX_CHARS = 1000;
 
   // Split text into sentence-ish chunks. Matches one of:
   //   - run of non-terminator chars followed by one-or-more terminators

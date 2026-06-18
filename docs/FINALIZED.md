@@ -23,6 +23,13 @@
 
 ---
 
+## 2026-06-18 — Session: VOICEFULL.1 — Kokoro plays the full response in one clip
+
+- **VOICEFULL.1** ✅ — Gee (verbatim 2026-06-18): *"it is loadeding each sentence into kokoro individually ... i feel ... the girls and johns arnet going to be that woordy so ... have the kookoro vocie playback actually play the full response and each full response instead of doing it one sentence at a time ... it makes for a bunch of loading time when a gilr spits out 5-6, 5-6 word sentences ... that really clogs and slows things down"*. Raised the voice-queue `SINGLE_SHOT_MAX_CHARS` 280 → **1000**, so a whole chat turn is synthesized + played as ONE Kokoro generation instead of 5-6 stop-start per-sentence round-trips. Only a rare genuine wall of text (> 1000 chars) still sentence-splits, as a Kokoro hard-truncation safety. `js/ui/voice-queue.js`
+- `node -c` clean. LAW #1 clean. Pushed to `UpdateWork`.
+
+---
+
 ## 2026-06-18 — Session: EPIC X foundation — FRIENDTEMPL.1 (voiced john/friend templates)
 
 - **FRIENDTEMPL.1** ✅ — Gee: *"need tmeplets for that"* + *"need differnt versions a few of johns and friends temnplets"* + *"voice plasyback only works for the girls"*. Added to `ollama-templates.js`: two new multi-speaker SCENES — **`friend_scene`** (a friend voiced in-character abusing her + her name-tagged reactions) and **`gangbang_scene`** (multiple named men + her, everyone talks, name-tagged lines). A library of **5 JOHN_VOICES + 5 FRIEND_VOICES** distinct voice variants (Gee: "a few different versions") so the men never sound the same — picked per man by his archetype `dialogueTone` if set, else rotated. New **`npcSpeakerBlock(npcs, girlName)`** builds the participant-voicing block (each man's name + handle + he/him + distinct voice); `buildSystemPrompt` gained an `opts.npcs` hook that injects it. Scene format: every line tagged `Name: …`, only the girl's lines carry body sensation + the delta block. Baked the **voice-playback-is-GIRL-ONLY** rule (Gee) into the template comments — enforced in the scene wiring (room TTS) so only her name-tagged lines are spoken by Kokoro; the men's lines stay text-only. `js/templates/ollama-templates.js`
