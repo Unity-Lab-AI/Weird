@@ -62,6 +62,7 @@
 
     properties: [],                // [{ locationId, owned, passiveIncomePerTick }]
     unlockedLocations: [],         // [locationId] hunting grounds with bought private access (PLVL.2)
+    ownedLocations: [],            // [locationId] locations BOUGHT OUT — you own the turf, grants perks (BUYLOCATION.1)
     purchasedUnlocks: [],          // [unlockKey] gated action tiers bought early with cash (PAYUNLOCK.1)
 
     roster: [],                    // [GirlProfile+state]  id-keyed; see girl-gen.js
@@ -149,6 +150,7 @@
     if (!s.trophies) s.trophies = [];
     if (!s.bodyParts) s.bodyParts = [];
     if (!s.unlockedLocations) s.unlockedLocations = [];
+    if (!s.ownedLocations) s.ownedLocations = [];
     if (!s.purchasedUnlocks) s.purchasedUnlocks = [];
     if (!s.settings) s.settings = {};
     if (!s.settings.playerName) s.settings.playerName = 'Master';
@@ -521,6 +523,8 @@
 
   // unlocked hunting grounds — bought private access (PLVL.2). Never removed.
   function addUnlockedLocation(locId) { mutate(s => { if (!s.unlockedLocations) s.unlockedLocations = []; if (!s.unlockedLocations.includes(locId)) s.unlockedLocations.push(locId); }); }
+  // BUYLOCATION.1 — locations BOUGHT OUT (you own the turf → perks). Never removed.
+  function addOwnedLocation(locId) { mutate(s => { if (!s.ownedLocations) s.ownedLocations = []; if (!s.ownedLocations.includes(locId)) s.ownedLocations.push(locId); }); }
   // purchased early-access action unlocks (PAYUNLOCK.1). Never removed.
   function addPurchasedUnlock(key) { mutate(s => { if (!s.purchasedUnlocks) s.purchasedUnlocks = []; if (!s.purchasedUnlocks.includes(key)) s.purchasedUnlocks.push(key); }); }
 
@@ -642,7 +646,7 @@
     addDisposal,
     addTrophy, getTrophies,
     addBodyPart, getBodyParts, removeBodyPart,
-    addUnlockedLocation, addPurchasedUnlock,
+    addUnlockedLocation, addOwnedLocation, addPurchasedUnlock,
     enqueuePropositioner, acceptPropositioner, completePropositioner, rejectPropositioner,
     listGirlForSale, unlistGirl,
     bumpTick,

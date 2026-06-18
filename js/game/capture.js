@@ -395,7 +395,10 @@
         // (health/bruises/dazed/sedated/mood/escape) in totality. Apply BEFORE escort so it persists.
         applyCaptureDebuffs(girl, ids);
         // CAPWANTED.1 — heat from the grab scales by tool tier (higher tier = cleaner = less heat).
-        const heat = captureHeat(ids);
+        let heat = captureHeat(ids);
+        // BUYLOCATION.1 — owning this turf (greased badges) cuts the WANTED heat from a grab here.
+        const op = window.DMTHGame.progression?.ownedLocationPerks ? window.DMTHGame.progression.ownedLocationPerks(locationId) : null;
+        if (op && op.wantedReduction) heat = heat * (1 - op.wantedReduction);
         if (heat > 0 && window.DMTHGame.state.addWanted) window.DMTHGame.state.addWanted(heat, 'snatch:' + bestToolTier(ids));
         const escort = window.DMTHGame.hunt.escortToHold(girl);
         // LOOT.1 — a successful grab drops location-aware loot (a tool from the scene, or cash).

@@ -107,6 +107,15 @@
     // produces its own gift over time (nurse → free scripts, sorority → allowance, etc.).
     if (window.DMTHGame.loot?.tickArchetypeGifts) window.DMTHGame.loot.tickArchetypeGifts();
 
+    // BUYLOCATION.1 — "The Skim": each BOUGHT-OUT location bleeds you a passive cut every tick.
+    if (window.DMTHGame.progression?.OWNERSHIP_PERKS && window.DMTHGame.state.addMoney) {
+      const owned = window.DMTHGame.state.current?.ownedLocations || [];
+      if (owned.length) {
+        const skim = owned.length * (window.DMTHGame.progression.OWNERSHIP_PERKS.passiveIncome || 0);
+        if (skim > 0) window.DMTHGame.state.addMoney(skim, 'owned-location-skim');
+      }
+    }
+
     // 13. Stamina + health drain/regen. Starvation/dehydration/
     // chronic-bruise penalties + passive rest regen when no negative pressure is active.
     if (window.DMTHGame.actionEffects) window.DMTHGame.actionEffects.tickStaminaHealth();

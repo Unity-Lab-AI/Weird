@@ -131,10 +131,12 @@
   // are ungated. Cheat-start opens everything.
   const LOCATION_GATES = Object.freeze({
     mall:            { girlCount: 2 },
+    'strip-club':    { level: 2 },
     sorority:        { level: 3 },
     'hotel-lobby':   { cost: 1500 },
     'private-party': { level: 3, girlCount: 4 },
     'school-campus': { level: 5 },
+    'prenatal-clinic': { level: 4 },          // PREGGOCAP.1 — pregnant-girl hunting ground
     remote:          { level: 6 }
   });
   function captiveCount() {
@@ -173,6 +175,42 @@
     return { ok: true, cost: g.cost };
   }
 
+  // ── BUYLOCATION.1 (Gee) — BUYING OUT a location (you OWN the turf, distinct from buying ACCESS).
+  // One buy-out grants the whole perk PACKAGE for that location, each perk with a fucked-up taboo
+  // name. Perks are read by hunt (exposure / wanted / capture odds) + tick (passive income).
+  const OWNERSHIP_PERKS = Object.freeze({
+    witnessReduction: 0.5,   // fewer witnesses → hunt exposure here halved
+    wantedReduction:  0.6,   // WANTED accrued from hunts here cut 60%
+    captureBoost:     0.15,  // home-turf capture-odds boost
+    passiveIncome:    120    // $/tick skim off the operation you now own
+  });
+  const OWNERSHIP_PERK_NAMES = Object.freeze([
+    '🙈 The Blind Eye — the whole block has learned not to see a thing (witnesses −50%)',
+    '💋 Greased Badges — the beat cops are on your dick, not your case (WANTED here −60%)',
+    '🩸 The Meat Rack — your turf, your rules; prey can\'t run far (+15% capture odds)',
+    '💰 The Skim — you own the operation now, it bleeds you a cut every tick (passive income)'
+  ]);
+  function buyOutCost(locId) {
+    const g = LOCATION_GATES[locId];
+    if (g && g.cost) return g.cost * 5;
+    if (g && g.level >= 5) return 16000;
+    if (g && g.level >= 3) return 10000;
+    return 6000;
+  }
+  function ownsLocation(locId) {
+    return (window.DMTHGame.state.current?.ownedLocations || []).includes(locId);
+  }
+  function ownedLocationPerks(locId) { return ownsLocation(locId) ? OWNERSHIP_PERKS : null; }
+  function buyOutLocation(locId) {
+    if (ownsLocation(locId)) return { ok: false, reason: 'you already own this turf' };
+    if (!isLocationUnlocked(locId)) return { ok: false, reason: 'unlock access to it first (level / captives / buy access)' };
+    const cost = buyOutCost(locId);
+    if (!window.DMTHGame.state.spendMoney(cost, 'buy-out-location:' + locId)) return { ok: false, reason: `need $${cost.toLocaleString()} to buy it out` };
+    if (window.DMTHGame.state.addOwnedLocation) window.DMTHGame.state.addOwnedLocation(locId);
+    if (window.DMTHNotify) window.DMTHNotify.show(`🏴 You BOUGHT OUT ${locId} — the turf is yours. Perks active: fewer witnesses, less heat, easier grabs, a passive skim.`, { type: 'success', durationMs: 6000 });
+    return { ok: true, cost, perks: OWNERSHIP_PERKS };
+  }
+
   window.DMTHGame = window.DMTHGame || {};
   window.DMTHGame.progression = Object.freeze({
     LEVEL_THRESHOLDS, LEVEL_TITLES, MAX_LEVEL, UNLOCKS, LOCATION_GATES,
@@ -180,6 +218,7 @@
     cumWadMultiplier, unlocksAtLevel, levelPerks, nextLevelInfo,
     isCheatUnlocked, isUnlocked, requiredLevel, describe,
     UNLOCK_FEES, unlockFee, buyUnlock,
-    isLocationUnlocked, locationGateReason, locationCost, buyLocationAccess
+    isLocationUnlocked, locationGateReason, locationCost, buyLocationAccess,
+    OWNERSHIP_PERKS, OWNERSHIP_PERK_NAMES, buyOutCost, ownsLocation, ownedLocationPerks, buyOutLocation
   });
 })();

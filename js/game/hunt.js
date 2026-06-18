@@ -244,7 +244,12 @@
     const notoriety = window.DMTHGame.state.current?.wallet?.notoriety || 0;
     const suspicion = (window.DMTHGame.state.current.wallet.suspicionByLocation[locationId] || 0);
     const suspicionPenalty = Math.min(0.45, suspicion * 0.08);
-    const exposure = LOCATION_EXPOSURE[locationId] || 0;
+    let exposure = LOCATION_EXPOSURE[locationId] || 0;
+    // BUYLOCATION.1 — OWNING the turf means the witnesses look away (lower exposure) and prey
+    // can't run far (home-turf capture boost). Perks come from progression.ownedLocationPerks.
+    const ownPerks = window.DMTHGame.progression?.ownedLocationPerks ? window.DMTHGame.progression.ownedLocationPerks(locationId) : null;
+    if (ownPerks) exposure = exposure * (1 - (ownPerks.witnessReduction || 0));
+    const ownedTurfBonus = ownPerks ? (ownPerks.captureBoost || 0) : 0;
 
     // Player satisfaction hunting bonus — fuck enough captives, the next catch is easier.
     // Center at 50 → 0 swing; full 100 → +0.20; floor 0 → -0.10.
@@ -272,7 +277,8 @@
       suspicionPenalty:    -suspicionPenalty,
       exposurePenalty:     -exposure,
       satisfactionBonus:   +satisfactionBonus,
-      sexDriveBonus:       +sexDriveBonus
+      sexDriveBonus:       +sexDriveBonus,
+      ownedTurfBonus:      +ownedTurfBonus
     };
     const sumRaw =
       breakdown.baseline +
@@ -286,7 +292,8 @@
       breakdown.suspicionPenalty +
       breakdown.exposurePenalty +
       breakdown.satisfactionBonus +
-      breakdown.sexDriveBonus;
+      breakdown.sexDriveBonus +
+      breakdown.ownedTurfBonus;
 
     const successP = Math.max(0.05, Math.min(0.95, sumRaw));
 
