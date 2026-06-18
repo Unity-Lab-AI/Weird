@@ -457,8 +457,12 @@
     // Proxy acts performed BY a john or a "friend" (john-* ids OR opts.byJohn) must NOT credit or
     // charge the player — a friend wrecking her doesn't fill the player's tank or drain it.
     const isProxyAct = String(actionId).startsWith('john-') || opts.byJohn === true;
-    const perfMul = (!isProxyAct && window.DMTHGame.playerStamina)
-      ? window.DMTHGame.playerStamina.performanceMul() : 1;
+    // NUGGETPERF (Gee) — performing on a NUGGET (limbless, can never escape) pays a kink + personal
+    // stat bonus: she's the ultimate helpless fuck-object, so every act on her hits +50% satisfaction
+    // + sex-drive. The reward for committing to the slow saw-work of nuggeting her.
+    const nuggetMul = girl.body?.isNugget ? 1.5 : 1;
+    const perfMul = ((!isProxyAct && window.DMTHGame.playerStamina)
+      ? window.DMTHGame.playerStamina.performanceMul() : 1) * nuggetMul;
     if (action.satisfaction && !isProxyAct && window.DMTHGame.state.addSatisfaction) {
       window.DMTHGame.state.addSatisfaction(action.satisfaction * perfMul, actionId);
     }
@@ -604,6 +608,12 @@
     // DEPRAVITY gate (PLVL.1) — nugget-making is high-tier; locked until level (cheat bypasses).
     if (window.DMTHGame.progression && !window.DMTHGame.progression.isUnlocked('nugget')) {
       return { ok: false, reason: `nugget-making is locked — reach DEPRAVITY level ${window.DMTHGame.progression.requiredLevel('nugget')} first` };
+    }
+    // TORTURE/SAWGATE (Gee) — you can't take a limb bare-handed; nuggeting needs a 🪚 Bone Saw.
+    // It's slow, methodical, multi-day work — the NUGGET_HEAL_GATE below makes her heal between
+    // each amputation, so the whole nugget is an operation of damage + healing across game-days.
+    if ((window.DMTHGame.state.current?.inventory?.['bone-saw'] || 0) < 1) {
+      return { ok: false, reason: 'you need a 🪚 Bone Saw to take her limbs — buy one first' };
     }
     const limbs = { ...limbState(girl) };
     if (limbs[limbKey] === 'removed') return { ok: false, reason: 'that limb is already gone' };

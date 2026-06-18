@@ -301,6 +301,13 @@
       cost: 480, tier: 3, cumImplant: { days: 1.5, capGain: 8 },
       notes: 'INSERTABLE — left in over time, not a quick session. Plug her with it and leave it ~1.5 game days while a timer runs; when it completes her cum-load CAPACITY jumps +8 (pushable past the kegel cap, toward a 60 ceiling) and she earns a bigger cum premium. Stretches + gapes her — visible in her images while it\'s in.'
     },
+    {
+      id: 'bone-saw', displayName: 'Bone Saw', emoji: '🪚',
+      category: 'item', subcategory: 'torture',
+      prompt: 'product photograph of a heavy surgical amputation bone saw with a worn wooden handle on a plain backdrop, grim antique-medical commerce style',
+      cost: 350, tier: 4,
+      notes: 'Reusable. REQUIRED to take a girl\'s limbs — nuggeting is slow, methodical work you can\'t do bare-handed. Buy once; the dismember/nugget actions gate on owning it. A full nugget can never run and never fight.'
+    },
 
     // --- BLUNT ---
     {
