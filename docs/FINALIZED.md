@@ -13,6 +13,15 @@
 
 ---
 
+## 2026-06-18 — Session: The Flesh Fence — shop rework (daily limited level-locked stock) + vile rename + cheat full-stock
+
+EPIC AB shipped. `node -c` clean.
+- **SHOPREWORK.1** ✅ — daily stock model: cheap STAPLES (≤$30 / contraception / food) unlimited; high-tier items LEVEL-LOCKED (tier ≤ 1+floor(DEPRAVITY/2)) AND only ~half the high-tier catalog stocked each game-day at qty 1-3, refreshing daily (persisted per day). `buy()` enforces lock + stock + decrements. `shop.js`, `state.js` (shopStock), `shop-view.js` (stock/∞/sold-out/🔒 display + gated buttons).
+- **SHOPNAME.1** ✅ — renamed the shop to **🩸 The Flesh Fence** (shop-view title + dashboard + game.html nav + buy messages).
+- **Cheat/sandbox full unlock** (Gee: *"starting with everything unlocked is a game option ... properly unlcok all gates and give access to a stock market (renamed ... vile and taboo)"*) — `isCheat()` (progression cheat OR sandbox mode) bypasses BOTH the level locks AND the daily stock limit → the fence is fully stocked for an everything-unlocked start.
+
+---
+
 ## 2026-06-18 — Session: FRIENDGIFT.1 — johns + friends gift high-tier loot on successful use
 
 - **FRIENDGIFT.1** ✅ — `loot.grantNpcGift` + `HIGH_TIER_GIFTS` pool (heavy chems / premium restraints / chamber toys / capacity trainers / blue-pill). Friends ~50% (generous), johns ~5%+intensity×2% (generous if big-tipper) leave a gift on a successful use — applies to johns AND friends per Gee. `loot.js`, `whore-out.js`

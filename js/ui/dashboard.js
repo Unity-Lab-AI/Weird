@@ -99,7 +99,7 @@
         <div class="btn-row">
           <a href="#town" class="btn-primary" data-tooltip="The map. Visit locations + own properties.">🌆 Town</a>
           <a href="#hunt" class="btn-small" data-tooltip="Pick a target + loadout. Run a 4-stage capture attempt.">🎯 Hunt</a>
-          <a href="#shop" class="btn-small" data-tooltip="Buy tools, drugs, food, water, contraception, abortion supplies.">🛒 Shop</a>
+          <a href="#shop" class="btn-small" data-tooltip="The Flesh Fence — shady supply den. Tools, drugs, food, water, contraception, abortion supplies. High-tier stock is level-locked + limited per day.">🩸 The Flesh Fence</a>
           <a href="#slave-market" class="btn-small" data-tooltip="Buy/sell captives. Untrained cheap, trained premium.">⛓️ Slave market</a>
           <a href="#achievements" class="btn-small" data-tooltip="Unlocked milestones.">🏆 Achievements</a>
           <a href="#trophy-room" class="btn-small" data-tooltip="Trophies minted from terminally-disposed girls — each grants stacking perks.">🏆 Trophy room</a>

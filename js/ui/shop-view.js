@@ -29,7 +29,8 @@
     };
     el.innerHTML = `
       <div class="panel">
-        <h2>🛒 Shop</h2>
+        <h2>🩸 The Flesh Fence</h2>
+        <p class="small muted">The fence's shady supply runs. Cheap staples (condoms / food) never run out — the good shit (high-tier tools, toys, chems) is level-locked and only a handful shows up each day. Stock refreshes every game-day. (Everything-unlocked start = the fence keeps everything fully stocked for you.)</p>
         <div class="tabs">
           ${SUBCATS.map(c => `<a href="#shop?sub=${c}" class="tab ${c === subcat ? 'active' : ''}" data-tooltip="${SUBCAT_TOOLTIPS[c] || c}">${c}</a>`).join('')}
         </div>
@@ -41,19 +42,26 @@
             const have = s.inventory[it.id] || 0;
             const canAfford = s.wallet.money >= it.price;
             const tooltip = (it.notes || it.displayName || '').replace(/"/g, '&quot;');
-            return `<div class="model-card" data-tooltip="${tooltip}">
+            // SHOPREWORK.1 — stock + level-lock state.
+            const stockTxt = it.staple ? '∞' : (it.available > 0 ? `${it.available} today` : 'sold out today');
+            const soldOut = !it.staple && it.available <= 0;
+            const blocked = it.locked || soldOut || !canAfford;
+            const buyMax = it.staple ? Infinity : it.available;
+            const buyLabel = it.locked ? '🔒 level-locked' : soldOut ? 'sold out' : !canAfford ? 'Too poor' : 'Buy';
+            return `<div class="model-card${it.locked ? ' locked' : ''}" data-tooltip="${tooltip}">
               <div class="asset-slot" data-asset-category="item" data-asset-id="${it.id}" data-asset-size="80"></div>
-              <div class="model-name">${it.emoji} ${it.displayName}</div>
+              <div class="model-name">${it.locked ? '🔒 ' : ''}${it.emoji} ${it.displayName}</div>
               <div class="model-meta">
                 <span data-tooltip="Item cost in dollars">$${it.price.toLocaleString()}</span>
-                <span data-tooltip="Item tier — higher = more powerful + more expensive">tier ${it.tier}</span>
+                <span data-tooltip="Item tier — higher = more powerful, level-locked">tier ${it.tier}</span>
+                <span data-tooltip="In stock today (∞ = unlimited staple, refreshes daily)" class="${soldOut ? 'danger' : ''}">${stockTxt}</span>
                 <span data-tooltip="Count currently in your inventory">have: ${have}</span>
               </div>
-              <div class="model-notes small">${it.notes || ''}</div>
-              <button class="btn-small ${canAfford ? 'btn-primary' : ''}" data-buy="${it.id}" ${canAfford ? '' : 'disabled'} data-tooltip="Buy one. Deducts $${it.price.toLocaleString()} from treasury.">
-                ${canAfford ? 'Buy' : 'Too poor'}
+              <div class="model-notes small">${it.locked ? '<span class="danger">Locked — raise your DEPRAVITY level to buy this tier.</span> ' : ''}${it.notes || ''}</div>
+              <button class="btn-small ${blocked ? '' : 'btn-primary'}" data-buy="${it.id}" ${blocked ? 'disabled' : ''} data-tooltip="${it.locked ? 'Locked by DEPRAVITY level' : soldOut ? 'Back tomorrow for fresh stock' : 'Buy one. Deducts $' + it.price.toLocaleString() + '.'}">
+                ${buyLabel}
               </button>
-              <button class="btn-small" data-buy5="${it.id}" ${s.wallet.money >= it.price * 5 ? '' : 'disabled'} data-tooltip="Bulk buy ×5. Deducts $${(it.price * 5).toLocaleString()} from treasury.">
+              <button class="btn-small" data-buy5="${it.id}" ${(blocked || s.wallet.money < it.price * 5 || buyMax < 5) ? 'disabled' : ''} data-tooltip="Bulk buy ×5. Deducts $${(it.price * 5).toLocaleString()}.">
                 Buy ×5
               </button>
             </div>`;
