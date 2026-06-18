@@ -387,6 +387,12 @@
       window.DMTHGame.wanted.accrue('corpse-content-sale');
     }
 
+    // FRIENDGIFT.1 — a satisfied john sometimes leaves a high-tier gift (generous types more often).
+    if (!isPostmortem && window.DMTHGame.loot && window.DMTHGame.loot.grantNpcGift
+        && Math.random() < (0.05 + (arc.intensity || 0) * 0.02)) {
+      window.DMTHGame.loot.grantNpcGift({ from: npc ? npc.handle : arc.displayName, generous: (arc.tipChance || 0) > 0.4 });
+    }
+
     window.DMTHGame.state.updateGirl(girl.id, { whoreOut: newWo });
     return encounter;
   }
@@ -467,6 +473,10 @@
     if (window.DMTHNotify) window.DMTHNotify.show(`🩸 ${arc.displayName} paid $${payment} to wreck ${girl.name} — she's at ${newHealth} HP.`, { type: 'warn', durationMs: 6000 });
     if (newHealth <= 8 && window.DMTHNotify) {
       window.DMTHNotify.show(`⚠️ ${girl.name} is barely alive (${newHealth} HP) — heal her now or lose her.`, { type: 'danger', durationMs: 8000 });
+    }
+    // FRIENDGIFT.1 — friends are generous: ~50% leave a high-tier gift (gear/toys/drugs) for the use.
+    if (window.DMTHGame.loot && window.DMTHGame.loot.grantNpcGift && Math.random() < 0.5) {
+      window.DMTHGame.loot.grantNpcGift({ from: (npc ? npc.handle : arc.displayName), generous: true });
     }
     return encounter;
   }

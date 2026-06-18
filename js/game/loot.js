@@ -206,6 +206,24 @@
     return { items: granted, toy };
   }
 
+  // FRIENDGIFT.1 — johns AND friends GIFT high-tier gear/toys/drugs on a successful use (the perk
+  // of renting her out / letting friends in). Friends gift more + bigger; johns rarer + smaller.
+  // Pool is the "good stuff" — heavy chems, premium restraints, chamber toys, capacity trainers.
+  const HIGH_TIER_GIFTS = [
+    'ketamine', 'chloroform', 'ether', 'rohypnol', 'tranquilizer',
+    'handcuffs', 'shackles', 'harness',
+    'mdma', 'coke-bumps',
+    'monster-dildo', 'fucking-machine', 'flogger-whip', 'cattle-prod',
+    'blue-pill', 'ben-wa-balls', 'vaginal-expander', 'condom-magnum'
+  ];
+  function grantNpcGift(opts = {}) {
+    const id = pick(HIGH_TIER_GIFTS);
+    const qty = 1 + (opts.generous && Math.random() < 0.4 ? 1 : 0);
+    window.DMTHGame.state.addItem(id, qty);
+    if (window.DMTHNotify) window.DMTHNotify.show(`🎁 ${opts.from || 'A client'} left you ${qty}× ${label(id)} — high-tier gift.`, { type: 'success', durationMs: 5000 });
+    return { id, qty };
+  }
+
   // ── ARCHGIFT.1 — passive per-archetype loot gifts ──────────────────────────────────────
   // EVERY girl type quietly produces a type-specific gift while you hold at least one of her —
   // a nurse's prescription pad yields free sedatives, a sorority girl bleeds daddy's allowance,
@@ -254,6 +272,7 @@
   window.DMTHGame.loot = Object.freeze({
     LOCATION_LOOT, FULL_POOL, ARCHETYPE_GIFTS, REQUEST_TEMPLATES, TIER_BASE,
     rollCaptureLoot, scavengeLocation, tickArchetypeGifts,
-    requestOptions, requestItem, grantCaptureHaul
+    requestOptions, requestItem, grantCaptureHaul,
+    HIGH_TIER_GIFTS, grantNpcGift
   });
 })();

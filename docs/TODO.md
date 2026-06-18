@@ -77,6 +77,14 @@
 - [ ] **GANGSEL.1** 🟠 *"so work this all into the templets for johns and frineds with things like the gangbang mechanic. with like selectors of whos is going to be involved"* — gangbang participant SELECTOR: pick which johns/friends + which girl(s) are involved. `js/ui/room.js`, `js/game/whore-out.js`
 - [ ] **GANGSCALE.1** 🟠 *"better dugeons more girls biuigerr gangbangs better satisfaction"* — bigger dungeons + more girls held → bigger gangbangs → better satisfaction payout. `js/game/whore-out.js`, `js/game/action-effects.js`
 
+### Gee's directive (verbatim 2026-06-18) — friends gift high-tier loot + death-as-bonus + don't-die-too-easy balance:
+
+> *"friends gift hiegh teir items equipment and toys and drugs on successful fucking events and actions.. no mind u if girl corpses during an act that s a bonus payment so not always a bad thing but we dont want girls dying off too easy but with management its totally possible to have dozens and dozens of girls across all your dugeons"*
+
+- [x] **FRIENDGIFT.1** 🟠 *"friends gift hiegh teir items equipment and toys and drugs on successful fucking events and actions"* — on a successful friend (and john) use, a chance to GIFT high-tier items / equipment / toys / drugs (the perk of letting friends in). `js/game/whore-out.js`, `js/game/loot.js`, `js/templates/john-archetypes.js`
+- [ ] **SNUFFBONUS.1** 🟠 *"no mind u if girl corpses during an act that s a bonus payment so not always a bad thing"* — if a girl dies DURING an act (friend/john/player), pay a snuff-content BONUS (premium) — death isn't purely a loss. `js/game/whore-out.js`, `js/game/death.js`, `js/game/lifespan.js`
+- [ ] **DEATHBAL.1** 🟠 *"but we dont want girls dying off too easy but with management its totally possible to have dozens and dozens of girls across all your dugeons"* — balance lethality so death is a managed RISK, not constant attrition: with care/healing/robustness a well-run operation holds dozens across dungeons. Ties to STOCK-BUILD.3 + FRIENDKILL lethal-finish gate. `js/game/lifespan.js`, `js/game/action-effects.js`, `js/game/whore-out.js`
+
 ### Carry-over / reconciliation (previously told):
 - [ ] **TUTORIAL.1** ⏸️ DEFERRED by Gee until he explicitly says go — guided onboarding (capture→feed→torture/rape→all mechanics). Do NOT start unprompted.
 - [ ] **LEGACY-AUDIT.1** 🟡 the unchecked legacy backlog blocks below (BAL.1-5, PLVL.1/.2, NEWBORN.2, CUMFILL.1, CONDOMS.1, LOOT.2, SEXDRIVE.1, XTOL.1, MULTIGIRL.2, TOOLTIPS.1/.2, ESCAPE-BAR.1, ESCAPE-GAME.1/.2, CLOTHING.1, TROPHY.1-3, CORPSE.1, DISPOSAL.1, ARREST.1, etc.) were largely SHIPPED in the 2026-06-18 mega-build (see FINALIZED). Audit each against FINALIZED, mark the genuinely-shipped ones `[x]`, and surface any that slipped (candidates to re-verify: ESCAPE-GAME.1 interactive mini-game, CLOTHING.1 per-outfit stat bonuses, TOOLTIPS.1 full untruncated effect tooltips).

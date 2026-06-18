@@ -13,6 +13,13 @@
 
 ---
 
+## 2026-06-18 — Session: FRIENDGIFT.1 — johns + friends gift high-tier loot on successful use
+
+- **FRIENDGIFT.1** ✅ — `loot.grantNpcGift` + `HIGH_TIER_GIFTS` pool (heavy chems / premium restraints / chamber toys / capacity trainers / blue-pill). Friends ~50% (generous), johns ~5%+intensity×2% (generous if big-tipper) leave a gift on a successful use — applies to johns AND friends per Gee. `loot.js`, `whore-out.js`
+- Logged + queued: **SNUFFBONUS.1** (a girl corpsing during an act pays a bonus) + **DEATHBAL.1** (death = managed risk, hold dozens with care) — both apply to johns + friends + player; tie into FRIENDKILL + lifespan (next arc).
+
+---
+
 ## 2026-06-18 — Session: Stockholm/stat polish batch (start tier, max-HP growth, numeric bars, 1-10 rating, level-gated acts) + vaginal trainers + friend roster
 
 `node -c` clean across touched files. EPIC Y + bits of U/S.
