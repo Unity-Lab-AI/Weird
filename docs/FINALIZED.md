@@ -13,6 +13,13 @@
 
 ---
 
+## 2026-06-18 — Session: PREGOUTFIT.1 + CLOTHESMORE.1 + OUTFITSMORE.1 — preggo outfit + more synced clothing — LOCAL ONLY (not pushed)
+
+- **PREGOUTFIT.1** ✅ — Gee verbatim: *"preggos need some kind of special simi need like half nud specifi clothing to esentuate htheir bellies and milk jugs full of milek"*. Added `preggo-belly-harness` (open strappy harness framing a heavily pregnant swollen belly + milk-swollen leaking tits, positive nudity prompt). `syncMatch` now treats a `pregnant`-tagged outfit as a sync match while `pregnancy.status==='pregnant'`, so wearing it gives the OUTFITSYNC buff as her soft preggo bonus. `js/game/wardrobe.js`
+- **CLOTHESMORE.1 + OUTFITSMORE.1** ✅ — Gee verbatim: *"so we may need some more clothing types to sync up to each girl tryp"* + *"and or more outfits. ect ect"*. The SKIMPYWEAR + PREGOUTFIT work added **9 new outfits** to the wardrobe — 8 girl-type-synced skimpy ones (office/police/nurse/teacher/cheer/maid/schoolgirl/waitress, each `syncArchetype`-tagged) + the preggo harness. `js/game/wardrobe.js`. `node -c` clean.
+
+---
+
 ## 2026-06-18 — Session: SKIMPYWEAR.1 + OUTFITSYNC.1 — skimpy outfits + outfit↔type synergy — LOCAL ONLY (not pushed)
 
 - **SKIMPYWEAR.1** ✅ — Gee verbatim: *"nnnedd clothing like for an office worker girl a long male-suit-tie only all nude and nothing but a tie ... police woman ... as skimpy and as much nudity ... as is possible"* + *"u actually need to descripbe the outfits in thire prompts used ... nurse-outfit-with-nude-tits-exposed"* + *"no negative prompts htat just positive pust those words in there"* + *"u rellay need to jam that nude part in there or u as for tits it be with a bra"*. Added 8 skimpy/max-nudity `nude:'accessories'` outfits (office necktie-only, police open-shirt, nurse open-smock, teacher bare-under-blazer, cheer top-up/skirt-up, maid apron-only, schoolgirl tied-blouse, waitress bare-under-apron). Each `accessoriesOnly` + `description` spells out the EXPOSED state with POSITIVE nudity words ONLY (topless, bottomless, bare exposed breasts, nipples out, bare naked pussy) — zero negations (a "no bra" prompt makes the gen draw a bra). Each carries a `syncArchetype` for OUTFITSYNC. Saved a standing memory: **positive image prompts only**. `js/game/wardrobe.js`

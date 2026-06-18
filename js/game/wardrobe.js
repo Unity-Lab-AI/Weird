@@ -262,6 +262,14 @@
       description: 'a tiny diner half-apron over an otherwise fully nude body, topless, bare exposed tits with nipples out, a short skirt hiked up over bare hips, bottomless, bare naked pussy', multiplier: 1.3, roleplay: 'waitress',
       nude: 'accessories', accessoriesOnly: 'a tiny diner half-apron over an otherwise fully nude body, topless with bare exposed tits and nipples out, a name tag by a bare nipple, a short skirt hiked up over bare hips, bottomless, bare naked pussy', syncArchetype: 'barista'
     },
+    // PREGOUTFIT.1 (Gee) — a preggo "simi need" half-nude outfit that accentuates her swollen belly +
+    // milk-heavy tits. Positive nudity prompt; meant for a pregnant captive (belly/milk show). The soft
+    // bonus while pregnant is the OUTFITSYNC sync match (roleplay 'pregnant' / archetype-agnostic).
+    {
+      id: 'preggo-belly-harness', displayName: 'Breeder: Belly + Milk Harness', emoji: '🤰', price: 170, tier: 3,
+      description: 'an open strappy harness framing a heavily pregnant swollen belly and huge milk-swollen tits, bare exposed breasts with leaking nipples out, bottomless, bare naked pussy under the bump, barefoot', multiplier: 1.4, roleplay: 'pregnant',
+      nude: 'accessories', accessoriesOnly: 'an open strappy harness framing her heavily pregnant swollen belly and milk-swollen tits, bare exposed breasts with fat leaking nipples out, topless, bottomless, bare naked pussy below the bump, barefoot', syncArchetype: 'pregnant'
+    },
     {
       id: 'goth-outfit',
       displayName: 'Goth Fit',
@@ -469,9 +477,11 @@
   function syncMatch(girl) {
     const o = getById(girl?.currentOutfit);
     if (!o) return null;
+    const tags = [o.syncArchetype, o.roleplay].filter(Boolean).map(s => String(s).toLowerCase());
+    // PREGOUTFIT.1 — a 'pregnant'-tagged outfit (the belly/milk harness) syncs while she's pregnant.
+    if (tags.includes('pregnant') && girl?.pregnancy?.status === 'pregnant') return o;
     const arc = String(girl?.archetypeTemplate || '').toLowerCase();
     if (!arc) return null;
-    const tags = [o.syncArchetype, o.roleplay].filter(Boolean).map(s => String(s).toLowerCase());
     return tags.some(t => t === arc || arc.includes(t) || t.includes(arc)) ? o : null;
   }
   // Synergy multiplier applied to sale price + film value when she's dressed in her matching type.
