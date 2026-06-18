@@ -179,12 +179,15 @@
     // Bond-debt overflow — girl protests, no more johns until debt clears
     if ((girl.bond?.bondDebt || 0) > BONDDEBT_EXCESS) return null;
 
-    // FRIENDDIRECT.1 (Gee) — friends are PLAYER-DIRECTED, never passive: "friends have to be
-    // drirrected at the girl the player wants them to use.. they dont just willy neely choose there
-    // own". So a passive per-tick arrival is ALWAYS a john now — friends only ever act when the
-    // player directs them at a specific girl (the room's voiced gangbang "include a friend" / the
-    // NPC-direct box / the visitor list). `friendsAllowed` now just means "friends are available to
-    // direct at this girl", it no longer auto-fires a friend visit. (Was: ~15% of arrivals.)
+    // FRIENDDIRECT.1 — corrected (Gee): *"johns can be passive but for a gang bang and same with
+    // friends i dont need to tell them what to do unless its a gangbang"*. So passive friends ARE
+    // back: a friend visits AUTONOMOUSLY (does his own extreme thing — the player doesn't tell him
+    // what to do) on a girl whose `friendsAllowed` is ON. The per-girl toggle IS how the player
+    // "directs" which girls receive friends (so they don't "willy neely choose there own girl"
+    // across the whole roster); DIRECTION OF THE ACT / participant selection is gangbang-only.
+    if (wo.friendsAllowed && window.DMTHJohnArchetypes.rollFriendArchetype && Math.random() < 0.15) {
+      return resolveFriendEncounter(girl, window.DMTHJohnArchetypes.rollFriendArchetype(Math.random));
+    }
 
     const isPregnant = girl.pregnancy?.status === 'pregnant';
     let archetypeId = window.DMTHJohnArchetypes.rollJohnArchetype(Math.random, { isPregnant });

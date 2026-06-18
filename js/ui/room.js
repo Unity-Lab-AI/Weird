@@ -325,8 +325,8 @@
                   <span>Condom required (needs stock)</span>
                   <label><input type="checkbox" id="whore-condom" ${wo.condomRequired ? 'checked' : ''}/> enforce</label>
                 </div>
-                <div class="stat-row" data-tooltip="Make your extreme 'friends' AVAILABLE to direct at her — they no longer show up on their own. When enabled you can include a friend in a 🎭 voiced gangbang or direct one at her; each will wreck her (~40-60 HP) for a fortune, and two+ together can finish her. Every visit logs to her history.">
-                  <span>🩸 Friends available</span>
+                <div class="stat-row" data-tooltip="Let your extreme 'friends' visit THIS girl — they arrive on their own and wreck her (~40-60 HP) for a fortune, no direction needed (they never use condoms). The per-girl toggle is how you pick which girls they're allowed at. For a 🎭 gangbang you choose which friends take part; two+ together can finish her. Every visit logs to her history.">
+                  <span>🩸 Let friends in</span>
                   <label><input type="checkbox" id="whore-friends" ${wo.friendsAllowed ? 'checked' : ''}/> allow</label>
                 </div>
                 <div class="btn-row" style="margin-top:4px">
@@ -1596,7 +1596,7 @@
     const friendsChk = el.querySelector('#whore-friends');
     if (friendsChk) {
       friendsChk.onchange = () => {
-        if (friendsChk.checked && !confirm(`This makes your extreme "friends" AVAILABLE to direct at ${girl.name} — they won't come on their own, but when you send one (voiced gangbang / direct-a-man) he'll leave her wrecked at the edge of death for the money, and two+ together can be her last night. Make them available?`)) {
+        if (friendsChk.checked && !confirm(`Let your extreme "friends" visit ${girl.name} — they'll come on their own and leave her wrecked at the edge of death for the money (no condoms, ever), and in a gangbang two+ together can be her last night. Allow friends here?`)) {
           friendsChk.checked = false;
           return;
         }
