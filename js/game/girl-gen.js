@@ -253,10 +253,21 @@
       ? window.DMTHTemplates.rollCaptiveAffect(archetype, r)
       : 'agreeable';
 
+    // FRIENDKINK.1 — ethnicity trait, picked at generation and baked into her LOCKED facial
+    // description so every image of her is consistent. Drives friend kink/dislike matching (a
+    // bigoted friend pays less on a girl he despises; a fetishist pays a premium for her type).
+    const ETHNICITIES = ['white', 'black', 'latina', 'asian', 'middle-eastern', 'indian', 'mixed'];
+    const ETHNICITY_FACE = {
+      white: 'fair-skinned white', black: 'dark-skinned black', latina: 'tan latina',
+      asian: 'east-asian', 'middle-eastern': 'olive-skinned middle-eastern', indian: 'brown-skinned south-asian', mixed: 'mixed-race'
+    };
+    const ethnicity = ETHNICITIES[Math.floor(r() * ETHNICITIES.length)];
+
     return {
       id,
       name,
       age,
+      ethnicity,
       archetypeTemplate: archetype,
       captiveAffect,
       voiceId,
@@ -286,7 +297,7 @@
       // visualIdentity (Pollinations seed + locked blocks for persistence)
       visualIdentity: {
         seed,
-        facialDescription: facial,
+        facialDescription: `${ETHNICITY_FACE[ethnicity] || ''} ${facial}`.trim(),
         defaultOutfitDescription: outfit,
         profileImagePath: null,          // will be populated when image is generated
         profileImageGeneratedAt: null,

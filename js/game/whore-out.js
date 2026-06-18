@@ -451,6 +451,16 @@
     // good/plentiful his loot is. A maxed L10 creep is a guaranteed kill on a girl under 60% health.
     const creep = (window.DMTHGame.state.getFriendCreep ? window.DMTHGame.state.getFriendCreep(friendId).level : 0) || 0;
 
+    // FRIENDKINK.1 — his unique kink/dislike vs THIS girl's traits swings his pay + loot, and a
+    // bigot may flat-out REFUSE her (Gee: don't put a racist friend on a girl he despises). Refusal
+    // aborts the visit entirely — no act, no pay, no creep — with a notify so the player learns.
+    const match = window.DMTHJohnArchetypes.friendMatch
+      ? window.DMTHJohnArchetypes.friendMatch(friendId, girl) : { payMult: 1.0, lootDelta: 0, refused: false, reason: '' };
+    if (match.refused) {
+      if (window.DMTHNotify) window.DMTHNotify.show(`🚫 ${arc.displayName} took one look at ${girl.name} and walked — ${match.reason || 'she\'s not his type'}.`, { type: 'warn', durationMs: 5000 });
+      return null;
+    }
+
     const moodBefore = girl.mood?.mood || 'neutral';
     const bondXPBefore = girl.bond?.bondXP || 0;
     const bondDebtBefore = girl.bond?.bondDebt || 0;
@@ -531,8 +541,9 @@
     const basePay = arc.payRange[0] + Math.floor(Math.random() * (arc.payRange[1] - arc.payRange[0]));
     const sat = window.DMTHGame.state.getSatisfaction ? window.DMTHGame.state.getSatisfaction() : 50;
     // SNUFFBONUS.1 snuff bonus + FRIENDTOY.1 chamber-toy premium both fold into his payout.
-    // FRIENDCREEP.1 — higher creep PAYS MORE (L0 ×1 → L10 ×2).
-    const payment = Math.round(basePay * (1 + ((sat - 50) / 50) * 0.12) * (1 + creep * 0.1)) + snuffBonus + chamberPremium;
+    // FRIENDCREEP.1 — higher creep PAYS MORE (L0 ×1 → L10 ×2). FRIENDKINK.1 — his kink/dislike vs
+    // this girl swings it further (premium for a fetish-match, scraps for one he's bigoted against).
+    const payment = Math.round(basePay * (1 + ((sat - 50) / 50) * 0.12) * (1 + creep * 0.1) * match.payMult) + snuffBonus + chamberPremium;
 
     const encounter = {
       id: 'frnd_' + Date.now().toString(36) + '_' + Math.floor(Math.random() * 0xffff).toString(36),
@@ -593,7 +604,8 @@
     // FRIENDGIFT.1 + FRIENDCREEP.1 — friends always leave loot; higher creep drops BETTER + MORE of it
     // (generous gift + one extra per ~3 creep levels, L10 ≈ 4 drops). A KILL is an epic win on top.
     if (window.DMTHGame.loot && window.DMTHGame.loot.grantNpcGift) {
-      const drops = 1 + Math.floor(creep / 3);
+      // FRIENDKINK.1 — kink-match drops more loot, dislike-hit drops less (floored at 0).
+      const drops = Math.max(0, 1 + Math.floor(creep / 3) + (match.lootDelta || 0));
       for (let i = 0; i < drops; i++) {
         window.DMTHGame.loot.grantNpcGift({ from: (npc ? npc.handle : arc.displayName), generous: true, kill: killed && i === 0 });
       }
@@ -607,7 +619,7 @@
     }
     // GIRLHIST.1/.2 — log the friend visit into her LIVE activity history (with his creep level).
     if (window.DMTHGame.state.appendActivity) {
-      window.DMTHGame.state.appendActivity(girl.id, { kind: 'friend', label: `FRIEND — ${arc.displayName} (creep ${creepAfter.level}/10)`, detail: `${killed ? 'KILLED her' : `wrecked her −${drop} HP`} · +$${payment}` });
+      window.DMTHGame.state.appendActivity(girl.id, { kind: 'friend', label: `FRIEND — ${arc.displayName} (creep ${creepAfter.level}/10)`, detail: `${killed ? 'KILLED her' : `wrecked her −${drop} HP`} · +$${payment}${match.reason ? ` · ${match.payMult >= 1 ? '😍' : '🤢'} ${match.reason}` : ''}` });
     }
     return encounter;
   }
