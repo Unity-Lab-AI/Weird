@@ -499,7 +499,7 @@
             <a class="btn-small" href="#dispose?girl=${girl.id}" data-tooltip="End the relationship. Bury / lose-at-sea / incinerate / release / final film / trade-away. Each method has different notoriety + premium-content tradeoffs.">⚱️ Dispose / trade</a>
             <button id="list-sale" class="btn-small" data-tooltip="List her on the slave market. Buyers tick in over time. Price scales with Stockholm rating + training.">⛓️ List on slave market</button>
             <a class="btn-small" href="#timeline?girl=${girl.id}" data-tooltip="Her full history — every turn, every drug, every milestone.">📖 Timeline</a>
-            <a class="btn-small" href="#gallery?girl=${girl.id}" data-tooltip="Every past image of her — view, download, open fullscreen.">🖼️ Gallery</a>
+            <a class="btn-small" href="#gallery?girl=${girl.id}" data-tooltip="Her Spank Bank — every filthy image of her ever made, persisted: view, download, open fullscreen.">🍆 Spank Bank</a>
           </div>
           <div id="selfie-slot"></div>
 
@@ -565,14 +565,14 @@
               <div class="panel">
                 <img src="${lastResult.url}" alt="${girl.name} custom pose" class="gen-img" onerror="this.outerHTML='<a href=\\'${lastResult.url}\\' target=\\'_blank\\' class=\\'img-link-fallback\\'>🔗 ${girl.name}</a>'" />
                 <p class="small muted">${girl.name} · custom pose: "${(lastResult.staging || '').slice(0, 80)}${(lastResult.staging || '').length > 80 ? '…' : ''}"</p>
-                <p class="small"><a href="${lastResult.url}" target="_blank" rel="noopener">🔗 open in tab</a> · <a href="#gallery?girl=${girl.id}">🖼️ view gallery</a></p>
+                <p class="small"><a href="${lastResult.url}" target="_blank" rel="noopener">🔗 open in tab</a> · <a href="#gallery?girl=${girl.id}">🍆 view her Spank Bank</a></p>
               </div>` : '';
             return `<div class="panel" style="margin-top:8px">
               <h3>🎨 Custom pose / scene</h3>
               <p class="small muted">Describe the scene + pose you want. Ollama composes a valid image prompt with all guardrails — you stage her how you want.</p>
               <textarea id="custom-pose-in" rows="3" placeholder="e.g. 'kneeling on the bed, looking up at the camera with submissive eyes, biting her lower lip, hands clasped between her thighs, soft warm bedroom lighting'">${draft.replace(/</g, '&lt;')}</textarea>
               <div class="btn-row" style="margin-top:6px">
-                <button id="custom-pose-fire" class="btn-small btn-primary" data-tooltip="Send your description to Ollama → composed prompt → Pollinations generation. Image appears below + saves to gallery.">🎨 Generate custom pose</button>
+                <button id="custom-pose-fire" class="btn-small btn-primary" data-tooltip="Send your description to Ollama → composed prompt → Pollinations generation. Image appears below + saves to her Spank Bank.">🎨 Generate custom pose</button>
                 <button id="custom-pose-clear" class="btn-small" data-tooltip="Clear the input box.">Clear</button>
                 <span class="small muted" id="custom-pose-status"></span>
               </div>
@@ -1555,9 +1555,9 @@
               <div class="panel">
                 <img src="${result.url}" alt="${girl.name} custom pose" class="gen-img" onerror="this.outerHTML='<a href=\\'${result.url}\\' target=\\'_blank\\' class=\\'img-link-fallback\\'>🔗 ${girl.name}</a>'" />
                 <p class="small muted">${girl.name} · custom pose: "${text.slice(0, 80)}${text.length > 80 ? '…' : ''}"</p>
-                <p class="small"><a href="${result.url}" target="_blank" rel="noopener">🔗 open in tab</a> · <a href="#gallery?girl=${girl.id}">🖼️ view gallery</a></p>
+                <p class="small"><a href="${result.url}" target="_blank" rel="noopener">🔗 open in tab</a> · <a href="#gallery?girl=${girl.id}">🍆 view her Spank Bank</a></p>
               </div>`;
-            if (status) status.textContent = '✓ done — saved to gallery';
+            if (status) status.textContent = '✓ done — saved to her Spank Bank';
           } else {
             if (slot) slot.innerHTML = `<div class="panel danger"><p>Custom pose failed: ${result?.error || 'unknown'}</p></div>`;
             if (status) status.textContent = 'failed';
