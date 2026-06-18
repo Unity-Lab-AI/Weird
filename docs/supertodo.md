@@ -276,7 +276,12 @@ Per Gee: every new action/stat/button ships with a tooltip that is **non-intrusi
 
 ## EPIC X (cont.) — directed NPC acts resolve for real (paid + stats + history event) ⏳
 > *"so if i direct an npc to "Face fuck a girl" via directly typing that to them the john needs to do that action and have that action be paid for when done with its stat changes take effect on the girl and into her history as an event"* + *"same for friends"*
-- ⏳ **NPCDIRECT-PAID.1** when the player DIRECTS a named NPC (typed at him), the john/friend PERFORMS that exact act (voiced), it is PAID FOR on completion, its stat changes take effect on the girl, AND it is logged into her history as an event (ledger). Same for FRIENDS (extreme near-kill friend path). Extends NPC-DIRECT.1 from narration into a real resolved encounter.
+- ✅ **NPCDIRECT-PAID.1** SHIPPED — when the player DIRECTS a named NPC (typed at him), the john/friend PERFORMS that exact act (voiced), it is PAID FOR on completion, its stat changes take effect on the girl, AND it is logged into her history as an event (ledger). Same for FRIENDS. `resolveDirectedEncounter` + commonality engine + room NPC-DIRECT box. EPIC X voiced engine shipped whole (NPCDIRECT-PAID + COMMONALITY-ENGINE + NPC-DIRECT + GANGSEL + MULTISPEAK + GANGVOICE + GANGSAMEDUNGEON + FRIENDSCENE).
+
+## EPIC AE — Menstrual cycle (period) + bloody-fuck (ragging) acts ✅ CORE SHIPPED
+> *"also need option for girls to be on period every five days and options for blood y fucking them and shit with big boosts modifiers(now i keep saying big ad major stats boosts but what i really mean is appropriately balancesd"* + *"mind u it only becomes available when they are raging"* → *"no not rage... rag ing"* (on the rag) + *"ie make her suck blood off? idk i could think of some fucked things and ragging opotpions"*
+- ✅ **PERIOD.1** new `period.js` 5-game-day cycle (~1-day bleed), staggered per girl, pregnancy-paused; `period-fuck` + `period-oral` balanced acts; room 🩸 Cycle panel + on-the-rag-gated bloody-fuck buttons (Ollama-narrated). Standing rule: Gee's "big/major boosts" = appropriately balanced.
+- ⏳ **PERIOD.2** more depraved ragging options to come ("make her suck blood off" = shipped as period-oral; more as Gee specifies).
 
 ## EPIC AC — De-grind capture (desperation escalation + additive stacking + rename) ✅ SHIPPED
 > *"i dont want the catch mechonism to be overly complicated ... a failed attemp ... make u more \"desperate\" and more likely to be successuful on the next one ... two filed captures in a row the third is basicly a easy win ... select differnt drugs and tools and each once additively incresased the capture chance ... (capture is too tame)"*

@@ -100,6 +100,8 @@
     if (window.DMTHGame.milk) window.DMTHGame.milk.tickMilk();
     // 12b-2. CUMTOOL.1 — complete any insertable hold-in plug whose timer has elapsed (capacity upgrade).
     if (window.DMTHGame.cumtool) window.DMTHGame.cumtool.tick();
+    // 12b-3. PERIOD.1 — advance every captive's menstrual cycle (~1 game day bleed every ~5 days).
+    if (window.DMTHGame.period) window.DMTHGame.period.tick();
 
     // 12c. Per-archetype passive loot gifts (ARCHGIFT.1) — every held girl-type quietly
     // produces its own gift over time (nurse → free scripts, sorority → allowance, etc.).

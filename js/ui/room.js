@@ -451,6 +451,25 @@
           })()}
 
           ${(() => {
+            // 🩸 PERIOD.1 — menstrual cycle status + bloody-fuck acts. The acts only appear while
+            // she's RAGGING (on the rag / menstruating — Gee's "rag ing", not rage). A pregnant girl
+            // doesn't cycle. The acts route through applyAction (balanced premium) + a chat turn so
+            // Ollama narrates her reaction (no hardcoded responses).
+            const period = window.DMTHGame.period;
+            if (!period) return '';
+            const onRag = period.isOnPeriod(girl);
+            const isPreg = girl.pregnancy?.status === 'pregnant';
+            return `<h3>🩸 Cycle</h3>
+              <div class="stat-row" data-tooltip="Each girl is on the rag ~1 game day every ~5 game days (paused while pregnant). Bloody-fucking her while she's ragging is premium taboo content — the option only shows up while she's on her period.">
+                <span>Status</span><b>${isPreg ? '🤰 paused (pregnant)' : onRag ? '🩸 ON THE RAG (ragging)' : '— ' + escapeHtml(period.describe(girl))}</b>
+              </div>
+              ${onRag ? `<div class="btn-row">
+                <button class="btn-small btn-danger" data-period-act="period-fuck" data-tooltip="Fuck her bloody while she's on the rag — depraved premium, strong satisfaction, she's sore + humiliated. No health wreck.">🩸 Bloody fuck</button>
+                <button class="btn-small btn-danger" data-period-act="period-oral" data-tooltip="Make her clean you off bloody with her mouth — degrading period oral.">🩸 Make her clean it</button>
+              </div>` : ''}`;
+          })()}
+
+          ${(() => {
             // 🥒 CUMTOOL.1 — insertable hold-in plug on a timer. Plug her, leave it in ~1-2 game
             // days, and her cum-load capacity upgrades (the visible jump on the Cum stat bar).
             const ct = window.DMTHGame.cumtool;
@@ -1597,6 +1616,19 @@
         const r = window.DMTHGame.specialize.apply(girl.id, b.dataset.specialize);
         if (!r.ok) { alert(r.reason); return; }
         window.DMTHRouter.handle();
+      };
+    });
+
+    // PERIOD.1 — bloody-fuck acts (only present while she's on the rag). Apply the balanced stat
+    // spec, then fire a chat turn so Ollama narrates her reaction (no hardcoded response).
+    el.querySelectorAll('[data-period-act]').forEach(b => {
+      b.onclick = () => {
+        const actId = b.dataset.periodAct;
+        if (window.DMTHGame.actionEffects?.applyAction) window.DMTHGame.actionEffects.applyAction(girl.id, actId);
+        const trigger = actId === 'period-oral'
+          ? 'makes her clean his cock off with her mouth while she bleeds, period blood smearing her lips'
+          : 'fucks her bloody while she\'s on the rag, her period blood streaking both of you';
+        sendTurn(`*${trigger}*`);
       };
     });
 

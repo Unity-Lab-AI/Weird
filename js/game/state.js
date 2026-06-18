@@ -240,7 +240,14 @@
         milkProducedTotal: 0,
         // CUMTOOL.1 — an insertable hold-in plug left in over time. { itemId, startTick } | null;
         // when the timer elapses her cumLoadCap upgrades. Gapes/stretches her image while in.
-        cumImplant: null
+        cumImplant: null,
+        // PERIOD.1 — menstrual cycle. She bleeds for ~1 game day every ~5 game days. `onPeriod`
+        // is the live flag; `periodStartedAt` stamps the current bleed's start (game-minutes);
+        // `lastPeriodAt` stamps the last cycle start so the 5-day cadence measures from it.
+        // period.tick() drives all three; a pregnant girl doesn't cycle.
+        onPeriod: false,
+        periodStartedAt: 0,
+        lastPeriodAt: 0
       };
       for (const [k, v] of Object.entries(BODY_DEFAULTS)) {
         if (g.body[k] == null) g.body[k] = v;

@@ -20,9 +20,11 @@
 
 ---
 
+## ✅ ALSO SHIPPED THIS SESSION
+- **PERIOD.1** — new `js/game/period.js`: per-girl ~5-game-day menstrual cycle (~1-day bleed, staggered, pregnancy-paused) wired into `tick.js`; `onPeriod`/`periodStartedAt`/`lastPeriodAt` body fields; balanced `period-fuck`/`period-oral` acts; room 🩸 **Cycle** panel + bloody-fuck buttons that only show while she's ON THE RAG (Gee: "rag ing", not rage) — Ollama-narrated. ⏳ **PERIOD.2** = more ragging options as Gee specifies ("make her suck blood off" = the period-oral act).
+
 ## ⏭️ QUEUED (logged verbatim in TODO + supertodo; board) — recommended order
-1. 🩸 **PERIOD.1** (#197, NEW) — *"option for girls to be on period every five days and options for blood y fucking them and shit with big boosts modifiers"*. Per-girl ~5-game-day period cycle (`state.js` field + period tick) + bloody-fuck acts in `action-effects.js` + room period status/acts. **Standing balance rule (now a saved memory):** Gee's "big/major boosts" = APPROPRIATELY BALANCED, not literally huge — scale to the existing curve.
-2. 🧬 **EPIC AD — outfit-sync + kinks + auto-logistics**: **OUTFITSYNC** (outfit↔girl-type synergy bonuses) · **CLOTHESMORE/GIRLTYPESMORE/OUTFITSMORE** · **KINKDISC** (per-girl hidden kink discovered on the act → status notice) · **KINKMATRIX** (each girl +/− across actions/toys/drugs/food) · **AUTOLOGISTICS** (slider distribution from universal inventory). Note: **PREGNEED kink-bonus** + **PREGOUTFIT** belly/milk outfit wait on the kink + outfit work here.
+1. 🧬 **EPIC AD — outfit-sync + kinks + auto-logistics**: **OUTFITSYNC** (outfit↔girl-type synergy bonuses) · **CLOTHESMORE/GIRLTYPESMORE/OUTFITSMORE** · **KINKDISC** (per-girl hidden kink discovered on the act → status notice) · **KINKMATRIX** (each girl +/− across actions/toys/drugs/food) · **AUTOLOGISTICS** (slider distribution from universal inventory). Note: **PREGNEED kink-bonus** + **PREGOUTFIT** belly/milk outfit wait on the kink + outfit work here.
 3. 🧰 **MODMATRIX.1** — audit + fill: a DRUG + an ACTION + a TOY for EVERY girl/player need (heal/mood/arousal/cumLoad/high/escape/stamina), so any need is movable by just-drugs OR just-actions OR just-toys. (Cross-cutting audit — do fresh.)
 4. 🧾 **LEGACY-AUDIT.1** — reconcile old backlog (BAL.1-5 / PLVL / NEWBORN / CUMFILL / CONDOMS / LOOT.2 / SEXDRIVE.1 / XTOL / MULTIGIRL.2 / TOOLTIPS.2) vs FINALIZED; re-read the WHOLE convo, confirm every verbatim directive captured + shipped/queued, flag misses.
 - ✅ **EPIC X — voiced multi-party engine** — DONE this session (commonality engine + NPCDIRECT-PAID + NPC-DIRECT + GANGSEL + MULTISPEAK + GANGVOICE + GANGSAMEDUNGEON + FRIENDSCENE). See SHIPPED above.

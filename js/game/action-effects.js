@@ -173,6 +173,17 @@
       stamina: -3, health: 0, mood: -2, cumLoad: +1.2, bondDebt: +2, satisfaction: +6,
       notes: 'Cum inside her pussy — adds bondDebt, fires pregnancy conception roll.'
     },
+    // PERIOD.1 — bloody-fucking acts (surfaced in the room only while she's ON her period). A taboo
+    // PREMIUM — appropriately balanced (Gee's "big boosts" = balanced): a notch above rough sex on
+    // satisfaction, heavier humiliation, no health wreck.
+    'period-fuck': {
+      stamina: -16, health: -2, mood: -6, arousal: +16, wetness: +18, cumLoad: +0.9, bondDebt: +2, satisfaction: +8,
+      notes: 'Bloody fuck — taking her while she bleeds. Depraved premium; she\'s sore + humiliated, you\'re thrilled.'
+    },
+    'period-oral': {
+      stamina: -8, health: -1, mood: -7, arousal: +9, bondDebt: +2, satisfaction: +7,
+      notes: 'Make her clean you off bloody with her mouth — degrading period oral. Strong satisfaction, real humiliation.'
+    },
 
     // -----------------------------------------------------------------
     // VIOLENCE / HURTME — bruise accumulation + health hits
