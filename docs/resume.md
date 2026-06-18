@@ -34,7 +34,7 @@ A huge autonomous build run off "continue / get shit done / finish these all off
 2. 🚚 **AUTOLOGISTICS.1** (#174) — an auto-logistics UPGRADE: slider-select how much of what to auto-distribute to holds/dungeons from the universal inventory. `js/game/dungeon-ops.js`, `js/game/supply.js`, `js/game/state.js` (logistics config + distribution tick), UI sliders.
 3. ⛓️ **STATGATE.1** (#212, framework shipped) — tag specific TABS actions with the new `afterExtreme` / `maxHealth` / `minHealth` gate fields (the gateOf framework + Force toggle are already live in `quick-actions.js`). Data pass.
 4. 🧾 **MODMATRIX.1** (#137) — audit + fill: a DRUG + an ACTION + a TOY for EVERY girl/player need (heal/mood/arousal/cumLoad/high/escape/stamina). Cross-cutting audit.
-5. 🏷️ **TOOLTIPS-FULL.1** (#215) — full non-truncated `data-tooltip` (not native `title`) on EVERY interactive element across all `js/ui/*`. Methodical sweep (workflow candidate).
+5. 🏷️ **TOOLTIPS-FULL.1** (#215) — THOROUGH non-truncated `data-tooltip` (not native `title`) on EVERY interactive element across all `js/ui/*`. Per Gee: drugs show their modifiers; actions show buffs+debuffs for BOTH the girl AND the player (satisfaction/sex-drive/DEPRAVITY/Nut-Reserve/crime-mult); toys show fx. Enrich `action-effects.previewCost`/`tooltipForAction` to split GIRL vs PLAYER effects, then propagate. Methodical sweep.
 6. 🔎 **LEGACY-AUDIT.1** (#136) — re-read the whole convo + reconcile old backlog vs FINALIZED; confirm every verbatim directive captured + shipped/queued, flag misses.
 
 ---
