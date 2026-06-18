@@ -214,6 +214,54 @@
       multiplier: 1.2,
       roleplay: 'cheerleader'
     },
+
+    // SKIMPYWEAR.1 (Gee) — per-girl-type SKIMPY / MAX-NUDITY outfits: "office worker a long male-suit-
+    // tie only all nude and nothing but a tie ... police woman ... as skimpy and as much nudity ... as
+    // is possible". Each is a `nude:'accessories'` outfit so imaging front-loads full nudity and renders
+    // ONLY the one scrap named in accessoriesOnly. `syncArchetype` tags the girl-type it's made for (OUTFITSYNC).
+    // NOTE (Gee): POSITIVE prompts only — NEVER write "no bra / no panties" (this gen latches onto
+    // the negated noun and renders it). Push affirmative nudity words: topless, bottomless, bare
+    // exposed breasts, nipples out, bare naked pussy, bare ass, fully nude.
+    {
+      id: 'skimpy-office-necktie', displayName: 'Office: Necktie Only', emoji: '👔', price: 160, tier: 3,
+      description: 'fully nude, topless, bottomless, only a long loosened man\'s silk necktie around her bare neck dangling between her bare exposed breasts with nipples out, bare naked pussy, high heels', multiplier: 1.4, roleplay: 'office',
+      nude: 'accessories', accessoriesOnly: 'only a long loosened man\'s silk necktie around her bare neck dangling between her bare exposed breasts, nipples out, topless, bottomless, bare naked pussy, fully nude, black high heels', syncArchetype: 'office'
+    },
+    {
+      id: 'skimpy-police', displayName: 'Police: Open Shirt', emoji: '👮', price: 175, tier: 3,
+      description: 'a police uniform shirt hanging wide open off her shoulders, topless, bare exposed breasts with nipples out, utility belt low on bare hips with handcuffs, bottomless, bare naked pussy, peaked cap', multiplier: 1.4, roleplay: 'police',
+      nude: 'accessories', accessoriesOnly: 'a police uniform shirt hanging wide open off her shoulders, topless with bare exposed breasts and nipples out, a utility belt low on her bare hips with handcuffs, bottomless, bare naked pussy, a peaked police cap', syncArchetype: 'police'
+    },
+    {
+      id: 'skimpy-nurse', displayName: 'Nurse: Open Smock', emoji: '🩺', price: 165, tier: 3,
+      description: 'a nurse smock hanging wide open off her shoulders, topless, bare exposed breasts with nipples out, white thigh-high stockings, nurse cap, stethoscope between her bare tits, bottomless, bare naked pussy', multiplier: 1.4, roleplay: 'nurse',
+      nude: 'accessories', accessoriesOnly: 'a nurse smock hanging open off her shoulders, topless with bare exposed breasts and nipples out, white thigh-high stockings, a nurse cap, a stethoscope between her bare tits, bottomless, bare naked pussy', syncArchetype: 'nurse'
+    },
+    {
+      id: 'skimpy-teacher', displayName: 'Teacher: Bare Under Blazer', emoji: '📐', price: 160, tier: 3,
+      description: 'an open blazer off her shoulders, topless, bare exposed breasts with nipples out, reading glasses, hair in a tight bun, pencil skirt shoved up around her waist, bottomless, bare ass and bare naked pussy', multiplier: 1.35, roleplay: 'teacher',
+      nude: 'accessories', accessoriesOnly: 'an open blazer hanging off her shoulders, topless with bare exposed breasts and nipples out, reading glasses, hair in a tight bun, a pencil skirt shoved up around her waist, bottomless, bare ass and bare naked pussy', syncArchetype: 'teacher'
+    },
+    {
+      id: 'skimpy-cheer', displayName: 'Cheer: Top Up, Skirt Up', emoji: '📣', price: 150, tier: 3,
+      description: 'a cheer crop-top shoved up above her bare exposed bouncing tits with nipples out, a tiny pleated skirt flipped up baring her bare ass and bare naked pussy, pom-poms, ankle socks, pigtails', multiplier: 1.35, roleplay: 'cheerleader',
+      nude: 'accessories', accessoriesOnly: 'a cheer crop-top shoved up above her bare exposed tits with nipples out, a tiny pleated skirt flipped up over her bare ass and bare naked pussy, pom-poms, ankle socks, pigtails', syncArchetype: 'sorority'
+    },
+    {
+      id: 'skimpy-maid', displayName: 'Maid: Apron Only', emoji: '🧹', price: 150, tier: 3,
+      description: 'only a frilly white maid apron tied at the waist, otherwise fully nude, bare exposed breasts and nipples at the sides, completely bare ass exposed from behind, bare naked pussy, lace choker, maid headpiece', multiplier: 1.35, roleplay: 'maid',
+      nude: 'accessories', accessoriesOnly: 'only a frilly white maid apron tied at the waist, otherwise fully nude, bare exposed breasts and nipples at the sides, completely bare ass exposed from behind, bare naked pussy, a lace choker and maid headpiece', syncArchetype: 'maid'
+    },
+    {
+      id: 'skimpy-schoolgirl', displayName: 'Schoolgirl: Tied Blouse', emoji: '🎒', price: 150, tier: 3,
+      description: 'a school blouse knotted up high under her bare exposed breasts with nipples out, topless, a micro pleated skirt, bottomless, bare naked pussy underneath, knee-high socks, pigtails', multiplier: 1.35, roleplay: 'schoolgirl',
+      nude: 'accessories', accessoriesOnly: 'a school blouse knotted up high under her bare exposed breasts and nipples out, topless, a micro pleated skirt, bottomless, bare naked pussy underneath, knee-high socks, pigtails', syncArchetype: 'college'
+    },
+    {
+      id: 'skimpy-waitress', displayName: 'Waitress: Bare Under Apron', emoji: '☕', price: 145, tier: 3,
+      description: 'a tiny diner half-apron over an otherwise fully nude body, topless, bare exposed tits with nipples out, a short skirt hiked up over bare hips, bottomless, bare naked pussy', multiplier: 1.3, roleplay: 'waitress',
+      nude: 'accessories', accessoriesOnly: 'a tiny diner half-apron over an otherwise fully nude body, topless with bare exposed tits and nipples out, a name tag by a bare nipple, a short skirt hiked up over bare hips, bottomless, bare naked pussy', syncArchetype: 'barista'
+    },
     {
       id: 'goth-outfit',
       displayName: 'Goth Fit',
@@ -414,14 +462,33 @@
   //   - playerSatisfaction: a lewder/nuder outfit gives the player a bigger satisfaction hit per sex act
   //   - girlArousal:        skin/lewd outfits leave her more exposed + worked-up
   //   - escapeSuppress:     restraint-flavored outfits physically hold her (lowers escape risk)
+  // OUTFITSYNC.1 (Gee: "put a nurese in a nurse outfit its a major buff, a sority girl in a cheer
+  // outfit a big buff") — does the equipped outfit's type match her girl-type? Matches the outfit's
+  // syncArchetype OR roleplay against her archetypeTemplate (loose contains-match so nurse↔nurse,
+  // cheer↔sorority, office↔office-worker all land). Returns the matched outfit or null.
+  function syncMatch(girl) {
+    const o = getById(girl?.currentOutfit);
+    if (!o) return null;
+    const arc = String(girl?.archetypeTemplate || '').toLowerCase();
+    if (!arc) return null;
+    const tags = [o.syncArchetype, o.roleplay].filter(Boolean).map(s => String(s).toLowerCase());
+    return tags.some(t => t === arc || arc.includes(t) || t.includes(arc)) ? o : null;
+  }
+  // Synergy multiplier applied to sale price + film value when she's dressed in her matching type.
+  function syncMultiplier(girl) { return syncMatch(girl) ? 1.25 : 1.0; }
+
   function outfitBonuses(girl) {
     const o = getById(girl?.currentOutfit) || {};
     const mult = ((girl?.wardrobe || []).find(w => w.id === girl.currentOutfit)?.multiplier) || o.multiplier || 1.0;
     const restraintFlavored = /restraint|cuff|harness|bondage|latex|catsuit|chain/i.test(`${o.roleplay || ''} ${o.id || ''} ${o.description || ''}`);
+    // OUTFITSYNC.1 — a TYPE-MATCHED outfit is a major buff: +25% john pay, more satisfaction + arousal.
+    const synced = !!syncMatch(girl);
+    const syncPay = synced ? 1.25 : 1.0;
     return {
-      johnPayMul: mult,
-      playerSatisfaction: Math.max(0, Math.round((mult - 1) * 6)),
-      girlArousal: o.nude ? 4 : Math.max(0, Math.round((mult - 1) * 8)),
+      synced,
+      johnPayMul: mult * syncPay,
+      playerSatisfaction: Math.max(0, Math.round((mult - 1) * 6)) + (synced ? 3 : 0),
+      girlArousal: (o.nude ? 4 : Math.max(0, Math.round((mult - 1) * 8))) + (synced ? 5 : 0),
       escapeSuppress: restraintFlavored ? 0.03 : 0
     };
   }
