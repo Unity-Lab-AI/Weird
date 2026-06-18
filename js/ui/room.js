@@ -477,6 +477,8 @@
               ${onRag ? `<div class="btn-row">
                 <button class="btn-small btn-danger" data-period-act="period-fuck" data-tooltip="Fuck her bloody while she's on the rag — depraved premium, strong satisfaction, she's sore + humiliated. No health wreck.">🩸 Bloody fuck</button>
                 <button class="btn-small btn-danger" data-period-act="period-oral" data-tooltip="Make her clean you off bloody with her mouth — degrading period oral.">🩸 Make her clean it</button>
+                <button class="btn-small btn-danger" data-period-act="period-creampie" data-tooltip="Breed her bloody — cum deep inside her on the rag. Filthiest premium; fires the conception hook.">🩸 Breed her bloody</button>
+                <button class="btn-small btn-danger" data-period-act="period-finger" data-tooltip="Finger her bloody and smear it up her belly + tits — degrading, marks her red.">🩸 Finger + smear</button>
               </div>` : ''}`;
           })()}
 
@@ -1664,10 +1666,13 @@
       b.onclick = () => {
         const actId = b.dataset.periodAct;
         if (window.DMTHGame.actionEffects?.applyAction) window.DMTHGame.actionEffects.applyAction(girl.id, actId);
-        const trigger = actId === 'period-oral'
-          ? 'makes her clean his cock off with her mouth while she bleeds, period blood smearing her lips'
-          : 'fucks her bloody while she\'s on the rag, her period blood streaking both of you';
-        sendTurn(`*${trigger}*`);
+        const PERIOD_TRIGGERS = {
+          'period-oral': 'makes her clean his cock off with her mouth while she bleeds, period blood smearing her lips',
+          'period-creampie': 'fucks her bloody and breeds her, cumming deep inside her while she\'s on the rag, blood and cum leaking out of her',
+          'period-finger': 'fingers her bloody and smears her period blood up her belly and over her tits, marking her red',
+          'period-fuck': 'fucks her bloody while she\'s on the rag, her period blood streaking both of you'
+        };
+        sendTurn(`*${PERIOD_TRIGGERS[actId] || PERIOD_TRIGGERS['period-fuck']}*`);
       };
     });
 

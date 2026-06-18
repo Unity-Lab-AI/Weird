@@ -184,6 +184,15 @@
       stamina: -8, health: -1, mood: -7, arousal: +9, bondDebt: +2, satisfaction: +7,
       notes: 'Make her clean you off bloody with her mouth — degrading period oral. Strong satisfaction, real humiliation.'
     },
+    // PERIOD.2 — more on-the-rag (ragging) options (Gee). Balanced premiums.
+    'period-creampie': {
+      stamina: -15, health: -2, mood: -6, arousal: +14, wetness: +12, cumLoad: +1.0, bondDebt: +3, satisfaction: +9,
+      notes: 'Breed her bloody — cum deep inside her while she\'s on the rag. Filthiest premium; fires the conception hook.'
+    },
+    'period-finger': {
+      stamina: -5, health: -1, mood: -5, arousal: +12, wetness: +10, bondDebt: +1, satisfaction: +6,
+      notes: 'Finger her bloody and smear it up her belly + over her tits — degrading, marks her red.'
+    },
 
     // -----------------------------------------------------------------
     // VIOLENCE / HURTME — bruise accumulation + health hits
@@ -390,7 +399,9 @@
     'torture-waterboard':    'beaten',
     // PERIOD.1 / IMGAFTERMATH.1 — bloody-fuck acts mark her next image (blood smear), TTL-faded.
     'period-fuck':           'bloody-fucked',
-    'period-oral':           'bloodied-mouth'
+    'period-oral':           'bloodied-mouth',
+    'period-creampie':       'bloody-fucked',
+    'period-finger':         'bloody-fucked'
   });
 
   // KINKMATRIX.1 — classify an action into the broad category her hidden kink like/dislike keys on.
@@ -708,7 +719,7 @@
     // Breeding / cum-inside ACTIONS raise her VAGINAL cum-fill (CUMFILL.1) — sustained fill is
     // what conceives (pregnancy.tickCumFill timer), not this single event. Skipped when a
     // condom is equipped. Only these vaginal-cum acts feed the fill — anal/oral don't.
-    const CUM_INSIDE_ACTIONS = new Set(['sex-cum-inside', 'extreme-breeding-rape']);
+    const CUM_INSIDE_ACTIONS = new Set(['sex-cum-inside', 'extreme-breeding-rape', 'period-creampie']);
     const condomBlocks = window.DMTHGame.condoms ? window.DMTHGame.condoms.blocks(girl) : (girl.currentOutfit === 'condom-on');
     const holed = window.DMTHGame.condoms?.isHoled ? window.DMTHGame.condoms.isHoled(girl) : false;
     if (CUM_INSIDE_ACTIONS.has(actionId) && !condomBlocks && window.DMTHGame.pregnancy?.addVaginalCum) {
