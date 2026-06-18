@@ -13,6 +13,12 @@
 
 ---
 
+## 2026-06-18 — Session: MONEYSWEETSPOT.1 — earnings peak on a half-dead girl — LOCAL ONLY (not pushed)
+
+- **MONEYSWEETSPOT.1** ✅ — Gee verbatim: *"keeping girls in a happy zone of low health high cum level and high stockholm all have a sweet spot and a range where they make the most money.. no one wants a fresh sority girl they want a half dead one that can barily move most likely"*. Inverted `johnHappinessForGirl`'s health factor from "healthy = more" into a SWEET-SPOT curve — half-dead 15-40% HP peaks at **1.30×**, a fresh full-health girl drops to **~0.85×** (the untouched sorority girl is worth less), and a near-death girl (<8% HP) tapers to **0.70×** (buyers wary of a corpse-in-waiting). Stamina factor softened to near-neutral (floor **0.85**) so a limp, barely-moving, used-up girl isn't penalized — spent ≠ cheap. Bond already multiplies pay (bondFactor → Stockholm) and cum already does (resolveEncounter `cumMul`), and FILM/content value already rewards the same zone (stress-band 25-55 HP bonus + `cumMul` + `bondLevelAtRecording` in autoPrice) — so the john-pay curve was the one gap, now aligned across both. `js/game/action-effects.js`. `node -c` clean.
+
+---
+
 ## 2026-06-18 — Session: STATEVOICE.2 — badly-hurt = describe + fight/argue, not gamey "heal me" — LOCAL ONLY (not pushed)
 
 - **STATEVOICE.2 (correction to STATEVOICE.1)** ✅ — Gee verbatim: *"and if hurt real bad she doesnt say i need to hel she describes what you did and how she fells and fights and argues"*. Reworked the badly-hurt branch in both the `BASE_SLUT` STATE-DRIVEN NEEDS rule and the `buildContextBlock` LIVE NEEDS line: a badly-hurt girl does NOT say gamey things ("I need to heal", "patch me up") — she DESCRIBES what he did + exactly how it feels and FIGHTS + ARGUES (curse / accuse / threaten / refuse — pain → defiance, not compliance). `js/templates/ollama-templates.js`. Also logged **FORCEGATE.1** (force option for gated actions on new girls + tender-action mood-unlock chain) as pending. `node -c` clean.

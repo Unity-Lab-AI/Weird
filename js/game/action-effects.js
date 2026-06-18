@@ -1191,15 +1191,23 @@
     // Stockholm bond — every level multiplies pay by ~10%. Cap at 1.9 (L9).
     const bondFactor = 1 + (bond.bondLevel || 0) * 0.10;
 
-    // Stamina — above STAMINA_THRESHOLD_FOR_STRAIN = full, below = degraded
+    // MONEYSWEETSPOT.1 (Gee: "no one wants a fresh sority girl they want a half dead one that can
+    // barily move") — stamina is NEAR-NEUTRAL now: a limp, barely-moving, used-up girl is what the
+    // clientele wants, so low stamina is no longer punished (floor 0.85, full ~1.0). Spent ≠ cheap.
     const staminaFactor = stamina >= STAMINA_THRESHOLD_FOR_STRAIN
-      ? Math.min(1.2, 0.6 + stamina / 100 * 0.6)
-      : Math.max(0.3, stamina / STAMINA_THRESHOLD_FOR_STRAIN * 0.6);
+      ? 1.0
+      : Math.max(0.85, 0.85 + stamina / STAMINA_THRESHOLD_FOR_STRAIN * 0.15);
 
-    // Health — same shape but harder to recover from
-    const healthFactor = health >= 30
-      ? Math.min(1.15, 0.7 + health / 100 * 0.45)
-      : Math.max(0.4, health / 30 * 0.7);
+    // MONEYSWEETSPOT.1 — earnings PEAK on a half-dead girl, NOT a fresh one. Health is a sweet-spot
+    // curve: the premium "half-dead, can barely move" zone (~15-40% HP) tops out at 1.30×; a fresh
+    // full-health girl is worth LESS (~0.85×, nobody wants the untouched sorority girl); and a girl
+    // teetering at death's door (<8%) tapers back (buyers get wary of a corpse-in-waiting).
+    let healthFactor;
+    if (health >= 70)      healthFactor = 0.85 + (100 - health) / 30 * 0.10;   // 100 → 0.85, 70 → 0.95 (fresh = less)
+    else if (health >= 40) healthFactor = 0.95 + (70 - health) / 30 * 0.20;    // 70 → 0.95, 40 → 1.15 (warming up)
+    else if (health >= 15) healthFactor = 1.30;                                // SWEET SPOT — half-dead premium
+    else if (health >= 8)  healthFactor = 1.10;                                // wrecked but still sellable
+    else                   healthFactor = 0.70;                                // near-death — buyers wary
 
     // Mood — happy moods multiply, broken moods penalize
     const moodTable = {
