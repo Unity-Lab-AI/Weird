@@ -294,7 +294,7 @@
               ? window.DMTHGame.actionEffects.johnHappinessForGirl(girl)
               : null;
             const happyPct = happy ? Math.round(happy.multiplier * 100) : 100;
-            return `<h3>💸 Whore-out</h3>
+            return `<details class="sect"${wo.enabled ? ' open' : ''}><summary>💸 Whore-out${wo.enabled ? ' <span class="ok small">· ON</span>' : ''}</summary><div class="sect-body">
               <div class="stat-row" data-tooltip="Passive john arrivals per tick at the selected rate. Cash accrues in unclaimedEarnings until you cash out.">
                 <span>Enabled</span>
                 <b>${wo.enabled ? '✅ ON' : '⛔ off'}</b>
@@ -358,7 +358,7 @@
                     return `<li data-tooltip="${(e.notes || '').replace(/"/g, '&quot;')}">${ago}min ago · ${e.johnDescription} · $${e.totalPaid}${e.tip > 0 ? ` (+$${e.tip} tip)` : ''}${e.condomUsed ? ' · 🎈' : ' · 🚫'} · ${e.acts.join(', ')}</li>`;
                   }).join('')}
                 </ul>
-              ` : ''}`;
+              ` : ''}</div></details>`;
           })()}
 
           ${(() => {
@@ -389,7 +389,7 @@
               birthed: 'Delivered.',
               lost: 'Pregnancy lost.'
             }[preg.status] || 'Pregnancy state.';
-            return `<h3 data-tooltip="${statusTip}">${statusEmoji} Pregnancy: ${statusLabel}</h3>
+            return `<details class="sect"${preg.status === 'pregnant' ? ' open' : ''}><summary>${statusEmoji} Pregnancy: ${statusLabel}</summary><div class="sect-body" data-tooltip="${statusTip}">
               <div class="stat-row" data-tooltip="${statusTip}"><span>Status</span><b>${statusEmoji} ${statusLabel}</b></div>
               ${preg.status !== 'pregnant' && window.DMTHGame.pregnancy && window.DMTHGame.pregnancy.PREGGO_FILL_MIN != null ? (() => {
                 const vc = girl.body?.vaginalCum || 0;
@@ -430,7 +430,7 @@
                 <ul class="small muted">
                   ${preg.outcomeHistory.slice(-5).map(h => `<li>${h.status}${h.method ? ' via ' + h.method : ''} · day ${h.day}${h.notes ? ' — ' + h.notes : ''}</li>`).join('')}
                 </ul>
-              ` : ''}`;
+              ` : ''}</div></details>`;
           })()}
 
           ${(() => {
@@ -446,7 +446,7 @@
             const rigged = milk.holdHasTitSucker(girl);
             const owned = milk.ownedTitSuckers();
             const bigTits = !!(window.DMTHGame.specialize && window.DMTHGame.specialize.has(girl, 'big-tits'));
-            return `<h3>🍼 Lactation</h3>
+            return `<details class="sect"><summary>🍼 Lactation${lactating ? ' <span class="ok small">· lactating</span>' : ''}</summary><div class="sect-body">
               <div class="stat-row" data-tooltip="A captive lactates while pregnant (2nd trimester+) or freshly postpartum — otherwise her breasts are dry."><span>Status</span><b>${lactating ? '🤱 lactating' : '— dry'}</b></div>
               ${lactating ? `
                 <div class="bar-row" data-tooltip="Her breast-milk fill — refills slowly over ~1 game day. Suck her dry (Love → suck her milk, needs ≥75% full) for a timed warm-milk buff, or rig a Tit Sucker to bottle it.${bigTits ? ' 🍈 Cow Tits: double capacity + output.' : ''}">
@@ -458,7 +458,7 @@
                   ? `<button class="btn-small" data-titsucker-detach data-tooltip="Pull the Tit Sucker off this hold and return it to inventory.">Detach</button>`
                   : `<button class="btn-small btn-primary" data-titsucker-attach ${owned < 1 ? 'disabled' : ''} data-tooltip="${owned < 1 ? 'No Tit Sucker in inventory — buy one in the Black Market (Milk Trade) or loot one.' : 'Attach an owned Tit Sucker to this hold to bottle her milk while she lactates.'}">Attach (${owned})</button>`}
               </div>
-              ${milk.buffActive() ? `<div class="stat-row small" data-tooltip="The warm-milk high from sucking a tit dry — Nut Reserve regen + satisfaction trickle each tick. Fades soon; suck another full tit to keep it going."><span>🥛 Warm-milk high</span><b class="gold">${milk.buffTicksLeft()} ticks left</b></div>` : ''}`;
+              ${milk.buffActive() ? `<div class="stat-row small" data-tooltip="The warm-milk high from sucking a tit dry — Nut Reserve regen + satisfaction trickle each tick. Fades soon; suck another full tit to keep it going."><span>🥛 Warm-milk high</span><b class="gold">${milk.buffTicksLeft()} ticks left</b></div>` : ''}</div></details>`;
           })()}
 
           ${(() => {
@@ -470,7 +470,7 @@
             if (!period) return '';
             const onRag = period.isOnPeriod(girl);
             const isPreg = girl.pregnancy?.status === 'pregnant';
-            return `<h3>🩸 Cycle</h3>
+            return `<details class="sect"${onRag ? ' open' : ''}><summary>🩸 Cycle${onRag ? ' <span class="ok small">· ON THE RAG</span>' : ''}</summary><div class="sect-body">
               <div class="stat-row" data-tooltip="Each girl is on the rag ~1 game day every ~5 game days (paused while pregnant). Bloody-fucking her while she's ragging is premium taboo content — the option only shows up while she's on her period.">
                 <span>Status</span><b>${isPreg ? '🤰 paused (pregnant)' : onRag ? '🩸 ON THE RAG (ragging)' : '— ' + escapeHtml(period.describe(girl))}</b>
               </div>
@@ -479,7 +479,7 @@
                 <button class="btn-small btn-danger" data-period-act="period-oral" data-tooltip="Make her clean you off bloody with her mouth — degrading period oral.">🩸 Make her clean it</button>
                 <button class="btn-small btn-danger" data-period-act="period-creampie" data-tooltip="Breed her bloody — cum deep inside her on the rag. Filthiest premium; fires the conception hook.">🩸 Breed her bloody</button>
                 <button class="btn-small btn-danger" data-period-act="period-finger" data-tooltip="Finger her bloody and smear it up her belly + tits — degrading, marks her red.">🩸 Finger + smear</button>
-              </div>` : ''}`;
+              </div>` : ''}</div></details>`;
           })()}
 
           ${(() => {
@@ -491,7 +491,7 @@
             const prog = ct.progress(girl);
             const capMaxed = (girl.body?.cumLoadCap ?? 10) >= ct.CUMTOOL_CAP_CEILING;
             if (!owned && prog == null && !capMaxed) return '';
-            return `<h3>🥒 Cum-capacity plug</h3>
+            return `<details class="sect"${prog != null ? ' open' : ''}><summary>🥒 Cum-capacity plug</summary><div class="sect-body">
               ${prog != null ? `
                 <div class="bar-row" data-tooltip="Leave the plug buried in her until this fills, then her cum-load capacity jumps. Pull it early and you lose the progress.">
                   <label>Stretching</label><div class="bar"><div class="bar-fill" style="width:${Math.round(prog * 100)}%;background:#b06"></div></div><b>${Math.round(prog * 100)}%</b></div>
@@ -500,7 +500,7 @@
                 : `<div class="stat-row" data-tooltip="Insert the massive plug + leave it in ~1.5 game days; her cum-load capacity upgrades +8 (toward a 60 ceiling) when the timer completes — you'll see the Cum cap number jump.">
                     <span>🥒 Pussy Wrecker</span><b>have ×${owned}</b>
                     <button class="btn-small btn-primary" data-cumplug-insert ${owned < 1 ? 'disabled' : ''}>Plug her + leave it in</button>
-                  </div>`}`;
+                  </div>`}</div></details>`;
           })()}
 
           ${(() => {
@@ -509,7 +509,7 @@
             if (!sp) return '';
             const ownedSpecs = sp.list(girl);
             const money = window.DMTHGame.state.current?.wallet?.money || 0;
-            return `<h3>🧬 Specializations</h3>
+            return `<details class="sect"><summary>🧬 Specializations</summary><div class="sect-body">
               <p class="small muted">Permanent fucked-up upgrades that specialize her for a role. Bought once, never removed.</p>
               ${ownedSpecs.length ? `<div class="stat-row small"><span>Installed</span><b>${ownedSpecs.map(s => `${s.emoji} ${escapeHtml(s.displayName)}`).join(' · ')}</b></div>` : ''}
               <div class="btn-row" style="flex-wrap:wrap">
@@ -518,7 +518,7 @@
                   const afford = money >= s.cost;
                   return `<button class="btn-small ${has ? '' : 'btn-primary'}" data-specialize="${s.id}" ${has || !afford ? 'disabled' : ''} data-tooltip="${escapeHtml(s.notes)}">${s.emoji} ${escapeHtml(s.displayName)} ${has ? '✅' : `— $${s.cost.toLocaleString()}`}</button>`;
                 }).join('')}
-              </div>`;
+              </div></div></details>`;
           })()}
 
           <h3>Drugs</h3>
