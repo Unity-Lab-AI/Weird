@@ -72,12 +72,11 @@
     const inv = window.DMTHGame.state.current.inventory || {};
     const attached = T.holdToys(girl);
     const cap = T.MAX_TOYS_PER_HOLD || 5;
-    const rows = Object.entries(T.TOYS).map(([id, t]) => {
+    // Thorough fx-split tooltip per toy (her body/bond fx + the player's gains) — falls back to notes.
+    const rowFor = (id, t) => {
       const isAtt = attached.includes(id);
       const have = inv[id] || 0;
       const lvlOk = T.levelOk(id);
-      // TOOLTIPS-FULL.1 — thorough fx-split tooltip (HER body/bond fx + YOU satisfaction/sex-drive/
-      // DEPRAVITY/WANTED) from the toy spec. Falls back to notes if the builder isn't loaded.
       const tip = (T.toyTooltip ? T.toyTooltip(id) : `${t.notes}${t.gore ? ' · ⚠ gore/mutilation' : ''}${t.masoFlips ? ' · a masochist craves this' : ''}`).replace(/"/g, '&quot;');
       const lock = lvlOk ? '' : ` <span class="muted">🔒 L${t.levelReq}</span>`;
       let btns;
@@ -90,11 +89,21 @@
         btns = `<button class="btn-small" data-toy-buy="${id}">Buy $${t.cost.toLocaleString()}</button>`;
       }
       return `<div class="stat-row small" data-tooltip="${tip}"><span>${isAtt ? '📌 ' : ''}${t.emoji} ${escapeHtml(t.name)}${lock}</span><span style="display:inline-flex;gap:4px">${btns}</span></div>`;
-    }).join('');
+    };
+    const entries = Object.entries(T.TOYS);
+    // Mounted + already-owned toys are shown directly; the full BUY catalog is tucked behind a
+    // collapsed toggle so it's not a permanent wall on the screen.
+    const ownedRows = entries.filter(([id]) => attached.includes(id) || (inv[id] || 0) > 0).map(([id, t]) => rowFor(id, t)).join('');
+    const buyRows = entries.filter(([id]) => !attached.includes(id) && !(inv[id] || 0)).map(([id, t]) => rowFor(id, t)).join('');
     return `<div class="panel" style="margin-top:8px">
       <h3>🧰 Toys &amp; Implements <span class="sub small">(${attached.length}/${cap} mounted in this hold)</span></h3>
-      <p class="small muted">Buy them here, or loot / find them in the world. MOUNT a toy in this hold (up to ${cap}) to use it on her — a mounted toy only works on this hold's girl, and shows on her image while in use. The gorier ones unlock with DEPRAVITY level.</p>
-      ${rows}
+      ${ownedRows || '<p class="sect-stub">No toys owned yet — open the shop below to buy one.</p>'}
+      <details class="sect"><summary>🛒 Shop toys (${buyRows ? entries.filter(([id]) => !attached.includes(id) && !(inv[id] || 0)).length : 0})</summary>
+        <div class="sect-body">
+          <p class="small muted">Buy here, or loot / find them in the world. MOUNT a toy in this hold (up to ${cap}) to use it on her — it only works on this hold's girl and shows on her image while in use. The gorier ones unlock with DEPRAVITY level.</p>
+          ${buyRows}
+        </div>
+      </details>
     </div>`;
   }
 

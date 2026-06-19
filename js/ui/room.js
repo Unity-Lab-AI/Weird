@@ -571,6 +571,10 @@
             const available = window.DMTHGame.state.current.roster.filter(g => g.id !== host.id && g.encounterState === 'captive' && !sceneIds.includes(g.id) && g.assignedDungeonId === host.assignedDungeonId);
             const elsewhere = window.DMTHGame.state.current.roster.filter(g => g.id !== host.id && g.encounterState === 'captive' && g.assignedDungeonId !== host.assignedDungeonId).length;
             const full = sceneGirls.length >= MAX_SCENE_PARTNERS;
+            // Don't show the multi-girl wall at all when there's nothing to do (no partners in the
+            // scene AND none available to bring in) — that's just noise. It returns the moment you
+            // hold a second captive in this dungeon.
+            if (!sceneGirls.length && !available.length) return '';
             return `<div class="panel" style="margin-top:8px">
               <h3>👯 Multi-girl scene</h3>
               <p class="small muted">Team up any captives held in THIS dungeon — pull up to ${MAX_SCENE_PARTNERS} more into ${escapeHtml(host.name)}'s room for a true multi-speaker scene. Every girl present answers in her OWN voice, in turn. Pick who an action targets below. They go back to their own holds when you send them back.${elsewhere ? ` <span class="muted">(${elsewhere} more captive${elsewhere === 1 ? '' : 's'} held in other dungeons — 🚚 transfer one here to add her.)</span>` : ''}</p>

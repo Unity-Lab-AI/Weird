@@ -17,8 +17,34 @@
 }
 .chrome-nav a.active { border-color: var(--accent); color: var(--accent); }
 
-.app-main { max-width: 1280px; margin: 0 auto; padding: 24px; display: grid; gap: 24px; }
-.grid-2   { display: grid; gap: 24px; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+.app-main { width: 100%; max-width: min(1720px, 96vw); margin: 0 auto; padding: 20px clamp(16px, 3vw, 40px); display: grid; gap: 20px; }
+.grid-2   { display: grid; gap: 20px; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); }
+/* The room uses a 3-column layout on wide screens (status | actions | log) so it isn't one tall tower. */
+.room-cols { display: grid; gap: 20px; align-items: start; grid-template-columns: 1fr; }
+@media (min-width: 1100px) { .room-cols { grid-template-columns: minmax(300px, 0.9fr) minmax(340px, 1.1fr); } }
+@media (min-width: 1500px) { .room-cols { grid-template-columns: minmax(300px, 0.85fr) minmax(360px, 1fr) minmax(340px, 1.05fr); } }
+
+/* Collapsible sections (room declutter). A <details class="sect"> with a <summary> header. */
+details.sect { border: 1px solid var(--border); border-radius: 8px; margin: 10px 0; background: rgba(255,255,255,0.015); }
+details.sect > summary { cursor: pointer; padding: 9px 12px; font-family: var(--mono); font-size: 0.9rem; color: var(--accent); letter-spacing: 0.04em; list-style: none; display: flex; align-items: center; gap: 8px; user-select: none; }
+details.sect > summary::-webkit-details-marker { display: none; }
+details.sect > summary::before { content: '▸'; color: var(--text-dim); transition: transform 0.15s; }
+details.sect[open] > summary::before { transform: rotate(90deg); }
+details.sect > summary:hover { color: #ff80b4; }
+details.sect > .sect-body { padding: 4px 14px 14px; }
+.sect-stub { font-size: 0.8rem; color: var(--text-dim); padding: 2px 0; }
+
+/* Dashboard captive hero — the primary loop made prominent. */
+.cap-hero { display: grid; gap: 14px; }
+.cap-hero-top { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+.cap-hero-cta { display: flex; gap: 10px; flex-wrap: wrap; }
+.cap-hero-cta a { padding: 12px 20px; border: 1px solid var(--accent); border-radius: 8px; color: var(--accent); text-decoration: none; font-family: var(--mono); font-size: 1rem; font-weight: 700; background: rgba(255,122,168,0.06); }
+.cap-hero-cta a:hover { background: var(--accent); color: #0b0b0e; }
+.cap-tiles { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); }
+.cap-tile { display: grid; gap: 6px; padding: 14px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-elev); text-decoration: none; color: var(--text); transition: border-color 0.15s, transform 0.1s; }
+.cap-tile:hover { border-color: var(--accent); transform: translateY(-2px); }
+.cap-tile-name { font-size: 1.05rem; font-weight: 700; color: var(--text); display: flex; align-items: center; gap: 6px; }
+.cap-tile-meta { font-size: 0.78rem; color: var(--text-dim); display: flex; gap: 8px; flex-wrap: wrap; }
 .panel    { background: var(--bg-panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 22px; box-shadow: var(--shadow); }
 .panel h2 { color: var(--accent); margin: 0 0 12px; font-family: var(--mono); letter-spacing: 0.05em; font-size: 1.05rem; }
 .panel h3 { color: var(--text); margin: 14px 0 6px; font-size: 0.95rem; }

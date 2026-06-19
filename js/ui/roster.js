@@ -3,12 +3,36 @@
 (function () {
   'use strict';
 
+  // One sortable girls list — sort by name / Stockholm level / time held, ascending or descending.
+  let sortKey = 'held';   // 'name' | 'level' | 'held'
+  let sortDir = 'desc';   // 'asc' | 'desc'
+
+  function daysHeldOf(g) {
+    const ls = window.DMTHGame.lifespan ? window.DMTHGame.lifespan.describeLifespan(g) : null;
+    if (ls && typeof ls.daysCaptive === 'number') return ls.daysCaptive;
+    return g.captureDate ? (Date.now() - g.captureDate) : 0;
+  }
+  function sortGirls(list) {
+    const dir = sortDir === 'asc' ? 1 : -1;
+    return list.slice().sort((a, b) => {
+      let cmp = 0;
+      if (sortKey === 'name') cmp = String(a.name || '').localeCompare(String(b.name || ''));
+      else if (sortKey === 'level') cmp = ((a.bond?.bondLevel || 0) - (b.bond?.bondLevel || 0));
+      else cmp = (daysHeldOf(a) - daysHeldOf(b));   // held
+      if (cmp === 0) cmp = String(a.name || '').localeCompare(String(b.name || ''));
+      return cmp * dir;
+    });
+  }
+
   function render(el) {
     const s = window.DMTHGame.state.current;
     const roster = s.roster || [];
     const captives = roster.filter(g => g.encounterState === 'captive');
     const listed = roster.filter(g => s.slaveMarket.listed.some(l => l.girlId === g.id));
     const escaped = roster.filter(g => g.encounterState === 'escaped');
+    const filter = new URLSearchParams(location.hash.split('?')[1]).get('filter');
+    const active = sortGirls(filter === 'escaped' ? escaped : filter === 'listed' ? listed : captives);
+    const sortBtn = (key, label) => `<button class="btn-small ${sortKey === key ? 'btn-primary' : ''}" data-sort="${key}" data-tooltip="Sort the list by ${label.toLowerCase()}.">${label}</button>`;
 
     el.innerHTML = `
       <div class="panel">
@@ -18,10 +42,13 @@
           <a href="#roster?filter=listed" class="tab">Listed for sale (${listed.length})</a>
           <a href="#roster?filter=escaped" class="tab">Escaped (${escaped.length})</a>
         </div>
+        <div class="btn-row" style="margin:8px 0;align-items:center;gap:6px;flex-wrap:wrap">
+          <span class="small muted">Sort:</span>
+          ${sortBtn('name', 'Name')}${sortBtn('level', 'Level')}${sortBtn('held', 'Time held')}
+          <button class="btn-small" id="sort-dir" data-tooltip="Toggle order — top-to-bottom vs bottom-to-top.">${sortDir === 'asc' ? '⬆️ Asc' : '⬇️ Desc'}</button>
+        </div>
         <div class="girl-grid">
-          ${(new URLSearchParams(location.hash.split('?')[1]).get('filter') === 'escaped' ? escaped
-           : new URLSearchParams(location.hash.split('?')[1]).get('filter') === 'listed' ? listed
-           : captives).map(renderCard).join('')}
+          ${active.map(renderCard).join('')}
         </div>
       </div>
 
@@ -34,6 +61,12 @@
         }
       </div>
     `;
+
+    el.querySelectorAll('[data-sort]').forEach(b => {
+      b.onclick = () => { sortKey = b.dataset.sort; render(el); };
+    });
+    const dirBtn = el.querySelector('#sort-dir');
+    if (dirBtn) dirBtn.onclick = () => { sortDir = sortDir === 'asc' ? 'desc' : 'asc'; render(el); };
 
     function renderCard(g) {
       const ls = window.DMTHGame.lifespan ? window.DMTHGame.lifespan.describeLifespan(g) : null;

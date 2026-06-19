@@ -98,13 +98,6 @@
           <div class="stat-row" data-tooltip="Cumulative payouts from films across the entire save.">Total earned<b>$${totalEarned.toLocaleString()}</b></div>
           <a data-route="market" href="#market" class="btn-small" data-tooltip="Open the films market — list / sell-negatives / view passive income.">Open market →</a>
         </section>
-        <section class="panel" data-tooltip="Captives in your operation across all dungeons.">
-          <h2>🔗 Captives</h2>
-          <div class="big-num">${captives.length}</div>
-          <div class="sub">across ${s.dungeons.length} dungeon${s.dungeons.length === 1 ? '' : 's'}</div>
-          <a data-route="roster" href="#roster" class="btn-small" data-tooltip="Full roster + disposal log + listings.">Roster →</a>
-          <a data-route="dungeon" href="#dungeon" class="btn-small" data-tooltip="Dungeon portfolio + hold upgrades.">Dungeons →</a>
-        </section>
         <section class="panel" data-tooltip="John inbox — upmarket clientele requesting specific rental gigs. Accept/reject per request.">
           <h2>📬 Propositioners</h2>
           <div class="stat-row" data-tooltip="Waiting for your review.">Inbox<b>${s.propositioners.inbox.length}</b></div>
@@ -115,16 +108,36 @@
       </div>
 
       <section class="panel">
-        <h2>Quick actions</h2>
-        <div class="btn-row">
-          <a href="#town" class="btn-primary" data-tooltip="The map. Visit locations + own properties.">🌆 Town</a>
-          <a href="#hunt" class="btn-small" data-tooltip="Pick a target + loadout. Run a 4-stage capture attempt.">🎯 Hunt</a>
-          <a href="#shop" class="btn-small" data-tooltip="The Defilers' Bloc — off-grid anarchist supply cell. Kidnap chems, restraints, chamber implements, drugs, food, water, contraception, abortion supplies. High-tier stock is level-locked + limited per day.">🏴 The Defilers' Bloc</a>
-          <a href="#slave-market" class="btn-small" data-tooltip="Buy/sell captives. Untrained cheap, trained premium.">⛓️ Slave market</a>
-          <a href="#achievements" class="btn-small" data-tooltip="Unlocked milestones.">🏆 Achievements</a>
-          <a href="#trophy-room" class="btn-small" data-tooltip="Keepsakes kept from the girls you've snuffed, buried, burned, or dumped for good — taken off her (panties, a lock of hair, jewelry) or cut off her (a tooth, a nipple) — each grants stacking perks.">🏆 Trophy room</a>
-          ${window.DMTHGame.escapeRecovery && window.DMTHGame.escapeRecovery.recoverable().length > 0 ? `<a href="#escape-recovery" class="btn-small btn-danger" data-tooltip="Girls have escaped — recapture them before they alert authorities.">🏃 ${window.DMTHGame.escapeRecovery.recoverable().length} on the run</a>` : ''}
-          ${captives.length > 0 ? `<a href="#room?girl=${captives[0].id}" class="btn-small" data-tooltip="Jump straight into ${captives[0].name}'s hold.">🚪 Enter ${captives[0].name}'s hold</a>` : ''}
+        <h2>🔗 Your Operation</h2>
+        <div class="cap-hero">
+          <div class="cap-hero-top">
+            <div>
+              <div class="big-num">${captives.length}</div>
+              <div class="sub">captive${captives.length === 1 ? '' : 's'} across ${s.dungeons.length} dungeon${s.dungeons.length === 1 ? '' : 's'}</div>
+            </div>
+            <div class="cap-hero-cta">
+              <a data-route="roster" href="#roster" data-tooltip="Full roster — every captive, escaped girl, corpse + disposal log + listings.">📋 Roster →</a>
+              <a data-route="dungeon" href="#dungeon" data-tooltip="Dungeon portfolio — holds, upgrades, capacity, security.">🏚️ Dungeons →</a>
+              <a href="#hunt" data-tooltip="Pick a target + loadout, run a capture attempt.">🎯 Hunt →</a>
+              ${window.DMTHGame.escapeRecovery && window.DMTHGame.escapeRecovery.recoverable().length > 0 ? `<a href="#escape-recovery" class="btn-danger" style="border-color:#c0392b;color:#ff8a8a" data-tooltip="Girls have escaped — recapture them before they alert authorities.">🏃 ${window.DMTHGame.escapeRecovery.recoverable().length} on the run</a>` : ''}
+            </div>
+          </div>
+          ${captives.length === 0
+            ? `<p class="muted small">No captives yet. <a href="#hunt">Go hunt one →</a></p>`
+            : `<div class="cap-tiles">${captives.map(g => {
+                const hp = Math.round(g.body?.health ?? 100);
+                const maxH = (window.DMTHGame.actionEffects?.maxHealthFor) ? window.DMTHGame.actionEffects.maxHealthFor(g) : 100;
+                const hpPct = Math.min(100, Math.round((hp / maxH) * 100));
+                const preg = g.pregnancy || {};
+                const pregBadge = preg.status === 'pregnant' ? ' 🤰' : '';
+                const stock = (g.bond?.bondLevel || 0) + 1;
+                return `<a class="cap-tile" href="#room?girl=${g.id}" data-tooltip="Enter ${g.name}'s hold — ${g.archetypeTemplate}, Stockholm ${stock}/10, ${hp}/${maxH} HP.">
+                  <div class="cap-tile-name">${g.mood.moodEmoji} ${g.name}${pregBadge}</div>
+                  <div class="cap-tile-meta"><span>⛓ Stk ${stock}/10</span><span>${g.archetypeTemplate}</span><span>❤️ ${hp}/${maxH}</span></div>
+                  <div class="bar"><div class="bar-fill ${hp < maxH * 0.3 ? 'danger' : ''}" style="width:${hpPct}%"></div></div>
+                </a>`;
+              }).join('')}</div>`
+          }
         </div>
       </section>
 
@@ -145,32 +158,6 @@
         })() : '<p class="muted small">—</p>'}
       </section>
 
-      <section class="panel">
-        <h2>Recent captives</h2>
-        ${captives.length === 0
-          ? `<p class="muted small">No captives. <a href="#hunt">Go hunt one.</a></p>`
-          : `<div class="girl-grid">${captives.map(g => {
-              const preg = g.pregnancy || {};
-              const pregLight = preg.status === 'pregnant'
-                ? `<span class="preg-light" data-tooltip="🤰 Pregnant — gestation day ${preg.gestationDays}/280 (trimester ${preg.trimester})">🤰</span>`
-                : preg.status === 'aborted' ? `<span class="preg-light" data-tooltip="Pregnancy aborted (day ${preg.outcomeHistory?.slice(-1)[0]?.day || '?'})">⚪</span>`
-                : preg.status === 'miscarried' ? `<span class="preg-light" data-tooltip="Miscarried (complication)">🩸</span>`
-                : preg.status === 'birthed' ? `<span class="preg-light" data-tooltip="Birthed">🍼</span>`
-                : preg.status === 'lost' ? `<span class="preg-light" data-tooltip="Lost to authorities">🚨</span>`
-                : '';
-              return `<a class="girl-card" href="#room?girl=${g.id}">
-                <div class="girl-emoji">${g.mood.moodEmoji}${pregLight}</div>
-                <div class="girl-name">${g.name}${preg.status === 'pregnant' ? ' 🤰' : ''}</div>
-                <div class="girl-meta">
-                  <span>L${g.bond.bondLevel}</span>
-                  <span>${g.archetypeTemplate}</span>
-                  ${preg.status === 'pregnant' ? `<span class="muted small" data-tooltip="gestation day ${preg.gestationDays}/280">T${preg.trimester}·d${preg.gestationDays}</span>` : ''}
-                </div>
-                <div class="bar"><div class="bar-fill" style="width:${Math.round(((g.bond.bondXP % 50) / 50) * 100)}%"></div></div>
-              </a>`;
-            }).join('')}</div>`
-        }
-      </section>
     `;
 
     // PLAYERSTAM.2 — pop a refill item / drink girl-milk to top up Nut Reserve.
