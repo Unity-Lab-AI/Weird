@@ -8,6 +8,7 @@
 }
 .chrome-brand { font-family: var(--mono); letter-spacing: 0.08em; color: var(--accent); font-weight: 700; }
 .chrome-money { font-family: var(--mono); color: var(--ok); }
+.chrome-wanted { font-family: var(--mono); padding: 4px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.88rem; letter-spacing: 0.03em; }
 .chrome-satisfaction { font-family: var(--mono); padding: 4px 10px; border: 1px solid var(--border); border-radius: 6px; background: rgba(255,122,168,0.08); font-size: 0.88rem; letter-spacing: 0.04em; }
 .chrome-clock { font-family: var(--mono); color: var(--warn); margin-left: auto; padding: 4px 12px; border: 1px solid var(--border); border-radius: 6px; background: rgba(255,184,74,0.08); font-size: 0.88rem; letter-spacing: 0.04em; }
 .chrome-nav   { display: flex; gap: 8px; flex-wrap: wrap; }
@@ -17,8 +18,15 @@
 }
 .chrome-nav a.active { border-color: var(--accent); color: var(--accent); }
 
-.app-main { width: 100%; max-width: min(1720px, 96vw); margin: 0 auto; padding: 20px clamp(16px, 3vw, 40px); display: grid; gap: 20px; }
-.grid-2   { display: grid; gap: 20px; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); }
+/* TRUE full-width — no centered cap, use the whole screen (ultrawide included). */
+.app-main { width: 100%; max-width: none; margin: 0; padding: 16px clamp(12px, 2vw, 32px); display: grid; gap: 16px; }
+.grid-2   { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); }
+/* Compact top-of-dashboard stat cards (Treasury / Depravity / etc.) — small, properly scaled tiles
+   instead of a huge panel holding one number. */
+.dash-stats { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+.dash-stats .panel { padding: 14px 16px; }
+.dash-stats .panel h2 { font-size: 0.92rem; margin: 0 0 6px; }
+.dash-stats .big-num { font-size: 1.7rem; }
 /* The room uses a 3-column layout on wide screens (status | actions | log) so it isn't one tall tower. */
 .room-cols { display: grid; gap: 20px; align-items: start; grid-template-columns: 1fr; }
 @media (min-width: 1100px) { .room-cols { grid-template-columns: minmax(300px, 0.9fr) minmax(340px, 1.1fr); } }

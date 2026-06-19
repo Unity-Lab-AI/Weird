@@ -64,6 +64,7 @@
     unlockedLocations: [],         // [locationId] hunting grounds with bought private access (PLVL.2)
     ownedLocations: [],            // [locationId] locations BOUGHT OUT — you own the turf, grants perks (BUYLOCATION.1)
     logistics: { unlocked: false, enabled: false, targets: { food: 20, water: 20, condoms: 10 } },   // AUTOLOGISTICS.1 — auto-distribute supplies to dungeon pools
+    ledger: [],                    // 📒 every money in/out: { at, gameMin, delta, reason, balance }
     purchasedUnlocks: [],          // [unlockKey] gated action tiers bought early with cash (PAYUNLOCK.1)
 
     roster: [],                    // [GirlProfile+state]  id-keyed; see girl-gen.js
@@ -153,6 +154,7 @@
     if (!s.unlockedLocations) s.unlockedLocations = [];
     if (!s.ownedLocations) s.ownedLocations = [];
     if (!s.logistics) s.logistics = { unlocked: false, enabled: false, targets: { food: 20, water: 20, condoms: 10 } };
+    if (!s.ledger) s.ledger = [];
     if (!s.purchasedUnlocks) s.purchasedUnlocks = [];
     if (!s.settings) s.settings = {};
     if (!s.settings.playerName) s.settings.playerName = 'Master';
@@ -321,10 +323,24 @@
   }
 
   // wallet
+  // The LEDGER (📒) — every money in/out is recorded with a signed delta + reason + running balance
+  // so the dashboard can show the full books. Bounded to the last 400 entries.
+  function recordLedger(s, delta, reason) {
+    if (!s.ledger) s.ledger = [];
+    s.ledger.push({
+      at: Date.now(),
+      gameMin: window.DMTHGame.gameClock ? window.DMTHGame.gameClock.now() : null,
+      delta,
+      reason: reason || 'misc',
+      balance: s.wallet.money
+    });
+    if (s.ledger.length > 400) s.ledger = s.ledger.slice(-400);
+  }
   function addMoney(amount, reason) {
     mutate(s => {
       s.wallet.money += amount;
       s._lastTxn = { amount, reason, at: Date.now() };
+      recordLedger(s, amount, reason);
     });
   }
   function spendMoney(amount, reason) {
@@ -332,6 +348,7 @@
     mutate(s => {
       s.wallet.money -= amount;
       s._lastTxn = { amount: -amount, reason, at: Date.now() };
+      recordLedger(s, -amount, reason);
     });
     return true;
   }
@@ -651,6 +668,7 @@
     addTrophy, getTrophies,
     addBodyPart, getBodyParts, removeBodyPart,
     addUnlockedLocation, addOwnedLocation, setLogistics, addPurchasedUnlock,
+    getLedger: () => (state && state.ledger) || [],
     enqueuePropositioner, acceptPropositioner, completePropositioner, rejectPropositioner,
     listGirlForSale, unlistGirl,
     bumpTick,
