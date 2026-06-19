@@ -1,4 +1,4 @@
-// DUNGEON MASTER: THE HUNT — toys & implements (TOYS.1).
+// DUNGEON MASTER: THE HUNT — toys & implements.
 // "Toys" used loosely — from a wand vibrator to torture-chamber implements. You can BUY them,
 // LOOT them, or FIND them; you only UNLOCK the USE of a toy once you OWN one (it's an inventory
 // item). Using a toy fires a depraved act with its own effect envelope + film/aftermath markers.
@@ -11,7 +11,7 @@
 (function () {
   'use strict';
 
-  // TOYBALANCE.1 (Gee) — every toy is NET-POSITIVE for the player: a nice boost/perk (big
+  // Every toy is NET-POSITIVE for the player: a nice boost/perk (big
   // satisfaction + arousal/wetness, or escape-suppression) clearly outweighs at most a SMALL
   // girl-side negative. The PLEASURE + mid toys carry only light health/mood/debt costs. The
   // GORE tier is the deliberate high-risk / high-reward exception — its benefit is the top
@@ -33,7 +33,7 @@
     'fucking-machine':{ name: 'Relentless Fucking Machine', emoji: '🛠️', cost: 750, levelReq: 3, notes: 'A motorized piston that rails her for hours at a setting — leaves her fucked stupid and ruined. Big arousal/wetness/cum-fill payoff, light cost.', fx: { arousal: +18, wetness: +16, cumLoad: +0.8, satisfaction: 11, mood: -5, health: -5, bruises: +2, bondDebt: 5, tag: 'rough' } }
   });
 
-  // TOY-IMG.1 — the visible implement on her body when a toy is in use, rendered into her image
+  // The visible implement on her body when a toy is in use, rendered into her image
   // (imaging.toyTokens reads body.recentToy, TTL-faded like recentActTag). Only toys with a
   // visible presence get a token; the rest just apply their effects.
   const TOY_IMG = Object.freeze({
@@ -53,12 +53,12 @@
     'fucking-machine':'a motorized fucking machine pistoning a dildo into her, strapped in place'
   });
 
-  const MAX_TOYS_PER_HOLD = 3;   // Gee: a max of three toys per hold
+  const MAX_TOYS_PER_HOLD = 3;   // a max of three toys per hold
 
   function spec(id) { return TOYS[id]; }
   function owns(id) { return ((window.DMTHGame.state.current?.inventory?.[id]) || 0) > 0; }
 
-  // ── Hold attachment (TOY-HOLD.1) ─────────────────────────────────────────────
+  // ── Hold attachment ─────────────────────────────────────────────
   // A hold holds up to MAX_TOYS_PER_HOLD attached toys; a toy can only be USED on a girl whose
   // hold it's attached to. Attaching consumes one from inventory; detaching returns it.
   function holdToys(girl) {
@@ -100,12 +100,28 @@
   function cheat() { return window.DMTHGame.progression ? window.DMTHGame.progression.isCheatUnlocked() : false; }
   function levelOk(id) { const t = TOYS[id]; return !t ? false : (cheat() || level() >= (t.levelReq || 0)); }
 
+  // A toy's BUY gates by the SAME multi-dimension engine as every other item type
+  // (player level + girls held + dungeons owned + stockpile, derived from the toy's levelReq).
+  function buyStatus(id) {
+    const t = TOYS[id];
+    if (!t) return { locked: true, unmet: ['unknown toy'] };
+    const p = window.DMTHGame.progression;
+    if (!p || !p.itemUnlockStatus) return { locked: false, unmet: [] };
+    return p.itemUnlockStatus(p.toyRequirementItem(t));
+  }
+  function buyLockReason(id) {
+    const st = buyStatus(id);
+    return st.unmet && st.unmet.length ? st.unmet.join(' + ') : '';
+  }
+
   function buy(id) {
     const t = TOYS[id];
     if (!t) return { ok: false, reason: 'unknown toy' };
+    const st = buyStatus(id);
+    if (st.locked) return { ok: false, reason: 'locked — needs ' + (st.unmet.join(' + ') || 'more progress') };
     if (!window.DMTHGame.state.spendMoney(t.cost, 'toy:' + id)) return { ok: false, reason: 'insufficient funds' };
     window.DMTHGame.state.addItem(id, 1);
-    if (window.DMTHNotify) window.DMTHNotify.show(`${t.emoji} Bought ${t.name} ($${t.cost.toLocaleString()}). Its use is unlocked.`, { type: 'success', durationMs: 4500 });
+    if (window.DMTHNotify) window.DMTHNotify.show(`${t.emoji} Bought ${t.name} ($${t.cost.toLocaleString()}) — added to your inventory. Mount it in a hold to use it.`, { type: 'success', durationMs: 4500 });
     return { ok: true, id, cost: t.cost };
   }
 
@@ -120,7 +136,7 @@
     const girl = window.DMTHGame.state.getGirl(girlId);
     if (!girl) return { ok: false, reason: 'no such girl' };
     if (girl.encounterState !== 'captive') return { ok: false, reason: 'she has to be a living captive for that' };
-    // TOY-HOLD.1 — a toy must be ATTACHED to her hold to use it on her.
+    // A toy must be ATTACHED to her hold to use it on her.
     if (!holdToys(girl).includes(toyId)) return { ok: false, reason: `${t.name} isn't mounted in her hold — attach it to this hold first` };
 
     const fx = t.fx || {};
@@ -133,7 +149,7 @@
     if (fx.bruises) b.bruises = clamp((b.bruises ?? 0) + fx.bruises, 0, 99);
     if (fx.cumLoad) b.cumLoad = +(((b.cumLoad || 0) + fx.cumLoad).toFixed(1));
     if (fx.tag) { b.recentActTag = fx.tag; if (window.DMTHGame.gameClock) b.recentActAt = window.DMTHGame.gameClock.now(); }
-    // TOY-IMG.1 — stamp the in-use toy so her next image renders the implement on her body
+    // Stamp the in-use toy so her next image renders the implement on her body
     // (gag in her mouth, clamps, machine, etc.). TTL-faded by imaging like recentActTag.
     if (TOY_IMG[toyId]) { b.recentToy = toyId; if (window.DMTHGame.gameClock) b.recentToyAt = window.DMTHGame.gameClock.now(); }
 
@@ -160,7 +176,7 @@
     return { ok: true, toyId, maso };
   }
 
-  // FRIENDTOY.1 — apply a toy's effect to a captive WITHOUT the ownership / hold-mount / level
+  // Apply a toy's effect to a captive WITHOUT the ownership / hold-mount / level
   // gates: an NPC ("friend") brought his OWN chamber-grade implement. Health floors at 1 (the toy
   // never insta-kills — the FRIENDKILL gate owns lethality). No player credit (byJohn semantics);
   // stamps the in-use toy so her next image renders the implement on her body. Returns the spec.
@@ -189,7 +205,7 @@
   // Toy ids that can turn up as world loot (find them) — fed into loot.FULL_POOL by loot.js.
   function lootableIds() { return Object.keys(TOYS); }
 
-  // TOOLTIPS-FULL.1 — thorough per-toy tooltip (Gee: "toys show fx"). Lays out the toy's full
+  // Thorough per-toy tooltip — lays out the toy's full
   // per-use effects split into a 👤 HER line (her body/bond fx) + a 🎮 YOU line (satisfaction /
   // sex-drive / DEPRAVITY XP / WANTED heat), plus gore / masochist / level-gate flags. No
   // truncation — the DMTHTooltips bubble pre-wraps.
@@ -224,7 +240,7 @@
   window.DMTHGame = window.DMTHGame || {};
   window.DMTHGame.toys = Object.freeze({
     TOYS, TOY_IMG, MAX_TOYS_PER_HOLD,
-    spec, owns, levelOk, buy, use, applyExternal, lootableIds, toyTooltip,
+    spec, owns, levelOk, buyStatus, buyLockReason, buy, use, applyExternal, lootableIds, toyTooltip,
     holdToys, holdToysAt, attachToHold, detachFromHold
   });
 })();

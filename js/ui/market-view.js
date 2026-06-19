@@ -47,9 +47,9 @@
       </div>
 
       <div class="panel">
-        <h2>🦴 Body-Part Market (${bodyParts.length})</h2>
-        <p class="small muted">Organs + limbs harvested via the 🪓 Dismember disposal path. They sell passively to black-market buyers each tick — or fence one instantly below at a small discount. Moving parts is hot: each sale adds a little WANTED heat.</p>
-        ${bodyParts.length === 0 ? `<p class="muted small">No parts listed. Dismember a captive (Dispose → 🪓 Dismember + Harvest) to stock the organ trade.</p>` :
+        <h2>🩸 The Offal Man — Organ Vendor (${bodyParts.length})</h2>
+        <p class="small muted">The Offal Man buys whatever wet goods you cut off them. Stock him by taking limbs (🪚 Bone Saw → 🪓 Nugget) or cutting out organs (🔪 Harvest Knife → 🫀 Harvest) in a captive's hold, or via the 🪓 Dismember disposal path. Parts sell passively to him each tick — or fence one instantly below at a small discount. Moving meat is hot: each sale adds a little WANTED heat.</p>
+        ${bodyParts.length === 0 ? `<p class="muted small">No parts on offer. Saw off her limbs or knife out her organs (in her hold), or Dismember a captive, to stock the Offal Man.</p>` :
           `<div class="stat-row"><span>Listed value (passive)</span><b class="gold">≈ $${bodyPartsTotal.toLocaleString()}</b></div>
            <ul class="film-list">${bodyParts.map(p => `
              <li class="film-item">

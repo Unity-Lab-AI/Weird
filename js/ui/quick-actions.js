@@ -248,6 +248,16 @@
         { emoji: '🦵', label: 'take right leg', text: '*the last leg comes off at the hip — now she is a complete nugget, limbless and helpless, nothing left to run on*', delimbKey: 'rightLeg' }
       ]
     },
+    organs: {
+      label: '🫀 Harvest',
+      actions: [
+        { emoji: '🫘', label: 'cut out left kidney',  text: '*opens her flank with the knife and lifts the left kidney out wet and whole — she can live on the one*', organKey: 'left-kidney' },
+        { emoji: '🫘', label: 'cut out right kidney', text: '*takes the other kidney too; with none left to filter her she will not last*', organKey: 'right-kidney' },
+        { emoji: '🫀', label: 'cut out liver',  text: '*reaches up under the ribs and carves the liver free — a vital organ, and she knows what it means*', organKey: 'liver' },
+        { emoji: '🫀', label: 'cut out heart',  text: '*cracks her chest open and lifts the still-warm heart out of her in both hands*', organKey: 'heart' },
+        { emoji: '🫁', label: 'cut out lungs',  text: '*splits the chest wide and takes both lungs — the table goes quiet*', organKey: 'lungs' }
+      ]
+    },
     own: {
       label: '🏷️ Own',
       actions: [
@@ -320,7 +330,7 @@
     // up (cheat/sandbox start bypasses). A locked tab can't be opened; it shows the required
     // level in a tooltip. Tab keys map 1:1 to progression UNLOCK keys.
     const prog = window.DMTHGame.progression;
-    const GATED_TABS = { extreme: 'extreme', torture: 'extreme', nugget: 'nugget', own: 'own' };
+    const GATED_TABS = { extreme: 'extreme', torture: 'extreme', nugget: 'nugget', organs: 'dismember', own: 'own' };
     const tabLocked = (k) => !!(GATED_TABS[k] && prog && !prog.isUnlocked(GATED_TABS[k]));
     let currentTab = container.dataset.qaTab || 'force';
     if (tabLocked(currentTab)) currentTab = 'force';   // never sit on a locked tab
@@ -393,10 +403,23 @@
             && window.DMTHGame.actionEffects.wouldBeLethal(girl.id, action.applyId)) {
           if (!confirm(window.DMTHGame.actionEffects.lethalWarningLine())) return;
         }
-        // Delimbing — heal-gated, special path (not an ACTIONS spec). If she hasn't healed
-        // from the last amputation, the attempt is refused and the turn isn't sent.
+        // Delimbing — special path (not an ACTIONS spec). No heal-gate: each limb is heavy damage
+        // and goes into inventory to sell; if she's too weak she dies on the table. Refused (turn
+        // not sent) only if the saw is missing or the limb is already gone.
         if (action.delimbKey && girl?.id && window.DMTHGame?.actionEffects?.delimb) {
           const r = window.DMTHGame.actionEffects.delimb(girl.id, action.delimbKey);
+          if (!r.ok) { alert(r.reason); return; }
+        }
+        // Organ harvesting — knife-gated special path. Vital organs (and the 2nd kidney) KILL her,
+        // so confirm a fatal cut first. The organ drops into inventory to sell to the organ vendor.
+        if (action.organKey && girl?.id && window.DMTHGame?.actionEffects?.harvestOrgan) {
+          const AE = window.DMTHGame.actionEffects;
+          const spec = AE.HARVEST_ORGANS && AE.HARVEST_ORGANS[action.organKey];
+          const other = action.organKey === 'left-kidney' ? 'right-kidney' : 'left-kidney';
+          const willKill = spec && girl.encounterState === 'captive'
+            && (spec.vital || (action.organKey.endsWith('kidney') && (girl.body?.organs || {})[other] === 'removed'));
+          if (willKill && !confirm(`Cutting out her ${spec.name} will KILL her. Harvest it anyway?`)) return;
+          const r = AE.harvestOrgan(girl.id, action.organKey);
           if (!r.ok) { alert(r.reason); return; }
         }
         // Ownership marks — permanent, irreversible PROPERTY marks. Special path (not an

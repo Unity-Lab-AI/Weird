@@ -267,7 +267,7 @@
       notes: 'Clean clinical referral — works any time before day 200. 3% complication. Zero notoriety. Expensive but safe.'
     },
 
-    // --- PLAYER BOOST (PLAYERSTAM.2) — refill your 💦 Nut Reserve. `playerRefill` = amount
+    // --- PLAYER BOOST — refill your 💦 Nut Reserve. `playerRefill` = amount
     //     restored (999 = full). Lootable + purchasable; girl-milk does it too (milk.drinkPlayer). ---
     {
       id: 'blue-pill', displayName: 'Blue Pill (Viagra)', emoji: '💊',
@@ -331,7 +331,14 @@
       category: 'item', subcategory: 'torture',
       prompt: 'product photograph of a heavy surgical amputation bone saw with a worn wooden handle on a plain backdrop, grim antique-medical commerce style',
       cost: 350, tier: 4,
-      notes: 'Reusable. REQUIRED to take a girl\'s limbs — nuggeting is slow, methodical work you can\'t do bare-handed. Buy once; the dismember/nugget actions gate on owning it. A full nugget can never run and never fight.'
+      notes: 'Reusable. REQUIRED to take a girl\'s limbs — nuggeting is slow, methodical work you can\'t do bare-handed. Buy once; the dismember/nugget actions gate on owning it. Each severed limb goes into your inventory to sell. Keep her HP up between cuts or the saw kills her.'
+    },
+    {
+      id: 'harvest-knife', displayName: 'Harvest Knife', emoji: '🔪',
+      category: 'item', subcategory: 'torture',
+      prompt: 'product photograph of a long surgical harvesting knife with a hooked stainless blade on a plain backdrop, grim medical-examiner commerce style',
+      cost: 420, tier: 5,
+      notes: 'Reusable. REQUIRED to cut out her organs for sale. A vital organ (liver / heart / lungs) kills her on the table; one kidney she survives, but take both and she dies. Each organ drops into your inventory to fence to the organ vendor.'
     },
 
     // --- BLUNT ---

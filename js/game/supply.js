@@ -1,4 +1,4 @@
-// DUNGEON MASTER: THE HUNT — two-tier supply pool (POOL-SUPPLY.1).
+// DUNGEON MASTER: THE HUNT — two-tier supply pool.
 // Supplies live in TWO places: a per-HOLD reserve (targeted to one girl) and a per-DUNGEON
 // POOL that every hold in that dungeon shares. A girl draws from her own hold reserve FIRST,
 // then falls back to the dungeon pool — so stocking the pool feeds every captive evenly with
@@ -144,7 +144,7 @@
     return d ? ensurePool(d) : { food: 0, water: 0, condoms: 0, birthControl: 0, drugs: {} };
   }
 
-  // ── AUTOLOGISTICS.1 (Gee) — a bought UPGRADE that auto-distributes supplies from your universal
+  // ── A bought UPGRADE that auto-distributes supplies from your universal
   // inventory into every dungeon's shared pool each tick, up to per-kind slider TARGETS — so you set
   // it once and stop hand-stocking. Consumes the matching inventory items (best-value source first).
   const LOGISTICS_UNLOCK_COST = 4000;

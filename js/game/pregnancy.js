@@ -160,7 +160,7 @@
 
     // Gate: outfit must not be a condom wardrobe entry (none ship in catalog yet — leave
     // open hook for the 'condom-equipped' wardrobe item to land later).
-    // Contraception gate (CONDOMS.1) — a BLOCKING condom stops conception; a holed/sabotaged
+    // Contraception gate — a BLOCKING condom stops conception; a holed/sabotaged
     // one (blocks:false) does NOT, so breeding still takes.
     const condomBlocks = window.DMTHGame.condoms
       ? window.DMTHGame.condoms.blocks(girl)
@@ -178,16 +178,16 @@
       return { rolled: false, reason: 'on birth control' };
     }
 
-    // Consistency-based conception (Gee): 3-4 game-days of consistent cum-inside should
+    // Consistency-based conception: 3-4 game-days of consistent cum-inside should
     // reliably breed her. Each qualifying cum-inside event raises a persistent breedingExposure
     // counter; the chance escalates with it so sustained breeding becomes near-certain, while a
     // one-off is far from guaranteed. Exposure persists across misses, resets on conception.
     const exposure = (preg.breedingExposure || 0) + 1;
-    // SPECIALIZE.1 — a 🐎 brood-mare conceives more readily.
+    // A 🐎 brood-mare conceives more readily.
     const fertility = window.DMTHGame.specialize ? window.DMTHGame.specialize.fertilityMultiplier(girl) : 1;
     const chance = Math.min(0.95, (0.16 + exposure * 0.12) * drugProtectionFactor(girl) * fertility);
     const roll = Math.random();
-    // CUMFILL.1 — the sustained vaginal cum-fill timer (tickCumFill) calls this with
+    // The sustained vaginal cum-fill timer (tickCumFill) calls this with
     // guaranteed:true once she's been kept filled long enough, so conception is the payoff of
     // maintained breeding rather than a per-event dice roll. The condom / L9 / already-pregnant
     // gates above still apply regardless.
@@ -226,7 +226,7 @@
   }
 
   // -----------------------------------------------------------------------
-  // CUMFILL.1 — vaginal cum-fill → sustained-fill preggo timer
+  // Vaginal cum-fill → sustained-fill preggo timer
   // -----------------------------------------------------------------------
   // ONLY cum deposited in the vagina raises this meter (anal / oral / ass-rape don't), so only
   // vaginal breeding can make her pregnant. The fill LEAKS over time, so she has to be kept
@@ -419,9 +419,9 @@
   // Full-term outcome resolver
   // -----------------------------------------------------------------------
 
-  // NEWBORN.2 — the "mass" can't join the harem, so the player CHOOSES how to get rid of it.
+  // The "mass" can't join the harem, so the player CHOOSES how to get rid of it.
   // Each method has unique trade-offs: money / WANTED / notoriety / the mother's mind / DEPRAVITY
-  // XP / facility + level gates. Gee's seeds (dumpster / firehouse / trafficking / incinerator)
+  // XP / facility + level gates (dumpster / firehouse / trafficking / incinerator)
   // PLUS expanded depraved options. money is a [min,max] range ([0,0] = none).
   const NEWBORN_METHODS = Object.freeze({
     'dumpster':      { displayName: 'Dumpster Drop',               emoji: '🗑️', money: [0, 0],       wanted: 2,  notoriety: 1, motherMood: -2,  xp: 4,  notes: 'Quick and cold — out with the trash. No benefit, low heat. The auto-default if you dawdle.' },
@@ -518,7 +518,7 @@
       outcomeHistory: [...(preg.outcomeHistory || []), { status: 'delivered', day: preg.gestationDays, method: null, ts: Date.now(), notes: `${girl.name} delivered — newborn awaiting disposal` }]
     };
     window.DMTHGame.state.updateGirl(girlId, { pregnancy: newPreg });
-    // MILKBAL.1 — delivery opens her postpartum lactation window ("a few days after birth",
+    // Delivery opens her postpartum lactation window ("a few days after birth",
     // extended for a big-tits girl), so her breasts keep producing milk after she's birthed.
     if (window.DMTHGame.milk?.startPostpartum) window.DMTHGame.milk.startPostpartum(girlId);
     if (window.DMTHNotify) {
@@ -531,7 +531,7 @@
   // Tick advancement
   // -----------------------------------------------------------------------
 
-  // Days-per-tick for gestation advancement. Pace target (Gee): 2 GAME DAYS per trimester →
+  // Days-per-tick for gestation advancement. Pace target: 2 GAME DAYS per trimester →
   // 6 game days to full term. 48 ticks per game day → 288 ticks per full term. Full term is
   // 280 gestation-days, so per-tick advance is 280/288 ≈ 0.972. The internal 0-280 scale is
   // kept (it drives the fine-grained abortion windows + the trimester image tiers); only the
@@ -546,7 +546,7 @@
     for (const girl of s.roster) {
       if (girl.encounterState !== 'captive') continue;
       const preg = getPregnancy(girl);
-      // NEWBORN.2 — a delivered newborn awaiting disposal auto-dumpsters if ignored too long.
+      // A delivered newborn awaiting disposal auto-dumpsters if ignored too long.
       if (preg.status === 'delivered' && preg.pendingNewbornDisposal) {
         if (preg.deliveredAt && (Date.now() - preg.deliveredAt) > NEWBORN_AUTO_MS) {
           disposeNewborn(girl.id, 'dumpster', { auto: true });
@@ -563,7 +563,7 @@
       // one is horrified by it — being bred against her will rots her mood + spikes bond-debt.
       const bond = girl.bond?.bondLevel || 0;
       const patch = { pregnancy: { ...preg, gestationDays: newDays, trimester: newTrimester } };
-      // PREGNEED.1 (Gee) — a pregnant girl eats for two: extra food drain on top of the normal
+      // A pregnant girl eats for two: extra food drain on top of the normal
       // consumable tick (neglect her food and the starvation penalty bites faster while preggo).
       if (girl.consumables && girl.consumables.food) {
         const cons = JSON.parse(JSON.stringify(girl.consumables));

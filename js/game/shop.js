@@ -1,6 +1,6 @@
-// DUNGEON MASTER: THE HUNT — "The Back Alley" (SHOPNAME.1) purchasing + daily stock (SHOPREWORK.1).
+// DUNGEON MASTER: THE HUNT — "The Back Alley" purchasing + daily stock.
 //
-// SHOPREWORK.1 — the back alley does NOT carry unlimited everything. Cheap STAPLES (condoms, food,
+// The back alley does NOT carry unlimited everything. Cheap STAPLES (condoms, food,
 // water, anything ≤ $30) are endless. High-tier tools / equipment / toys / chems are LEVEL-LOCKED
 // (your DEPRAVITY level) and only a HANDFUL appear in stock each game-day, with the variety + amounts
 // refreshing daily. Not so scarce you wait weeks — roughly half the high-tier catalog shows each day.
@@ -19,13 +19,25 @@
   }
 
   // Tier the player is allowed to buy at his DEPRAVITY level (cheat/sandbox bypasses).
+  // (Kept for back-compat; the real gate is the multi-dimension requirement engine below.)
   function allowedTier() {
     const p = window.DMTHGame.progression;
     if (!p) return 99;
     if (p.isCheatUnlocked && p.isCheatUnlocked()) return 99;
     return 1 + Math.floor((p.getLevel ? p.getLevel() : 0) / 2);   // L0→t1, L2→t2, L4→t3 … L8→t5
   }
-  function isLevelLocked(item) { return !isCheat() && (item.tier || 0) > allowedTier(); }
+  // An item is locked unless its multi-dimension requirement (player level + girls
+  // held + dungeons owned + stockpile prereq, derived from tier by the progression ladder) is met.
+  function isLevelLocked(item) {
+    const p = window.DMTHGame.progression;
+    if (p && p.isItemLocked) return p.isItemLocked(item);
+    return !isCheat() && (item.tier || 0) > allowedTier();   // fallback if progression missing
+  }
+  // The unmet requirement text for a locked item, e.g. "DEPRAVITY L3 + 2 girls held".
+  function lockReason(item) {
+    const p = window.DMTHGame.progression;
+    return (p && p.itemGateText) ? p.itemGateText(item) : 'raise your DEPRAVITY level';
+  }
 
   // Per-day stock map. Staples aren't tracked (always ∞). High-tier items: ~half appear each day
   // with a small quantity (1-3). Persisted so it's stable within the day, fresh across days.
@@ -78,6 +90,7 @@
       prompt: item.prompt,
       staple: isStaple(item),
       locked: isLevelLocked(item),
+      lockReason: lockReason(item),
       available: availableOf(item.id)
     }));
   }
@@ -89,7 +102,7 @@
   function buy(itemId, qty = 1) {
     const item = window.DMTHAssets.getById('item', itemId);
     if (!item) throw new Error(`unknown item: ${itemId}`);
-    if (isLevelLocked(item)) throw new Error('locked — raise your DEPRAVITY level to buy this tier');
+    if (isLevelLocked(item)) throw new Error('locked — needs ' + lockReason(item));
     const avail = availableOf(itemId);
     if (avail < qty) throw new Error(avail <= 0 ? 'the fence is out of these today — check back tomorrow' : `the fence only has ${avail} today`);
     const total = (item.cost || 0) * qty;
@@ -119,6 +132,6 @@
   window.DMTHGame = window.DMTHGame || {};
   window.DMTHGame.shop = Object.freeze({
     listings, listingsBySubcategory, buy, use,
-    dailyStock, availableOf, isStaple, isLevelLocked, allowedTier
+    dailyStock, availableOf, isStaple, isLevelLocked, lockReason, allowedTier
   });
 })();

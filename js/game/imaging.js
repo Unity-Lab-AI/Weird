@@ -62,7 +62,7 @@
   function bodyStateTokens(body) {
     const out = [];
     if (!body) return '';
-    // TEMPL-CONCISE.1 — ONE concise token per body axis (highest applicable threshold only).
+    // ONE concise token per body axis (highest applicable threshold only).
     // Previously every crossed threshold stacked (arousal≥95 pushed 3 phrases, cum≥5 pushed 4),
     // piling adjectives that drowned the location / outfit / toy slots. Single-token-per-axis
     // keeps each component visible without one category eating the others.
@@ -79,7 +79,7 @@
     else if (body.cumLoad >= 3)   out.push('cum dripping down her thighs and ass, glazed in spent loads');
     else if (body.cumLoad >= 1.5) out.push('cum streaked across collarbones and stomach');
     else if (body.cumLoad >= 0.5) out.push('glazed stomach');
-    // CUMFILL.1 — vaginal cum-fill (preggo meter) reads as a stuffed, plugged, leaking cunt.
+    // Vaginal cum-fill (preggo meter) reads as a stuffed, plugged, leaking cunt.
     if ((body.vaginalCum || 0) >= 6)      out.push('cunt overflowing with backed-up cum, bred-full and leaking');
     else if ((body.vaginalCum || 0) >= 3) out.push('pussy stuffed full of cum, swollen and leaking');
     // Bruises
@@ -90,7 +90,7 @@
     // Low HEALTH reads as visible sickness/injury so an unhealthy, damaged captive looks it.
     if ((body.health ?? 100) < 20)      out.push('badly hurt and bloodied, deathly pale, barely conscious');
     else if ((body.health ?? 100) < 40) out.push('weakened and unwell, pale and unsteady');
-    // Drug withdrawal — dope-sick markers (DEP-EXP.2). Set by drug-scheduler tickAll on body.withdrawalState.
+    // Drug withdrawal — dope-sick markers. Set by drug-scheduler tickAll on body.withdrawalState.
     if (body.withdrawalState && body.withdrawalState.severity >= 0.2) out.push('dope-sick — clammy grey sweat, shaking, hollow strung-out look');
     // NOTE: pupil/high markers moved to drugStateTokens() so they're sourced from the
     // specific active drug and scaled by body.high intensity. bodyStateTokens stays focused
@@ -125,13 +125,12 @@
     fisted:    'cunt stretched obscenely wide and gaping, puffy and slick and ruined, trembling around the emptiness, fresh-fisted and wrecked',
     prolapsed: 'wrecked hole fucked inside-out, swollen pink and slick and distended, pushed past its limit and gaping',
     pissed:    'soaked and dripping, hair plastered to her flushed face, glistening wet and degraded, kneeling in the puddle',
-    // PERIOD.1 / IMGAFTERMATH.1 — on-the-rag aftermath. SLIGHT smear modifiers layered onto her
+    // On-the-rag aftermath. SLIGHT smear modifiers layered onto her
     // locked seed/face (TTL-faded), so the bloody act shows without altering who she is.
     'bloodied-mouth': 'a smear of period blood across her lips, mouth and chin with a red streak up one cheek, wiping her mouth, otherwise unchanged',
     'bloody-fucked':  'faint streaks of period blood smeared across her inner thighs and hips and his handprints, freshly-used flush, otherwise unchanged',
-    // IMGAFTERMATH.1 (Gee: "all adjectives need to be added ... in any case where her apperance has
-    // changes for actions and a new image is needed") — caretaking that CLEANS her up is itself an
-    // appearance change, so it stamps a fresh-and-clean look (washing the mess away).
+    // Any appearance-changing action stamps adjectives onto her next image — caretaking that CLEANS
+    // her up is itself an appearance change, so it stamps a fresh-and-clean look (washing the mess away).
     'cleaned':   'freshly bathed and wiped down, skin clean and soft, hair damp and combed, the mess washed away, calm and cared-for'
   };
   const ACT_AFTERMATH_TTL_GAMEMIN = 120;   // ~2 game-hours before the look fades
@@ -146,7 +145,7 @@
     return tok;
   }
 
-  // TOY-IMG.1 — the implement currently in use on her (gag in mouth, clamps, plug, machine,
+  // The implement currently in use on her (gag in mouth, clamps, plug, machine,
   // etc.) rendered visibly on her body, like cuffs/clothing. Reads body.recentToy + recentToyAt
   // (game-min), TTL-faded so it shows for a short window after use then clears. Suppressed
   // postmortem. Visual descriptions live in toys.TOY_IMG.

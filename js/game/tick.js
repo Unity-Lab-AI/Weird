@@ -19,7 +19,7 @@
     // Run's over — halt the loop, the game-over screen has taken over.
     if (s.gameOver) { stop(); return; }
 
-    // PAUSE.1 — game paused: freeze everything (clock / escapes / decay / johns / raids).
+    // Game paused: freeze everything (clock / escapes / decay / johns / raids).
     // The interval keeps spinning but does nothing until resumed.
     if (window.DMTHGame.gameClock && window.DMTHGame.gameClock.isPaused()) return;
 
@@ -43,7 +43,7 @@
       runEscapeRoll(girl);
     }
 
-    // 3. Market sale pass (films) + body-part black-market pass (DEP-EXP.3)
+    // 3. Market sale pass (films) + body-part black-market pass
     window.DMTHGame.market.runSaleTick();
     if (window.DMTHGame.market.runBodyPartSaleTick) window.DMTHGame.market.runBodyPartSaleTick();
 
@@ -57,7 +57,7 @@
     window.DMTHGame.slaveMarket.runBuyerTick();
 
     // 6. Drug scheduler — captives first self-dose from hold/pool drugs to survive
-    // (DRUG-SELFSERVE.1, never self-OD), THEN pharmacokinetic curves + withdrawal resolve.
+    // (drug self-serve, never self-OD), THEN pharmacokinetic curves + withdrawal resolve.
     if (window.DMTHGame.drugs?.tickSelfServe) window.DMTHGame.drugs.tickSelfServe();
     if (window.DMTHGame.drugs) window.DMTHGame.drugs.tickAll();
 
@@ -90,9 +90,9 @@
     // 12. Pregnancy — advance gestation by GESTATION_DAYS_PER_TICK
     // for every pregnant captive; auto-resolve at day 280 (birthed / sold / lost branches).
     if (window.DMTHGame.pregnancy) window.DMTHGame.pregnancy.tickPregnancies();
-    // 12a. Vaginal cum-fill drain + sustained-fill preggo timer (CUMFILL.1).
+    // 12a. Vaginal cum-fill drain + sustained-fill preggo timer.
     if (window.DMTHGame.pregnancy?.tickCumFill) window.DMTHGame.pregnancy.tickCumFill();
-    // 12a-2. Condom wear-off (CONDOM-TIMED.1) — revert any expired condoms to raw.
+    // 12a-2. Condom wear-off — revert any expired condoms to raw.
     if (window.DMTHGame.condoms?.tickExpiry) window.DMTHGame.condoms.tickExpiry();
     // 12a-3. Birth-control pills — every captive auto-takes one the instant her two-day window
     // lapses if any are stocked, so protection stays gapless while pills are in the hold/pool.
@@ -101,20 +101,20 @@
     // 12b. Milk / lactation economy — refill every lactating captive's breast-fill, bottle
     // milk from any Tit-Sucker-rigged hold, run the warm-milk player buff, + passive milk sales.
     if (window.DMTHGame.milk) window.DMTHGame.milk.tickMilk();
-    // 12b-2. CUMTOOL.1 — complete any insertable hold-in plug whose timer has elapsed (capacity upgrade).
+    // 12b-2. Complete any insertable hold-in plug whose timer has elapsed (capacity upgrade).
     if (window.DMTHGame.cumtool) window.DMTHGame.cumtool.tick();
-    // 12b-3. PERIOD.1 — advance every captive's menstrual cycle (~1 game day bleed every ~5 days).
+    // 12b-3. Advance every captive's menstrual cycle (~1 game day bleed every ~5 days).
     if (window.DMTHGame.period) window.DMTHGame.period.tick();
 
-    // 12c. Per-archetype passive loot gifts (ARCHGIFT.1) — every held girl-type quietly
+    // 12c. Per-archetype passive loot gifts — every held girl-type quietly
     // produces its own gift over time (nurse → free scripts, sorority → allowance, etc.).
     if (window.DMTHGame.loot?.tickArchetypeGifts) window.DMTHGame.loot.tickArchetypeGifts();
 
-    // AUTOLOGISTICS.1 — auto-distribute supplies from inventory into every dungeon pool (if the
+    // Auto-distribute supplies from inventory into every dungeon pool (if the
     // upgrade is installed + enabled). No-op otherwise.
     if (window.DMTHGame.supply?.autoDistribute) { try { window.DMTHGame.supply.autoDistribute(); } catch (e) { /* non-fatal */ } }
 
-    // BUYLOCATION.1 — "The Skim": each BOUGHT-OUT location bleeds you a passive cut every tick.
+    // "The Skim": each BOUGHT-OUT location bleeds you a passive cut every tick.
     if (window.DMTHGame.progression?.OWNERSHIP_PERKS && window.DMTHGame.state.addMoney) {
       const owned = window.DMTHGame.state.current?.ownedLocations || [];
       if (owned.length) {
@@ -126,7 +126,7 @@
     // 13. Stamina + health drain/regen. Starvation/dehydration/
     // chronic-bruise penalties + passive rest regen when no negative pressure is active.
     if (window.DMTHGame.actionEffects) window.DMTHGame.actionEffects.tickStaminaHealth();
-    // DEATHWARN.1 — non-intrusive low-health alert for held captives (throttled per girl).
+    // Non-intrusive low-health alert for held captives (throttled per girl).
     if (window.DMTHGame.actionEffects && window.DMTHGame.actionEffects.lowHealthAlertSweep) window.DMTHGame.actionEffects.lowHealthAlertSweep();
 
     // Player satisfaction slow decay — without intimacy this tick, the meter drifts down.
@@ -147,10 +147,10 @@
       if (curBuzz > 0) w.buzz = Math.max(0, curBuzz - 0.3);
     }
 
-    // Player sexual-drive deprivation drift (SEXDRIVE.1) — falls without intimacy.
+    // Player sexual-drive deprivation drift — falls without intimacy.
     if (window.DMTHGame.sexdrive) window.DMTHGame.sexdrive.decayTick();
 
-    // Player Nut Reserve regen (PLAYERSTAM.1) — rebuilds briskly each tick so you're never just
+    // Player Nut Reserve regen — rebuilds briskly each tick so you're never just
     // sitting and waiting; refill items (viagra / girl's-milk) top it instantly.
     if (window.DMTHGame.playerStamina) window.DMTHGame.playerStamina.regenTick();
 
@@ -242,7 +242,7 @@
     };
   }
 
-  // Escape-risk BAR model (Gee 2026-06-18). Each tick the bar RISES — fast when she's
+  // Escape-risk BAR model. Each tick the bar RISES — fast when she's
   // defiant/terrified and carrying bond-debt, suppressed by containment and by Stockholm
   // bond (an indoctrinated captive stops trying). The player's active counter-lever is
   // care/loving acts (action-effects.js escapeRisk derive) which push the bar back down.
@@ -253,7 +253,7 @@
     const { containment } = holdContainment(girl);
 
     const mood = girl.mood?.mood || '';
-    // BAL.2 — escape pacing. Rates ~halved + containment weighted heavier so a MANAGED captive
+    // Escape pacing. Rates ~halved + containment weighted heavier so a MANAGED captive
     // (fed/watered + the odd care act, or any locks/restraints) stays put and escapes are an
     // occasional real event, not a daily one. A fully-neglected, unsecured fresh captive still
     // works the bar up over ~25+ real minutes; care acts + containment push it back down.

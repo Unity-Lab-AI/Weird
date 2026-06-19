@@ -12,7 +12,7 @@
     return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   }
 
-  // 🚚 Transfer / corpse-move (TRANSPORT.1 / CORPSE-MOVE.1).
+  // 🚚 Transfer / corpse-move.
   function transfer(girl) {
     if (!((girl.encounterState === 'captive' || girl.encounterState === 'dead') && window.DMTHGame.transport)) return '';
     const T = window.DMTHGame.transport;
@@ -44,7 +44,7 @@
     </div></details>`;
   }
 
-  // ☠️ Snuff (SNUFF.1).
+  // ☠️ Snuff.
   function snuff(girl) {
     if (!(girl.encounterState === 'captive' && window.DMTHGame.progression && window.DMTHGame.lifespan?.SNUFF_METHODS)) return '';
     const unlocked = window.DMTHGame.progression.isUnlocked('snuff');
@@ -63,7 +63,7 @@
     </div></details>`;
   }
 
-  // 🧰 Toys & implements (TOYS.1 / TOY-HOLD.1).
+  // 🧰 Toys & implements.
   function toys(girl) {
     if (!(girl.encounterState === 'captive' && window.DMTHGame.toys)) return '';
     const T = window.DMTHGame.toys;
@@ -75,6 +75,8 @@
       const isAtt = attached.includes(id);
       const have = inv[id] || 0;
       const lvlOk = T.levelOk(id);
+      const buyLocked = T.buyStatus ? T.buyStatus(id).locked : false;
+      const buyReason = T.buyLockReason ? T.buyLockReason(id) : '';
       const tip = (T.toyTooltip ? T.toyTooltip(id) : `${t.notes}${t.gore ? ' · ⚠ gore/mutilation' : ''}${t.masoFlips ? ' · a masochist craves this' : ''}`).replace(/"/g, '&quot;');
       const lock = lvlOk ? '' : ` <span class="muted">🔒 L${t.levelReq}</span>`;
       let btns;
@@ -83,8 +85,10 @@
                 <button class="btn-small" data-toy-detach="${id}" data-tooltip="Unmount it from this hold (back to inventory).">Detach</button>`;
       } else if (have > 0) {
         btns = `<button class="btn-small btn-primary" data-toy-attach="${id}" ${attached.length >= cap ? 'disabled' : ''} data-tooltip="Mount it in this hold (${attached.length}/${cap}). Then it can be used on her.">Mount (have ${have})</button>`;
+      } else if (buyLocked) {
+        btns = `<button class="btn-small" disabled data-tooltip="Locked — needs ${escapeHtml(buyReason)}. Buy goes into your inventory, then you mount it in a hold.">🔒 ${escapeHtml(buyReason)}</button>`;
       } else {
-        btns = `<button class="btn-small" data-toy-buy="${id}">Buy $${t.cost.toLocaleString()}</button>`;
+        btns = `<button class="btn-small" data-toy-buy="${id}" data-tooltip="Buy 1 into your inventory ($${t.cost.toLocaleString()}). Then mount it in a hold to use it — you can stockpile more than one.">Buy $${t.cost.toLocaleString()}</button>`;
       }
       return `<div class="stat-row small" data-tooltip="${tip}"><span>${isAtt ? '📌 ' : ''}${t.emoji} ${escapeHtml(t.name)}${lock}</span><span style="display:inline-flex;gap:4px">${btns}</span></div>`;
     };
@@ -105,7 +109,7 @@
     </div>`;
   }
 
-  // 🎈 Condoms (CONDOMS.1 / CONDOM-TIMED.1).
+  // 🎈 Condoms.
   function condoms(girl) {
     const C = window.DMTHGame.condoms;
     if (!C) return '';
@@ -132,7 +136,7 @@
     </div></details>`;
   }
 
-  // 🏪 Dungeon pool (POOL-SUPPLY.1 / CONDOM-STOCK.1).
+  // 🏪 Dungeon pool.
   function dungeonPool(girl) {
     if (!(girl.encounterState === 'captive' && window.DMTHGame.supply)) return '';
     const pool = window.DMTHGame.supply.poolOf(girl.assignedDungeonId);

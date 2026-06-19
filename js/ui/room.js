@@ -133,7 +133,7 @@
           ${isUnc ? `<div class="tranq-banner panel" style="border:1px solid #b00;background:rgba(180,0,0,.08);padding:8px;margin:8px 0">
             <b>💉 TRANQUILIZED — OUT COLD</b>
             <span class="muted small">· countdown</span>
-            <b id="tranq-countdown" data-wear-off="${tranqNow.wearOffAt}">${fmtCountdown(tranqNow.wearOffAt - Date.now())}</b>
+            <b id="tranq-countdown" data-wear-off="${Date.now() + (window.DMTHGame.drugs.unconsciousRemainingMs ? window.DMTHGame.drugs.unconsciousRemainingMs(g) : 0)}">${fmtCountdown(window.DMTHGame.drugs.unconsciousRemainingMs ? window.DMTHGame.drugs.unconsciousRemainingMs(g) : 0)}</b>
             <div class="small muted">She's limp, eyes closed, deeply sedated. Chat / feed / water / sex / wardrobe actions disabled until wake-up. Image prompts render her unconscious automatically.</div>
           </div>` : ''}
           ${(() => {
@@ -483,23 +483,30 @@
           })()}
 
           ${(() => {
-            // 🥒 CUMTOOL.1 — insertable hold-in plug on a timer. Plug her, leave it in ~1-2 game
-            // days, and her cum-load capacity upgrades (the visible jump on the Cum stat bar).
+            // 🥒 Insertable hold-in cum-capacity plug on a per-level timer. Plug her, leave it
+            // buried, and every ~2.5 real minutes (game-time) her cum-load capacity jumps a level;
+            // 3 levels = +100% over base. Live "level X of 3 · next in mm:ss" readout below.
             const ct = window.DMTHGame.cumtool;
             if (!ct) return '';
             const owned = window.DMTHGame.state.current?.inventory?.['pussy-wrecker'] || 0;
             const prog = ct.progress(girl);
-            const capMaxed = (girl.body?.cumLoadCap ?? 10) >= ct.CUMTOOL_CAP_CEILING;
+            const lvl = ct.plugLevel(girl);
+            const maxLvl = ct.PLUG_MAX_LEVEL;
+            const capMaxed = lvl >= maxLvl || (girl.body?.cumLoadCap ?? 10) >= ct.CUMTOOL_CAP_CEILING;
             if (!owned && prog == null && !capMaxed) return '';
-            return `<details class="sect"${prog != null ? ' open' : ''}><summary>🥒 Cum-capacity plug</summary><div class="sect-body">
+            const fmtSec = s => { const m = Math.floor(s / 60), ss = Math.round(s % 60); return `${m}:${String(ss).padStart(2, '0')}`; };
+            return `<details class="sect"${prog != null ? ' open' : ''}><summary>🥒 Cum-capacity plug — level ${lvl}/${maxLvl}</summary><div class="sect-body">
               ${prog != null ? `
-                <div class="bar-row" data-tooltip="Leave the plug buried in her until this fills, then her cum-load capacity jumps. Pull it early and you lose the progress.">
-                  <label>Stretching</label><div class="bar"><div class="bar-fill" style="width:${Math.round(prog * 100)}%;background:#b06"></div></div><b>${Math.round(prog * 100)}%</b></div>
-                <div class="btn-row"><button class="btn-small" data-cumplug-remove data-tooltip="Pull the plug early — no upgrade, progress lost.">Pull it out</button></div>
-              ` : capMaxed ? `<div class="stat-row small muted">Her cunt's stretched to the max — no more capacity to gain.</div>`
-                : `<div class="stat-row" data-tooltip="Insert the massive plug + leave it in ~1.5 game days; her cum-load capacity upgrades +8 (toward a 60 ceiling) when the timer completes — you'll see the Cum cap number jump.">
+                <div class="stat-row small" data-tooltip="Each level buried wrenches her cunt wider — 3 levels takes her cum-load capacity to +100% over base. She's on level ${prog.level} of ${prog.maxLevel} right now.">
+                  <span>🥒 Plug level</span><b>${prog.level} / ${prog.maxLevel}</b></div>
+                <div class="bar-row" data-tooltip="Progress toward the NEXT level. Leave the plug buried until it fills and her cum-load capacity jumps. Pull it early and only the in-progress level resets — levels already earned stay.">
+                  <label>Next level</label><div class="bar"><div class="bar-fill" style="width:${Math.round(prog.frac * 100)}%;background:#b06"></div></div>
+                  <b id="cumplug-countdown" data-cp-end="${Date.now() + prog.remainingRealSec * 1000}">next in ${fmtSec(prog.remainingRealSec)}</b></div>
+                <div class="btn-row"><button class="btn-small" data-cumplug-remove data-tooltip="Pull the plug out early — levels already earned stay, but the level she's mid-way through resets.">Pull it out</button></div>
+              ` : capMaxed ? `<div class="stat-row small muted">Her cunt's wrecked to the max — level ${lvl}/${maxLvl}, no more capacity to gain.</div>`
+                : `<div class="stat-row" data-tooltip="Bury the massive plug in her and leave it; every ~2.5 minutes her cum-load capacity jumps a level (3 levels = +100%, toward a 60 ceiling). You'll watch the Cum cap number climb.">
                     <span>🥒 Pussy Wrecker</span><b>have ×${owned}</b>
-                    <button class="btn-small btn-primary" data-cumplug-insert ${owned < 1 ? 'disabled' : ''}>Plug her + leave it in</button>
+                    <button class="btn-small btn-primary" data-cumplug-insert ${owned < 1 ? 'disabled' : ''}>Plug her + leave it buried</button>
                   </div>`}</div></details>`;
           })()}
 
@@ -2142,6 +2149,21 @@
           return;
         }
         el2.textContent = fmtCountdown(remaining);
+      }, 1000);
+    }
+
+    // Live cum-capacity-plug countdown — ticks the "next in mm:ss" every second; on completion
+    // re-renders so the level + cum-cap jump shows. Reads a real-ms end-stamp off the element.
+    const cumplugEl = el.querySelector('#cumplug-countdown');
+    if (cumplugEl) {
+      const cpTicker = setInterval(() => {
+        const el3 = el.querySelector('#cumplug-countdown');
+        if (!el3) { clearInterval(cpTicker); return; }
+        const endMs = Number(el3.dataset.cpEnd || 0);
+        const remSec = Math.max(0, Math.round((endMs - Date.now()) / 1000));
+        if (remSec <= 0) { clearInterval(cpTicker); window.DMTHRouter.handle(); return; }
+        const m = Math.floor(remSec / 60), ss = remSec % 60;
+        el3.textContent = `next in ${m}:${String(ss).padStart(2, '0')}`;
       }, 1000);
     }
 

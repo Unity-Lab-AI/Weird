@@ -3,7 +3,7 @@
 //   • A successful capture drops loot keyed to WHERE you took her (club → party drugs, a
 //     remote spot → heavy chems, the street → a pipe), or cash she was carrying.
 //   • scavengeLocation() is exposed for a hunt "search the area" action.
-//   • REQUEST.1 — PRE-CAPTURE item requests. While you're sizing up a girl you haven't taken
+//   • PRE-CAPTURE item requests. While you're sizing up a girl you haven't taken
 //     yet, you can ask her for ONE item. Each girl TYPE has three templated options (cheap →
 //     prize); each is a stat-based roll whose odds scale with your DEPRAVITY level, the
 //     location difficulty, and her difficulty/stats. Cheap gear is likely (~80%), prizes are a
@@ -32,7 +32,7 @@
     gym:             ['rope', 'duct-tape'],
     remote:          ['pipe', 'ether', 'chloroform']
   };
-  // Full-catalog rare-find pool (LOOT.2) — ANY tool / equipment / drug / consumable can turn
+  // Full-catalog rare-find pool — ANY tool / equipment / drug / consumable can turn
   // up as loot, not just the location-flavored basics. Scavenges + conversation-wins
   // occasionally pull from here so the whole kit is obtainable in the world, not only the shop.
   const FULL_POOL = [
@@ -40,25 +40,25 @@
     'duct-tape', 'rope', 'zip-ties', 'handcuffs', 'shackles', 'harness',
     'coke-bumps', 'weed', 'mdma', 'acid', 'wine',
     'basic-meal', 'bottled-water', 'condom', 'condom-standard', 'condom-french-tickler', 'condom-magnum', 'condom-ribbed',
-    // PLAYERSTAM.2 — Nut Reserve refills can turn up as loot too.
+    // Nut Reserve refills can turn up as loot too.
     'blue-pill', 'energy-shot', 'the-good-coke', 'oyster-tonic',
-    // TOYS.1 — lower-tier toys/implements can be FOUND in the world too (not just bought). The
+    // Lower-tier toys/implements can be FOUND in the world too (not just bought). The
     // gory high-tier chamber implements stay shop/level-gated to keep them special.
     'wand-vibrator', 'dildo-set', 'loop-gag', 'flogger-whip', 'fucking-machine',
-    // TITSUCKER.1 — the Tit Sucker machine is a rare lootable find (attach one per hold).
+    // The Tit Sucker machine is a rare lootable find (attach one per hold).
     'tit-sucker'
   ];
   const ITEM_LABEL = { 'coke-bumps': 'coke', mdma: 'molly', wine: 'whiskey', 'duct-tape': 'duct tape', 'zip-ties': 'zip-ties', 'basic-meal': 'meal', 'bottled-water': 'water', 'condom-french-tickler': 'french tickler' };
   function label(id) { return ITEM_LABEL[id] || String(id).replace(/-/g, ' '); }
   function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
-  // Gee: all loot GAINS get a click-away popup (no close button). Prefer the popup; fall back to a
+  // All loot GAINS get a click-away popup (no close button). Prefer the popup; fall back to a
   // toast if it isn't loaded. (Passive ambient trickle — ARCHGIFT — stays a quiet toast on purpose.)
   function lootPop(msg) {
     if (window.DMTHLootPopup) window.DMTHLootPopup.show(msg);
     else if (window.DMTHNotify) window.DMTHNotify.show(msg, { type: 'success', durationMs: 5000 });
   }
 
-  // ── LOOTALL.1 (Gee) — the ENTIRE catalog is lootable, not a curated subset. ───────────────
+  // ── The ENTIRE catalog is lootable, not a curated subset. ───────────────
   // Loot quality + type scale by (a) the GIRL TYPE (archetype biases the pool), (b) the DROP
   // SOURCE on an escalating ladder — capture < friend-fuck < CORPSING — which raises the max item
   // TIER + count, and (c) the GIRL'S TIER (a harder/more-vibrant archetype drops better on capture).
@@ -104,7 +104,7 @@
     waitress: ['coke-bumps', 'wine', 'weed'],
     remote:   ['pipe', 'ether', 'chloroform', 'tranquilizer']
   };
-  // LOOTRARITY.1 (Gee) — category rarity weighting: drugs are COMMON, food/water/tools/restraints/
+  // Category rarity weighting: drugs are COMMON, food/water/tools/restraints/
   // consumables/tech are COMMONPLACE, toys are RARE (clothing — also rare — drops via OUTFITLOOT's
   // grantOutfit path, not the item pool). Higher weight = shows up more often in a roll.
   const RARITY_WEIGHT = { commonplace: 5, common: 3, rare: 1 };
@@ -132,7 +132,7 @@
       const inTier = biasIds.filter(id => candidates.includes(id));
       if (inTier.length) return pick(inTier);
     }
-    return weightedPickLoot(candidates);   // LOOTRARITY.1 — category-rarity-weighted pull
+    return weightedPickLoot(candidates);   // category-rarity-weighted pull
   }
   // Girl's loot tier on capture — a harder/more-vibrant archetype (higher ARCHETYPE_DIFFICULTY)
   // drops better gear. maps 0..1 difficulty → maxTier 2..5.
@@ -141,7 +141,7 @@
       && window.DMTHGame.hunt.ARCHETYPE_DIFFICULTY[girl && girl.archetypeTemplate]) ?? 0.45;
     return Math.max(2, Math.min(5, 2 + Math.round(diff * 3)));
   }
-  // NOTE (Gee / LOOTALL.1): there is intentionally NO corpse-loot function. A girl is only lootable
+  // NOTE: there is intentionally NO corpse-loot function. A girl is only lootable
   // ON CAPTURE (grantCaptureHaul) — you can't loot an already-captured girl by killing her. The
   // "corpsing = best loot" tier lives in grantNpcGift below (the friend's KILLWIN gift on a kill),
   // which is the friend rewarding you, NOT stripping her body.
@@ -164,7 +164,7 @@
     return { kind: 'item', id, qty };
   }
 
-  // Scavenge a hunt location for tools (LOOT.2 — exposed for the hunt "search the area" action).
+  // Scavenge a hunt location for tools (exposed for the hunt "search the area" action).
   // Most finds are location-flavored; ~25% pull a rare item from the full catalog pool.
   function scavengeLocation(locationId) {
     if (Math.random() > 0.5) return { ok: false, reason: 'found nothing worth taking' };
@@ -177,7 +177,7 @@
     return { ok: true, id, qty, rare };
   }
 
-  // ── REQUEST.1 — PRE-CAPTURE item requests ────────────────────────────────────────────────
+  // ── PRE-CAPTURE item requests ────────────────────────────────────────────────
   // Each girl TYPE has three templated options spanning cheap → prize. Tier sets the base odds;
   // your DEPRAVITY level + the location difficulty + her difficulty/stats modify them. Item ids
   // are real catalog / drug-scheduler ids. Themed to what that kind of girl plausibly carries.
@@ -215,7 +215,7 @@
     const gc = window.DMTHGame.gameClock;
     return gc ? Math.floor(gc.now() / (gc.MIN_PER_DAY || 1440)) + 1 : 1;
   }
-  // Once-per-day key. Now that LOCPERSIST.1 makes encounters persist with stable ids, this is
+  // Once-per-day key. Now that encounters persist with stable ids, this is
   // keyed per GIRL per location per day (was per-archetype while encounters were ephemeral) —
   // "once a day per girl in a location" exactly as asked.
   function requestKey(locationId, girlId) { return (locationId || '?') + '|' + (girlId || '?'); }
@@ -295,7 +295,7 @@
         toy = { id: toyId, name: (spec && spec.name) || label(toyId), emoji: (spec && spec.emoji) || '🧰' };
       }
     }
-    // LOOTALL.1 — higher-TIER girls drop BETTER loot on capture: a tier-scaled bonus pull from the
+    // Higher-TIER girls drop BETTER loot on capture: a tier-scaled bonus pull from the
     // FULL catalog (type-biased), on top of her stash + any toy. A harder/more-vibrant archetype
     // (higher ARCHETYPE_DIFFICULTY) → higher max item tier + more drops.
     const lootTier = girlLootTier(girl);
@@ -311,7 +311,7 @@
     return { items: granted, toy, bonus };
   }
 
-  // FRIENDGIFT.1 — johns AND friends GIFT high-tier gear/toys/drugs on a successful use (the perk
+  // Johns AND friends GIFT high-tier gear/toys/drugs on a successful use (the perk
   // of renting her out / letting friends in). Friends gift more + bigger; johns rarer + smaller.
   // Pool is the "good stuff" — heavy chems, premium restraints, chamber toys, capacity trainers.
   const HIGH_TIER_GIFTS = [
@@ -320,11 +320,11 @@
     'mdma', 'coke-bumps',
     'monster-dildo', 'fucking-machine', 'flogger-whip', 'cattle-prod',
     'blue-pill', 'ben-wa-balls', 'vaginal-expander', 'condom-magnum',
-    // TITSUCKER.1 — a generous friend/john might gift you a whole Tit Sucker machine.
+    // A generous friend/john might gift you a whole Tit Sucker machine.
     'tit-sucker'
   ];
   function grantNpcGift(opts = {}) {
-    // OUTFITLOOT.1 — RARE: instead of gear, a generous client gifts the girl a slutty special
+    // RARE: instead of gear, a generous client gifts the girl a slutty special
     // outfit (added free to HER wardrobe). Needs a girl context (opts.girlId); type-matched when
     // possible. ~12% on a generous/kill gift, lower otherwise. Falls through to a normal gift if
     // she already owns the rolled outfit or no girl is in context.
@@ -338,21 +338,21 @@
         if (r && r.ok) { lootPop(`👗 ${opts.from || 'A client'} gifted ${g ? g.name : 'her'} a ${r.outfit.displayName} to wear for him.`); return { id: oid, qty: 1, outfit: true }; }
       }
     }
-    // LOOTALL.1 — gift quality climbs the source ladder: a CORPSING kill drops the BEST (tier 5),
+    // Gift quality climbs the source ladder: a CORPSING kill drops the BEST (tier 5),
     // a generous friend tier 4, a routine john tier 3. Pulled from the FULL catalog, type-biased to
     // the girl when we have her; HIGH_TIER_GIFTS is the fallback bias/pool.
     const gMaxTier = opts.kill ? 5 : (opts.generous ? 4 : 3);
     const gGirl = opts.girlId ? window.DMTHGame.state.getGirl(opts.girlId) : null;
     const gBias = (ARCHETYPE_LOOT_BIAS[gGirl && gGirl.archetypeTemplate] || HIGH_TIER_GIFTS);
     const id = pickLootByTier(gMaxTier, gBias) || pick(HIGH_TIER_GIFTS);
-    // A kill is an EPIC WIN for the john/friend (Gee) — they tip bigger, so a kill-gift skews to 2×.
+    // A kill is an EPIC WIN for the john/friend — they tip bigger, so a kill-gift skews to 2×.
     const qty = 1 + ((opts.generous && Math.random() < 0.4) || (opts.kill && Math.random() < 0.7) ? 1 : 0);
     window.DMTHGame.state.addItem(id, qty);
     lootPop(`🎁 ${opts.from || 'A client'} ${opts.kill ? 'was THRILLED she died on him — left you' : 'left you'} ${qty}× ${label(id)} — high-tier gift.`);
     return { id, qty };
   }
 
-  // ── ARCHGIFT.1 — passive per-archetype loot gifts ──────────────────────────────────────
+  // ── Passive per-archetype loot gifts ──────────────────────────────────────
   // EVERY girl type quietly produces a type-specific gift while you hold at least one of her —
   // a nurse's prescription pad yields free sedatives, a sorority girl bleeds daddy's allowance,
   // a club girl scores party drugs, an office girl skims petty cash. Granted on a cadence per

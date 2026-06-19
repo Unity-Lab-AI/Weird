@@ -78,7 +78,7 @@
   // the single source of truth for how dangerous each band is.
   function raidChancePerTick() { return tier().raidChancePerTick; }
 
-  // WANTEDDOWN.1 (Gee) — active levers to keep WANTED a MANAGEABLE stat, not a wait-it-out timer.
+  // Active levers to keep WANTED a MANAGEABLE stat, not a wait-it-out timer.
 
   // Lower WANTED by an amount (used by bribes + tenderness acts).
   function reduce(amount, reason) {
@@ -109,7 +109,7 @@
   function noteHunt() { const s = window.DMTHGame.state.current; if (s) s._lastHuntTick = s.tickCount || 0; }
 
   // Slow decay — called from tick. Drift accumulator so sub-1 decay still applies over time.
-  // Time OFF from hunting cools heat ~2.5× faster (Gee) — lay low and it bleeds off quicker.
+  // Time OFF from hunting cools heat ~2.5× faster — lay low and it bleeds off quicker.
   function decayTick() {
     const s = window.DMTHGame.state.current;
     if (!s || !(s.wallet.wanted > 0)) return;

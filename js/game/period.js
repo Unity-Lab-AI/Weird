@@ -1,8 +1,7 @@
-// DUNGEON MASTER: THE HUNT — menstrual cycle (PERIOD.1).
+// DUNGEON MASTER: THE HUNT — menstrual cycle.
 //
-// Gee (verbatim 2026-06-18): "also need option for girls to be on period every five days and
-// options for blood y fucking them and shit with big boosts modifiers (now i keep saying big ad
-// major stats boosts but what i really mean is appropriately balancesd".
+// Girls cycle on their period roughly every five days, with bloody-fucking acts available while
+// on it carrying appropriately-balanced stat modifiers.
 //
 // Each captive bleeds for ~1 game day every ~5 game days. The bloody-fucking ACTS themselves
 // (period-fuck / period-oral) live in action-effects.js with appropriately-balanced premium

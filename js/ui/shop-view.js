@@ -5,8 +5,8 @@
 
   const SUBCATS = ['blunt','sedation','restraint','containment','toys','drugs','food','player-boost','dungeon-upgrade','consumables','utility','tech'];
 
-  // TOOLTIPS-FULL.1 — build a THOROUGH shop-item tooltip (Gee: "drug types need to show theri
-  // modifiers ... toys show fx"). Starts from notes, then appends the item's REAL numbers when we
+  // Build a THOROUGH shop-item tooltip — drug types show their modifiers, toys show fx.
+  // Starts from notes, then appends the item's REAL numbers when we
   // can resolve them: a toy's HER/YOU fx (toys.toyTooltip), a drug's body modifiers + high/duration/
   // use-case (action-effects + drug-scheduler), and a player-boost item's Nut Reserve refill.
   const DRUGKEY_TO_ACTION = {
@@ -30,9 +30,9 @@
       if (a && AE.girlEffectLine) { const her = AE.girlEffectLine(a); if (her) lines.push('👤 HER: ' + her); }
       const curve = window.DMTHGame.drugs.DRUG_CURVES?.[dkey];
       if (curve) {
-        const mins = Math.round((curve.wearOffMs || 0) / 60000);
+        const gameMin = Math.round(curve.wearOffMin || 0);
         const uc = window.DMTHGame.drugs.useCaseOf ? window.DMTHGame.drugs.useCaseOf(dkey) : null;
-        lines.push(`💊 High +${curve.highContribution} · ~${mins}min${uc ? ' · use: ' + uc : ''}${curve.canOD ? ' · can OD' : ''}`);
+        lines.push(`💊 High +${curve.highContribution} · lasts ~${gameMin} game-min${uc ? ' · use: ' + uc : ''}${curve.canOD ? ' · can OD' : ''}`);
       }
     }
     // Player-boost refill → Nut Reserve gain.
@@ -79,12 +79,12 @@
             const have = s.inventory[it.id] || 0;
             const canAfford = s.wallet.money >= it.price;
             const tooltip = shopItemTooltip(it).replace(/"/g, '&quot;');
-            // SHOPREWORK.1 — stock + level-lock state.
+            // Stock + level-lock state.
             const stockTxt = it.staple ? '∞' : (it.available > 0 ? `${it.available} today` : 'sold out today');
             const soldOut = !it.staple && it.available <= 0;
             const blocked = it.locked || soldOut || !canAfford;
             const buyMax = it.staple ? Infinity : it.available;
-            const buyLabel = it.locked ? '🔒 level-locked' : soldOut ? 'sold out' : !canAfford ? 'Too poor' : 'Buy';
+            const buyLabel = it.locked ? '🔒 locked' : soldOut ? 'sold out' : !canAfford ? 'Too poor' : 'Buy';
             return `<div class="model-card${it.locked ? ' locked' : ''}" data-tooltip="${tooltip}">
               <div class="asset-slot" data-asset-category="item" data-asset-id="${it.id}" data-asset-size="80"></div>
               <div class="model-name">${it.locked ? '🔒 ' : ''}${it.emoji} ${it.displayName}</div>
@@ -94,8 +94,8 @@
                 <span data-tooltip="In stock today (∞ = unlimited staple, refreshes daily)" class="${soldOut ? 'danger' : ''}">${stockTxt}</span>
                 <span data-tooltip="Count currently in your inventory">have: ${have}</span>
               </div>
-              <div class="model-notes small">${it.locked ? '<span class="danger">Locked — raise your DEPRAVITY level to buy this tier.</span> ' : ''}${it.notes || ''}</div>
-              <button class="btn-small ${blocked ? '' : 'btn-primary'}" data-buy="${it.id}" ${blocked ? 'disabled' : ''} data-tooltip="${it.locked ? 'Locked by DEPRAVITY level' : soldOut ? 'Back tomorrow for fresh stock' : 'Buy one. Deducts $' + it.price.toLocaleString() + '.'}">
+              <div class="model-notes small">${it.locked ? `<span class="danger">🔒 Locked — needs ${it.lockReason}.</span> ` : ''}${it.notes || ''}</div>
+              <button class="btn-small ${blocked ? '' : 'btn-primary'}" data-buy="${it.id}" ${blocked ? 'disabled' : ''} data-tooltip="${it.locked ? 'Locked — needs ' + it.lockReason : soldOut ? 'Back tomorrow for fresh stock' : 'Buy one. Deducts $' + it.price.toLocaleString() + '.'}">
                 ${buyLabel}
               </button>
               <button class="btn-small" data-buy5="${it.id}" ${(blocked || s.wallet.money < it.price * 5 || buyMax < 5) ? 'disabled' : ''} data-tooltip="Bulk buy ×5. Deducts $${(it.price * 5).toLocaleString()}.">

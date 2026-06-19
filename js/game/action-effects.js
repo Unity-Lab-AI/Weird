@@ -755,7 +755,38 @@
   // -----------------------------------------------------------------
   const LIMB_KEYS = ['leftArm', 'rightArm', 'leftLeg', 'rightLeg'];
   const LIMB_LABEL = { leftArm: 'left arm', rightArm: 'right arm', leftLeg: 'left leg', rightLeg: 'right leg' };
-  const NUGGET_HEAL_GATE = 55;   // HP she must recover to before the NEXT amputation
+  const LIMB_EMOJI = { leftArm: '💪', rightArm: '💪', leftLeg: '🦵', rightLeg: '🦵' };
+  const LIMB_BASE  = { leftArm: 80, rightArm: 80, leftLeg: 95, rightLeg: 95 };
+  const LIMB_DMG = 50;           // HP cost of taking one limb — manage her HP or she bleeds out
+
+  // Major organs harvestable for sale. Vital ones (liver / heart / lungs) kill a living girl
+  // outright; a kidney is survivable while she still has the other (taking BOTH is fatal). A
+  // corpse can be harvested freely. Each extracted organ drops into the harvested-parts inventory.
+  const HARVEST_ORGANS = {
+    'left-kidney':  { name: 'left kidney',  emoji: '🫘', base: 180, vital: false },
+    'right-kidney': { name: 'right kidney', emoji: '🫘', base: 180, vital: false },
+    'liver':        { name: 'liver',        emoji: '🫀', base: 200, vital: true },
+    'heart':        { name: 'heart',        emoji: '🫀', base: 280, vital: true },
+    'lungs':        { name: 'lungs',        emoji: '🫁', base: 240, vital: true }
+  };
+  const HARVEST_RARITY_MUL = { unity_seed: 2.0, sorority: 1.5, model: 1.5, club: 1.2, nurse: 1.2 };
+  const ORGAN_DMG = 40;          // HP cost of a survivable organ extraction (a kidney)
+
+  // Push a severed limb / extracted organ into the harvested-parts inventory (sold to the organ vendor).
+  function harvestPartToInventory(girl, key, name, emoji, base) {
+    if (!window.DMTHGame.state.addBodyPart) return null;
+    const rarityMul = HARVEST_RARITY_MUL[girl.archetypeTemplate] || 1.0;
+    const bondMul = 0.8 + (girl.bond?.bondLevel || 0) * 0.04;
+    const value = Math.max(10, Math.round((base || 80) * rarityMul * bondMul * (0.85 + Math.random() * 0.3)));
+    const part = {
+      id: 'part_' + (girl.id || 'x') + '_' + key + '_' + Date.now().toString(36) + Math.floor(Math.random() * 1000),
+      girlName: girl.name, archetype: girl.archetypeTemplate, partKey: key,
+      name, emoji, value, listed: true, harvestedAt: Date.now()
+    };
+    window.DMTHGame.state.addBodyPart(part);
+    return part;
+  }
+  function organsRemoved(girl) { return girl.body?.organs || {}; }
 
   function limbState(girl) {
     return girl.body?.limbs || { leftArm: 'attached', rightArm: 'attached', leftLeg: 'attached', rightLeg: 'attached' };
@@ -782,14 +813,22 @@
     }
     const limbs = { ...limbState(girl) };
     if (limbs[limbKey] === 'removed') return { ok: false, reason: 'that limb is already gone' };
-    // Heal-gate — extreme nugget damage must heal before the next amputation.
-    const already = LIMB_KEYS.filter(k => limbs[k] === 'removed').length;
-    if (already > 0 && (girl.body?.health ?? 100) < NUGGET_HEAL_GATE) {
-      return { ok: false, reason: `she has to heal to ${NUGGET_HEAL_GATE} HP before the next amputation — the nugget damage is too fresh` };
-    }
+    // No heal-gate between amputations — the player just has to manage her HP. Each limb is heavy
+    // damage; if she's too weak to survive the saw she bleeds out on the table (then dispose/harvest).
+    const startHealth = girl.body?.health ?? 100;
     limbs[limbKey] = 'removed';
+    // The severed limb drops into your harvested-parts inventory to sell to the organ vendor.
+    harvestPartToInventory(girl, limbKey, LIMB_LABEL[limbKey], LIMB_EMOJI[limbKey], LIMB_BASE[limbKey]);
+    if ((startHealth - LIMB_DMG) <= 0) {
+      // Too weak — she dies during the amputation. The limb is already taken.
+      if (window.DMTHGame.lifespan?.killDuringAct) window.DMTHGame.lifespan.killDuringAct(girlId, { cause: 'bled-out-during-amputation', corpse: 'bled-out', byLabel: 'amputation' });
+      const dead = window.DMTHGame.state.getGirl(girlId);
+      window.DMTHGame.state.updateGirl(girlId, { body: { ...dead.body, limbs } });
+      if (window.DMTHNotify) window.DMTHNotify.show(`☠️ ${girl.name} bled out as you took her ${LIMB_LABEL[limbKey]} — she was too weak for the saw. The ${LIMB_LABEL[limbKey]} is in your inventory to sell.`, { type: 'error', durationMs: 7500 });
+      return { ok: true, limbKey, died: true };
+    }
     const body = { ...girl.body, limbs };
-    body.health = Math.max(1, (body.health ?? 100) - 50);
+    body.health = Math.max(1, startHealth - LIMB_DMG);
     body.bruises = Math.min(99, (body.bruises ?? 0) + 15);
     body.stamina = Math.max(0, Math.min(body.health, (body.stamina ?? 70) - 30));
     body.recentActTag = 'beaten';
@@ -806,11 +845,77 @@
     if (window.DMTHNotify) {
       window.DMTHNotify.show(
         body.isNugget
-          ? `🪓 ${girl.name} is now a NUGGET — all four limbs gone. She can't run, she can't fight, she's nothing but a hole now.`
-          : `🪓 ${girl.name}'s ${LIMB_LABEL[limbKey]} taken (${nowRemoved}/4). She must heal before the next.`,
+          ? `🪓 ${girl.name} is now a NUGGET — all four limbs gone, all four in your inventory to sell. She can't run, she can't fight, she's nothing but a hole now.`
+          : `🪓 ${girl.name}'s ${LIMB_LABEL[limbKey]} taken (${nowRemoved}/4) and in your inventory to sell. Keep her HP up or the next one kills her.`,
         { type: 'error', durationMs: 7000 });
     }
     return { ok: true, limbKey, removed: nowRemoved, isNugget: body.isNugget };
+  }
+
+  // -----------------------------------------------------------------
+  // ORGAN HARVESTING — cut out her major organs to sell. Needs a 🔪 Harvest Knife in inventory.
+  // A vital organ (liver / heart / lungs) kills a living girl outright. A kidney is survivable
+  // while she still has the other — taking BOTH kidneys is fatal. No heal-gate: the player just
+  // manages her HP. Each organ drops into the harvested-parts inventory to sell to the organ vendor.
+  // A corpse can be harvested freely (nothing left to kill). 18+ fiction.
+  // -----------------------------------------------------------------
+  function harvestOrgan(girlId, organKey) {
+    const girl = window.DMTHGame.state.getGirl(girlId);
+    if (!girl) return { ok: false, reason: 'no such girl' };
+    const spec = HARVEST_ORGANS[organKey];
+    if (!spec) return { ok: false, reason: 'invalid organ' };
+    if (girl.encounterState !== 'captive' && girl.encounterState !== 'dead') {
+      return { ok: false, reason: 'she has to be a captive or a corpse for that' };
+    }
+    // Organ harvesting is the highest-tier butchery — gated behind the dismember unlock (cheat bypasses).
+    if (window.DMTHGame.progression && !window.DMTHGame.progression.isUnlocked('dismember')) {
+      return { ok: false, reason: `organ harvesting is locked — reach DEPRAVITY level ${window.DMTHGame.progression.requiredLevel('dismember')} first` };
+    }
+    // A 🔪 Harvest Knife is required to cut out organs (the 🪚 Bone Saw is for limbs).
+    if ((window.DMTHGame.state.current?.inventory?.['harvest-knife'] || 0) < 1) {
+      return { ok: false, reason: 'you need a 🔪 Harvest Knife to cut out organs — buy one first' };
+    }
+    const organs = { ...organsRemoved(girl) };
+    if (organs[organKey] === 'removed') return { ok: false, reason: 'that organ is already gone' };
+    const alive = girl.encounterState === 'captive';
+    // Lethality: vital organs always kill a living girl; the SECOND kidney (none left) is fatal.
+    let fatal = false;
+    if (alive) {
+      if (spec.vital) fatal = true;
+      else if (organKey.endsWith('kidney')) {
+        const other = organKey === 'left-kidney' ? 'right-kidney' : 'left-kidney';
+        if (organs[other] === 'removed') fatal = true;   // both kidneys gone → death
+      }
+    }
+    // Harvest the organ into inventory regardless of outcome.
+    harvestPartToInventory(girl, organKey, spec.name, spec.emoji, spec.base);
+    organs[organKey] = 'removed';
+    if (alive && fatal) {
+      if (window.DMTHGame.lifespan?.killDuringAct) window.DMTHGame.lifespan.killDuringAct(girlId, { cause: 'organ-harvest', corpse: 'gutted', byLabel: 'organ harvest' });
+      const dead = window.DMTHGame.state.getGirl(girlId);
+      window.DMTHGame.state.updateGirl(girlId, { body: { ...dead.body, organs } });
+      if (window.DMTHNotify) window.DMTHNotify.show(`☠️ You cut out ${girl.name}'s ${spec.name} — a vital organ. She died on the table; it's in your inventory to sell.`, { type: 'error', durationMs: 7500 });
+      return { ok: true, organKey, died: true };
+    }
+    // Survivable removal (a kidney while she still has the other, or harvesting a corpse).
+    const body = { ...girl.body, organs };
+    if (alive) {
+      body.health = Math.max(1, (body.health ?? 100) - ORGAN_DMG);
+      body.bruises = Math.min(99, (body.bruises ?? 0) + 10);
+      body.stamina = Math.max(0, Math.min(body.health, (body.stamina ?? 70) - 25));
+      body.recentActTag = 'beaten';
+      if (window.DMTHGame.gameClock) body.recentActAt = window.DMTHGame.gameClock.now();
+    }
+    const patch = { body };
+    if (alive) {
+      patch.bond = { ...girl.bond, bondDebt: (girl.bond?.bondDebt || 0) + 12 };
+      patch.mood = { ...girl.mood, mood: 'traumatized', moodEmoji: '😵' };
+      if (window.DMTHGame.state.addSatisfaction) window.DMTHGame.state.addSatisfaction(5, 'organ-harvest');
+      if (window.DMTHGame.progression) window.DMTHGame.progression.grantXp(12, 'organ-harvest');
+    }
+    window.DMTHGame.state.updateGirl(girlId, patch);
+    if (window.DMTHNotify) window.DMTHNotify.show(`🔪 You cut out ${girl.name}'s ${spec.name}${alive ? " — she survived (one kidney's enough)" : ' from the corpse'}. It's in your inventory to sell.`, { type: 'error', durationMs: 6000 });
+    return { ok: true, organKey, died: false };
   }
 
   // -----------------------------------------------------------------
@@ -1475,8 +1580,9 @@
     playerEffectLine,
     tickStaminaHealth,
     johnHappinessForGirl,
-    LIMB_KEYS, LIMB_LABEL, NUGGET_HEAL_GATE,
+    LIMB_KEYS, LIMB_LABEL,
     limbState, limbsRemoved, isNugget, delimb,
+    HARVEST_ORGANS, organsRemoved, harvestOrgan, harvestPartToInventory,
     MARK_SPECS, ownershipMarksOf, hasMark, applyMark,
     wouldBeLethal, lethalWarningLine, lowHealthAlertSweep,
     trainCumCapacity, CUMCAP_MAX, maxHealthFor

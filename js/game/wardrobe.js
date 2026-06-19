@@ -215,11 +215,11 @@
       roleplay: 'cheerleader'
     },
 
-    // SKIMPYWEAR.1 (Gee) — per-girl-type SKIMPY / MAX-NUDITY outfits: "office worker a long male-suit-
-    // tie only all nude and nothing but a tie ... police woman ... as skimpy and as much nudity ... as
-    // is possible". Each is a `nude:'accessories'` outfit so imaging front-loads full nudity and renders
-    // ONLY the one scrap named in accessoriesOnly. `syncArchetype` tags the girl-type it's made for (OUTFITSYNC).
-    // NOTE (Gee): POSITIVE prompts only — NEVER write "no bra / no panties" (this gen latches onto
+    // Per-girl-type SKIMPY / MAX-NUDITY outfits (e.g. office worker in a necktie only, all else nude;
+    // police woman as skimpy + as much nudity as possible). Each is a `nude:'accessories'` outfit so
+    // imaging front-loads full nudity and renders ONLY the one scrap named in accessoriesOnly.
+    // `syncArchetype` tags the girl-type it's made for (outfit-sync buff).
+    // POSITIVE prompts only — NEVER write "no bra / no panties" (this gen latches onto
     // the negated noun and renders it). Push affirmative nudity words: topless, bottomless, bare
     // exposed breasts, nipples out, bare naked pussy, bare ass, fully nude.
     {
@@ -262,25 +262,25 @@
       description: 'a tiny diner half-apron over an otherwise fully nude body, topless, bare exposed tits with nipples out, a short skirt hiked up over bare hips, bottomless, bare naked pussy', multiplier: 1.3, roleplay: 'waitress',
       nude: 'accessories', accessoriesOnly: 'a tiny diner half-apron over an otherwise fully nude body, topless with bare exposed tits and nipples out, a name tag by a bare nipple, a short skirt hiked up over bare hips, bottomless, bare naked pussy', syncArchetype: 'barista'
     },
-    // PREGOUTFIT.1 (Gee) — a preggo "simi need" half-nude outfit that accentuates her swollen belly +
+    // A preggo half-nude outfit that accentuates her swollen belly +
     // milk-heavy tits. Positive nudity prompt; meant for a pregnant captive (belly/milk show). The soft
-    // bonus while pregnant is the OUTFITSYNC sync match (roleplay 'pregnant' / archetype-agnostic).
+    // bonus while pregnant is the outfit-sync match (roleplay 'pregnant' / archetype-agnostic).
     {
       id: 'preggo-belly-harness', displayName: 'Breeder: Belly + Milk Harness', emoji: '🤰', price: 170, tier: 3,
       description: 'an open strappy harness framing a heavily pregnant swollen belly and huge milk-swollen tits, bare exposed breasts with leaking nipples out, bottomless, bare naked pussy under the bump, barefoot', multiplier: 1.4, roleplay: 'pregnant',
       nude: 'accessories', accessoriesOnly: 'an open strappy harness framing her heavily pregnant swollen belly and milk-swollen tits, bare exposed breasts with fat leaking nipples out, topless, bottomless, bare naked pussy below the bump, barefoot', syncArchetype: 'pregnant'
     },
-    // STRIPPER.1 / SKIMPYEXOTIC.1 (Gee) — the stripper's signature: she works NUDE. Exotic, not
-    // modest — fully nude in nothing but fishnets + clear heels. DASHGROUP-friendly concept words.
+    // The stripper's signature: she works NUDE. Exotic, not modest — fully nude in nothing but
+    // fishnets + clear heels. Dash-grouped concept words for image consistency.
     {
       id: 'skimpy-stripper', displayName: 'Stripper: Nude + Fishnets Only', emoji: '💃', price: 150, tier: 3,
       description: 'fully-nude-body wearing only sheer-black-fishnet-stockings and clear-stripper-platform-heels, bare-exposed-nude-tits-nipples-out, bare-naked-pussy, a rhinestone choker, body-glitter on bare skin', multiplier: 1.45, roleplay: 'stripper',
       nude: 'accessories', accessoriesOnly: 'fully-nude-body wearing only sheer-black-fishnet-stockings pulled up the thighs and clear-stripper-platform-heels, bare-exposed-nude-tits-nipples-out, bare-naked-pussy, a rhinestone choker, a lace-garter stuffed-with-cash on one thigh, body-glitter shimmering on bare skin', syncArchetype: 'stripper'
     },
-    // SKIMPYALL.1 + SKIMPYEXOTIC.1 (Gee) — every girl type gets its OWN special nude-like outfit,
-    // and they are NOT modest: exotic, beyond-sexy variations of the type's normal look, max exposed
-    // nudity. Backfill for the archetypes that didn't already have a dedicated skimpy (the rest
-    // auto-sync via roleplay tags). DASHGROUP-friendly concept words (groupConcepts dashes them).
+    // Every girl type gets its OWN special nude-like outfit, and they are NOT modest: exotic,
+    // beyond-sexy variations of the type's normal look, max exposed nudity. Backfill for the
+    // archetypes that didn't already have a dedicated skimpy (the rest auto-sync via roleplay
+    // tags). Dash-grouped concept words (groupConcepts dashes them).
     {
       id: 'skimpy-library', displayName: 'Bookworm: Cardigan & Bare', emoji: '📚', price: 150, tier: 3,
       description: 'an open oversized cardigan hanging off her bare shoulders over nothing, wire-rim glasses, fully-nude underneath, bare-exposed-breasts nipples-out, bottomless, bare-naked-pussy, white thigh-high stockings, an open book held against one hip', multiplier: 1.35, roleplay: 'library',
@@ -472,7 +472,57 @@
     return { ok: true, outfit };
   }
 
-  // OUTFITLOOT.1 (Gee) — the skimpy/special outfits are obtained two ways: bought in the Carcass
+  // ── Clothing now buys into a SHARED stackable inventory (you
+  // can hoard duplicates), then you APPLY one to a girl from inventory. Nothing is a one-click
+  // buy-to-equip; the outfit has to be IN your inventory first. Buying is gated by the same
+  // multi-dimension engine as every other item type (derived from the outfit's tier).
+  function clothingStatus(outfitId) {
+    const o = getById(outfitId);
+    const p = window.DMTHGame.progression;
+    if (!o || !p || !p.itemUnlockStatus) return { locked: false, unmet: [] };
+    return p.itemUnlockStatus({ tier: o.tier || 1, unlock: o.unlock });
+  }
+  function clothingLockReason(outfitId) {
+    const st = clothingStatus(outfitId);
+    return st.unmet && st.unmet.length ? st.unmet.join(' + ') : '';
+  }
+  // How many of this outfit you're holding in the shared inventory.
+  function ownedQty(outfitId) {
+    return (window.DMTHGame.state.current?.inventory?.[outfitId]) || 0;
+  }
+  // Buy ONE into the shared inventory (stackable). Gate-checked, then spend + addItem.
+  function buyToInventory(outfitId) {
+    const o = getById(outfitId);
+    if (!o) return { ok: false, reason: 'no such outfit' };
+    const st = clothingStatus(outfitId);
+    if (st.locked) return { ok: false, reason: 'locked — needs ' + (st.unmet.join(' + ') || 'more progress') };
+    if (!window.DMTHGame.state.spendMoney(o.price, `wardrobe-buy:${outfitId}`)) return { ok: false, reason: 'insufficient funds' };
+    window.DMTHGame.state.addItem(outfitId, 1);
+    if (window.DMTHNotify) window.DMTHNotify.show(`🧵 Bought ${o.displayName} ($${o.price.toLocaleString()}) — added to your inventory. Apply it to a girl from her wardrobe page.`, { type: 'success', durationMs: 4500 });
+    return { ok: true, outfit: o };
+  }
+  // Apply one from inventory onto a girl: consume a unit, add it to HER wardrobe, equip it.
+  // If she already owns it in her wardrobe, just re-equip (no inventory consumed).
+  function applyToGirl(girlId, outfitId) {
+    const girl = window.DMTHGame.state.getGirl(girlId);
+    const o = getById(outfitId);
+    if (!girl || !o) return { ok: false, reason: 'no such girl/outfit' };
+    const alreadyInWardrobe = (girl.wardrobe || []).some(w => w.id === outfitId);
+    if (!alreadyInWardrobe) {
+      if (ownedQty(outfitId) <= 0) return { ok: false, reason: `none in inventory — buy ${o.displayName} first` };
+      if (!window.DMTHGame.state.consumeItem(outfitId, 1)) return { ok: false, reason: 'none in inventory' };
+      const newWardrobe = [...(girl.wardrobe || []), {
+        id: o.id, displayName: o.displayName, description: o.description,
+        source: 'applied', price: o.price, multiplier: o.multiplier, acquiredAt: Date.now()
+      }];
+      window.DMTHGame.state.updateGirl(girlId, { wardrobe: newWardrobe });
+    }
+    try { equip(girlId, outfitId); } catch (e) { /* wardrobe write already done; equip is best-effort */ }
+    if (window.DMTHNotify) window.DMTHNotify.show(`👗 ${girl.name} is now in ${o.displayName}.`, { type: 'success', durationMs: 3000 });
+    return { ok: true, outfit: o };
+  }
+
+  // The skimpy/special outfits are obtained two ways: bought in the Carcass
   // Closet (buyForGirl) OR found as RARE loot / NPC gifts (granted free to a girl's wardrobe).
   // These expose the skimpy set + a free grant for the loot/gift paths.
   function skimpyOutfitIds() { return OUTFITS.filter(o => o.nude === 'accessories' && o.syncArchetype).map(o => o.id); }
@@ -552,21 +602,21 @@
     return current?.multiplier || 1.0;
   }
 
-  // Stat bonuses from the equipped outfit (CLOTHING.1). Derived from the outfit's content
+  // Stat bonuses from the equipped outfit. Derived from the outfit's content
   // multiplier + nude/roleplay flags so we don't have to hand-author a bonus block per outfit:
   //   - johnPayMul:         multiplier already applied to john pay via johnHappinessForGirl
   //   - playerSatisfaction: a lewder/nuder outfit gives the player a bigger satisfaction hit per sex act
   //   - girlArousal:        skin/lewd outfits leave her more exposed + worked-up
   //   - escapeSuppress:     restraint-flavored outfits physically hold her (lowers escape risk)
-  // OUTFITSYNC.1 (Gee: "put a nurese in a nurse outfit its a major buff, a sority girl in a cheer
-  // outfit a big buff") — does the equipped outfit's type match her girl-type? Matches the outfit's
+  // A type-matched outfit is a major buff (a nurse in a nurse outfit, a sorority girl in a cheer
+  // outfit). Does the equipped outfit's type match her girl-type? Matches the outfit's
   // syncArchetype OR roleplay against her archetypeTemplate (loose contains-match so nurse↔nurse,
   // cheer↔sorority, office↔office-worker all land). Returns the matched outfit or null.
   function syncMatch(girl) {
     const o = getById(girl?.currentOutfit);
     if (!o) return null;
     const tags = [o.syncArchetype, o.roleplay].filter(Boolean).map(s => String(s).toLowerCase());
-    // PREGOUTFIT.1 — a 'pregnant'-tagged outfit (the belly/milk harness) syncs while she's pregnant.
+    // A 'pregnant'-tagged outfit (the belly/milk harness) syncs while she's pregnant.
     if (tags.includes('pregnant') && girl?.pregnancy?.status === 'pregnant') return o;
     const arc = String(girl?.archetypeTemplate || '').toLowerCase();
     if (!arc) return null;
@@ -579,7 +629,7 @@
     const o = getById(girl?.currentOutfit) || {};
     const mult = ((girl?.wardrobe || []).find(w => w.id === girl.currentOutfit)?.multiplier) || o.multiplier || 1.0;
     const restraintFlavored = /restraint|cuff|harness|bondage|latex|catsuit|chain/i.test(`${o.roleplay || ''} ${o.id || ''} ${o.description || ''}`);
-    // OUTFITSYNC.1 — a TYPE-MATCHED outfit is a major buff: +25% john pay, more satisfaction + arousal.
+    // A TYPE-MATCHED outfit is a major buff: +25% john pay, more satisfaction + arousal.
     const synced = !!syncMatch(girl);
     const syncPay = synced ? 1.25 : 1.0;
     return {
@@ -596,6 +646,7 @@
     OUTFITS, catalog, getById, buyForGirl, equip, derobe, stripEverything,
     currentMultiplier, outfitBonuses, builtIns, isNude,
     skimpyOutfitIds, skimpyForArchetype, grantOutfit,
+    clothingStatus, clothingLockReason, ownedQty, buyToInventory, applyToGirl,
     NUDE_PSEUDO_ID, NUDE_PSEUDO,
     NO_WARDROBE_PSEUDO_ID, NO_WARDROBE_PSEUDO,
     CONDOM_PSEUDO_ID, CONDOM_PSEUDO

@@ -4,29 +4,28 @@
 (function () {
   'use strict';
 
-  // Curve table — all times in ms.
-  // Effect peaks at `peakAt`, lingers, then wears off by `wearOffAt`.
-  // highContribution is the max amount added to girl.body.high.
-  // canOD — whether too much KILLS her (weed never; coke/K/molly/etc. yes). instant — the
-  // immediate stat shift on FORCED dosing that makes her more pliable + menial to being
-  // fucked (arousal/wetness up, escape-risk down). Applied in administer() the moment it hits.
+  // Curve table — all times in GAME-MINUTES (the sim's own clock; 60 game-minutes = 1 real
+  // minute, so a high tracks GAME time, freezes when the game pauses, and is never tied to the
+  // wall-clock). Effect peaks at peakMin, lingers, then wears off by wearOffMin. highContribution
+  // is the max added to girl.body.high. Durations are tuned so a high lasts a satisfying few real
+  // minutes (not a 3-minute blink, not hours of real time) — which is several game-HOURS, never
+  // "days in game". canOD — whether too much KILLS her (weed never; coke/K/molly/etc. yes).
+  // instant — the immediate stat shift on FORCED dosing that makes her more pliable (arousal/
+  // wetness up, escape-risk down). Applied in administer() the moment it hits.
   const DRUG_CURVES = {
-    coke:    { onsetMs: 60_000,   peakMs: 8 * 60_000,  wearOffMs: 45 * 60_000,  highContribution: 60, speechEffect: 'high_coke',  stackable: true,  itemId: 'coke-bumps', canOD: true,  instant: { arousal: +6, escapeRisk: -0.03 } },
-    weed:    { onsetMs: 90_000,   peakMs: 30 * 60_000, wearOffMs: 120 * 60_000, highContribution: 40, speechEffect: 'high_weed',  stackable: true,  itemId: 'weed',       canOD: false, instant: { arousal: +3, escapeRisk: -0.05 } },
-    mdma:    { onsetMs: 30 * 60_000, peakMs: 90 * 60_000, wearOffMs: 4 * 60 * 60_000, highContribution: 70, speechEffect: 'aroused', stackable: false, itemId: 'mdma',    canOD: true,  instant: { arousal: +15, wetness: +15, escapeRisk: -0.08 } },
-    acid:    { onsetMs: 45 * 60_000, peakMs: 4 * 60 * 60_000, wearOffMs: 10 * 60 * 60_000, highContribution: 55, speechEffect: 'curious', stackable: false, itemId: 'acid', canOD: true,  instant: { arousal: +4, escapeRisk: -0.05 } },
-    whiskey: { onsetMs: 5 * 60_000,  peakMs: 20 * 60_000, wearOffMs: 90 * 60_000, highContribution: 45, speechEffect: 'drunk',     stackable: true,  itemId: 'wine',       canOD: true,  instant: { arousal: +6, escapeRisk: -0.06 } },
-    alcohol: { onsetMs: 5 * 60_000,  peakMs: 20 * 60_000, wearOffMs: 90 * 60_000, highContribution: 45, speechEffect: 'drunk',     stackable: true,  itemId: 'wine',       canOD: true,  instant: { arousal: +6, escapeRisk: -0.06 } },
-    ketamine:{ onsetMs: 2 * 60_000,  peakMs: 8 * 60_000,  wearOffMs: 40 * 60_000, highContribution: 75, speechEffect: 'broken',    stackable: false, itemId: 'ketamine',   canOD: true,  instant: { arousal: +2, escapeRisk: -0.10 } },
-    // Tranquilizer — 4 real minutes of total knockout. In game-time terms that's
-    // 4 real-min × 60 game-min/real-min = 240 game-minutes = 4 game hours (since
-    // 1 real sec = 1 game minute). Hard binary effect — see curveMagnitude special-
-    // case below. 5-sec onset for the inject-to-down transition, then full knockout
-    // until wearOffAt, then she snaps awake. Distinct from ketamine (dissociation)
-    // — this is total unresponsiveness. While active, isUnconscious(girl) returns
-    // truthy, gating chat / consensual actions in room.js and front-loading
-    // unconscious markers in the image prompt.
-    tranquilizer: { onsetMs: 5_000, peakMs: 10_000, wearOffMs: 240_000, highContribution: 100, speechEffect: 'unconscious', stackable: false, itemId: 'tranquilizer' }
+    coke:    { onsetMin: 6,  peakMin: 60,  wearOffMin: 360, highContribution: 60, speechEffect: 'high_coke', stackable: true,  itemId: 'coke-bumps', canOD: true,  instant: { arousal: +6, escapeRisk: -0.03 } },
+    weed:    { onsetMin: 9,  peakMin: 180, wearOffMin: 480, highContribution: 40, speechEffect: 'high_weed', stackable: true,  itemId: 'weed',       canOD: false, instant: { arousal: +3, escapeRisk: -0.05 } },
+    mdma:    { onsetMin: 30, peakMin: 300, wearOffMin: 720, highContribution: 70, speechEffect: 'aroused',   stackable: false, itemId: 'mdma',       canOD: true,  instant: { arousal: +15, wetness: +15, escapeRisk: -0.08 } },
+    acid:    { onsetMin: 45, peakMin: 360, wearOffMin: 900, highContribution: 55, speechEffect: 'curious',   stackable: false, itemId: 'acid',       canOD: true,  instant: { arousal: +4, escapeRisk: -0.05 } },
+    whiskey: { onsetMin: 5,  peakMin: 120, wearOffMin: 360, highContribution: 45, speechEffect: 'drunk',     stackable: true,  itemId: 'wine',       canOD: true,  instant: { arousal: +6, escapeRisk: -0.06 } },
+    alcohol: { onsetMin: 5,  peakMin: 120, wearOffMin: 360, highContribution: 45, speechEffect: 'drunk',     stackable: true,  itemId: 'wine',       canOD: true,  instant: { arousal: +6, escapeRisk: -0.06 } },
+    ketamine:{ onsetMin: 2,  peakMin: 60,  wearOffMin: 300, highContribution: 75, speechEffect: 'broken',    stackable: false, itemId: 'ketamine',   canOD: true,  instant: { arousal: +2, escapeRisk: -0.10 } },
+    // Tranquilizer — a hard binary knockout lasting 240 game-minutes (= 4 real minutes at 60
+    // game-min per real-min). 5 game-min onset for the inject-to-down transition, then full
+    // knockout until wearOff, then she snaps awake. Distinct from ketamine (dissociation) — this
+    // is total unresponsiveness. While active, isUnconscious(girl) is truthy, gating chat /
+    // consensual actions and front-loading unconscious markers in the image prompt.
+    tranquilizer: { onsetMin: 5, peakMin: 10, wearOffMin: 240, highContribution: 100, speechEffect: 'unconscious', stackable: false, itemId: 'tranquilizer' }
   };
 
   // ---- FORCED ADDICTION + WITHDRAWAL (DEP-EXP.2) ----
@@ -50,11 +49,17 @@
   const OD_LOAD_FREE = 0.2;        // first dose or two are survivable
   const OD_LOAD_DECAY = 0.10;      // toxicity clears while sober (per tick) — must be dosed "in a row"
 
-  // Return the active tranquilizer entry on the girl if she's still within
-  // its wearOffAt window, else null. Used by UI to gate buttons + drive the live mm:ss
-  // countdown, and by image-prompt path to front-load unconscious markers.
+  // Game-clock NOW in game-minutes — drug timing lives on game time, not the wall-clock. Falls
+  // back to a real-seconds count if the clock isn't loaded yet (1 real sec ≈ 1 game minute).
+  function gnow() {
+    return window.DMTHGame.gameClock ? window.DMTHGame.gameClock.now() : (Date.now() / 1000);
+  }
+
+  // Return the active tranquilizer entry on the girl if she's still within its wear-off window,
+  // else null. Used by UI to gate buttons + drive the live countdown, and by the image-prompt
+  // path to front-load unconscious markers.
   function isUnconscious(girl) {
-    const now = Date.now();
+    const now = gnow();
     const active = Array.isArray(girl?.body?.activeDrugs) ? girl.body.activeDrugs : [];
     for (const d of active) {
       if (typeof d !== 'object') continue;
@@ -64,10 +69,11 @@
     return null;
   }
 
+  // Real-time ms remaining for the UI countdown (1 game-minute = 1000 real ms at the clock rate).
   function unconsciousRemainingMs(girl) {
     const d = isUnconscious(girl);
     if (!d) return 0;
-    return Math.max(0, (d.wearOffAt || 0) - Date.now());
+    return Math.max(0, ((d.wearOffAt || 0) - gnow()) * 1000);
   }
 
   // Administer a drug — consumes an inventory item if available, starts a curve on the girl.
@@ -82,7 +88,7 @@
       if (!ok) throw new Error(`no ${curve.itemId} in inventory`);
     }
 
-    const now = Date.now();
+    const now = gnow();
     const active = Array.isArray(girl.body.activeDrugs) ? girl.body.activeDrugs.slice() : [];
 
     if (!curve.stackable) {
@@ -92,9 +98,9 @@
     active.push({
       name: drugKey,
       administeredAt: now,
-      onsetAt: now + curve.onsetMs,
-      peakAt: now + curve.peakMs,
-      wearOffAt: now + curve.wearOffMs,
+      onsetAt: now + curve.onsetMin,
+      peakAt: now + curve.peakMin,
+      wearOffAt: now + curve.wearOffMin,
       highContribution: curve.highContribution,
       speechEffect: curve.speechEffect
     });
@@ -122,6 +128,10 @@
     // A girl SELF-DOSING to survive (DRUG-SELFSERVE.1) never stacks toxicity — she paces herself
     // and will not OD on her own; only the player force-dosing builds odLoad toward death.
     if (curve.canOD && !selfServe) newBody.odLoad = (newBody.odLoad || 0) + (OD_POTENCY[drugKey] || 0.10);
+
+    // Update her high meter IMMEDIATELY so the bar jumps the instant she's dosed, instead of
+    // waiting for the next engine tick to recompute it.
+    newBody.high = currentEffect({ body: newBody }).high;
 
     window.DMTHGame.state.updateGirl(girlId, { body: newBody, escape });
 
@@ -164,7 +174,7 @@
   // Compute current effect per-girl from active curves.
   // Returns { high: 0..100, strongestEffect: 'high_coke' | 'drunk' | ..., activeList: [...] }
   function currentEffect(girl) {
-    const now = Date.now();
+    const now = gnow();
     const active = Array.isArray(girl.body?.activeDrugs) ? girl.body.activeDrugs : [];
     let highTotal = 0;
     let strongest = null;
@@ -287,11 +297,11 @@
   // Get a readable remaining-time summary
   function summarize(girl) {
     const active = Array.isArray(girl.body?.activeDrugs) ? girl.body.activeDrugs : [];
-    const now = Date.now();
+    const now = gnow();
     return active.filter(d => typeof d === 'object' && d.wearOffAt > now).map(d => ({
       name: d.name,
       mag: Math.round(curveMagnitude(d, now)),
-      remainingMin: Math.max(0, Math.round((d.wearOffAt - now) / 60000))
+      remainingMin: Math.max(0, Math.round(d.wearOffAt - now))   // game-minutes remaining
     }));
   }
 
