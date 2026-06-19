@@ -378,6 +378,9 @@ OUTPUT — a multi-speaker exchange, EVERY line tagged with the speaker's name e
       parts.push(renamed
         ? `Your captor has RENAMED you "${renamed}" — you are no longer your own person, that is your name now and the only name you answer to; your old name is gone. You answer when someone calls you "${renamed}" and refer to yourself as ${renamed}. You are age ${girl.age}, archetype: ${girl.archetypeTemplate}${girl.captiveAffect ? `, captive-affect: ${girl.captiveAffect}` : ''}.`
         : `Your name is ${girl.name} — you KNOW your own name, you answer when someone calls you "${girl.name}", and you may refer to yourself as ${girl.name}. You are age ${girl.age}, archetype: ${girl.archetypeTemplate}${girl.captiveAffect ? `, captive-affect: ${girl.captiveAffect}` : ''}.`);
+      // She reacts like a real captive human to a WRONG name — never blandly answers to it.
+      const knownName = renamed || girl.name;
+      parts.push(`WRONG-NAME REACTION: if anyone calls you by a name that is NOT "${knownName}", do NOT just answer to it — react AS YOURSELF, like a real captive woman would: confused, correcting him, or wary/jealous/defiant depending on your state and Stockholm. e.g. he says "hi ${girl.name === 'Unity' ? 'Sasha' : 'Unity'}" and you snap back something like "who's that? that's not my fucking name" or "who is she — another one of your slaves?". A timid girl asks small and scared, a fighter spits it back, a high-Stockholm girl might get jealous. Never accept the wrong name, never go blank or generic.`);
     }
     if (room) {
       parts.push(`Room ambience: ${room.ambience || 'unspecified'}. Upgrades: ${Object.entries(room.upgrades || {}).map(([k,v]) => `${k}=${v}`).join(', ')}.`);
