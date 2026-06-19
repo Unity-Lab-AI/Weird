@@ -271,72 +271,164 @@
       .sort((a, b) => a.chance - b.chance);
   }
 
-  // --- Wrangle escalation ---
+  // --- CAPEASE.1 — DESPERATION model (REVERSES the old tightening escalation) ---
   //
-  // Each failed tool attempt during an encounter bumps the escalation tier. The girl's
-  // struggle escalates and subsequent tool chances are multiplied down. At tier 4 (the
-  // ESCAPE tier), she breaks free and the encounter ends. The player gets ~4 attempts
-  // before she's gone — earlier with cheap tools.
+  // Gee: the grab must NOT be the boring stuck part — no endless missing, no getting stuck. Each
+  // failed grab makes the PLAYER more desperate and the NEXT attempt EASIER (an additive bonus),
+  // so two misses in a row means the third grab is basically a guaranteed win. She no longer
+  // "escapes" from repeated attempts — you always run her down, it just takes a beat or two.
   //
-  //   tier 0 (calm)        — no penalty, first contact
-  //   tier 1 (suspicious)  — chance × 0.85 after 1 miss
-  //   tier 2 (fighting)    — chance × 0.70 after 2 misses
-  //   tier 3 (screaming)   — chance × 0.55 after 3 misses
-  //   tier 4 (running)     — encounter ends, she escapes
-  const ESCALATION_MULTIPLIERS = [1.00, 0.85, 0.70, 0.55];
-  const ESCALATION_LABELS = ['calm', 'suspicious', 'fighting', 'screaming', 'running'];
-  const ESCAPE_TIER = 4;
-  const ESCALATION_NARRATION = [
+  //   tier 0 (steady)     — no bonus, first move
+  //   tier 1 (rattled)    — +0.22 after 1 miss
+  //   tier 2 (desperate)  — +0.45 after 2 misses → even a 50% tool ≈ 95% on the 3rd grab
+  //   tier 3+ (frenzied)  — +0.90 → effectively guaranteed
+  const DESPERATION_BONUS  = [0, 0.22, 0.45, 0.90, 0.90];
+  const DESPERATION_LABELS = ['steady', 'rattled', 'desperate', 'frenzied', 'frenzied'];
+  const DESPERATION_NARRATION = [
     null,
-    "she shoves you off, eyes wide, looking around for help",
-    "she's swinging — fists flying, scrambling backward, knocking shit over",
-    "she's screaming for help, kicking free, trying to crawl away",
-    "she breaks free and bolts — gone before you can grab her again"
+    "the miss makes you reckless — you close back in, hungrier, harder for her to shake",
+    "you're past caring who sees now — desperate, grabbing, and she's running out of room",
+    "you're frenzied, all teeth and grip — there's no getting away from you now",
+    "you're frenzied, all teeth and grip — there's no getting away from you now"
   ];
+  const DESP_MAX_TIER = DESPERATION_BONUS.length - 1;
 
-  function escalationLabel(tier) { return ESCALATION_LABELS[Math.min(tier, ESCAPE_TIER)]; }
-  function escalationMultiplier(tier) { return ESCALATION_MULTIPLIERS[tier] || 0; }
-  function escalationNarration(tier) { return ESCALATION_NARRATION[Math.min(tier, ESCAPE_TIER)]; }
+  function desperationBonus(tier) { return DESPERATION_BONUS[Math.min(tier || 0, DESP_MAX_TIER)] || 0; }
+  function desperationLabel(tier) { return DESPERATION_LABELS[Math.min(tier || 0, DESP_MAX_TIER)] || 'frenzied'; }
+  function desperationNarration(tier) { return DESPERATION_NARRATION[Math.min(tier || 0, DESP_MAX_TIER)]; }
 
-  // Roll a single-tool capture. On success, escort the girl to the active dungeon's
-  // first open hold via hunt.js. On failure, bump location suspicion AND the encounter's
-  // escalation tier. The caller (UI) decides what to do with the new tier — typically
-  // re-render the picker with adjusted odds, or end the encounter if tier >= ESCAPE_TIER.
-  function simpleAttempt({ girl, toolId, locationId, escalationTier = 0 }) {
-    if (escalationTier >= ESCAPE_TIER) {
-      return { outcome: 'escaped', escalationTier, reason: 'already-escaped' };
+  // CAPDEBUFF.1 — per-tool debuff applied to the girl AT the grab. Gee: the COMBINED effects of
+  // every drug/tool/equipment you used (consciousness, mood, health, etc.) debuff her starting
+  // captive stats in TOTALITY — a rohi + pipe + cuffs grab leaves her bruised, dazed, sedated and
+  // bound at the start of captivity. Blunt tools do real health damage + bruises; chemicals leave
+  // her groggy/sedated (high↑ = doped, mood↓, stamina↓); restraints suppress escape-risk + small
+  // marks. Health floors at 1 — a grab never insta-kills. Healing is the rest/heal/feed/love loop.
+  const CAPTURE_INJURY = Object.freeze({
+    pipe:         { health: -25, bruises: 6, mood: -8, stamina: -10, tag: 'beaten' },
+    handcuffs:    { health: -2,  bruises: 2, escapeRisk: -0.10 },
+    shackles:     { health: -3,  bruises: 2, escapeRisk: -0.14 },
+    'zip-ties':   { health: -2,  bruises: 1, escapeRisk: -0.08 },
+    rope:         { health: -1,  bruises: 1, escapeRisk: -0.06 },
+    'duct-tape':  { health: -1,  bruises: 1, escapeRisk: -0.05 },
+    harness:      { health: -2,  bruises: 1, escapeRisk: -0.10 },
+    rohypnol:     { health: -4,  bruises: 0, mood: -6,  high: 35, stamina: -25, escapeRisk: -0.12 },
+    chloroform:   { health: -5,  bruises: 0, mood: -8,  high: 45, stamina: -35, escapeRisk: -0.18 },
+    ether:        { health: -5,  bruises: 0, mood: -8,  high: 45, stamina: -35, escapeRisk: -0.18 },
+    ketamine:     { health: -6,  bruises: 0, mood: -10, high: 50, stamina: -40, escapeRisk: -0.20 },
+    tranquilizer: { health: -4,  bruises: 0, mood: -6,  high: 55, stamina: -45, escapeRisk: -0.22 }
+  });
+
+  // Apply the COMBINED debuff from EVERY tool in the loadout (summed + clamped) to the fresh
+  // captive — the "in totality" debuff on first capture. Mutates girl.body in place (caller
+  // escorts her right after, so the debuffed stats persist into her starting captive state).
+  function applyCaptureDebuffs(girl, toolIds) {
+    if (!girl.body) return;
+    const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+    let tag = null;
+    for (const id of (toolIds || [])) {
+      const inj = CAPTURE_INJURY[id];
+      if (!inj) continue;
+      girl.body.health  = Math.max(1, (girl.body.health ?? 100) + (inj.health || 0));
+      girl.body.bruises = Math.min(99, (girl.body.bruises ?? 0) + (inj.bruises || 0));
+      if (inj.high)    girl.body.high    = clamp((girl.body.high ?? 0) + inj.high, 0, 100);
+      if (inj.stamina) girl.body.stamina = clamp((girl.body.stamina ?? 70) + inj.stamina, 0, girl.body.health);
+      if (inj.mood && girl.mood) girl.mood.moodPressure = clamp((girl.mood.moodPressure || 0) + inj.mood, -60, 60);
+      if (inj.escapeRisk && girl.escape) girl.escape.currentRisk = clamp((girl.escape.currentRisk ?? 0.1) + inj.escapeRisk, 0, 1);
+      if (inj.tag) tag = inj.tag;
     }
-    const base = SIMPLE_CAPTURE_CHANCE[toolId];
-    if (!base) return { outcome: 'fail', reason: 'tool-not-capture-grade', escalationTier };
-    const inv = window.DMTHGame.state.current.inventory;
-    if (!inv[toolId] || inv[toolId] < 1) return { outcome: 'fail', reason: 'no-tool', escalationTier };
+    if (tag) {
+      girl.body.recentActTag = tag;
+      if (window.DMTHGame.gameClock) girl.body.recentActAt = window.DMTHGame.gameClock.now();
+    }
+  }
 
-    window.DMTHGame.state.consumeItem(toolId, 1);
+  // CAPWANTED.1 — heat from a grab scales by the BEST tool tier used. Higher-tier gear is cleaner
+  // (quiet sedatives, pro restraints) → far less WANTED heat + suspicion; crude low-tier grabs
+  // (a pipe in the open, tape) draw the most. "higher teir items have less negatives more positives."
+  function bestToolTier(toolIds) {
+    let max = 0;
+    for (const id of (toolIds || [])) {
+      const it = window.DMTHAssets && window.DMTHAssets.getById ? window.DMTHAssets.getById('item', id) : null;
+      if (it && typeof it.tier === 'number' && it.tier > max) max = it.tier;
+    }
+    return max;   // 0-5
+  }
+  // Heat for a successful grab — 0..~3, shrinking with tier. Tier 4+ = a clean, quiet snatch.
+  function captureHeat(toolIds) { return Math.max(0, 3 - bestToolTier(toolIds) * 0.7); }
 
-    const mul = ESCALATION_MULTIPLIERS[escalationTier] || 0;
-    const chance = Math.max(0.05, base * mul);
+  // CAPSTACK.1 — combine MULTIPLE selected drugs+tools into one grab. Each one stacks toward the
+  // snatch (probabilistic OR — every tool is an independent shot at landing her, so more gear =
+  // higher chance), then the CAPEASE desperation bonus is added on top. Clamped 5-98%.
+  function stackedChance(toolIds, desperationTier) {
+    const ids = (toolIds || []).filter(id => SIMPLE_CAPTURE_CHANCE[id] != null);
+    if (!ids.length) return 0;
+    let miss = 1;
+    for (const id of ids) miss *= (1 - SIMPLE_CAPTURE_CHANCE[id]);
+    const combined = 1 - miss;                                    // stacked base from every tool
+    return Math.max(0.05, Math.min(0.98, combined + desperationBonus(desperationTier || 0)));
+  }
 
+  // Fire a grab with a loadout of selected tools/drugs. On success, escort her to the active
+  // dungeon's first open hold via hunt.js. On a miss, bump location suspicion + the player's
+  // DESPERATION tier (the next grab gets EASIER) — she never "escapes" from repeated attempts,
+  // so the player never gets stuck (CAPEASE.1). Single-use tools in the loadout are consumed per
+  // attempt; reusable ones (pipe / handcuffs / shackles / harness) survive.
+  function stackedAttempt({ girl, toolIds, locationId, desperationTier = 0 }) {
+    const ids = (toolIds || []).filter(id => SIMPLE_CAPTURE_CHANCE[id] != null);
+    if (!ids.length) return { outcome: 'fail', reason: 'no-tools-selected', desperationTier };
+    // WANTEDDOWN.1 — stamp hunting activity so "time off from hunting" cools WANTED faster.
+    if (window.DMTHGame.wanted?.noteHunt) window.DMTHGame.wanted.noteHunt();
+    const inv = window.DMTHGame.state.current.inventory || {};
+    for (const id of ids) {
+      if ((inv[id] || 0) < 1) return { outcome: 'fail', reason: 'no-tool:' + id, desperationTier };
+    }
+    // Consume single-use tools (1 each). Reusable tools survive the grab.
+    const consumed = [];
+    for (const id of ids) {
+      if (SINGLE_USE_TOOLS.has(id) && window.DMTHGame.state.consumeItem(id, 1)) consumed.push(id);
+    }
+    const chance = stackedChance(ids, desperationTier);
     const roll = Math.random();
     if (roll < chance) {
       try {
+        // CAPDEBUFF.1 — the COMBINED debuff from the whole loadout hits her starting captive stats
+        // (health/bruises/dazed/sedated/mood/escape) in totality. Apply BEFORE escort so it persists.
+        applyCaptureDebuffs(girl, ids);
+        // CAPWANTED.1 — heat from the grab scales by tool tier (higher tier = cleaner = less heat).
+        let heat = captureHeat(ids);
+        // BUYLOCATION.1 — owning this turf (greased badges) cuts the WANTED heat from a grab here.
+        const op = window.DMTHGame.progression?.ownedLocationPerks ? window.DMTHGame.progression.ownedLocationPerks(locationId) : null;
+        if (op && op.wantedReduction) heat = heat * (1 - op.wantedReduction);
+        if (heat > 0 && window.DMTHGame.state.addWanted) window.DMTHGame.state.addWanted(heat, 'snatch:' + bestToolTier(ids));
         const escort = window.DMTHGame.hunt.escortToHold(girl);
-        return { outcome: 'success', toolId, baseChance: base, chance, roll, escort, escalationTier };
+        // LOOT.1 — a successful grab drops location-aware loot (a tool from the scene, or cash).
+        let loot = null;
+        if (window.DMTHGame.loot) { try { loot = window.DMTHGame.loot.rollCaptureLoot(locationId); } catch (e) { /* non-fatal */ } }
+        // REQUEST.1 — strip her stash on the grab: 2-5 of EACH item her girl-type offered.
+        let haul = null;
+        if (window.DMTHGame.loot && window.DMTHGame.loot.grantCaptureHaul) { try { haul = window.DMTHGame.loot.grantCaptureHaul(girl); } catch (e) { /* non-fatal */ } }
+        // DEPRAVITY XP (PLVL.2) — a successful snatch is a big level boost.
+        if (window.DMTHGame.progression) window.DMTHGame.progression.grantXp(25, 'snatch');
+        return { outcome: 'success', toolIds: ids, chance, roll, escort, desperationTier, loot, haul, consumed };
       } catch (err) {
-        return { outcome: 'success-no-room', toolId, baseChance: base, chance, roll, error: err.message, escalationTier };
+        return { outcome: 'success-no-room', toolIds: ids, chance, roll, error: err.message, desperationTier, consumed };
       }
     }
-
-    // Miss — bump suspicion + bump escalation tier.
+    // Miss — desperation rises (next grab easier), a little location heat. NO escape (CAPEASE.1).
+    // CAPWANTED.1 — a clean high-tier loadout botches QUIETLY: tier 3+ adds no suspicion/heat,
+    // crude low-tier grabs draw the usual blip.
     const s = window.DMTHGame.state.current;
-    const sus = s.wallet.suspicionByLocation[locationId] || 0;
-    s.wallet.suspicionByLocation[locationId] = sus + 1;
-    const newTier = escalationTier + 1;
-    if (newTier >= ESCAPE_TIER) {
-      // She gets away — bigger notoriety hit since she'll talk
-      window.DMTHGame.state.addNotoriety(2);
-      return { outcome: 'escaped', toolId, baseChance: base, chance, roll, suspicionDelta: 1, escalationTier: newTier, notorietyDelta: 2 };
-    }
-    return { outcome: 'miss', toolId, baseChance: base, chance, roll, suspicionDelta: 1, escalationTier: newTier };
+    const tier = bestToolTier(ids);
+    const susBump = tier >= 3 ? 0 : 1;
+    s.wallet.suspicionByLocation[locationId] = (s.wallet.suspicionByLocation[locationId] || 0) + susBump;
+    if (susBump > 0 && window.DMTHGame.wanted) window.DMTHGame.wanted.accrue('botched-capture');
+    return { outcome: 'miss', toolIds: ids, chance, roll, suspicionDelta: susBump, desperationTier: (desperationTier || 0) + 1, consumed };
+  }
+
+  // Back-compat single-tool wrapper — delegates to the stacked engine. No escape end-state.
+  function simpleAttempt({ girl, toolId, locationId, escalationTier = 0 }) {
+    const r = stackedAttempt({ girl, toolIds: [toolId], locationId, desperationTier: escalationTier });
+    return { ...r, toolId, escalationTier: r.desperationTier };
   }
 
   // Compose a human-readable summary of one stage outcome — used by UI for inline feedback.
@@ -368,14 +460,15 @@
     runAttempt,
     summarizeStage,
     SIMPLE_CAPTURE_CHANCE,
-    ESCALATION_MULTIPLIERS,
-    ESCALATION_LABELS,
-    ESCAPE_TIER,
+    DESPERATION_BONUS,
+    DESPERATION_LABELS,
     getSimpleCaptureChance,
     eligibleSimpleTools,
     simpleAttempt,
-    escalationLabel,
-    escalationMultiplier,
-    escalationNarration
+    stackedAttempt,
+    stackedChance,
+    desperationLabel,
+    desperationBonus,
+    desperationNarration
   });
 })();

@@ -21,6 +21,11 @@
   // Each module load resets the anchor to Date.now(), so realDelta is measured
   // from the boot of THIS tab session.
   let anchorRealMs = null;
+  // PAUSE.1 — when paused, game time FREEZES: now() stops advancing and the tick is gated
+  // (tick.js early-returns), so escapes / decay / johns / raids all halt while the player
+  // steps away with the tab open. Closing the tab already freezes time (the anchor isn't
+  // persisted), so this covers the "tab open but walked away" case + an explicit stop.
+  let pausedAt = null;
 
   function ensureSeed() {
     const s = window.DMTHGame.state.current;
@@ -35,23 +40,39 @@
   }
 
   // Continuous game-time read. Returns gameMinutes including the real-clock
-  // delta since the last anchor (boot, or last advanceFromTick).
+  // delta since the last anchor (boot, or last advanceFromTick). Frozen while paused.
   function now() {
     const s = ensureSeed();
     if (!s) return 0;
+    if (pausedAt != null) return s.gameMinutes;   // frozen — no time passes while paused
     const realDeltaSec = Math.max(0, (Date.now() - anchorRealMs) / 1000);
     return s.gameMinutes + realDeltaSec;   // 1 real second = 1 game minute
   }
 
   // Advance the persisted gameMinutes by the real-clock delta since last anchor,
-  // then re-anchor to NOW. Called by tick.js at the top of each tick.
+  // then re-anchor to NOW. Called by tick.js at the top of each tick. No-op while paused.
   function advanceFromTick() {
     const s = ensureSeed();
-    if (!s) return;
+    if (!s || pausedAt != null) return;
     const realDeltaSec = Math.max(0, (Date.now() - anchorRealMs) / 1000);
     s.gameMinutes += realDeltaSec;
     anchorRealMs = Date.now();
   }
+
+  // Freeze the clock — bakes the elapsed real-time delta into gameMinutes, then stops.
+  function pause() {
+    const s = ensureSeed();
+    if (!s || pausedAt != null) return;
+    s.gameMinutes = now();      // bake in time elapsed up to this instant
+    pausedAt = Date.now();
+  }
+  // Unfreeze — re-anchor to now so the paused interval doesn't retroactively count.
+  function resume() {
+    if (pausedAt == null) return;
+    anchorRealMs = Date.now();
+    pausedAt = null;
+  }
+  function isPaused() { return pausedAt != null; }
 
   // Convert a game-minutes timestamp delta into days.
   function minutesToDays(min) {
@@ -108,6 +129,7 @@
   window.DMTHGame.gameClock = Object.freeze({
     now,
     advanceFromTick,
+    pause, resume, isPaused,
     daysSince,
     minutesToDays,
     formatNow,

@@ -131,6 +131,39 @@
     return g?.archetypeTemplate || 'library';
   }
 
+  // --- Body-part market (DEP-EXP.3) ---
+  // Harvested organs + limbs sit listed; each market tick a listed part has a chance to find a
+  // black-market buyer and sell for its value (then it's gone). Moving body parts is hot — each
+  // sale bumps WANTED a touch. The player can also fence a part instantly via sellBodyPartNow.
+  const BODYPART_SELL_CHANCE = 0.22;   // per listed part per tick
+  function runBodyPartSaleTick() {
+    const s = window.DMTHGame.state.current;
+    if (!s || !Array.isArray(s.bodyParts) || !s.bodyParts.length) return { earnings: 0, sold: 0 };
+    let earnings = 0, sold = 0;
+    for (const part of s.bodyParts.filter(p => p.listed)) {
+      if (Math.random() > BODYPART_SELL_CHANCE) continue;
+      const price = Math.round((part.value || 0) * (0.85 + Math.random() * 0.3));
+      window.DMTHGame.state.addMoney(price, `bodypart-sale:${part.partKey}`);
+      window.DMTHGame.state.removeBodyPart(part.id);
+      earnings += price; sold++;
+      if (window.DMTHGame.wanted) window.DMTHGame.wanted.accrue('clean-disposal');   // moving parts is heat
+      if (window.DMTHNotify) window.DMTHNotify.show(`🦴 Sold ${part.emoji || ''} ${part.name} (${part.girlName}) on the black market — $${price.toLocaleString()}.`, { type: 'info', durationMs: 5000 });
+    }
+    return { earnings, sold };
+  }
+  // Instant black-market fence — sell a specific part now at a small discount (certainty now
+  // vs. waiting for the passive buyer).
+  function sellBodyPartNow(partId) {
+    const s = window.DMTHGame.state.current;
+    const part = (s?.bodyParts || []).find(p => p.id === partId);
+    if (!part) throw new Error('no such body part');
+    const price = Math.round((part.value || 0) * 0.8);
+    window.DMTHGame.state.addMoney(price, `bodypart-fence:${part.partKey}`);
+    window.DMTHGame.state.removeBodyPart(part.id);
+    if (window.DMTHGame.wanted) window.DMTHGame.wanted.accrue('clean-disposal');
+    return { ok: true, price, partId };
+  }
+
   function unlist(filmId) { window.DMTHGame.state.updateFilm(filmId, { listedForSale: false, status: 'archived' }); }
   function relist(filmId) { window.DMTHGame.state.updateFilm(filmId, { listedForSale: true,  status: 'listed' }); }
   function getDemand() { return { ...DEMAND }; }
@@ -139,6 +172,7 @@
   window.DMTHGame.market = Object.freeze({
     runSaleTick, sellNegatives, estimatePerTick, estimateNegativesPayout,
     unlist, relist, getDemand,
+    runBodyPartSaleTick, sellBodyPartNow,
     TICK_RATE_BASE, SELL_NEGATIVES_MULT
   });
 })();

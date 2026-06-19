@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DUNGEON MASTER: THE HUNT — Game Wiki</title>
+  <meta name="description" content="Full gameplay wiki for DUNGEON MASTER: THE HUNT — every system, item, toy, action and concept, plus how to play, how to keep your slaves, and how to stay out of jail." />
+  <meta name="robots" content="noindex,nofollow" />
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="stylesheet" href="css/landing.css" />
+  <style>
+    .wiki-section { display: none; }
+    .wiki-section.active { display: block; }
+    .wiki-layout { display: grid; grid-template-columns: 230px 1fr; gap: 28px; align-items: start; }
+    @media (max-width: 760px) { .wiki-layout { grid-template-columns: 1fr; } }
+    .wiki-toc { position: sticky; top: 12px; border: 1px solid #2a2a2a; border-radius: 8px; padding: 12px; background: #181410; max-height: 92vh; overflow: auto; }
+    .wiki-toc h4 { margin: 10px 0 4px; color: #ffc8a0; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; }
+    .wiki-toc a { display: block; color: #c8b8a0; text-decoration: none; padding: 3px 8px; border-radius: 4px; font-size: 0.9rem; }
+    .wiki-toc a:hover { background: #2a2a2a; }
+    .wiki-toc a.active { background: #3a2820; color: #ffc8a0; }
+    .wiki-body h2 { color: #ffc8a0; border-bottom: 1px solid #2a2a2a; padding-bottom: 6px; }
+    .wiki-body h3 { color: #ffb888; margin-top: 22px; }
+    .wiki-body p, .wiki-body li { color: #c4b4a4; line-height: 1.6; }
+    .wiki-body code { background: #20191320; color: #ffc8a0; padding: 1px 5px; border-radius: 3px; }
+    .wiki-tip { background: rgba(40,90,50,.16); border: 1px solid #2f6b3f; padding: 10px 14px; border-radius: 6px; margin: 12px 0; color: #b8e0c0; }
+    .wiki-warn { background: rgba(180,40,0,.15); border: 1px solid #8a4020; padding: 10px 14px; border-radius: 6px; margin: 12px 0; color: #ffc0a0; }
+    table.wiki { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.9rem; }
+    table.wiki th, table.wiki td { border: 1px solid #2a2a2a; padding: 6px 9px; text-align: left; vertical-align: top; }
+    table.wiki th { background: #221911; color: #ffc8a0; }
+    table.wiki td { color: #c4b4a4; }
+    .wiki-top { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <div class="wiki-top">
+      <h1 style="color:#ffc8a0;margin:0">📖 DUNGEON MASTER: THE HUNT — Game Wiki</h1>
+      <a href="index.html" class="btn-small">← Landing</a>
+    </div>
+    <p class="small muted">The complete reference for the persistent dungeon-harem city-builder. Adult fiction, 18+ only — every captive is locked to 18+. Everything runs locally on your machine.</p>
+
+    <div class="wiki-layout">
+      <!-- ===== TABLE OF CONTENTS / GLOSSARY OF PAGES ===== -->
+      <nav class="wiki-toc" id="wiki-toc">
+        <h4>Start here</h4>
+        <a href="#overview" data-w="overview">Overview</a>
+        <a href="#howtoplay" data-w="howtoplay">How to Play</a>
+        <a href="#loop" data-w="loop">The Core Loop</a>
+        <h4>Systems</h4>
+        <a href="#hunting" data-w="hunting">Hunting &amp; Capture</a>
+        <a href="#dungeon" data-w="dungeon">The Dungeon &amp; Holds</a>
+        <a href="#supply" data-w="supply">Supplies &amp; the Pool</a>
+        <a href="#care" data-w="care">Captive Care &amp; Bonding</a>
+        <a href="#depravity" data-w="depravity">DEPRAVITY &amp; Progression</a>
+        <a href="#acts" data-w="acts">Sex, Violence &amp; Acts</a>
+        <a href="#toys" data-w="toys">Toys &amp; Implements</a>
+        <a href="#drugs" data-w="drugs">Drugs &amp; Addiction</a>
+        <a href="#breeding" data-w="breeding">Breeding, Condoms &amp; Pregnancy</a>
+        <a href="#milk" data-w="milk">Milk Economy</a>
+        <a href="#films" data-w="films">Films &amp; the Content Market</a>
+        <a href="#johns" data-w="johns">Johns &amp; Whoring-Out</a>
+        <a href="#market" data-w="market">Slave Market &amp; Propositioners</a>
+        <a href="#transport" data-w="transport">Transport &amp; Logistics</a>
+        <a href="#death" data-w="death">Disposal, Snuff &amp; Death</a>
+        <a href="#trophies" data-w="trophies">Trophies &amp; Keepsakes</a>
+        <a href="#player" data-w="player">Player Sheet &amp; Drives</a>
+        <h4>Survival guides</h4>
+        <a href="#keep" data-w="keep">⛓️ Keep Your Slaves</a>
+        <a href="#jail" data-w="jail">🚨 Stay Out of Jail</a>
+        <h4>Reference</h4>
+        <a href="#index" data-w="index">Item / Toy / Action Index</a>
+        <a href="#glossary" data-w="glossary">Glossary</a>
+      </nav>
+
+      <div class="wiki-body">
+
+        <!-- OVERVIEW -->
+        <section class="wiki-section" id="overview-w" data-w="overview">
+          <h2>Overview</h2>
+          <p>You are the villain — the dungeon operator, the predator, the collector. <b>DUNGEON MASTER: THE HUNT</b> is a persistent text-and-emoji <b>city-builder</b> wearing the skin of a dungeon-harem evil-taboo simulator. Gather resources (money from film sales + captured girls), invest in construction (dungeon + per-hold upgrades), expand operations (more girls, harder grounds, bigger dungeons), and grow forever. <b>There is no win state</b> — the game is the ever-growing collection and the ever-upgrading dungeon.</p>
+          <p>Every girl is procedurally generated from an archetype, runs on a local uncensored LLM (Ollama) for live dialogue, gets her own TTS voice (Kokoro), and a seeded face + outfit (Pollinations) kept consistent across every image of her. Everything persists locally in your browser (IndexedDB) and nothing leaves your machine.</p>
+          <div class="wiki-warn">Adult fiction, 18+ only. Every template and procedural spawn is locked to an 18+ floor. Taboo content stays in fiction.</div>
+        </section>
+
+        <!-- HOW TO PLAY -->
+        <section class="wiki-section" id="howtoplay-w" data-w="howtoplay">
+          <h2>How to Play</h2>
+          <ol>
+            <li><b>Set up your tools.</b> Run Ollama locally (an uncensored model — dolphin-mistral / abliterated), and optionally drop a Pollinations key in Settings for images + load Kokoro for voice. See the landing <a href="index.html#setup">⚡ Setup</a>.</li>
+            <li><b>Start a new game.</b> You begin with a basic dungeon and one starter captive already in a hold. Name the honorific your girls call you.</li>
+            <li><b>Go hunting.</b> Open <b>Town</b>, pick a hunting ground, buy capture tools from the shop, and run the 4-stage capture attempt.</li>
+            <li><b>Bring her home.</b> She's assigned a hold. Open her room to talk, feed/water her, drug her, dress her, and interact.</li>
+            <li><b>Make money.</b> Record films of your sessions and let them sell passively; whore her out to johns; sell milk; later sell body parts.</li>
+            <li><b>Reinvest.</b> Spend on dungeon + per-hold upgrades, more tools, more dungeons, owned properties, and consumables.</li>
+            <li><b>Level your DEPRAVITY.</b> Every act earns XP. Higher levels unlock the heaviest depravities.</li>
+            <li><b>Manage the threats.</b> Keep escape-risk down and WANTED heat low. Pause the game (⏸) any time — progress is saved and reloads when you return.</li>
+          </ol>
+          <div class="wiki-tip">Sandbox / cheat start unlocks everything up front for a consequence-free playground (raids off, all tiers open). Normal mode makes you earn it.</div>
+        </section>
+
+        <!-- LOOP -->
+        <section class="wiki-section active" id="loop-w" data-w="loop">
+          <h2>The Core Loop</h2>
+          <p>A self-reinforcing city-builder cycle. Every step ratchets the operation forward.</p>
+          <ol>
+            <li>🎯 <b>Hunt</b> prey in Town with purchased tools.</li>
+            <li>⛓️ <b>Hold</b> her in an upgradeable dungeon hold.</li>
+            <li>💬 <b>Interact / indoctrinate</b> — care, drugs, sex, violence, toys; raise her Stockholm bond, mark her as yours.</li>
+            <li>🎬 <b>Record + rent</b> — films sell forever; johns pay per visit; milk + body parts add income.</li>
+            <li>😈 <b>Level DEPRAVITY</b> — unlock harder grounds + darker acts; or pay a fee to unlock early.</li>
+            <li>🏗️ <b>Reinvest + expand</b> — upgrades, tools, dungeons, properties.</li>
+            <li>🩸 <b>Retire</b> — trade, snuff, dispose; keep a keepsake trophy with a permanent buff.</li>
+          </ol>
+          <p>Threaded through all of it: keep her from <b>escaping</b>, and keep your <b>WANTED</b> heat below the raid line.</p>
+        </section>
+
+        <!-- HUNTING -->
+        <section class="wiki-section" id="hunting-w" data-w="hunting">
+          <h2>Hunting &amp; Capture</h2>
+          <p>Town hosts the hunting grounds, each with its own spawn pool of girls + an exposure (witness) risk. Harder grounds host rarer, more vibrant girls and unlock with progression.</p>
+          <h3>Hunting grounds</h3>
+          <p>Main Street · Pink Room Club · Old Library · Westwood Park · Iron Gym · Downtown Mall · Cup &amp; Saucer (coffee shop) · Greek Row (sorority) · Backroads (remote) · Grand Hotel Lobby · Private Party · Campus Quad — plus your neighborhood.</p>
+          <p><b>Gating:</b> some grounds need a DEPRAVITY level, a minimum captives-held count, or bought private access — e.g. mall (2 captives), sorority (L3), hotel lobby (paid), private party (L3 + 4 captives), campus (L5), remote (L6). Owning a property unlocks no-suspicion private hunts there.</p>
+          <h3>The 4-stage capture</h3>
+          <p>Approach → Engage → Subdue → Secure. Each stage rolls per-tool stats against per-archetype resistance. Capture tools leave healable injury (a lead pipe wounds; chemicals sicken). A botched grab in the open or a witnessed one raises WANTED; repeated misses can let her escape.</p>
+          <h3>Capture tools</h3>
+          <p>Sedatives: Sedative Vial (rohypnol), Clear Solvent (chloroform), Anesthetic (ether), Veterinary Bottle (ketamine), Tranquilizer Dart. Restraints/blunt: Lead Pipe, Duct Tape, Nylon Rope, Heavy-Duty Zip Ties, Steel Cuffs, Steel Shackles, Full Body Harness.</p>
+          <h3>Loot &amp; finds</h3>
+          <p>You don't only buy gear — you <b>loot</b> it. A successful capture drops location-aware loot (or cash she carried), and you <b>strip her stash</b> — 2–5 of each item her girl-type carries, with a ~1-in-3 chance she was packing her own sex toy. "Search the area" on a hunt and "case the streets" in town scavenge tools. And <b>before</b> you take her, you can <b>ask her for something</b> — three type-specific options (cheap gear likely, prize items a long shot), a stat-based roll shown as a % that scales with your DEPRAVITY level, the location, and her stats; one ask per girl-type per location per day. Any tool/drug/gear — even lower-tier toys — can turn up.</p>
+        </section>
+
+        <!-- DUNGEON -->
+        <section class="wiki-section" id="dungeon-w" data-w="dungeon">
+          <h2>The Dungeon &amp; Holds</h2>
+          <p>Your base. Start with one basic template (hole-in-the-wall / cinderblock), buy more dungeons over time across owned properties, and expand each one's capacity for more holds. Each captive occupies one hold.</p>
+          <h3>Per-hold upgrade tracks (12)</h3>
+          <p>🔒 Security · ⛓️ Restraints · 💡 Lights · 🧸 Toys · 🍱 Food quality · 🍽️ Feed automation · 🚽 Toilet (can → bucket → plumbing) · 🚰 Water supply · 🛏️ Bedding · 📺 Entertainment · 🎨 Decor · 🌡️ Climate. Plumbed toilet/water zeroes water decay; auto-feeder zeroes food decay.</p>
+          <h3>Dungeon-level security facilities</h3>
+          <p>Reinforced Door · 🐕 Guard Dog · Motion Sensors · Soundproofing (big WANTED-heat reduction) · Electrified Perimeter · Auto-Sedation Collar. Each adds escape-containment + a passive WANTED-decay bonus. Disposal facilities: 🔥 Incinerator, ⛵ Boat (unlock those disposal methods).</p>
+        </section>
+
+        <!-- SUPPLY -->
+        <section class="wiki-section" id="supply-w" data-w="supply">
+          <h2>Supplies &amp; the Dungeon Pool</h2>
+          <p>Supplies live in <b>two tiers</b>: each hold has its own reserve, and each dungeon has a shared <b>POOL</b> every hold draws from when its own reserve runs dry — no real stock cap, filtered evenly across holds.</p>
+          <ul>
+            <li><b>Food / Water</b> — a hungry/thirsty captive auto-consumes from her hold first, then the pool. She survives 5 game days without food, 3 without water (plumbing makes water automatic) before health drains.</li>
+            <li><b>Condoms</b> — stock them so johns can glove up (see Johns). No stock = johns go raw.</li>
+            <li><b>Drugs</b> — stock the pool and addicted captives <b>self-dose</b> to stave off withdrawal (they never self-OD; only you can OD her).</li>
+          </ul>
+          <p>Stock the pool from the room's 🏪 Dungeon Pool panel (convert inventory items into shared units), or drop straight into a hold's reserve.</p>
+        </section>
+
+        <!-- CARE -->
+        <section class="wiki-section" id="care-w" data-w="care">
+          <h2>Captive Care &amp; Bonding</h2>
+          <p>Each captive has body state (arousal, wetness, cum load, bruises, drug high, stamina, health), a mood, a Stockholm <b>bond</b> (L0 terrified → L9 fully-bonded), an escape-risk meter, and her own persona + memory.</p>
+          <h3>Stockholm bond — a long indoctrination build</h3>
+          <p>Bond is a slow climb over game-<b>weeks</b>, driven by a MIX of regular abuse <b>and</b> loving/care acts (massage, cuddling, pussy-petting — not just rape). It basically never goes down — only the most brutal acts (beatdown, choke-out) set her back. High bond lowers escape risk, unlocks willing interaction + new scene types, raises her market + film value, and makes her <b>more robust</b> (she endures neglect/injury far better). Captives sound like captives at first (fighting, crying, refusing) and only warm up as they're indoctrinated. Care/love acts forgive accrued bond-debt.</p>
+          <h3>Cum-load capacity</h3>
+          <p>Each girl has a cum-load <b>storage capacity</b> (trained up with ⚪ Ben Wa balls / kegel trainer from the LOVE actions). A girl filled near her cap is premium content — johns pay up to +35% — but staying stuffed wears on her: mood + health slip and she gets restless (escape nudges up). Drain her (bathe / wipe-down / time) to reset.</p>
+          <h3>Drugs as management tools</h3>
+          <p>Drugs aren't one-note: stimulants (coke/mdma) loosen a mute or catatonic girl's tongue so she finally talks — though a high doesn't indoctrinate her, so at low bond she just curses you out faster. Sedatives, ketamine and the tranquilizer pacify fighters and collapse her speech; knockouts put her fully under for handling.</p>
+          <h3>Extreme-act tolerance</h3>
+          <p>A girl absorbs ~10 extreme acts before she's <b>spent</b> — then each one piles on extra damage until you let her recover with heal / caress / love / feed / rest. Spread the rough stuff across your roster.</p>
+          <h3>Ownership marks</h3>
+          <p>Brand / owner-name tattoo / locked piercings are permanent, render in every image (even postmortem), and add a possessiveness premium to films. Unlocks at DEPRAVITY L3.</p>
+        </section>
+
+        <!-- DEPRAVITY -->
+        <section class="wiki-section" id="depravity-w" data-w="depravity">
+          <h2>DEPRAVITY &amp; Progression</h2>
+          <p>DEPRAVITY is the player level — the spine the whole game hangs off. <b>Every successful act</b> earns XP (a gentle kiss a sliver, an atrocity a flood; a capture +25, a disposal a chunk). Level is always derived from total XP.</p>
+          <h3>Levels</h3>
+          <p>L1 Curious → Creep → Deviant → Predator → Degenerate → Sadist → Monster → Butcher → Fiend → Abomination → Nightmare → L12 <b>The Depraved</b>.</p>
+          <h3>Gated tiers</h3>
+          <table class="wiki"><tr><th>Tier</th><th>Unlocks at</th><th>Buy-early fee</th></tr>
+            <tr><td>🏷️ Brand her yours (ownership marks)</td><td>L3</td><td>$400</td></tr>
+            <tr><td>☠️ Extreme acts</td><td>L4</td><td>$900</td></tr>
+            <tr><td>🪓 Nugget-making (delimbing)</td><td>L6</td><td>$2,500</td></tr>
+            <tr><td>🔪 Dismember + harvest</td><td>L7</td><td>$3,500</td></tr>
+            <tr><td>⚰️ Snuff</td><td>L7</td><td>$4,000</td></tr>
+          </table>
+          <p>Cheat/sandbox start unlocks everything. Otherwise, level up or pay the fee. Your full build is visible on the 📑 Character Sheet.</p>
+        </section>
+
+        <!-- ACTS -->
+        <section class="wiki-section" id="acts-w" data-w="acts">
+          <h2>Sex, Violence &amp; Acts</h2>
+          <p>Actions run through one central effect table — each applies body deltas (stamina/health/arousal/wetness/cum/bruises), mood/bond shifts, satisfaction, and image aftermath markers. Nothing is canned: dialogue is generated live by Ollama from her persona + current state + your action.</p>
+          <h3>Categories</h3>
+          <ul>
+            <li><b>Love / sensual</b> — kiss, cuddle, praise, massage, bathe, feed-by-hand, aftercare… rebuild stamina/health/bond, forgive bond-debt, lower escape risk.</li>
+            <li><b>Sex</b> — gentle, rough, oral, anal, cum-inside (vaginal cum fills the breeding meter; anal/oral don't).</li>
+            <li><b>Violence</b> — slap, choke, whip, punch, beatdown.</li>
+            <li><b>☠️ Extreme</b> (L4+) — extreme face-fuck, rough anal, breeding-rape, degrade, beatdown, choke-out, and a psycho <b>masochist-overload</b> (a masochist's bond RISES; on anyone else it's pure trauma).</li>
+            <li><b>🪓 Nugget-making</b> (L6+) — delimb one limb at a time, heal-gated between amputations; a full nugget can't run or fight.</li>
+          </ul>
+          <div class="wiki-warn">Stacking extreme acts on ONE girl drains her toward death — the satisfaction you want has to be spread across the roster, or you'll kill her.</div>
+        </section>
+
+        <!-- TOYS -->
+        <section class="wiki-section" id="toys-w" data-w="toys">
+          <h2>Toys &amp; Implements</h2>
+          <p>"Toys" loosely — from a wand to torture-chamber implements. <b>Buy, loot, or find</b> them; then <b>mount</b> one in a hold (up to 5 per hold). A mounted toy can only be used on that hold's girl, and renders <b>on her image</b> while in use (gag in her mouth, clamps on, machine attached, welts…). Johns will grab a mounted toy and use it on her too. Gorier ones are DEPRAVITY-gated; some masochists crave them.</p>
+          <table class="wiki"><tr><th>Toy</th><th>Notes</th></tr>
+            <tr><td>💫 Wand Vibrator</td><td>Overstimulation — edge her raw.</td></tr>
+            <tr><td>🔵 Dildo Set</td><td>Graduated — work her open.</td></tr>
+            <tr><td>👄 Ring Loop Gag</td><td>Holds her jaw wide for face-fucking.</td></tr>
+            <tr><td>🟣 Monster Dildo (L2)</td><td>Obscene girth — leaves her gaping.</td></tr>
+            <tr><td>🔥 Leather Flogger</td><td>Welts; a masochist begs for it.</td></tr>
+            <tr><td>⚡ Electro Cattle-Prod (L2)</td><td>Convulsions; lowers escape will.</td></tr>
+            <tr><td>🪡 Urethral Sounding Rods (L3)</td><td>Deep, invasive pain.</td></tr>
+            <tr><td>🌭 The Slim Jim (L3)</td><td>Driven deeper than anything should go.</td></tr>
+            <tr><td>🛠️ Fucking Machine (L3)</td><td>Rails her for hours; fucked stupid.</td></tr>
+            <tr><td>🦞 Breast Ripper (L4, gore)</td><td>Iron claws — mutilating, premium film.</td></tr>
+            <tr><td>⚙️ The Cunt-Wrecker (L4, gore)</td><td>Ratchets her open past tearing.</td></tr>
+            <tr><td>🔪 Carving Knife (L4, gore)</td><td>Cuts + carved lines; blood sells; can kill.</td></tr>
+            <tr><td>🍩 Anal Prolapser Pump (L5, gore)</td><td>Prolapse on camera — filthiest tier.</td></tr>
+            <tr><td>🍐 Pear of Anguish (L5, gore)</td><td>Screw-pear ratcheted open inside her.</td></tr>
+          </table>
+        </section>
+
+        <!-- DRUGS -->
+        <section class="wiki-section" id="drugs-w" data-w="drugs">
+          <h2>Drugs &amp; Addiction</h2>
+          <p>Drugs run on pharmacokinetic curves (onset → peak → wear-off) driving her high, speech, arousal, and pliability. Forced dosing makes her instantly more pliable (arousal up, escape-will down) and builds <b>addiction</b>.</p>
+          <ul>
+            <li><b>Recreational:</b> ❄️ coke, 🌿 weed, 💊 molly (MDMA), 🧪 acid, 🥃 whiskey, 🐴 ketamine.</li>
+            <li><b>🎯 Tranquilizer</b> — full 4-minute knockout (out cold; most actions disabled).</li>
+          </ul>
+          <h3>Addiction &amp; withdrawal</h3>
+          <p>Dosing racks up per-drug addiction; cut her off and withdrawal hits her mood + stamina + escape-risk (never her health directly). Stock the dungeon drug pool and she'll <b>self-dose</b> to stay functional — she never self-ODs.</p>
+          <div class="wiki-warn">OD death: hard drugs stack cumulative toxicity that decays while sober. Force-dose her fast and hard — e.g. ~10× molly in a row — and she dies, leaving a corpse you can still make money on. Weed can never kill.</div>
+        </section>
+
+        <!-- BREEDING -->
+        <section class="wiki-section" id="breeding-w" data-w="breeding">
+          <h2>Breeding, Condoms &amp; Pregnancy</h2>
+          <p>Only <b>vaginal</b> cum fills the breeding meter (anal/oral don't). Keep her cum-filled above the threshold and a sustained-fill timer runs to a guaranteed conception. Gestation advances per tick to full term, then you choose a newborn-disposal method (it can't join the harem).</p>
+          <h3>Condoms (typed + TIMED)</h3>
+          <p>A condom you equip is a <b>timed effect</b> — it protects for ~4 game hours, then wears off. Types:</p>
+          <table class="wiki"><tr><th>Type</th><th>Effect</th></tr>
+            <tr><td>🎈 Standard</td><td>Blocks pregnancy. Cheap ($3) — the stock johns use.</td></tr>
+            <tr><td>🎀 French Tickler</td><td>+arousal, nudges indoctrination. Blocks.</td></tr>
+            <tr><td>🍆 Magnum</td><td>Stretches her, mild pleasure. Blocks.</td></tr>
+            <tr><td>〰️ Ribbed</td><td>Pleasure bump. Blocks.</td></tr>
+            <tr><td>🕳️ Holed / Sabotaged (L5)</td><td>Does NOT block — she thinks she's safe, but one vaginal load breeds her <b>instantly</b>.</td></tr>
+          </table>
+          <h3>Newborn-disposal methods</h3>
+          <p>Dumpster Drop · Firehouse/Safe-Haven · Church Step · Bury on Property · Sell to Traffickers · Incinerate · Feed to Guard Dog · Black-Market Organ Harvest · Dark-Web Disposal Reel · Occult Sacrifice — each with its own cash / WANTED / mother's-mind / DEPRAVITY trade-offs. Ignore it and it's auto-dumpstered.</p>
+        </section>
+
+        <!-- MILK -->
+        <section class="wiki-section" id="milk-w" data-w="milk">
+          <h2>Milk Economy</h2>
+          <p>Buy a milk-sucker to passively farm girl-milk from lactating (pregnant) captives, or 🤱 suck from her breast directly for a bonus (no rig needed). Milk can be drunk by a girl (a soothing drug) or by the player (a stat boost), or sold on the market + via passive john sales.</p>
+        </section>
+
+        <!-- FILMS -->
+        <section class="wiki-section" id="films-w" data-w="films">
+          <h2>Films &amp; the Content Market</h2>
+          <p>The core income loop. Record any session; the film's title + scrollable summary are generated dynamically from what actually happened (acts, johns, corpse, distress, drugs, blood, bond). Films list on the content market and pay <b>passive income every tick, forever</b>. Value scales with quality markers — bond level, content intensity, rarity, dungeon setting, a stress-band streak multiplier, ownership-mark premium, and non-indoctrinated/crying/fighting girls film for MORE.</p>
+          <p><b>Finalization films</b> (graduation or disposal) and <b>snuff films</b> are premium single-use reels at 3–5× regular value. 💣 Sell-negatives kills a film for a one-time premium payout.</p>
+        </section>
+
+        <!-- JOHNS -->
+        <section class="wiki-section" id="johns-w" data-w="johns">
+          <h2>Johns &amp; Whoring-Out</h2>
+          <p>Enable whore-out and johns arrive on a game-time cadence (off / trickle / casual / steady / rapid), boosted by your 🐝 BUZZ. Each pays based on the extremity of his own whims; fast constant use drains her stamina/health. Johns can do anything you can — including grabbing a mounted toy or a pool drug and using it on her (with a depravity pay premium). Vaginal acts fill cum (pregnancy risk); anal/oral don't. Johns only glove up if condoms are stocked.</p>
+          <p><b>💦 Gangbang</b> — throw her a gangbang from her room and several johns take turns back-to-back, stacking pay + cum-fill with a heavy stamina/health toll (it ends early if she's too spent — and warns you if it might kill her).</p>
+          <p><b>🩸 Friends</b> — toggle "let friends in" and a slice of arrivals become <b>friends</b>: rare, far more extreme visitors (The Butcher, The Surgeon, The Pack, The Strangler) who use an extreme act and a unique near-kill ability — a single visit drops her ~40-60 HP for a fortune. Every friend visit is logged to her history for her trophy/death dossier. Use them sparingly; they'll wreck her.</p>
+          <h3>Archetypes</h3>
+          <p>Regular · Rough Trade · Cheap-skate · Big Tipper · Repeat Client · Weirdo Kink · Quick Visit · Talker · Breeder · <b>Sadist</b> (cruel, uses the room's implements, pays premium) · Degrader · and a Postmortem Client for corpse content.</p>
+          <p>Set a condom-required toggle, a per-girl cadence, and block john types you don't want. A high bond-debt makes her refuse johns until it clears.</p>
+        </section>
+
+        <!-- MARKET -->
+        <section class="wiki-section" id="market-w" data-w="market">
+          <h2>Slave Market &amp; Propositioners</h2>
+          <p><b>Slave market:</b> buy untrained captives cheap; sell trained, high-Stockholm ones for a premium. Buyers tick in over time on your listings.</p>
+          <p><b>Propositioners:</b> upmarket clients arrive with specific needs (archetype, kinks, acts, toys, duration, budget, quirks). Pick which girl, negotiate price, accept or reject; engagements resolve against her stats + mood + bond and build repeat-client reputation.</p>
+        </section>
+
+        <!-- TRANSPORT -->
+        <section class="wiki-section" id="transport-w" data-w="transport">
+          <h2>Transport &amp; Logistics</h2>
+          <p>Move a captive (or a corpse) between your dungeons — and corpses can also be repositioned hold-to-hold in the same dungeon. A LIVE move is a risk gamble (clean → battered → escape-in-transit → death); a corpse is a clean haul (she's already dead) for cash + a little WANTED. Higher tier = better perks, less risk.</p>
+          <table class="wiki"><tr><th>Method</th><th>Tier / notes</th></tr>
+            <tr><td>🎒 Duffel Bag</td><td>T1, free — cramped, can suffocate her.</td></tr>
+            <tr><td>🧳 Rolling Suitcase</td><td>T1 — hard shell, still rough.</td></tr>
+            <tr><td>🚗 Car Trunk</td><td>T2 — middle of the road.</td></tr>
+            <tr><td>💊 Drugged Back-Seat</td><td>T2 — burns a sedative; near-zero escape risk.</td></tr>
+            <tr><td>📦 Freight Crate (L3)</td><td>T3 — discreet, slow.</td></tr>
+            <tr><td>🚐 Unmarked Van (L4)</td><td>T3 — fast, controlled, near-zero heat.</td></tr>
+            <tr><td>🚑 Fake Medical Transport (L6)</td><td>T4 — flawless; the false hope deepens her bond.</td></tr>
+          </table>
+          <p>You can only run a multi-girl scene with captives held in the <b>same location</b> — transport one in to team her up.</p>
+        </section>
+
+        <!-- DEATH -->
+        <section class="wiki-section" id="death-w" data-w="death">
+          <h2>Disposal, Snuff &amp; Death</h2>
+          <h3>Snuff (L7)</h3>
+          <p>Kill a captive into a corpse — 14 methods quick → slow + methodical, filmed (premium reel) or not. Strangle-mid-fuck · Suffocate-on-cock · Slit-throat · Hotshot · Drown · Beat-to-death · Breed-then-bleed · Snap-neck · Disembowel-slow · Flay-alive · Impale · Fuck-to-death · Lethal-speedball · Crush-skull. Each leaves a method-specific corpse marker on her image.</p>
+          <h3>The corpse window</h3>
+          <p>A corpse stays in her hold for postmortem use. It keeps her look — fresh, she just looks "asleep"; she rots over ~5 game days, fresh paying the most and near-rotten very little, until she's a maggot-infested mess no one wants. Leave a body too long and it bleeds WANTED. Corpse chat is narration-only (she's dead).</p>
+          <h3>Death dossier</h3>
+          <p>However she dies (neglect, snuff, OD, transit), a popup saves her <b>final dossier</b> — final stats + full history (where captured, where held longest, films, johns, pregnancies) + her final living likeness — and attaches it to her trophy at disposal.</p>
+          <h3>Disposal methods</h3>
+          <p>Bury · Lose at Sea (needs a boat) · Incinerate (needs an incinerator) · Trade Away · Release · Finalization Film · 🔪 Dismember + Harvest (organs/limbs to the body-part market). A sloppy disposal leaves evidence → WANTED.</p>
+          <div class="wiki-warn">Getting raided with a corpse still in a hold is an instant arrest — dispose of bodies, or keep a lawyer on retainer.</div>
+        </section>
+
+        <!-- TROPHIES -->
+        <section class="wiki-section" id="trophies-w" data-w="trophies">
+          <h2>Trophies &amp; Keepsakes</h2>
+          <p>Every girl carries <b>1–3 keepsakes on her person</b>; at disposal you <b>choose one</b> to keep forever. Trophies never leave your collection — they only stack small <b>permanent buffs</b> (hunt odds, WANTED decay, film price, john cadence, containment, shop discount, healing). Each carries her saved death dossier + final likeness.</p>
+          <p>Keepsakes are themed to her archetype (her library card, lace panties, bra, driver license, sorority flag, prescription pad, jewelry…) plus generic personal items and gorier body-part trophies (a nipple, a finger, a tooth, her tongue). Rarity scales with bond + days held. View them in the 🏆 Trophy Room.</p>
+        </section>
+
+        <!-- PLAYER -->
+        <section class="wiki-section" id="player-w" data-w="player">
+          <h2>Player Sheet &amp; Drives</h2>
+          <p>The 📑 Character Sheet shows your whole build at a glance — DEPRAVITY level, every active buff + debuff (mapped to the real hunt/income math), unlocked tiers, and operation tallies — all with their depraved names.</p>
+          <ul>
+            <li><b>🍆 Sex-drive (Cock-Hunger)</b> — a NEED meter fed by sex acts, decaying over time. Its ceiling scales with roster size + DEPRAVITY level, so you can't max it on one girl — maxing it is a mid-game thing spread across bodies. Using DIFFERENT girls in a day fills it faster; spamming the same act on the same girl pays diminishing fill. The capture bonus is GRADED by how full it is (warming → high → maxed); DEPRIVED = debuffs.</li>
+            <li><b>💦 Nut Reserve</b> — your gas tank. Every act on a girl spends it (extreme acts cost the most); it regenerates each tick (no sitting and waiting) and is refilled instantly by a 💊 blue pill (viagra, full), energy shot / the good coke / oyster tonic (partial), or a glass of girl's-milk. Run it empty and you're "running on fumes" — acts pay reduced satisfaction + sex-drive fill until you recover.</li>
+            <li><b>😏 Satisfaction</b> — above 50 grants a hunt bonus + cash bump; below 50 a penalty. Drifts down without intimacy.</li>
+            <li><b>🐝 BUZZ</b> — underground word-of-mouth; more johns at higher BUZZ. Fed by income, drains idle.</li>
+            <li><b>🎁 Archetype gifts</b> — holding a girl type passively yields its gift (a nurse → free scripts, a sorority girl → allowance, a club girl → molly, etc.).</li>
+          </ul>
+        </section>
+
+        <!-- KEEP YOUR SLAVES -->
+        <section class="wiki-section" id="keep-w" data-w="keep">
+          <h2>⛓️ How to Best Keep Your Slaves</h2>
+          <p>An ignored, terrified, unsecured fresh captive will work her escape-risk meter up and break for it. Containment decides caught vs gone. Keep her, in order of leverage:</p>
+          <ol>
+            <li><b>Care lowers the bar.</b> Love/caress/heal/feed acts drop escape-risk + raise bond + indoctrinate. A few care acts on a fresh captive keeps her put.</li>
+            <li><b>Bond her.</b> High Stockholm captives stop trying — a bonded girl's risk can drift down on its own.</li>
+            <li><b>Upgrade containment.</b> Security + restraint tiers, a 🐕 guard dog, motion sensors, electrified perimeter, and an auto-sedation collar all shave the rise and make a maxed bar auto-contain. Once invested, escapes stop being something you manage by hand.</li>
+            <li><b>Feed + water her.</b> Stock her hold or the dungeon pool; plumbing makes water hands-off. Starvation/dehydration crater health.</li>
+            <li><b>Don't over-use her.</b> ~10 extreme acts spends her — let her recover, or spread the rough stuff across the roster.</li>
+            <li><b>Manage withdrawal.</b> Stock pool drugs so addicted girls self-dose; withdrawal spikes escape-risk.</li>
+            <li><b>Sedate or nugget the flight risk.</b> A tranquilizer dart buys time; a full nugget can never run.</li>
+          </ol>
+          <p>If she does escape, recapture her before she ages out of the recovery window — a girl who gets away clean talks, and that's a big WANTED spike.</p>
+        </section>
+
+        <!-- STAY OUT OF JAIL -->
+        <section class="wiki-section" id="jail-w" data-w="jail">
+          <h2>🚨 How to Stay Out of Jail</h2>
+          <p><b>WANTED</b> (0–100) is pure law-heat — distinct from BUZZ (good underground rep) and Notoriety (legacy stat). It builds from hunts, escapes, deaths, sloppy disposal, and corpse content; it decays slowly. High tiers roll per-tick <b>raids</b>.</p>
+          <h3>What raises it</h3>
+          <p>Botched/witnessed captures · escapes (worst when she gets away clean and talks) · captive deaths · sloppy disposal · selling corpse/necro content · letting a non-bonded captive walk · a body left to rot.</p>
+          <h3>What cools it</h3>
+          <p>Time (slow decay) · soundproofing + security facilities · WANTED-decay trophy perks · paying a raid fine.</p>
+          <h3>Raids &amp; the escape valves</h3>
+          <p>A raid → pay a fine (scales with WANTED + bodies). Can't pay = jail = <b>GAME OVER</b>. Caught with a corpse in a hold = instant arrest. Pre-buy defenses from the dashboard 🚨 Legal Defenses (they auto-apply):</p>
+          <ul>
+            <li><b>⚖️ Lawyer on Retainer</b> — beats a body-in-hold instant-arrest, or cuts a fine 40%.</li>
+            <li><b>💰 Dirty-Cop Connections</b> — auto-bribes a raid away (costs more than the fine but slashes WANTED, no record).</li>
+            <li><b>🏃 Escape Kit</b> — flee an unpayable fine instead of prison (lose half your cash + up to 2 captives, WANTED resets — but you survive).</li>
+          </ul>
+          <div class="wiki-tip">Golden rules: dispose of corpses promptly, recapture escapees fast, keep soundproofing up if you sell corpse content, and never let WANTED sit at a raid tier without a lawyer + escape kit in the bank.</div>
+        </section>
+
+        <!-- INDEX -->
+        <section class="wiki-section" id="index-w" data-w="index">
+          <h2>Item / Toy / Action Index</h2>
+          <h3>Capture tools &amp; restraints</h3>
+          <p>Sedative Vial (rohypnol) · Clear Solvent (chloroform) · Anesthetic (ether) · Veterinary Bottle (ketamine) · Tranquilizer Dart · Lead Pipe · Duct Tape · Nylon Rope · Heavy-Duty Zip Ties · Steel Cuffs · Steel Shackles · Full Body Harness · Leather Blindfold · Silicone Gag · Canvas Hood · Leather Collar.</p>
+          <h3>Consumables</h3>
+          <p>Rations Bucket · Microwave Meals · Gourmet Boxes · Bottled / Filtered Water · Condom (3-pack) + typed condoms · Plan B · Medical Abortion Pill · Back-alley Surgical Kit · Clean OB-GYN Referral.</p>
+          <h3>Toys / implements</h3>
+          <p>Wand Vibrator · Dildo Set · Ring Loop Gag · Monster Dildo · Leather Flogger · Electro Cattle-Prod · Sounding Rods · Slim Jim · Fucking Machine · Breast Ripper · Cunt-Wrecker · Carving Knife · Anal Prolapser Pump · Pear of Anguish.</p>
+          <h3>Drugs</h3>
+          <p>Coke · Weed · Molly (MDMA) · Acid · Whiskey · Ketamine · Tranquilizer.</p>
+          <h3>Snuff methods</h3>
+          <p>Strangle-mid-fuck · Suffocate-on-cock · Slit-throat · Hotshot · Drown · Beat-to-death · Breed-then-bleed · Snap-neck · Disembowel · Flay · Impale · Fuck-to-death · Lethal-speedball · Crush-skull.</p>
+          <h3>Disposal methods</h3>
+          <p>Bury · Lose at Sea · Incinerate · Trade Away · Release · Finalization Film · Dismember + Harvest.</p>
+          <h3>Transport methods</h3>
+          <p>Duffel Bag · Rolling Suitcase · Car Trunk · Drugged Back-Seat · Freight Crate · Unmarked Van · Fake Medical Transport.</p>
+          <h3>John archetypes</h3>
+          <p>Regular · Rough Trade · Cheap-skate · Big Tipper · Repeat Client · Weirdo Kink · Quick Visit · Talker · Breeder · Sadist · Degrader · Postmortem Client.</p>
+          <h3>Hunting grounds</h3>
+          <p>Main Street · Pink Room Club · Old Library · Westwood Park · Iron Gym · Downtown Mall · Cup &amp; Saucer · Greek Row · Backroads · Grand Hotel Lobby · Private Party · Campus Quad.</p>
+        </section>
+
+        <!-- GLOSSARY -->
+        <section class="wiki-section" id="glossary-w" data-w="glossary">
+          <h2>Glossary</h2>
+          <table class="wiki"><tr><th>Term</th><th>Meaning</th></tr>
+            <tr><td><b>DEPRAVITY</b></td><td>The player level. XP from every act; gates the darkest tiers.</td></tr>
+            <tr><td><b>Stockholm bond</b></td><td>Per-captive devotion meter (L0–L9). High bond = lower escape risk + more value.</td></tr>
+            <tr><td><b>Escape-risk</b></td><td>Per-captive meter that rises over time; maxing it = a break-out attempt. Lowered by care + containment.</td></tr>
+            <tr><td><b>WANTED</b></td><td>Law-heat (0–100). High tiers roll raids → fines → jail.</td></tr>
+            <tr><td><b>BUZZ</b></td><td>Underground word-of-mouth; higher = more johns.</td></tr>
+            <tr><td><b>Satisfaction</b></td><td>Player meter; high = hunt + cash bonus, low = penalty.</td></tr>
+            <tr><td><b>Sex-drive</b></td><td>Player NEED meter; ceiling scales with roster + level. Maxed = boosts, deprived = debuffs.</td></tr>
+            <tr><td><b>Cum-fill</b></td><td>Vaginal-only meter; sustained high → guaranteed conception.</td></tr>
+            <tr><td><b>Hold</b></td><td>One captive's room in a dungeon; upgradeable across 12 tracks.</td></tr>
+            <tr><td><b>The Pool</b></td><td>Dungeon-wide shared supply (food/water/condoms/drugs) every hold draws from.</td></tr>
+            <tr><td><b>Snuff</b></td><td>Deliberately killing a captive into a usable corpse.</td></tr>
+            <tr><td><b>Nugget</b></td><td>A captive with limbs amputated; can't run or fight.</td></tr>
+            <tr><td><b>Keepsake / Trophy</b></td><td>An item kept from a disposed girl granting a permanent stacking buff.</td></tr>
+            <tr><td><b>Postmortem</b></td><td>Use of a corpse before disposal; value decays over ~5 game days.</td></tr>
+            <tr><td><b>Propositioner</b></td><td>An upmarket client who rents a specific girl on bespoke terms.</td></tr>
+            <tr><td><b>Finalization film</b></td><td>Premium single-use film at graduation or disposal (3–5×).</td></tr>
+          </table>
+        </section>
+
+      </div>
+    </div>
+  </main>
+
+  <script>
+  (function () {
+    'use strict';
+    const PAGES = ['overview','howtoplay','loop','hunting','dungeon','supply','care','depravity','acts','toys','drugs','breeding','milk','films','johns','market','transport','death','trophies','player','keep','jail','index','glossary'];
+    function route() {
+      const h = (location.hash || '#loop').replace('#', '');
+      const target = PAGES.includes(h) ? h : 'loop';
+      for (const p of PAGES) {
+        const sec = document.getElementById(p + '-w');
+        if (sec) sec.classList.toggle('active', p === target);
+        const link = document.querySelector(`.wiki-toc a[data-w="${p}"]`);
+        if (link) link.classList.toggle('active', p === target);
+      }
+      window.scrollTo(0, 0);
+    }
+    window.addEventListener('hashchange', route);
+    document.addEventListener('DOMContentLoaded', route);
+    route();
+  })();
+  </script>
+</body>
+</html>

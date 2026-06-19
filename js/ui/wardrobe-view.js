@@ -48,7 +48,7 @@
       </div>
 
       <div class="panel">
-        <h2>Buy for her</h2>
+        <h2>🧵 The Carcass Closet <span class="small muted">— dress your meat up (these layer ON TOP of her own clothes; her captured-at outfit is hers forever)</span></h2>
         <div class="girl-grid">
           ${window.DMTHGame.wardrobe.catalog().map(o => {
             const isOwned = owned.has(o.id);

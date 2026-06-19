@@ -1,8 +1,10 @@
 # ARCHITECTURE — weird project
 
-**Generated:** 2026-04-21 · **Last revised:** 2026-05-14 (post-Phase-21 closeout)
-**Project root:** `C:\Users\gfour\Desktop\weird\`
-**Current state:** Live build with all Phase 21 milestones + PRE.* epics shipped. See `docs/FINALIZED.md` for session-by-session implementation detail.
+**Generated:** 2026-04-21 · **Last revised:** 2026-06-18 (DEPRAVITY-spine mega-build + ship-readiness pass; pushed to branch `UpdateWork`)
+**Project root:** `C:\Users\gfour\Desktop\weird v2\`
+**Current state:** Live, feature-complete build. All Phase 21 milestones + PRE.* epics shipped, PLUS the 2026-06-18 mega-build (progression/DEPRAVITY spine, depravity + economy systems, death dossier, toys/implements, hold/dungeon supply pool, john variety, transport, balance pass). Entire `js/` tree passes `node -c`. The authoritative current module map + state shape lives in **[`## New Systems & Modules (2026-06-18 build)`](#new-systems--modules-2026-06-18-build)** below; per-session detail in `docs/FINALIZED.md` + `docs/resume.md`; full player-facing reference in `../wiki.html` + `../README.md`.
+
+> **Note on the older sections below:** the early "server/*.mjs" directory tree + the Node-backend "Technical Debt"/"Recommendations" notes are the original 2026-04 design sketch. The shipped reality is a **pure static vanilla-JS client** — every "server" responsibility is a `js/game/*.js` IIFE module on `window.DMTHGame.*`. The current module map below supersedes them.
 
 > **Cross-references:** [`../README.md`](../README.md) (gameplay wiki) · [`../SETUP-README.md`](../SETUP-README.md) (technical setup) · [`ROADMAP.md`](./ROADMAP.md) (phase plan) · [`SKILL_TREE.md`](./SKILL_TREE.md) (capability matrix) · [`TODO.md`](./TODO.md) (active backlog) · [`FINALIZED.md`](./FINALIZED.md) (completion archive)
 
@@ -1161,9 +1163,14 @@ None planned — no test framework, no bundler yet (vanilla JS first).
 
 | Entry Point | Purpose | Location |
 |-------------|---------|----------|
-| `weird.html` | Frontend UI | `C:\Users\gfour\Desktop\weird\weird.html` |
-| `server/index.mjs` (target) | Backend server | `C:\Users\gfour\Desktop\weird\server\index.mjs` |
-| `start.bat` (local dev only, gitignored) | Local workflow launcher | ignored at deploy |
+| `index.html` | Public landing page (Home / Setup / About+team / Terms / Privacy / Settings + Wiki link) | project root |
+| `game.html` | The game shell — loads all engine + UI modules, mounts the router | project root |
+| `wiki.html` | Full gameplay wiki (anchor-routed) | project root |
+| `js/game/state.js` → `window.DMTHGame.state` | Central state singleton every module reads/writes | `js/game/` |
+| `js/ui/router.js` → `window.DMTHRouter` | Hash router mounting every game page | `js/ui/` |
+| `start.bat` / `start.sh` (local dev only, gitignored) | Local workflow launcher | ignored at deploy |
+
+_(The original `weird.html` sketch + the `server/index.mjs` Node target never shipped — the static-client design replaced both.)_
 
 ---
 
@@ -1178,20 +1185,60 @@ None planned — no test framework, no bundler yet (vanilla JS first).
 
 ---
 
+## New Systems & Modules (2026-06-18 build)
+
+The static-client implementation lives entirely under `js/`. Engine modules are IIFEs registering on `window.DMTHGame.*`; UI views on `window.DMTHRouter`; extracted room panels on `window.DMTHRoomPanels`. Load order is defined in `game.html` (and the landing `index.html`). Pages: `index.html` (landing — Home / Setup / About+team / Terms / Privacy / Settings + a 📖 link to `wiki.html`), `game.html` (the game shell), `wiki.html` (full gameplay wiki).
+
+### Engine modules — `js/game/`
+| Module | Responsibility |
+|--------|----------------|
+| `state.js` | Central reactive state + IDB persistence; `mutate()` auto-saves+emits; `migrateLoadedState()` backfills old saves (incl. new wallet/dungeon/hold/girl fields). |
+| `progression.js` | **DEPRAVITY** player level (XP from every act) + tier gating (own L3 / extreme L4 / nugget L6 / dismember L7 / snuff L7) + pay-to-unlock + hunting-ground gates. |
+| `sexdrive.js` | Player sex-drive NEED; ceiling scales with roster + level; maxed = boosts, deprived = debuffs. GRADED capture bonus by band + variety (distinct girls/day) fill multiplier + per-(girl,act) anti-spam diminishing returns. |
+| `playerstamina.js` | **💦 Nut Reserve** — player spend-resource; drains per act (extreme costs most), regens per tick, low = reduced satisfaction/sex-drive fill. Refilled by viagra / girl's-milk / etc. (`wallet.nutReserve`). |
+| `wanted.js` | WANTED heat axis (tiers, accrual, decay, raid-chance). |
+| `arrest.js` | Raid roll → fine → jail/GAME OVER + F.5 escape valves (lawyer / dirty-cop bribe / escape-kit flee). |
+| `lifespan.js` | Days-captive aging, neglect death, **SNUFF_METHODS** (14, filmed/corpse markers), corpse decay (5-day window). |
+| `death.js` | **Death dossier** chokepoint (`ensureDeathRecord`) — final stats + history + last-living likeness, fired from every death path. |
+| `drug-scheduler.js` | Pharmacokinetic curves, addiction/withdrawal, OD death (cumulative toxicity), `tickSelfServe()` (captives self-dose from supply, never self-OD). |
+| `pregnancy.js` | Vaginal cum-fill meter + sustained-fill breeding timer + guaranteed conception, gestation, newborn-disposal catalog. |
+| `condoms.js` | Typed + **TIMED** condoms (wear off ~4h); `blocks`/`isHoled`/`tickExpiry`; holed = instant breed. |
+| `action-effects.js` | Central ACTIONS spec (love/sex/violence/extreme), `tickStaminaHealth` (grace + pool fallback), XTOL extreme-act tolerance. |
+| `toys.js` | Toys/implements catalog (14), hold-mount (≤5, `attachToHold`), ownership-gated `use`, `TOY_IMG` image tokens, masochist flip. |
+| `supply.js` | **Two-tier supply** — per-hold reserve + dungeon `pool` (food/water/condoms/drugs); `draw`/`drawDrug`/`stock*`. |
+| `transport.js` | Inter-dungeon transport (7 tiered methods, risk roll) + corpse moves (clean haul, same-dungeon reposition). |
+| `whore-out.js` | John engine (cadence/BUZZ), CONDOM-STOCK draw, JOHN-VARIETY (sadist; johns use mounted toys + pool drugs; extremity pay). |
+| `trophies.js` | Keepsakes — 1–3 per girl, pick one at disposal; themed + gore items; stacking permanent perks; carries death dossier. |
+| `milk.js` | Lactation/milk economy (farm/drink/sell/suckle). |
+| `loot.js` | Loot from capture/scavenge/conversation + **ARCHGIFT** passive per-archetype gifts. |
+| `disposal.js` | Disposal methods (bury/sea/incinerate/trade/release/finalization/dismember) + trophy mint with chosen keepsake. |
+| `tick.js` | Per-tick orchestration (order matters): clock advance → pause gate → consumable decay → escape rolls → market/body-part sales → propositioners → slave-market → drug self-serve + curves → heat decay → achievements → escape-recovery → lifespan → pregnancy (cum-fill + condom expiry) → milk → archetype gifts → stamina/health → satisfaction/buzz/sex-drive decay → john arrivals → raid roll. |
+
+### UI — `js/ui/`
+`charsheet.js` (player Character Sheet — depraved-named stats/buffs/debuffs), `death-dossier-overlay.js` (`window.DMTHDeathDossier`), `room/panels.js` (extracted captive panels on `window.DMTHRoomPanels`: transfer / snuff / toys / condoms / dungeonPool), plus the existing room / dashboard / dispose-view / market / town / hunt / trophy-room views.
+
+### New persisted-state shape (additions)
+- `wallet`: `depravityXp`, `sexDrive` (+ existing money/notoriety/wanted/buzz/playerSatisfaction); valves live in `inventory` (`legal-retainer`, `escape-kit`) + `purchasedUnlocks` (`bribe-contacts`, gated tiers).
+- top-level: `unlockedLocations`, `purchasedUnlocks`, `bodyParts`, `gameMinutes`.
+- `dungeon.pool = { food, water, condoms, drugs:{} }`; `hold.toys[]`, `hold.condomReserve`, `hold.drugReserve{}` (+ existing food/water reserves).
+- `girl`: `sceneGirlIds[]`, `dungeonHistory[]`, `deathRecord`, `condomActiveUntil`, `condomType`; `body.*` additions `ownershipMarks[]`, `addiction{}`, `vaginalCum`, `preggoFillMaintained`, `extremeStreak`, `odLoad`, `limbs{}`, `recentToy`/`recentToyAt`, `corpseMarker`, `decayedMinutes`, `diedAt`.
+
+---
+
 ## Technical Debt
 
-### Critical (blocks the expansion)
-- `weird.html` uses hardcoded reaction strings — violates LAW — UNITY IS THE LLM. Must be replaced with real Ollama inference as soon as the server is up.
-- No backend exists. All current interactivity is frontend-only JS with static responses.
+### Resolved (were listed here in the 2026-04 sketch, now shipped)
+- ~~`weird.html` hardcoded reaction strings~~ — superseded; all dialogue is live Ollama inference (LAW — UNITY IS THE LLM honored).
+- ~~No backend / no persistence / no memory / no mode UI~~ — the static-client design ships all of it: IDB persistence (auto-save + pause/reload), embedding-assisted per-girl memory, in-UI mode switching.
 
-### Important (will bite us soon)
-- No state persistence — if the page reloads, everything resets.
-- No memory — Unity has no awareness of past sessions.
-- No mode switching wiring — `/hurtme` / `/sexy` are CLI commands but the UI does not reflect mode state.
+### Current (real, post-mega-build)
+- **`js/ui/room.js` is large (~1750 lines).** The 5 biggest captive panels were extracted to `js/ui/room/panels.js`; the remaining panels (body-stats, whore-out, pregnancy, drugs, hold-supplies, custom-pose, multi-girl) + all handlers + the streaming engine still live in room.js and could follow the same extraction pattern.
+- **Balance is by-design-unverified** — the BAL pass tuned escape pacing + audited drains/curves, but per project policy (no playtesting) magnitudes are tuned by reasoning, not measured.
+- **`deathRecord.finalImageUrl`** stores a session-scoped blob URL; a durable `finalImageCacheKey` is now also stored for re-resolve after reload, but the dossier/trophy display still prefers the URL (cosmetic — `onerror`-guarded).
+- **No tests** — project policy (manual verification + `node -c` only).
 
 ### Minor (polish phase)
-- Inline CSS in `weird.html` — extract to separate file during polish.
-- No bundler — vanilla JS fine until the frontend grows past one file.
+- No bundler — vanilla JS, no build step (intentional, keeps GitHub-Pages-static deploy trivial).
 
 ---
 

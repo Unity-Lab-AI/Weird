@@ -241,6 +241,30 @@ Settings → **Factory reset** → confirm. Wipes:
                               └──────────────────────┘
 ```
 
+### Modules added since the diagram (2026-06-18 mega-build)
+
+These register on `window.DMTHGame.*` (or `window.DMTHRoomPanels` / `window.DMTHDeathDossier`) and load in `game.html` in dependency order. Full per-module responsibilities are in `docs/ARCHITECTURE.md` → *New Systems & Modules*, and player-facing detail in `wiki.html`.
+
+| New module | Loads after | Purpose |
+|---|---|---|
+| `js/game/progression.js` | `state.js` | DEPRAVITY level + tier gating + pay-to-unlock + ground gates |
+| `js/game/sexdrive.js` | `progression.js` | player sex-drive NEED |
+| `js/game/wanted.js` | `state.js` | WANTED heat axis |
+| `js/game/arrest.js` | `tick.js` deps | raids / fines / jail + escape valves |
+| `js/game/death.js` | `lifespan.js` | death dossier chokepoint |
+| `js/game/condoms.js` | `pregnancy.js` | typed + timed condoms |
+| `js/game/supply.js` | before `loot.js` | two-tier hold/dungeon supply pool |
+| `js/game/loot.js` | `capture.js` | loot + passive archetype gifts |
+| `js/game/toys.js` | `loot.js` | toys/implements + hold-mount |
+| `js/game/transport.js` | `toys.js` | inter-dungeon + corpse transport |
+| `js/game/milk.js` | `market.js` | milk economy |
+| `js/game/trophies.js` | `disposal.js` | keepsake trophies + perks |
+| `js/ui/charsheet.js` | `dashboard.js` | player Character Sheet (route `#charsheet`) |
+| `js/ui/death-dossier-overlay.js` | `notify.js` | death dossier modal |
+| `js/ui/room/panels.js` | before `room.js` | extracted captive panels |
+
+Expanded existing modules: `state.js` (new persisted fields + migration backfill), `tick.js` (new per-tick steps incl. condom expiry, drug self-serve, archetype gifts), `drug-scheduler.js` (addiction/withdrawal/OD/self-serve), `whore-out.js` (CONDOM-STOCK + JOHN-VARIETY), `lifespan.js` (snuff + 5-day corpse window), `pregnancy.js` (cum-fill timer + newborn disposal), `action-effects.js` (XTOL + pool fallback), `imaging.js` (toy + corpse + ownership-mark tokens), `game-clock.js` (pause).
+
 ---
 
 ## State-model ER

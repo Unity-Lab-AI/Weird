@@ -18,19 +18,38 @@
         <a href="#room?girl=${girl.id}" class="btn-small" data-tooltip="Back to her hold — no harm done.">← cancel</a>
       </div>
 
+      ${window.DMTHGame.trophies?.personalKeepsakes ? (() => {
+        // TROPHYLOOT.1 — she has 1-3 keepsakes on her person; pick ONE to keep forever as a
+        // small permanent stacking buff (applies on a TERMINAL disposal — bury / incinerate /
+        // lose-at-sea / finalization / dismember; trade/release route her out alive, no trophy).
+        const ks = window.DMTHGame.trophies.personalKeepsakes(girl);
+        if (!ks.length) return '';
+        return `<div class="panel">
+          <h2>🏆 Keepsake — choose 1 to keep</h2>
+          <p class="small muted">She's got ${ks.length === 1 ? 'one keepsake' : ks.length + ' keepsakes'} on her. Pick the one you want mounted in your trophy room — permanent, never lost, small stacking buff. (Only when you finish her for good — bury her, burn her, dump her at sea, or shoot a snuff finale.)</p>
+          ${ks.map((k, i) => `<label class="stat-row" style="cursor:pointer" data-tooltip="${(k.flavor || '').replace(/"/g, '&quot;')} · ${k.perks.map(p => (p.key === 'huntBonus' ? (p.target ? 'hunt vs ' + p.target : 'hunt') : p.key) + ' +' + Math.round(p.value * 100) + '%').join(' · ')}">
+            <span><input type="radio" name="keepsake-pick" value="${k.keepsakeId}" ${i === 0 ? 'checked' : ''}/> ${k.rarityEmoji || ''} ${k.emoji} ${escapeHtml(k.name)}${k.gore ? ' <span class="warn">⚠ gore</span>' : ''}</span>
+            <b class="ok">${k.perks.map(p => '+' + Math.round(p.value * 100) + '%').join(' ')}</b>
+          </label>`).join('')}
+        </div>`;
+      })() : ''}
+
       <div class="panel">
         <h2>Choose a method</h2>
+        ${girl.encounterState === 'dead' ? `<p class="small warn">💀 Corpse — only bury / incinerate / lose-at-sea apply.</p>` : ''}
         <div class="girl-grid">
-          ${Object.entries(window.DMTHGame.disposal.METHODS).map(([key, m]) => {
+          ${window.DMTHGame.disposal.availableMethodsFor(girl).map(key => {
+            const m = window.DMTHGame.disposal.METHODS[key];
             const cardTip = (m.notes || '').replace(/"/g, '&quot;');
+            const reqErr = window.DMTHGame.disposal.requirementError(key, dungeon);
             return `<div class="model-card" data-tooltip="${cardTip}">
               <div class="model-name">${m.emoji} ${m.displayName}</div>
               <div class="model-notes small">${m.notes}</div>
               <div class="stat-row small" data-tooltip="Up-front money cost for this disposal method"><span>Cost</span><b>$${m.moneyCost}</b></div>
               <div class="stat-row small" data-tooltip="Notoriety added to your operation. Higher = more heat from authorities."><span>Notoriety</span><b>+${m.notorietyFactor(girl, dungeonTpl) || 0}</b></div>
               ${m.generatesFilm ? `<div class="small gold" data-tooltip="Generates a premium finalization film — 3-5× regular film value, one-shot.">🎬 Generates finalization film</div>` : ''}
-              ${m.requiresFacility ? `<div class="small warn" data-tooltip="Requires this specific facility built into your dungeon">Requires facility: ${m.requiresFacility}</div>` : ''}
-              <button data-method="${key}" class="btn-small btn-danger" data-tooltip="Dispose via ${m.displayName}. Cannot be undone.">Dispose via ${m.displayName}</button>
+              ${reqErr ? `<div class="small warn" data-tooltip="${reqErr.replace(/"/g, '&quot;')}">🔒 ${reqErr}</div>` : ''}
+              <button data-method="${key}" class="btn-small btn-danger" ${reqErr ? 'disabled style="opacity:.5;cursor:not-allowed"' : ''} data-tooltip="Dispose via ${m.displayName}. Cannot be undone.">Dispose via ${m.displayName}</button>
             </div>`;
           }).join('')}
         </div>
@@ -46,7 +65,8 @@
         try {
           // Capture the girl ref BEFORE disposal mutates state, so we can narrate the final scene
           const girlSnapshot = JSON.parse(JSON.stringify(girl));
-          const result = window.DMTHGame.disposal.dispose(girl.id, method);
+          const keepsakeId = el.querySelector('input[name="keepsake-pick"]:checked')?.value;
+          const result = window.DMTHGame.disposal.dispose(girl.id, method, keepsakeId);
           // Show final narration from Ollama
           const narration = await window.DMTHGame.disposal.narrateDisposal(girlSnapshot, method);
           const resultHtml = `<div class="panel"><h3>${window.DMTHGame.disposal.METHODS[method].emoji} ${window.DMTHGame.disposal.METHODS[method].displayName}</h3>

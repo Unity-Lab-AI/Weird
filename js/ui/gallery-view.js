@@ -1,9 +1,10 @@
-// DUNGEON MASTER: THE HUNT — image history gallery view.
-// Past images viewable, downloadable, openable fullscreen in a lightbox.
+// DUNGEON MASTER: THE HUNT — the "Spank Bank" (image-history archive).
+// Past images viewable, downloadable, openable fullscreen in a lightbox. (Route id stays
+// `gallery` so existing links keep working; the player-facing name is the Spank Bank.)
 //
-// Per-girl gallery showing every past generated image. Thumbnails grid → click for
-// fullscreen lightbox with prev/next navigation. Download button on each image.
-// Source: girl.visualIdentity.imageHistory (populated by imaging.generateFor).
+// Per-girl archive showing every depraved image of her ever generated — it all persists +
+// accumulates here. Thumbnails grid → click for fullscreen lightbox with prev/next navigation.
+// Download button on each image. Source: girl.visualIdentity.imageHistory (imaging.generateFor).
 
 (function () {
   'use strict';
@@ -19,8 +20,8 @@
 
     el.innerHTML = `
       <div class="panel">
-        <h2>🖼️ ${girl.name}'s image history (${history.length})</h2>
-        <p class="small muted">Every past generation — profile / selfie / capture-memorial / room-scene / bond-milestone / disposal-final / film-cover / custom-pose / town + dungeon renders. Click any thumbnail to open fullscreen.</p>
+        <h2>🍆 ${girl.name}'s Spank Bank (${history.length})</h2>
+        <p class="small muted">Every filthy frame of her ever generated — it all persists + stacks up here: profile / selfie / capture-memorial / room-scene / bond-milestone / disposal-final / film-cover / custom-pose / town + dungeon renders. Click any thumbnail to open fullscreen.</p>
         <div class="btn-row">
           <a href="#room?girl=${girl.id}" class="btn-small" data-tooltip="Back to her hold.">← back to her hold</a>
         </div>
@@ -28,7 +29,7 @@
 
       ${history.length === 0 ? `
         <div class="panel">
-          <p class="small muted">No images generated yet for ${girl.name}. Visit her room + click 📸 Demand selfie or 🎨 Custom pose to start her history.</p>
+          <p class="small muted">${girl.name}'s Spank Bank is empty. Visit her room + click 📸 Demand selfie or 🎨 Custom pose to start filling it.</p>
         </div>
       ` : `
         <div class="panel">
@@ -63,6 +64,21 @@
 
     if (history.length === 0) return;
 
+    // Resolve cached blobs by cacheKey — the stored entry.url may be a dead blob: URL after
+    // a page reload. Rebuild a live object URL from the cached Blob and swap it into each
+    // thumbnail (and stash on the entry so the lightbox uses it too). Falls back to entry.url.
+    if (window.DMTHGame.imaging?.resolveCached) {
+      el.querySelectorAll('.gallery-thumb').forEach(async (thumb) => {
+        const idx = Number(thumb.dataset.idx);
+        const ck = history[idx]?.cacheKey;
+        if (!ck) return;
+        try {
+          const u = await window.DMTHGame.imaging.resolveCached(ck);
+          if (u) { history[idx]._resolved = u; const img = thumb.querySelector('img'); if (img) img.src = u; }
+        } catch {}
+      });
+    }
+
     let currentIdx = 0;
     const overlay = el.querySelector('#lightbox-overlay');
     const lbImg = el.querySelector('#lightbox-img');
@@ -74,17 +90,18 @@
       currentIdx = idx;
       const entry = history[idx];
       if (!entry) return;
-      lbImg.src = entry.url;
+      const liveUrl = entry._resolved || entry.url;
+      lbImg.src = liveUrl;
       lbImg.alt = `${girl.name} ${entry.situation}`;
       lbMeta.innerHTML = `
         <b>${entry.situation}</b>${entry.userStaging ? ' · 🎨 custom' : ''}
         <span class="small muted">· ${new Date(entry.ts).toLocaleString()}</span>
         ${entry.userStaging ? `<div class="small muted" style="margin-top:6px;font-style:italic">"${entry.userStaging}"</div>` : ''}
       `;
-      lbDownload.href = entry.url;
-      const ext = entry.url.match(/\.(jpe?g|png|webp)/i)?.[1] || 'jpg';
+      lbDownload.href = liveUrl;
+      const ext = (entry.url.match(/\.(jpe?g|png|webp)/i)?.[1]) || 'jpg';
       lbDownload.download = `${girl.name}-${entry.situation}-${entry.id || Date.now()}.${ext}`;
-      lbOpen.href = entry.url;
+      lbOpen.href = liveUrl;
       overlay.style.display = 'flex';
     }
 

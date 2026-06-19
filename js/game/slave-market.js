@@ -9,8 +9,11 @@
     const bondMult = 1 + 0.2 * (girl.bond.bondLevel || 0);
     const kinkMult = 1 + ((girl.kinks?.length || 0) * 0.03);
     const rarityMult = girl.archetypeTemplate === 'sorority' ? 1.3 : girl.archetypeTemplate === 'unity_seed' ? 2.5 : 1;
+    // OUTFITSYNC.1 — a girl dressed in her matching girl-type outfit sells for more (Gee: "more cash
+    // for selling girls" from the sync).
+    const syncMult = window.DMTHGame.wardrobe?.syncMultiplier ? window.DMTHGame.wardrobe.syncMultiplier(girl) : 1;
     const base = 80 + statAgg * 1.2;
-    return Math.round(base * bondMult * wardrobeMult * kinkMult * rarityMult);
+    return Math.round(base * bondMult * wardrobeMult * kinkMult * rarityMult * syncMult);
   }
 
   function listForSale(girlId, price) {

@@ -16,6 +16,12 @@
   function runTick() {
     const s = window.DMTHGame.state.current;
     if (!s || !s.createdAt) return;
+    // Run's over — halt the loop, the game-over screen has taken over.
+    if (s.gameOver) { stop(); return; }
+
+    // PAUSE.1 — game paused: freeze everything (clock / escapes / decay / johns / raids).
+    // The interval keeps spinning but does nothing until resumed.
+    if (window.DMTHGame.gameClock && window.DMTHGame.gameClock.isPaused()) return;
 
     window.DMTHGame.state.bumpTick();
 
@@ -37,8 +43,9 @@
       runEscapeRoll(girl);
     }
 
-    // 3. Market sale pass (films)
+    // 3. Market sale pass (films) + body-part black-market pass (DEP-EXP.3)
     window.DMTHGame.market.runSaleTick();
+    if (window.DMTHGame.market.runBodyPartSaleTick) window.DMTHGame.market.runBodyPartSaleTick();
 
     // 4. Propositioner arrivals
     if (window.DMTHGame.propositioner.shouldArriveThisTick()) {
@@ -49,11 +56,22 @@
     // 5. Slave-market buyer tick
     window.DMTHGame.slaveMarket.runBuyerTick();
 
-    // 6. Drug scheduler — pharmacokinetic curves drive high + active list
+    // 6. Drug scheduler — captives first self-dose from hold/pool drugs to survive
+    // (DRUG-SELFSERVE.1, never self-OD), THEN pharmacokinetic curves + withdrawal resolve.
+    if (window.DMTHGame.drugs?.tickSelfServe) window.DMTHGame.drugs.tickSelfServe();
     if (window.DMTHGame.drugs) window.DMTHGame.drugs.tickAll();
 
     // 7. Notoriety slow decay — heat cools over time
     if (window.DMTHGame.balancing) window.DMTHGame.balancing.decayTick();
+    if (window.DMTHGame.wanted) window.DMTHGame.wanted.decayTick();
+    // Installed dungeon security facilities (soundproofing etc.) bleed extra WANTED heat —
+    // a hardened, quiet property draws less attention.
+    if (window.DMTHGame.dungeonOps && window.DMTHGame.state.addWanted) {
+      let red = window.DMTHGame.dungeonOps.totalWantedReduction();
+      // Trophy perks — stacking passive WANTED decay bonus.
+      if (window.DMTHGame.trophies) red += window.DMTHGame.trophies.perk('wantedDecayBonus');
+      if (red > 0 && window.DMTHGame.state.getWanted() > 0) window.DMTHGame.state.addWanted(-red, 'security-facilities+trophies');
+    }
 
     // 9. Achievements check
     if (window.DMTHGame.achievements) {
@@ -72,10 +90,41 @@
     // 12. Pregnancy — advance gestation by GESTATION_DAYS_PER_TICK
     // for every pregnant captive; auto-resolve at day 280 (birthed / sold / lost branches).
     if (window.DMTHGame.pregnancy) window.DMTHGame.pregnancy.tickPregnancies();
+    // 12a. Vaginal cum-fill drain + sustained-fill preggo timer (CUMFILL.1).
+    if (window.DMTHGame.pregnancy?.tickCumFill) window.DMTHGame.pregnancy.tickCumFill();
+    // 12a-2. Condom wear-off (CONDOM-TIMED.1) — revert any expired condoms to raw.
+    if (window.DMTHGame.condoms?.tickExpiry) window.DMTHGame.condoms.tickExpiry();
+
+    // 12b. Milk / lactation economy — refill every lactating captive's breast-fill, bottle
+    // milk from any Tit-Sucker-rigged hold, run the warm-milk player buff, + passive milk sales.
+    if (window.DMTHGame.milk) window.DMTHGame.milk.tickMilk();
+    // 12b-2. CUMTOOL.1 — complete any insertable hold-in plug whose timer has elapsed (capacity upgrade).
+    if (window.DMTHGame.cumtool) window.DMTHGame.cumtool.tick();
+    // 12b-3. PERIOD.1 — advance every captive's menstrual cycle (~1 game day bleed every ~5 days).
+    if (window.DMTHGame.period) window.DMTHGame.period.tick();
+
+    // 12c. Per-archetype passive loot gifts (ARCHGIFT.1) — every held girl-type quietly
+    // produces its own gift over time (nurse → free scripts, sorority → allowance, etc.).
+    if (window.DMTHGame.loot?.tickArchetypeGifts) window.DMTHGame.loot.tickArchetypeGifts();
+
+    // AUTOLOGISTICS.1 — auto-distribute supplies from inventory into every dungeon pool (if the
+    // upgrade is installed + enabled). No-op otherwise.
+    if (window.DMTHGame.supply?.autoDistribute) { try { window.DMTHGame.supply.autoDistribute(); } catch (e) { /* non-fatal */ } }
+
+    // BUYLOCATION.1 — "The Skim": each BOUGHT-OUT location bleeds you a passive cut every tick.
+    if (window.DMTHGame.progression?.OWNERSHIP_PERKS && window.DMTHGame.state.addMoney) {
+      const owned = window.DMTHGame.state.current?.ownedLocations || [];
+      if (owned.length) {
+        const skim = owned.length * (window.DMTHGame.progression.OWNERSHIP_PERKS.passiveIncome || 0);
+        if (skim > 0) window.DMTHGame.state.addMoney(skim, 'owned-location-skim');
+      }
+    }
 
     // 13. Stamina + health drain/regen. Starvation/dehydration/
     // chronic-bruise penalties + passive rest regen when no negative pressure is active.
     if (window.DMTHGame.actionEffects) window.DMTHGame.actionEffects.tickStaminaHealth();
+    // DEATHWARN.1 — non-intrusive low-health alert for held captives (throttled per girl).
+    if (window.DMTHGame.actionEffects && window.DMTHGame.actionEffects.lowHealthAlertSweep) window.DMTHGame.actionEffects.lowHealthAlertSweep();
 
     // Player satisfaction slow decay — without intimacy this tick, the meter drifts down.
     // 0.5/tick = full decay (50 → 0) over ~100 ticks (~50 real minutes). Sex acts via
@@ -95,11 +144,22 @@
       if (curBuzz > 0) w.buzz = Math.max(0, curBuzz - 0.3);
     }
 
+    // Player sexual-drive deprivation drift (SEXDRIVE.1) — falls without intimacy.
+    if (window.DMTHGame.sexdrive) window.DMTHGame.sexdrive.decayTick();
+
+    // Player Nut Reserve regen (PLAYERSTAM.1) — rebuilds briskly each tick so you're never just
+    // sitting and waiting; refill items (viagra / girl's-milk) top it instantly.
+    if (window.DMTHGame.playerStamina) window.DMTHGame.playerStamina.regenTick();
+
     // 14. Whore-out john arrivals. Per-rate arrival rolls per
     // whored-out captive; each arrival resolves the encounter, drains stamina via action-
     // effects, accrues unclaimedEarnings, persists to johnLedger, fires pregnancy hook on
     // vaginal-cum + !condomUsed.
     if (window.DMTHGame.whoreOut) window.DMTHGame.whoreOut.runJohnTick();
+
+    // 15. Arrest system — raid roll scaled by the current WANTED tier. A raid → pay a fine,
+    // or jail → GAME OVER if you can't (or instant arrest if a body's in a hold).
+    if (window.DMTHGame.arrest) window.DMTHGame.arrest.runRaidTick();
   }
 
   // Decay food + water per tick, GATED by the hold's automation tiers.
@@ -144,34 +204,103 @@
     window.DMTHGame.state.updateGirl(girl.id, patch);
   }
 
+  // Containment strength (0-1) for a captive's hold — how well the dungeon physically holds
+  // her. Built from the purchased security + restraint upgrade TIERS (the player's active
+  // lever), the dungeon template's concealment/isolation, and ANY dungeon-level security
+  // facilities the player has installed (guard dog, reinforced door, motion sensors,
+  // electrified fence, soundproofing, sedation collar — see dungeon-ops SECURITY_FACILITIES;
+  // guard dog is just ONE of the set). High containment both SUPPRESSES the escape-risk
+  // bar's rise AND makes a maxed-out bar near-certain to be auto-contained — so once you've
+  // invested in containment, escapes stop being something you manage by hand.
+  function holdContainment(girl) {
+    const dungeon = window.DMTHGame.state.getDungeon(girl.assignedDungeonId);
+    const dungeonTpl = dungeon && window.DMTHAssets.getById('dungeon', dungeon.templateId);
+    const hold = dungeon?.holds?.[girl.assignedHoldIdx ?? 0];
+    const security   = hold?.upgrades?.security ?? 0;     // 0-4
+    const restraints = hold?.upgrades?.restraints ?? 0;   // 0-5
+    const concealment = dungeonTpl?.concealment || 0.5;
+    const isolation   = dungeonTpl?.isolation || 0.5;
+    // Sum the containment bonus of every installed dungeon-level security facility.
+    const facilities = dungeon?.security || {};
+    const facDefs = window.DMTHGame.dungeonOps?.SECURITY_FACILITIES || {};
+    let facilityBonus = 0;
+    for (const id of Object.keys(facilities)) {
+      if (facilities[id] && facDefs[id]) facilityBonus += facDefs[id].containment || 0;
+    }
+    return {
+      containment: Math.min(0.98,
+        (security / 4) * 0.30 +
+        (restraints / 5) * 0.25 +
+        concealment * 0.10 +
+        isolation * 0.10 +
+        Math.min(0.38, facilityBonus) +
+        (window.DMTHGame.trophies ? window.DMTHGame.trophies.perk('escapeContainmentBonus') : 0)),
+      facilities
+    };
+  }
+
+  // Escape-risk BAR model (Gee 2026-06-18). Each tick the bar RISES — fast when she's
+  // defiant/terrified and carrying bond-debt, suppressed by containment and by Stockholm
+  // bond (an indoctrinated captive stops trying). The player's active counter-lever is
+  // care/loving acts (action-effects.js escapeRisk derive) which push the bar back down.
+  // When the bar MAXES (>=1) she makes a break for it; containment decides caught vs out.
   function runEscapeRoll(girl) {
     if (!girl.escape) return;
-    const threshold = Math.min(0.6, girl.escape.currentRisk || 0.1);
-    if (Math.random() < threshold * 0.1) {       // slow rate — per-tick chance
-      // Escape attempt
-      const dungeon = window.DMTHGame.state.getDungeon(girl.assignedDungeonId);
-      const dungeonTpl = dungeon && window.DMTHAssets.getById('dungeon', dungeon.templateId);
-      const concealment = dungeonTpl?.concealment || 0.5;
-      const isolation = dungeonTpl?.isolation || 0.5;
-      const containmentChance = Math.min(0.95, 0.4 + concealment * 0.3 + isolation * 0.3);
-      const caught = Math.random() < containmentChance;
-      if (caught) {
-        // Contained — small bruise hit, bond debt
-        const newBody = { ...girl.body, bruises: girl.body.bruises + 2 };
-        const newBond = { ...girl.bond, bondDebt: girl.bond.bondDebt + 3 };
-        const newMood = { mood: 'defiant', moodEmoji: '😤', history: [...(girl.mood.history || []), { shift: 'escape-caught', ts: Date.now() }] };
-        window.DMTHGame.state.updateGirl(girl.id, {
-          body: newBody, bond: newBond, mood: newMood,
-          escape: { ...girl.escape, lastAttempt: { outcome: 'caught', ts: Date.now() } }
-        });
-      } else {
-        // She got out — move encounter state, notoriety spike
-        window.DMTHGame.state.updateGirl(girl.id, {
-          encounterState: 'escaped',
-          escape: { ...girl.escape, lastAttempt: { outcome: 'escaped', ts: Date.now() } }
-        });
-        window.DMTHGame.state.addNotoriety(4);
+    if (girl.body?.isNugget) return;   // a nugget has no limbs — she can't run, ever.
+    const { containment } = holdContainment(girl);
+
+    const mood = girl.mood?.mood || '';
+    // BAL.2 — escape pacing. Rates ~halved + containment weighted heavier so a MANAGED captive
+    // (fed/watered + the odd care act, or any locks/restraints) stays put and escapes are an
+    // occasional real event, not a daily one. A fully-neglected, unsecured fresh captive still
+    // works the bar up over ~25+ real minutes; care acts + containment push it back down.
+    const moodDrive = /defiant|terrified|wary|broken|catatonic/.test(mood) ? 0.030
+                    : /acclimating|subdued|ambivalent/.test(mood) ? 0.014
+                    : 0.006;
+    const bondDebtDrive = Math.min(0.04, (girl.bond?.bondDebt || 0) * 0.0008);
+    const bondCalm      = Math.min(0.09, (girl.bond?.bondLevel || 0) * 0.011); // high Stockholm = stops trying
+    // Net per-tick rise. Containment shaves the rise hard; a well-secured + bonded girl can
+    // even drift downward on her own (rise goes negative).
+    const rise = moodDrive + bondDebtDrive - bondCalm - containment * 0.12;
+
+    const prevRisk = girl.escape.currentRisk ?? 0.1;
+    let risk = Math.max(0, Math.min(1, prevRisk + rise));
+    const escapeBase = { ...girl.escape, currentRisk: risk, containment };
+
+    // Warn once when the bar climbs into the danger band so the player knows to intervene.
+    if (risk >= 0.8 && prevRisk < 0.8 && window.DMTHNotify) {
+      window.DMTHNotify.show(`⚠️ ${girl.name}'s escape risk is critical — calm her down (care/love) or tighten containment.`, { type: 'error', durationMs: 6000 });
+    }
+
+    if (risk < 1) {
+      window.DMTHGame.state.updateGirl(girl.id, { escape: escapeBase });
+      return;
+    }
+
+    // BAR MAXED → break for it. Containment decides the outcome (locks + dog ≈ auto-contain).
+    const caught = Math.random() < Math.max(0.4, 0.4 + containment * 0.58);
+    if (caught) {
+      const newBody = { ...girl.body, bruises: (girl.body.bruises || 0) + 2 };
+      const newBond = { ...girl.bond, bondDebt: (girl.bond.bondDebt || 0) + 3 };
+      const newMood = { mood: 'defiant', moodEmoji: '😤', history: [...(girl.mood.history || []), { shift: 'escape-caught', ts: Date.now() }] };
+      window.DMTHGame.state.updateGirl(girl.id, {
+        body: newBody, bond: newBond, mood: newMood,
+        // Contained — bar drops back but not to zero; she'll build again unless calmed/secured.
+        escape: { ...escapeBase, currentRisk: 0.45, lastAttempt: { outcome: 'caught', ts: Date.now() } }
+      });
+      if (window.DMTHNotify) {
+        window.DMTHNotify.show(`🔒 ${girl.name} tried to run — contained${containment >= 0.8 ? ' (security held)' : ''}.`, { type: 'info', durationMs: 5000 });
       }
+    } else {
+      window.DMTHGame.state.updateGirl(girl.id, {
+        encounterState: 'escaped',
+        escape: { ...escapeBase, currentRisk: 1, lastAttempt: { outcome: 'escaped', ts: Date.now() } }
+      });
+      window.DMTHGame.state.addNotoriety(4);
+      // A captive loose in public is heat. The big spike comes later if she's never
+      // recaptured (escape-recovery → 'escape-ratted'); this is the initial bump.
+      if (window.DMTHGame.wanted) window.DMTHGame.wanted.accrue('escape');
+      if (window.DMTHNotify) window.DMTHNotify.show(`🏃 ${girl.name} ESCAPED — recapture her before she's gone for good.`, { type: 'error', durationMs: 8000 });
     }
   }
 
