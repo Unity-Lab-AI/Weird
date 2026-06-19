@@ -136,6 +136,18 @@ Three buckets. (A) **Real bugs** — drug high-meter runs on `Date.now()` real-t
 
 - [ ] **STRIPPOLE.1** 🟠 *"and make sure that when visiting the strip club the girls are actually like on the dance pole and shit in their profile pic and remember the strippers can be found nude or in panties/ gstrings only no tops and or complet bare ass totally with hairless-vagina"* — when VISITING the strip club, the encountered stripper girls' profile/thumbnail image actually shows them ON THE DANCE POLE (dancing, stage, etc.); and strippers are found NUDE, or in panties / g-strings ONLY with NO tops, or completely bare-ass totally with a hairless-vagina (positive nudity prompt, dash-grouped per DASHGROUP). Strippers work nude → hunted/captured already bare. `js/game/imaging.js`, `js/game/girl-gen.js`, `js/game/hunt.js`
 
+### Gee's directive (verbatim 2026-06-19) — NO negative prompts in ANY Ollama OR image template (positive-only):
+
+> *"and remember NO NEGATIVE PROMPTS IN ANY OLLAMA OR IMAGE TEMPLET"*
+
+- [ ] **POSPROMPT.1** 🟠 *"and remember NO NEGATIVE PROMPTS IN ANY OLLAMA OR IMAGE TEMPLET"* — every generation-bound string in BOTH the image templates AND the Ollama templates is POSITIVE-ONLY: never phrase a wanted outcome as the absence of its opposite (no "no bra/no panties/no clothing", no "do NOT render X") because the gen latches the negated noun and renders it. PARTIAL FIX SHIPPED (`js/game/imaging.js`): nudeTokens full/accessories/stripped rewritten positive-only (dropped all "no bra/no panties/no clothing/no jewelry/no collar…" → "totally undressed, smooth unadorned bare skin, bare neck/ears/wrists"); drugs-none + pregnancy-none + fully-nude rules reworded "do NOT render" → positive. REMAINING: full sweep of imaging.js + wardrobe.js outfit strings + ollama-templates.js. (NOT a ban on behavioral guardrail bullets like "never break character" — those are model instructions, not rendered prompts.) `js/game/imaging.js`, `js/game/wardrobe.js`, `js/templates/ollama-templates.js`
+
+### Gee's directive (verbatim 2026-06-19) — use the word "girl" not "woman":
+
+> *"adult woman? we use the word girl"* + *"adult girl"*
+
+- [ ] **GIRLWORD.1** 🟠 *"adult woman? we use the word girl"* + *"adult girl"* — the game's term is GIRL, not "woman". Replace "woman"/"women" with "girl"/"girls" in generation-bound strings, templates, and user-facing UI — keeping the "adult" qualifier for the 18+ image-gen anchor ("adult girl", not bare "girl" which can skew the gen young). PARTIAL FIX SHIPPED (`js/game/imaging.js`): every "adult woman" → "adult girl" (nude tokens, sexLock "female adult girl", full-term pregnancy string, release scene). REMAINING: sweep wardrobe.js, girl-gen.js ("the woman from the cookouts"), hunt.js ("normal women"), ollama-templates.js, UI labels. (18+ floor unchanged.) `js/game/imaging.js`, `js/game/wardrobe.js`, `js/game/girl-gen.js`, `js/game/hunt.js`, `js/templates/ollama-templates.js`
+
 ### Gee's directive (verbatim 2026-06-19) — kill the Stockholm-based off-screen birth control + add a stockable auto-taken birth-control pill:
 
 > *"Stockholm rating < 9 (fully-bonded captives use birth-control off-screen unless source is whore-out) i dont know about this i never said to put pregnacy on a greater than a stokholm rating and yes lets add birth control pill that u can stock in the holds and the girls will take it auto like if its there and they cant get preggo for two days after taking a birthcontrol pill once every two days max, and make sure there isnt any wiggle room so the moment one wears off and pills are available the girls take another instantly so there is no time inbetween where they can get preggo if the pills are in the hold"*
