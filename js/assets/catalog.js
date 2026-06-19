@@ -228,6 +228,13 @@
       notes: 'Preventive — ONE per john, drawn from the hold/dungeon stock during a whore-out turn (you must stock the hold first; no stock = he goes raw = pregnancy risk). ~$9/condom ≈ 12% of an average starting-girl john\'s fee, so keeping a girl off the breeding track costs but never bankrupts you. Stacks of 3.'
     },
     {
+      id: 'birth-control-pill', displayName: 'Birth-Control Pills (pack of 5)', emoji: '💊',
+      category: 'item', subcategory: 'contraception',
+      prompt: 'product photograph of a circular birth-control pill blister-pack with small unmarked tablets on a plain backdrop, pharmacy commerce style, muted lighting',
+      cost: 30, tier: 1,
+      notes: 'Stock these in a hold or the dungeon pool and every captive who draws on it takes one AUTOMATICALLY — one pill keeps her off the breeding track for two full days, and the instant it wears off she takes another (if stocked) so there is never a gap to knock her up. Max one pill per girl per two days. Pack of 5.'
+    },
+    {
       id: 'plan-b', displayName: 'Plan B Pill', emoji: '💊',
       category: 'item', subcategory: 'reproductive-medical',
       prompt: 'product photograph of a small unmarked white tablet next to its foil blister-pack on a plain backdrop, pharmacy commerce style',

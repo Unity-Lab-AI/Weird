@@ -138,6 +138,7 @@
     const pool = window.DMTHGame.supply.poolOf(girl.assignedDungeonId);
     const inv = window.DMTHGame.state.current.inventory || {};
     const has = id => (inv[id] || 0) > 0;
+    const isOnBC = window.DMTHGame.pregnancy?.isOnBirthControl ? window.DMTHGame.pregnancy.isOnBirthControl(girl) : false;
     const drugCount = Object.values(pool.drugs || {}).reduce((a, b) => a + b, 0);
     const drugBtns = ['coke-bumps', 'weed', 'mdma', 'acid', 'wine'].filter(has)
       .map(id => `<button class="btn-small" data-pool-drug="${id}" data-tooltip="Move 1× ${escapeHtml(id.replace(/-/g, ' '))} into the dungeon drug pool — addicted girls self-dose from it to stave off withdrawal (they never OD themselves).">+1 ${escapeHtml(id.replace(/-/g, ' '))}</button>`).join('');
@@ -145,11 +146,13 @@
       <p class="small muted">Stock a shared pool any captive in this dungeon draws from when her own hold runs dry — no real cap, filtered evenly across holds. Stock condoms here (or in a hold) so johns can glove up; stock drugs so addicted girls self-medicate to stay alive.</p>
       <div class="stat-row small" data-tooltip="Shared food + water units. A hungry/thirsty girl pulls from her hold first, then this pool."><span>🍱 Food / 💧 Water</span><b>${pool.food} / ${pool.water}</b></div>
       <div class="stat-row small" data-tooltip="Condoms johns will use (if you set condom-required or the john complies). One consumed per gloved john. No stock = johns go raw."><span>🎈 Condoms</span><b>${pool.condoms}</b></div>
+      <div class="stat-row small" data-tooltip="Birth-control pills. While any are stocked, EVERY captive in this dungeon auto-takes one the moment she isn't covered — one pill = two game-days off the breeding track, re-taken the instant it lapses, so there's no gap to knock her up. One pill per girl per two days.${isOnBC ? ` ${girl.name} is covered now.` : (pool.birthControl > 0 ? ` ${girl.name} will take one on the next tick.` : '')}"><span>💊 Birth-control pills${isOnBC ? ' <span class="ok">· on the pill</span>' : ''}</span><b>${pool.birthControl}</b></div>
       <div class="stat-row small" data-tooltip="Drug doses captives self-serve from to stave off withdrawal — they never OD themselves."><span>💊 Drug doses</span><b>${drugCount}</b></div>
       <div class="btn-row" style="margin-top:4px">
         <button class="btn-small ${has('basic-meal') ? 'btn-primary' : ''}" data-pool-stock="food:basic-meal:3" ${has('basic-meal') ? '' : 'disabled'} data-tooltip="Convert 1 basic meal → +3 shared food.">+3 food</button>
         <button class="btn-small ${has('bottled-water') ? 'btn-primary' : ''}" data-pool-stock="water:bottled-water:6" ${has('bottled-water') ? '' : 'disabled'} data-tooltip="Convert 1 24-pack → +6 shared water.">+6 water</button>
         <button class="btn-small ${has('condom-standard') ? 'btn-primary' : ''}" data-pool-stock="condoms:condom-standard:3" ${has('condom-standard') ? '' : 'disabled'} data-tooltip="Convert 1 standard condom → +3 pooled condoms for johns.">+3 condoms</button>
+        <button class="btn-small ${has('birth-control-pill') ? 'btn-primary' : ''}" data-pool-stock="birthControl:birth-control-pill:5" ${has('birth-control-pill') ? '' : 'disabled'} data-tooltip="Convert 1 pack → +5 pooled birth-control pills. Captives auto-take them to stay off the breeding track.">+5 pills</button>
       </div>
       <div class="btn-row">${drugBtns || '<span class="small muted">no drug items in inventory to stock</span>'}</div>
     </div></details>`;

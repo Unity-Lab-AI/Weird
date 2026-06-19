@@ -13,6 +13,18 @@
 
 ---
 
+## 2026-06-19 — Session: BCPILL — remove Stockholm off-screen contraception + add a stockable, auto-taken birth-control pill (zero-gap protection)
+
+**Gee verbatim:**
+> *"Stockholm rating < 9 (fully-bonded captives use birth-control off-screen unless source is whore-out) i dont know about this i never said to put pregnacy on a greater than a stokholm rating and yes lets add birth control pill that u can stock in the holds and the girls will take it auto like if its there and they cant get preggo for two days after taking a birthcontrol pill once every two days max, and make sure there isnt any wiggle room so the moment one wears off and pills are available the girls take another instantly so there is no time inbetween where they can get preggo if the pills are in the hold"*
+
+- [x] **BCPILL.1** ✅ — REMOVED the `bond.bondLevel >= 9 && source !== 'whore-out'` "fully-bonded captives use birth-control off-screen" conception gate from `attemptConception` (Gee never asked for pregnancy to hang off a Stockholm/bond rating — that was my own assumption). Top-of-file comment reworded to match. `js/game/pregnancy.js`
+- [x] **BCPILL.2** ✅ — added a `birth-control-pill` item (💊 "Birth-Control Pills (pack of 5)", $30, contraception subcategory) and a new `birthControl` pooled supply kind. Stock it in a hold reserve or the dungeon pool exactly like condoms/food/water; a captive who draws on it takes ONE automatically — one pill = no pregnancy for **two game-days** (2880 game-minutes), max one pill per girl per two days (the 2-day window naturally enforces the cadence — she never takes a second while still covered). New `pregnancy.isOnBirthControl(girl)` / `takeBirthControlIfNeeded(girl)` / `tickBirthControl()`; per-girl `girl.birthControlUntil` game-minutes timestamp. Wired `tickBirthControl()` into the engine tick (keeps every captive topped the instant her window lapses) + added the pill to the auto-logistics rig (sources + default target 10). Room Dungeon-Pool panel shows a 💊 Birth-control pills count + "on the pill" badge + a "+5 pills" stock button. `js/assets/catalog.js`, `js/game/supply.js`, `js/game/pregnancy.js`, `js/game/tick.js`, `js/ui/room/panels.js`
+- [x] **BCPILL.3** ✅ — ZERO wiggle room: `attemptConception` calls `takeBirthControlIfNeeded(girl)` BEFORE the breeding roll — so the instant a prior pill's two-day window lapses, if pills are stocked she takes another right there and the attempt returns `{ rolled:false, reason:'on birth control' }`. There is no tick-gap where a stocked-pill girl can conceive (verified headless). The pill protects against ALL conception sources while active (no whore-out exception). `js/game/pregnancy.js`
+- Verified headless (Playwright, new game → starter captive Unity): no pills + bond 9 → conceives (Stockholm gate gone); stock 5 pills → attemptConception auto-takes one → blocked "on birth control", pool 5→4, `birthControlUntil` set, `isOnBirthControl` true; whore-out source also blocked while covered; zero console errors.
+
+---
+
 ## 2026-06-19 — Session: LANDING-DEDUP — kill redundant landing buttons (header is canonical, drop duplicate cards + the floating settings btn)
 
 **Gee verbatim quotes:**

@@ -15,9 +15,10 @@
 //   }
 //
 // Conception: fired from delta.applyDelta() when cumLoad crosses ~1.0 in a turn (semen
-// delivery proxy) AND outfit ID is not 'condom-on' AND bond.bondLevel < 9 (fully-bonded
-// captives use birth-control off-screen). Conception chance modulated by fertility curve
-// (peaks mid-cycle, simplified to a flat base + per-drug protection factor).
+// delivery proxy) AND no blocking condom is on AND she is NOT covered by a stocked birth-control
+// pill (a captive auto-takes one when pills are stocked in her hold / the dungeon pool — one pill
+// = two game-days of protection, re-taken the instant it lapses, no gap). Conception chance is
+// modulated by a fertility curve (simplified to a flat base + per-drug protection factor).
 //
 // Abortion methods (catalog items, see catalog.js entries shipped with this milestone):
 //   - condom            $2/stack  — preventive (worn as wardrobe; not technically abort)
@@ -67,6 +68,48 @@
     if (days <= 93) return 1;
     if (days <= 186) return 2;
     return 3;
+  }
+
+  // -----------------------------------------------------------------------
+  // Birth-control pill — stock it in a hold / the dungeon pool and a captive takes one
+  // AUTOMATICALLY whenever she isn't already covered. One pill keeps her off the breeding
+  // track for exactly two game-days; the instant that window lapses she takes another (if any
+  // are stocked) so there is never a tick-gap to conceive in. Max one pill per girl per two days.
+  // -----------------------------------------------------------------------
+  const BIRTH_CONTROL_DURATION_MIN = 2 * 24 * 60;   // two game-days = 2880 game-minutes
+  function gameMin() { return window.DMTHGame.gameClock ? window.DMTHGame.gameClock.now() : 0; }
+
+  // Is she currently covered by a pill (still inside its two-day window)?
+  function isOnBirthControl(girl) {
+    return !!(girl && girl.birthControlUntil != null && gameMin() < girl.birthControlUntil);
+  }
+
+  // She takes a pill the instant she needs one if any are stocked. Returns true if she ends up
+  // covered (already-covered OR just took one). Consumes one pill (hold first, then pool) and
+  // sets her two-day window. Mutates the passed `girl` object too so a caller re-checking the
+  // same object immediately sees the new coverage (no wiggle room at the conception roll).
+  function takeBirthControlIfNeeded(girl) {
+    if (!girl) return false;
+    if (isOnBirthControl(girl)) return true;            // still covered — no second pill, no waste
+    if (!window.DMTHGame.supply || window.DMTHGame.supply.available(girl, 'birthControl') <= 0) return false;
+    if (window.DMTHGame.supply.draw(girl, 'birthControl', 1) <= 0) return false;
+    const until = gameMin() + BIRTH_CONTROL_DURATION_MIN;
+    girl.birthControlUntil = until;                     // mutate local copy for same-tick re-checks
+    window.DMTHGame.state.updateGirl(girl.id, { birthControlUntil: until });
+    return true;
+  }
+
+  // Per-tick top-up — keep every captive covered the moment her window lapses (if pills stocked),
+  // so her status reads "on the pill" and the protection is continuous with no gap.
+  function tickBirthControl() {
+    const s = window.DMTHGame.state.current;
+    if (!s || !Array.isArray(s.roster)) return;
+    for (const g of s.roster) {
+      if (g.encounterState && g.encounterState !== 'captive') continue;
+      if (isPregnant(g)) continue;                      // pointless on an already-pregnant girl
+      if (isOnBirthControl(g)) continue;
+      takeBirthControlIfNeeded(g);
+    }
   }
 
   // -----------------------------------------------------------------------
@@ -126,10 +169,13 @@
       return { rolled: false, reason: 'condom equipped' };
     }
 
-    // Gate: fully-bonded captives (L9) use birth-control off-screen unless source is forced.
-    const bondLevel = girl?.bond?.bondLevel || 0;
-    if (bondLevel >= 9 && opts?.conceptionSource !== 'whore-out') {
-      return { rolled: false, reason: 'fully-bonded captive uses contraception off-screen' };
+    // Gate: birth-control pill. If pills are stocked in her hold / the dungeon pool she takes one
+    // the instant she isn't already covered — so the moment a prior pill's two-day window lapses,
+    // a new one is taken right here before any breeding roll. No wiggle room: stocked pills = no
+    // pregnancy, with zero gap. (No off-screen Stockholm/bond contraception — that was never asked
+    // for and is gone; only an actual stocked pill protects her.)
+    if (takeBirthControlIfNeeded(girl)) {
+      return { rolled: false, reason: 'on birth control' };
     }
 
     // Consistency-based conception (Gee): 3-4 game-days of consistent cum-inside should
@@ -594,6 +640,9 @@
     getPregnancy,
     isPregnant,
     trimesterFromDays,
+    isOnBirthControl,
+    takeBirthControlIfNeeded,
+    tickBirthControl,
     attemptConception,
     addVaginalCum,
     tickCumFill,

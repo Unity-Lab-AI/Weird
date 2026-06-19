@@ -94,6 +94,9 @@
     if (window.DMTHGame.pregnancy?.tickCumFill) window.DMTHGame.pregnancy.tickCumFill();
     // 12a-2. Condom wear-off (CONDOM-TIMED.1) — revert any expired condoms to raw.
     if (window.DMTHGame.condoms?.tickExpiry) window.DMTHGame.condoms.tickExpiry();
+    // 12a-3. Birth-control pills — every captive auto-takes one the instant her two-day window
+    // lapses if any are stocked, so protection stays gapless while pills are in the hold/pool.
+    if (window.DMTHGame.pregnancy?.tickBirthControl) window.DMTHGame.pregnancy.tickBirthControl();
 
     // 12b. Milk / lactation economy — refill every lactating captive's breast-fill, bottle
     // milk from any Tit-Sucker-rigged hold, run the warm-milk player buff, + passive milk sales.
