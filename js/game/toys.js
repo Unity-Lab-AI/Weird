@@ -2,8 +2,7 @@
 // "Toys" used loosely — from a wand vibrator to torture-chamber implements. You can BUY them,
 // LOOT them, or FIND them; you only UNLOCK the USE of a toy once you OWN one (it's an inventory
 // item). Using a toy fires a depraved act with its own effect envelope + film/aftermath markers.
-// The nastiest implements are DEPRAVITY-level gated (and cheat-start opens them). 18+ fiction.
-//
+// The nastiest implements are DEPRAVITY-level gated (and cheat-start opens them).//
 // Each toy: { name, emoji, cost, levelReq, masoFlips?, gore?, notes, fx }
 //   fx = per-use effects on her body + the player. Negative = harm. masoFlips: a masochist
 //   captive takes bondDebt as bondXP instead + an arousal surge (she craves it).

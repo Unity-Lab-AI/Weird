@@ -208,7 +208,7 @@
   // A myriad of ways to do the deed, quick → slow & methodical, each its own sexually-taboo
   // act. Filmed or not. The result is always a CORPSE in her hold (postmortem use until
   // disposal — distinct from disposal, which removes her). corpse = the visible cause marker
-  // the image pipeline renders on the body (imaging.postmortemTokens). 18+ fiction.
+  // the image pipeline renders on the body (imaging.postmortemTokens).
   const SNUFF_METHODS = Object.freeze({
     'choke-fuck':       { displayName: 'Strangle Her Mid-Fuck',     emoji: '🤲', speed: 'slow',  xp: 16, wanted: 5, filmBase: 1100, corpse: 'choked',       notes: 'Erotic asphyxiation taken all the way — choke the life out of her while buried inside her. Slow, intimate, vile.' },
     'cock-suffocate':   { displayName: 'Suffocate on His Cock',     emoji: '👄', speed: 'slow',  xp: 15, wanted: 4, filmBase: 1000, corpse: 'choked',       notes: 'Hold her down on his cock until she stops struggling — throat-fucked to death.' },

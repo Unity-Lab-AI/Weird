@@ -219,8 +219,7 @@
     // bruises/mood) but the biggest player-satisfaction payouts + the strongest film-value
     // markers (cumLoad + bruises + aftermath). Stacking these on ONE girl drains her health
     // toward death fast — the satisfaction the player wants has to be spread across the
-    // roster or it kills her. 18+ fiction.
-    // -----------------------------------------------------------------
+    // roster or it kills her.    // -----------------------------------------------------------------
     'extreme-facefuck': {
       stamina: -12, health: -6, mood: -12, arousal: +10, cumLoad: +0.8, bruises: +2, bondDebt: +6, satisfaction: +7,
       notes: 'Brutal face-fuck — throat trauma, ruined makeup, gagging. Big satisfaction + film value, real health toll.'
@@ -256,8 +255,7 @@
     // TORTURE (TORTURECAT.1) — straight-up evil, NON-sexual torture. SEVERE health damage + huge
     // bond-debt + mood crater + premium film/satisfaction value. These are the acts that wreck a
     // girl fast — spread across the roster or heal her between, or they kill her (several are
-    // ACT_CAN_KILL). Distinct from the sexual Extreme tab. 18+ fiction.
-    // -----------------------------------------------------------------
+    // ACT_CAN_KILL). Distinct from the sexual Extreme tab.    // -----------------------------------------------------------------
     'torture-rack': {
       stamina: -14, health: -14, mood: -16, bruises: +5, bondDebt: +9, satisfaction: +7,
       notes: 'The rack — winch her joints apart until tendons tear and shoulders pop. Agonizing, crippling, premium content.'
@@ -751,8 +749,7 @@
   // NUGGET / DELIMBING — masochist body-horror. Take her limbs one at a time. Each
   // amputation is EXTREME damage; she must HEAL back up before the next can be taken (can't
   // just delimb all four at once). A full nugget (all 4 gone) CANNOT escape and CANNOT fight,
-  // is premium film content, and renders as a limbless torso. 18+ fiction.
-  // -----------------------------------------------------------------
+  // is premium film content, and renders as a limbless torso.  // -----------------------------------------------------------------
   const LIMB_KEYS = ['leftArm', 'rightArm', 'leftLeg', 'rightLeg'];
   const LIMB_LABEL = { leftArm: 'left arm', rightArm: 'right arm', leftLeg: 'left leg', rightLeg: 'right leg' };
   const LIMB_EMOJI = { leftArm: '💪', rightArm: '💪', leftLeg: '🦵', rightLeg: '🦵' };
@@ -857,8 +854,7 @@
   // A vital organ (liver / heart / lungs) kills a living girl outright. A kidney is survivable
   // while she still has the other — taking BOTH kidneys is fatal. No heal-gate: the player just
   // manages her HP. Each organ drops into the harvested-parts inventory to sell to the organ vendor.
-  // A corpse can be harvested freely (nothing left to kill). 18+ fiction.
-  // -----------------------------------------------------------------
+  // A corpse can be harvested freely (nothing left to kill).  // -----------------------------------------------------------------
   function harvestOrgan(girlId, organKey) {
     const girl = window.DMTHGame.state.getGirl(girlId);
     if (!girl) return { ok: false, reason: 'no such girl' };
@@ -926,8 +922,7 @@
   // the owned-property psychology in her voice (ollama-templates.ownershipMarkBlock), and
   // adds a possessiveness premium to recordings (film.analyzeRecording). One of each type
   // can be applied. The owner name is baked in at marking time so a later rename never
-  // rewrites an old tattoo. 18+ fiction.
-  // -----------------------------------------------------------------
+  // rewrites an old tattoo.  // -----------------------------------------------------------------
   function ownerNameNow() {
     return (window.DMTHGame.state && window.DMTHGame.state.getPlayerName)
       ? window.DMTHGame.state.getPlayerName() : 'Master';

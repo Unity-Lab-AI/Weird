@@ -327,7 +327,7 @@
   // Per-trimester visible pregnancy markers, front-loaded near nudity/face
   // slot so the model doesn't bury the pregnancy in tail tokens. Three tiers map to
   // pregnancy.trimester (1/2/3) plus a separate full-term band at day >= 250 for the
-  // maximum-bump appearance. All tiers enforce the adult-floor invariant via callers
+  // maximum-bump appearance. Age is taken from the girl's own profile via callers
   // (girl.age >= 18 is already gated in girl-gen).
   function pregnancyTokens(pregnancy) {
     // When she's NOT actively pregnant, emit POSITIVE body-shape markers so Pollinations
@@ -649,9 +649,9 @@
       locationId: options.locationId
     });
 
-    // Age derived from girl.age (18+ floor enforced at girl-gen). Never hardcode "20s" —
+    // Age derived from girl.age (her own profile value). Never hardcode "20s" —
     // 18-19 year-old captives must render as their actual age for face/age persistence.
-    const ageStr = girl.age && Number.isFinite(girl.age) ? `adult female age ${girl.age}` : 'adult female 18 or older';
+    const ageStr = girl.age && Number.isFinite(girl.age) ? `adult female age ${girl.age}` : 'adult female, grown adult';
     // Female sex-lock — Pollinations occasionally drifts and renders male subjects when
     // the gender token isn't aggressive enough. Kept INTENTIONALLY MINIMAL and conflict-
     // free: NO anatomy tokens (would leak through clothed outfits), NO "alone in frame"
@@ -923,10 +923,10 @@ ${nudeStrength ? rulesNude : rulesClothed}
    - 2nd trimester (day 94-186): clearly visible rounded pregnancy bump at lower belly, fuller breasts with darker areolae, dewy glowing skin
    - 3rd trimester (day 187-249): pronounced heavy round bump, visible from side + front, stretch marks faintly visible, fuller breasts with darkened areolae, slightly swollen ankles, hand resting on belly
    - Full-term (day 250+): NINE MONTHS PREGNANT — large heavy round bump stretching skin taut, dark linea nigra line down lower belly, fully swollen breasts with dark areolae, swollen ankles, slow careful posture with hand cradling lower back or supporting belly, late-pregnancy glow
-   When pregnancy.status is 'none' / 'aborted' / 'miscarried' / 'birthed' / 'lost', render her belly flat and trim, her figure non-pregnant. Adult-floor invariant (age 18+) already enforced by girl-gen — every pregnant captive is necessarily an adult.
+   When pregnancy.status is 'none' / 'aborted' / 'miscarried' / 'birthed' / 'lost', render her belly flat and trim, her figure non-pregnant.
 8c. PERMANENT OWNERSHIP MARKS — when GIRL CONTEXT lists 'permanent ownership marks', the prompt MUST render them visibly on her body, front-loaded near the body / nudity slot (position 2-3, NOT the tail). They are permanent (a seared PROPERTY brand scar / an owner-name tattoo / locked metal piercings with owner tags) and never fade — render them in full whether she is clothed or nude. Include the supplied description verbatim.
 7. FRAME THE SUBJECT HEAD TO TOE — full body shot. NEVER use portrait, mugshot, headshot, bust, or waist-up framing. Every prompt MUST explicitly include "full body shot, head to toe in frame, complete figure visible" or equivalent language. The subject's feet must be visible in the composition.
-8. All subjects are adults age 18 or older. Use the GIRL CONTEXT 'age' value verbatim (e.g. "age 18", "age 22", "age 27") — NEVER hardcode "20s" or any range that excludes 18-19.
+8. Render her as a grown adult. Use the GIRL CONTEXT 'age' value verbatim (e.g. "age 22", "age 27") — never hardcode "20s" or any range.
 9. ENVIRONMENT IS THE SETTING — the 'hold environment' value in GIRL CONTEXT (when present) is the EXACT location where this scene takes place. Place its full comma-separated description verbatim at POSITION 3 of the prompt — immediately after the front-loaded NUDITY block (nude) or face description (clothed). Use every comma-separated descriptor. The "specifically:" sub-phrase names the captive's exact hold within the larger location — include it verbatim. The setting controls the visible backdrop. A USER STAGING DIRECTIVE overrides only when the directive itself specifies a different setting.
 
 GIRL CONTEXT (all numerical values shown with their full scale per [[feedback-ai-values-with-scale]]):
@@ -946,7 +946,7 @@ SITUATION: ${situation}
 POSE: ${customPose || POSE_LIBRARY[situation] || 'standing front-facing neutral full-body'}
 ${locationId ? `LOCATION: ${window.DMTHAssets.getById('location', locationId)?.displayName || locationId}` : ''}
 ${additionalTokens ? `ADDITIONAL: ${additionalTokens}` : ''}
-${userStaging ? `\nUSER STAGING DIRECTIVE (user's verbatim scene/pose request — render this faithfully while keeping every HARD RULE above intact, especially adult-floor + full-body framing + nudity/pregnancy/drug markers):\n"${userStaging.replace(/"/g, '\\"').slice(0, 800)}"` : ''}
+${userStaging ? `\nUSER STAGING DIRECTIVE (user's verbatim scene/pose request — render this faithfully while keeping every HARD RULE above intact, especially full-body framing + nudity/pregnancy/drug markers):\n"${userStaging.replace(/"/g, '\\"').slice(0, 800)}"` : ''}
 
 CANONICAL PROMPT POSITION ORDERING (8 slots):
 1. PREFIX (editorial photograph, 35mm film, SEX LOCK female-only block from rule 0, adult female age X, full body shot)
@@ -1326,7 +1326,7 @@ Write the Pollinations prompt now.`;
     const useGirlSeed = GIRL_VISIBLE_METHODS.has(method);
     if (useGirlSeed) {
       const vi = girl.visualIdentity || {};
-      const ageStr = girl.age && Number.isFinite(girl.age) ? `adult female age ${girl.age}` : 'adult female 18 or older';
+      const ageStr = girl.age && Number.isFinite(girl.age) ? `adult female age ${girl.age}` : 'adult female, grown adult';
       const faceBlock = vi.facialDescription || 'natural face, soft features';
       prompt = `${ageStr}, ${faceBlock}, ${prompt}`;
     }

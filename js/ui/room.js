@@ -644,7 +644,7 @@
           ${(() => {
             // Custom image-prompt input. User types a free-form scene description; Ollama
             // composes a full prompt with all the existing guardrails (8-position canonical
-            // ordering, adult-floor, full-body framing, nudity / pregnancy / drug markers);
+            // ordering, full-body framing, nudity / pregnancy / drug markers);
             // Pollinations fires. Draft text + last result image restore from module-scoped
             // per-girl caches so state.onChange re-renders don't wipe them.
             const draft = customPoseDrafts.get(girl.id) || '';

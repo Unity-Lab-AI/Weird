@@ -311,7 +311,7 @@
     const film = window.DMTHGame.state.getFilm(filmId);
     if (!film || !window.DMTHGame.ollama) return;
     const events = (film.contentEvents || []).map(e => e.label).join('; ') || 'a session in the dungeon';
-    const sys = `You write the TITLE and BLURB for an underground adult film sold on a taboo content marketplace. 18+ fiction.
+    const sys = `You write the TITLE and BLURB for an underground adult film sold on a taboo content marketplace.
 Output EXACTLY two lines, nothing else:
 TITLE: <punchy 2-6 word title>
 BLURB: <one lurid, marketable 1-2 sentence sell line>

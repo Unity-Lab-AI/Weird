@@ -308,8 +308,8 @@
     },
     {
       id: 'skimpy-grad', displayName: 'Grad: Sash, Cap & Bare', emoji: '🎓', price: 150, tier: 3,
-      description: 'only a graduation sash draped across her bare-exposed-tits nipples-out and a mortarboard cap, otherwise fully-nude, bottomless, bare-naked-pussy, knee-high socks (adult 18+)', multiplier: 1.35, roleplay: 'highschool-grad',
-      nude: 'accessories', accessoriesOnly: 'only a satin graduation sash draped across her bare-exposed-tits nipples-out and a mortarboard graduation cap, otherwise fully-nude, bottomless, bare-naked-pussy, knee-high socks, eighteen years old', syncArchetype: 'highschool-grad'
+      description: 'only a graduation sash draped across her bare-exposed-tits nipples-out and a mortarboard cap, otherwise fully-nude, bottomless, bare-naked-pussy, knee-high socks', multiplier: 1.35, roleplay: 'highschool-grad',
+      nude: 'accessories', accessoriesOnly: 'only a satin graduation sash draped across her bare-exposed-tits nipples-out and a mortarboard graduation cap, otherwise fully-nude, bottomless, bare-naked-pussy, knee-high socks', syncArchetype: 'highschool-grad'
     },
     {
       id: 'skimpy-neighbor', displayName: 'Neighbor: Robe Falling Open', emoji: '🏡', price: 145, tier: 3,
