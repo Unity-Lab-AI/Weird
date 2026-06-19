@@ -13,6 +13,16 @@
 
 ---
 
+## 2026-06-19 — Session: RENAMEGIRL — captor renames a captive; she answers only to the name he gives her
+
+**Gee verbatim:**
+> *"and need way to rename girls if it pleases they are no longer an individual and thir captor gets to choose what they respond to"*
+
+- [x] **RENAMEGIRL.1** ✅ — a ✏️ rename button in the girl's hold header sets `girl.captiveName`. The hold header now shows the chosen name (with a "was <original>" note), the chat speaker label uses it, and `buildContextBlock` tells her "Your captor has RENAMED you 'X' — you are no longer your own person, that is the only name you answer to; your old name is gone" so she actually responds to the new name in chat. Persisted on the girl. Core surfaces (hold view + chat + template) done; a full sweep of every other girl.name display site is a minor follow-up. `js/ui/room.js`, `js/templates/ollama-templates.js`
+- Also captured verbatim (NOT built): **IMGEXPR.1** — image expression tracks Stockholm/affect, only high-Stockholm smile, full emotion range varied per girl (tracker #294). **STOCKADJUST.1** — "stockholm adjustable based on level" (tracker #295, intent to confirm).
+
+---
+
 ## 2026-06-19 — Session: CUMMOD-MAX — cum-load modifiers raise her MAX for a few days, never her current load
 
 **Gee verbatim:**

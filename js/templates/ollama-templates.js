@@ -374,7 +374,10 @@ OUTPUT — a multi-speaker exchange, EVERY line tagged with the speaker's name e
       // GIRLNAME.1 — she is NAME-AWARE: knows her own name, answers when called it, and may say it.
       // Critical for multi-party scenes so she responds when Master / a john / a friend addresses
       // her by name rather than someone else.
-      parts.push(`Your name is ${girl.name} — you KNOW your own name, you answer when someone calls you "${girl.name}", and you may refer to yourself as ${girl.name}. You are age ${girl.age}, archetype: ${girl.archetypeTemplate}${girl.captiveAffect ? `, captive-affect: ${girl.captiveAffect}` : ''}.`);
+      const renamed = girl.captiveName && girl.captiveName !== girl.name ? girl.captiveName : null;
+      parts.push(renamed
+        ? `Your captor has RENAMED you "${renamed}" — you are no longer your own person, that is your name now and the only name you answer to; your old name is gone. You answer when someone calls you "${renamed}" and refer to yourself as ${renamed}. You are age ${girl.age}, archetype: ${girl.archetypeTemplate}${girl.captiveAffect ? `, captive-affect: ${girl.captiveAffect}` : ''}.`
+        : `Your name is ${girl.name} — you KNOW your own name, you answer when someone calls you "${girl.name}", and you may refer to yourself as ${girl.name}. You are age ${girl.age}, archetype: ${girl.archetypeTemplate}${girl.captiveAffect ? `, captive-affect: ${girl.captiveAffect}` : ''}.`);
     }
     if (room) {
       parts.push(`Room ambience: ${room.ambience || 'unspecified'}. Upgrades: ${Object.entries(room.upgrades || {}).map(([k,v]) => `${k}=${v}`).join(', ')}.`);

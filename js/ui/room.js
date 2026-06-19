@@ -183,7 +183,7 @@
       <div class="grid-2">
 
         <section class="panel">
-          <h2>${girl.mood.moodEmoji} ${girl.name} <span class="muted small">(${girl.archetypeTemplate}, ${girl.age})</span></h2>
+          <h2>${girl.mood.moodEmoji} ${escapeHtml(girl.captiveName || girl.name)} <button id="rename-girl" class="btn-small" data-tooltip="Rename her — she's no longer her own person; she answers only to what you call her." style="font-size:0.7rem;padding:1px 6px;vertical-align:middle;">✏️</button> <span class="muted small">(${girl.archetypeTemplate}, ${girl.age}${girl.captiveName && girl.captiveName !== girl.name ? `, was ${escapeHtml(girl.name)}` : ''})</span></h2>
           <p class="small muted">${girl.backstoryFragment}</p>
           <p class="small">📍 ${dungeonTpl?.displayName || 'Unknown'} · hold ${(girl.assignedHoldIdx ?? 0) + 1}</p>
           <div class="room-profile-img" id="profile-img-slot">
@@ -707,7 +707,7 @@
       // Speaker label: `t.speaker` is set for partner-captive lines mirrored into this host
       // girl's shared log by a multi-girl scene (MULTIGIRL.2). Otherwise user → "Master",
       // assistant → the active girl's name.
-      const speakerOf = t => t.speaker || (t.role === 'user' ? 'Master' : girl.name);
+      const speakerOf = t => t.speaker || (t.role === 'user' ? 'Master' : (girl.captiveName || girl.name));
       const turns = window.DMTHGame.state.getTurns(girl.id, 50);
       if (turns.length < lastRenderedTurnCount) {
         // History shrank (cleared / replaced) — full repaint
@@ -739,6 +739,19 @@
         window.DMTHGame.state.clearTurns(girl.id);
         lastRenderedTurnCount = 0;
         logEl.innerHTML = '';
+      };
+    }
+
+    // RENAMEGIRL.1 — the captor renames her; she's no longer an individual and answers only to
+    // what he calls her (the chosen name flows into her chat template + her hold header).
+    const renameBtn = el.querySelector('#rename-girl');
+    if (renameBtn) {
+      renameBtn.onclick = () => {
+        const cur = girl.captiveName || girl.name;
+        const next = (prompt("Rename her. She's no longer her own person — she answers only to what you name her:", cur) || '').trim();
+        if (!next || next === cur) return;
+        window.DMTHGame.state.updateGirl(girl.id, { captiveName: next.slice(0, 40) });
+        window.DMTHRouter.go('room', { girl: girl.id });
       };
     }
 
