@@ -363,11 +363,32 @@
     }
   }
 
-  // Escort a captured girl to an open hold in the active dungeon.
-  function escortToHold(girl, dungeonId) {
+  // Every empty hold across EVERY dungeon you own — [{ dungeonId, dungeonName, holdIdx, holdLabel }].
+  // Powers the no-empty-hold capture lockout and the on-capture "which cell does she wake up in" picker.
+  function openHolds() {
+    const s = window.DMTHGame.state && window.DMTHGame.state.current;
+    if (!s || !Array.isArray(s.dungeons)) return [];
+    const out = [];
+    for (const d of s.dungeons) {
+      const tpl = window.DMTHAssets && window.DMTHAssets.getById ? window.DMTHAssets.getById('dungeon', d.templateId) : null;
+      const dName = (tpl && tpl.displayName) || d.id;
+      (d.holds || []).forEach((h, idx) => {
+        if (!h.captiveGirlId) out.push({ dungeonId: d.id, dungeonName: dName, holdIdx: idx, holdLabel: `Cell ${idx + 1}` });
+      });
+    }
+    return out;
+  }
+  // True if there's at least one empty hold anywhere — the gate for starting a new grab.
+  function hasOpenHold() { return openHolds().length > 0; }
+
+  // Escort a captured girl to an open hold. Targets a specific dungeon + hold when given
+  // (the on-capture cell picker); otherwise falls back to the first empty hold in the active dungeon.
+  function escortToHold(girl, dungeonId, holdIdx) {
     const dungeon = window.DMTHGame.state.getDungeon(dungeonId || window.DMTHGame.state.current.settings.activeDungeonId);
     if (!dungeon) throw new Error('no dungeon to escort to');
-    const openIdx = dungeon.holds.findIndex(h => !h.captiveGirlId);
+    const wantsIdx = (typeof holdIdx === 'number' && holdIdx >= 0
+      && dungeon.holds[holdIdx] && !dungeon.holds[holdIdx].captiveGirlId);
+    const openIdx = wantsIdx ? holdIdx : dungeon.holds.findIndex(h => !h.captiveGirlId);
     if (openIdx < 0) throw new Error('no open holds in dungeon');
     girl.encounterState = 'captive';
     girl.assignedDungeonId = dungeon.id;
@@ -452,6 +473,8 @@
     attemptCapture,
     previewCaptureOdds,
     escortToHold,
+    openHolds,
+    hasOpenHold,
     composeSceneVars,
     LOCATION_SPAWNS,
     TOOL_POWER,

@@ -137,6 +137,7 @@
     let desperationTier = 0;
     const selected = new Set();   // CAPSTACK loadout — tool ids stacked for the next grab
     const attemptHistory = [];    // [{toolIds, roll, chance}]
+    let lastReq = null;           // last ask-for-an-item outcome, persisted across re-renders
 
     function rerender() {
       const tools = cap.eligibleSimpleTools();   // [{id, chance, owned}]
@@ -144,6 +145,9 @@
       for (const id of [...selected]) { if (!tools.find(t => t.id === id)) selected.delete(id); }
 
       const suspicionNow = window.DMTHGame.state.current?.wallet?.suspicionByLocation?.[locId] || 0;
+      // CAPNOHOLD — no empty hold anywhere = no snatch. The button locks with a notice.
+      const openHoldsList = window.DMTHGame.hunt.openHolds ? window.DMTHGame.hunt.openHolds() : [];
+      const noHold = openHoldsList.length === 0;
       const despBonus = cap.desperationBonus(desperationTier);
       const despLabel = cap.desperationLabel(desperationTier);
       const despEmoji = ['🙂','😤','🔥','😈','😈'][desperationTier] || '😈';
@@ -180,6 +184,16 @@
       // stat-rolled odds shown per option, once per game-day per girl-type per location.
       const reqInfo = (window.DMTHGame.loot && window.DMTHGame.loot.requestOptions)
         ? window.DMTHGame.loot.requestOptions(girl, locId) : { usedToday: false, options: [] };
+      // ASKRESULT — the outcome of the last ask STICKS on the panel (it used to flash for a
+      // second then get wiped by the re-render that locks the panel, so the player saw nothing).
+      let lastReqHtml = '';
+      if (lastReq) {
+        const rolled = (lastReq.roll != null && lastReq.chance != null)
+          ? ` <span class="muted">(rolled ${Math.round(lastReq.roll * 100)} vs ${Math.round(lastReq.chance * 100)}%)</span>` : '';
+        lastReqHtml = lastReq.ok
+          ? `<p class="small gold">🎁 You asked for <b>${escapeHtml(lastReq.label)}</b> — she handed it over. 1× added to your kit.${rolled}</p>`
+          : `<p class="small">😒 You asked ${escapeHtml(girl.name)} for <b>${escapeHtml(lastReq.label)}</b> — ${escapeHtml(lastReq.reason || 'she refused')}.${rolled}</p>`;
+      }
       const reqHtml = `
         <div class="panel">
           <h2>Ask her for something</h2>
@@ -197,7 +211,7 @@
                     </button>`;
                 }).join('')}
               </div>`}
-          <div id="req-result"></div>
+          <div id="req-result">${lastReqHtml}</div>
         </div>
       `;
 
@@ -225,14 +239,15 @@
 
         <div class="panel">
           <h2>🩸 Snatch her</h2>
+          ${noHold ? `<p class="small danger" style="margin:0 0 10px;">🔒 Every hold is full — you've got nowhere to chain her. Buy or upgrade a dungeon for another empty cell before you snatch anyone new. <a href="#dungeon">Manage dungeons →</a></p>` : ''}
           <div class="stat-row" style="margin-bottom:8px;"><span>Your resolve</span><b class="${despColor}">${despEmoji} ${despLabel.toUpperCase()}${despBonus > 0 ? ` · +${Math.round(despBonus * 100)}% desperation` : ''}</b></div>
           <p class="small muted">Stack any drugs + tools — each one adds to your odds. Then drag her under. Every miss only makes you more desperate and the next grab easier (the third's basically a lock). She can't get away from you here.</p>
           <div class="btn-col" style="gap:6px;">
             ${toolCards}
           </div>
           <div class="btn-row" style="margin-top:10px;align-items:center;gap:10px;">
-            <button id="snatch-btn" class="btn-small btn-primary" ${selected.size === 0 ? 'disabled' : ''} data-tooltip="Fire the grab with your whole loadout. Single-use items (drugs / tape / rope) are spent; reusable gear (pipe / cuffs / shackles / harness) isn't.">🩸 Drag her under — ${selected.size === 0 ? 'pick gear' : combinedPct + '%'}</button>
-            ${selected.size ? `<span class="small muted">${selected.size} item${selected.size > 1 ? 's' : ''} stacked</span>` : ''}
+            <button id="snatch-btn" class="btn-small btn-primary" ${(selected.size === 0 || noHold) ? 'disabled' : ''} data-tooltip="${noHold ? 'No empty hold to put her in — get another dungeon/hold first.' : 'Fire the grab with your whole loadout. Single-use items (drugs / tape / rope) are spent; reusable gear (pipe / cuffs / shackles / harness) isn&#39;t.'}">🩸 Drag her under — ${noHold ? 'no empty hold' : (selected.size === 0 ? 'pick gear' : combinedPct + '%')}</button>
+            ${selected.size && !noHold ? `<span class="small muted">${selected.size} item${selected.size > 1 ? 's' : ''} stacked</span>` : ''}
           </div>
           ${historyHtml}
         </div>
@@ -250,23 +265,23 @@
       };
       el.querySelector('[data-action="walk"]').onclick = () => window.DMTHRouter.go('hunt');
 
-      // REQUEST.1 — ask-for-an-item handlers. Roll the chosen option, show the result, then
-      // re-render so the now-spent daily attempt locks the panel until tomorrow.
+      // ASKRESULT — ask-for-an-item handlers. Roll the chosen option, STORE the outcome, then
+      // re-render. The stored outcome renders persistently (lastReqHtml) so it survives the panel
+      // lock instead of flashing for a second and getting wiped.
       el.querySelectorAll('.req-item-btn').forEach(btn => {
         btn.onclick = () => {
           el.querySelectorAll('.req-item-btn').forEach(b => { b.disabled = true; });
           const idx = parseInt(btn.dataset.req, 10);
+          const asked = reqInfo.options[idx] || {};
           const r = window.DMTHGame.loot.requestItem(girl, locId, idx);
-          const rr = el.querySelector('#req-result');
-          const rolled = (r.roll != null && r.chance != null) ? ` <span class="muted">(rolled ${Math.round(r.roll * 100)} vs ${Math.round(r.chance * 100)}%)</span>` : '';
-          if (r.ok) {
-            rr.innerHTML = `<div class="panel"><p class="small gold">🎁 She gives it up — 1× ${escapeHtml(String(r.id).replace(/-/g, ' '))} added to your kit.${rolled}</p></div>`;
-          } else if (r.usedToday) {
-            rr.innerHTML = `<div class="panel"><p class="small warn">${escapeHtml(r.reason)}.</p></div>`;
-          } else {
-            rr.innerHTML = `<div class="panel"><p class="small">😒 ${escapeHtml(girl.name)} ${escapeHtml(r.reason || 'refuses')}.${rolled}</p></div>`;
-          }
-          setTimeout(rerender, 1100);
+          lastReq = {
+            ok: !!r.ok,
+            label: r.ok ? String(r.id).replace(/-/g, ' ') : (asked.label || 'it'),
+            reason: r.reason,
+            roll: r.roll,
+            chance: r.chance
+          };
+          rerender();
         };
       });
 
@@ -307,18 +322,22 @@
             userText: '',
             injectInto: resultEl.querySelector('#acquire-narr')
           });
-          if (result.outcome === 'success' && result.escort) {
-            // LOCPERSIST.1 — she's taken; drop her from this location's persistent spawn set.
-            try { window.DMTHGame.hunt.markEncounterCaptured(locId, girl.id); } catch (e) { /* non-fatal */ }
-            const sceneVars = window.DMTHGame.hunt.composeSceneVars({
-              girl, toolId: toolIds[0], locationId: locId, dungeonId: result.escort.dungeonId
-            });
-            await playTransitionSequence({ resultEl, girl, sceneVars });
-            const followup = document.createElement('div');
-            followup.className = 'btn-row';
-            followup.innerHTML = `<a href="#room?girl=${girl.id}" class="btn-primary">Enter her hold →</a>`;
-            resultEl.querySelector('.panel').appendChild(followup);
+          if (result.outcome === 'success') {
+            // HOLDPICK — more than one empty cell means the player chooses where she wakes up.
+            // Exactly one open hold already auto-placed her (result.escort) — go straight to transition.
+            if (result.needsHoldPick && !result.escort) {
+              renderHoldPicker(resultEl, girl, locId, result.openHolds || [], toolIds);
+            } else if (result.escort) {
+              await finalizePlacement(resultEl, girl, locId, result.escort, toolIds);
+            }
           }
+          return;
+        }
+
+        if (result.outcome === 'no-hold') {
+          // CAPNOHOLD — nowhere to put her; no gear was spent. Tell the player to get a hold/dungeon.
+          resultEl.innerHTML = `<div class="panel"><h3>🔒 Nowhere to put her</h3><p class="small danger">Every hold is full — you can't drag anyone home until you free up or build a cell.</p><div class="btn-row"><a href="#dungeon" class="btn-small">🏚️ Manage dungeons →</a></div></div>`;
+          setTimeout(rerender, 700);
           return;
         }
 
@@ -454,6 +473,46 @@
         injectInto.textContent = `(Ollama unreachable: ${err.message} — mechanics applied.)`;
       }
     }
+  }
+
+  // HOLDPICK — after a grab when >1 cell is empty, ask the player which dungeon/hold she lands in.
+  // On pick, escort her there, then run the same arrival transition the single-hold path uses.
+  function renderHoldPicker(resultEl, girl, locId, holds, toolIds) {
+    const wrap = document.createElement('div');
+    wrap.className = 'panel';
+    wrap.innerHTML = `
+      <h3>⛓️ Where does she wake up?</h3>
+      <p class="small muted">You've got more than one empty cell — pick which dungeon and hold ${escapeHtml(girl.name)} gets chained in.</p>
+      <div class="btn-col" style="gap:6px;">
+        ${holds.map((h, i) => `<button class="btn-small hold-pick" data-hp="${i}" data-tooltip="Stash her in ${escapeHtml(h.dungeonName)}, ${escapeHtml(h.holdLabel)}." style="text-align:left;">🏚️ <b>${escapeHtml(h.dungeonName)}</b> — ${escapeHtml(h.holdLabel)}</button>`).join('')}
+      </div>`;
+    resultEl.appendChild(wrap);
+    wrap.querySelectorAll('.hold-pick').forEach(btn => {
+      btn.onclick = async () => {
+        wrap.querySelectorAll('.hold-pick').forEach(b => { b.disabled = true; });
+        const h = holds[parseInt(btn.dataset.hp, 10)];
+        let escort;
+        try { escort = window.DMTHGame.hunt.escortToHold(girl, h.dungeonId, h.holdIdx); }
+        catch (e) { wrap.insertAdjacentHTML('beforeend', `<p class="small danger">${escapeHtml(e.message)}</p>`); return; }
+        wrap.remove();
+        await finalizePlacement(resultEl, girl, locId, escort, toolIds);
+      };
+    });
+  }
+
+  // Shared placement tail — drop her from the location's spawn set, play the arrival transition,
+  // then surface the "enter her hold" link. Used by both the auto-placed and hand-picked paths.
+  async function finalizePlacement(resultEl, girl, locId, escort, toolIds) {
+    // LOCPERSIST.1 — she's taken; drop her from this location's persistent spawn set.
+    try { window.DMTHGame.hunt.markEncounterCaptured(locId, girl.id); } catch (e) { /* non-fatal */ }
+    const sceneVars = window.DMTHGame.hunt.composeSceneVars({
+      girl, toolId: toolIds[0], locationId: locId, dungeonId: escort.dungeonId
+    });
+    await playTransitionSequence({ resultEl, girl, sceneVars });
+    const followup = document.createElement('div');
+    followup.className = 'btn-row';
+    followup.innerHTML = `<a href="#room?girl=${girl.id}" class="btn-primary">Enter her hold →</a>`;
+    resultEl.appendChild(followup);
   }
 
   function moodEmoji(g) { return g.mood?.moodEmoji || '😐'; }

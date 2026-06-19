@@ -373,9 +373,13 @@
   // DESPERATION tier (the next grab gets EASIER) — she never "escapes" from repeated attempts,
   // so the player never gets stuck (CAPEASE.1). Single-use tools in the loadout are consumed per
   // attempt; reusable ones (pipe / handcuffs / shackles / harness) survive.
-  function stackedAttempt({ girl, toolIds, locationId, desperationTier = 0 }) {
+  function stackedAttempt({ girl, toolIds, locationId, desperationTier = 0, holdChoice = null }) {
     const ids = (toolIds || []).filter(id => SIMPLE_CAPTURE_CHANCE[id] != null);
     if (!ids.length) return { outcome: 'fail', reason: 'no-tools-selected', desperationTier };
+    // You can't drag a girl home with nowhere to put her — block the grab before any gear is spent
+    // when every hold is full, so the player gets a clean "go get another hold/dungeon" lockout.
+    const holdsBefore = window.DMTHGame.hunt && window.DMTHGame.hunt.openHolds ? window.DMTHGame.hunt.openHolds() : [];
+    if (!holdsBefore.length) return { outcome: 'no-hold', reason: 'no-free-hold', desperationTier };
     // WANTEDDOWN.1 — stamp hunting activity so "time off from hunting" cools WANTED faster.
     if (window.DMTHGame.wanted?.noteHunt) window.DMTHGame.wanted.noteHunt();
     const inv = window.DMTHGame.state.current.inventory || {};
@@ -400,7 +404,21 @@
         const op = window.DMTHGame.progression?.ownedLocationPerks ? window.DMTHGame.progression.ownedLocationPerks(locationId) : null;
         if (op && op.wantedReduction) heat = heat * (1 - op.wantedReduction);
         if (heat > 0 && window.DMTHGame.state.addWanted) window.DMTHGame.state.addWanted(heat, 'snatch:' + bestToolTier(ids));
-        const escort = window.DMTHGame.hunt.escortToHold(girl);
+        // Placement: the player chooses which dungeon/cell she wakes up in. If an explicit
+        // holdChoice was passed (the picker), use it. With exactly ONE empty hold there's no
+        // choice to make — auto-escort. With MORE than one, defer placement so the UI can ask.
+        const holds = window.DMTHGame.hunt.openHolds ? window.DMTHGame.hunt.openHolds() : [];
+        let escort = null;
+        let needsHoldPick = false;
+        if (holdChoice && holdChoice.dungeonId != null) {
+          escort = window.DMTHGame.hunt.escortToHold(girl, holdChoice.dungeonId, holdChoice.holdIdx);
+        } else if (holds.length === 1) {
+          escort = window.DMTHGame.hunt.escortToHold(girl, holds[0].dungeonId, holds[0].holdIdx);
+        } else if (holds.length > 1) {
+          needsHoldPick = true;   // UI prompts which cell, then re-fires placement via placeCaptured()
+        } else {
+          escort = window.DMTHGame.hunt.escortToHold(girl);   // safety net (shouldn't reach — guarded)
+        }
         // LOOT.1 — a successful grab drops location-aware loot (a tool from the scene, or cash).
         let loot = null;
         if (window.DMTHGame.loot) { try { loot = window.DMTHGame.loot.rollCaptureLoot(locationId); } catch (e) { /* non-fatal */ } }
@@ -409,7 +427,7 @@
         if (window.DMTHGame.loot && window.DMTHGame.loot.grantCaptureHaul) { try { haul = window.DMTHGame.loot.grantCaptureHaul(girl); } catch (e) { /* non-fatal */ } }
         // DEPRAVITY XP (PLVL.2) — a successful snatch is a big level boost.
         if (window.DMTHGame.progression) window.DMTHGame.progression.grantXp(25, 'snatch');
-        return { outcome: 'success', toolIds: ids, chance, roll, escort, desperationTier, loot, haul, consumed };
+        return { outcome: 'success', toolIds: ids, chance, roll, escort, needsHoldPick, openHolds: holds, desperationTier, loot, haul, consumed };
       } catch (err) {
         return { outcome: 'success-no-room', toolIds: ids, chance, roll, error: err.message, desperationTier, consumed };
       }

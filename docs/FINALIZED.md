@@ -13,6 +13,20 @@
 
 ---
 
+## 2026-06-19 — Session: CAPTURE-FLOW BUGS — no-hold lockout + on-capture hold picker + persistent ask-for-item outcome
+
+**Gee verbatim:**
+> *"you shouldnt be able to capture a girel if u dont have a hold to put here in so need a lock out with notice saying that you need a ned hold or dungeon"*
+> *"once we capture a girl is a success we need an option of which dungeon/hold to put them in, currently it just auto sticks them in one"*
+> *"when i asked a girl for zip ties, this message instantly poped up and i had no response as to the outcome of the ask"*
+
+- [x] **CAPNOHOLD.1** ✅ — you can't drag a girl home with nowhere to put her. New `hunt.openHolds()` (every empty cell across EVERY dungeon → `[{dungeonId, dungeonName, holdIdx, holdLabel}]`) + `hunt.hasOpenHold()`. `capture.stackedAttempt` checks for a free hold BEFORE spending any gear and returns `{outcome:'no-hold'}` when every hold is full — so a blocked grab wastes no drugs/tools (verified: gear count unchanged). The hunt approach UI shows a red lockout notice ("Every hold is full … Buy or upgrade a dungeon … Manage dungeons →") and disables the Drag-her-under button while there's no empty hold; the click handler also surfaces the no-hold notice defensively. `js/game/hunt.js`, `js/game/capture.js`, `js/ui/hunt-view.js`
+- [x] **HOLDPICK.1** ✅ — on a successful grab the player chooses where she wakes up instead of auto-stuffing the first cell. `escortToHold(girl, dungeonId, holdIdx)` now accepts an explicit target hold (falls back to first-open when omitted — keeps slave-market + back-compat callers working). `stackedAttempt` defers placement when MORE than one cell is empty (`needsHoldPick:true`, returns the `openHolds` list); with exactly one open cell it auto-places (no pointless prompt). The hunt UI renders a cell picker ("⛓️ Where does she wake up?" → one button per open hold across all dungeons); picking escorts her there, then runs the same arrival transition + "Enter her hold →" link the single-hold path uses. `js/game/hunt.js`, `js/game/capture.js`, `js/ui/hunt-view.js`
+- [x] **ASKRESULT.1** ✅ — the ask-for-an-item outcome used to flash for ~1s then get wiped by the re-render that locks the daily attempt, so the player saw "nothing." The outcome now STICKS: the result (gave it up / refused, with the roll) is stored in encounter state (`lastReq`) and rendered persistently in the request panel through every re-render, alongside the "come back tomorrow" lock. `js/ui/hunt-view.js`
+- Verified headless (Playwright, sandbox new game): full holds → `stackedAttempt` returns `no-hold` and rohypnol count unchanged; one open hold → auto-escort with `escort` set, no pick; three empty holds → `needsHoldPick:true`, no auto-escort, then `escortToHold(d,2)` places her in the chosen cell and into the roster; zero console/page errors.
+
+---
+
 ## 2026-06-19 — Session: BCPILL — remove Stockholm off-screen contraception + add a stockable, auto-taken birth-control pill (zero-gap protection)
 
 **Gee verbatim:**
