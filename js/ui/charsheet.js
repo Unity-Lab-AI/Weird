@@ -9,6 +9,10 @@
 (function () {
   'use strict';
 
+  // Single persistent state-change subscription (subscribing inside render() loops forever: the
+  // emit() listener-Set re-visits listeners added during iteration). Subscription lives in mount().
+  let sheetUnsub = null;
+
   // ---- TABOO PERK NAMING ----
   // Every aggregated trophy-perk category gets a depraved display name + emoji. The underlying
   // key is what the game math reads; this is just the player-facing flex. Kept in sync with
@@ -197,16 +201,21 @@
       </section>
     `;
 
-    // Re-render live when state changes while this page is open.
-    const unsub = window.DMTHGame.state.onChange(() => {
+    // No subscription inside render (it would loop during emit) — see mount().
+  }
+
+  function mount(el) {
+    if (sheetUnsub) { try { sheetUnsub(); } catch (e) { /* ignore */ } sheetUnsub = null; }
+    render(el);
+    sheetUnsub = window.DMTHGame.state.onChange(() => {
       if (location.hash.startsWith('#charsheet')) render(el);
     });
-    return unsub;
+    return sheetUnsub;
   }
 
   function escapeHtml(s) {
     return String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
   }
 
-  window.DMTHRouter.register('charsheet', render);
+  window.DMTHRouter.register("charsheet", mount);
 })();

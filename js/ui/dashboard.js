@@ -3,6 +3,12 @@
 (function () {
   'use strict';
 
+  // Single persistent state-change subscription for this page. Subscribing from inside render()
+  // is a freeze bug: state.emit() iterates the listener Set, and a Set re-visits elements added
+  // during iteration — so subscribing from within an emit-triggered render loops forever in one
+  // emit. The subscription lives in mount() (once); render() only builds DOM.
+  let dashUnsub = null;
+
   function render(el) {
     const s = window.DMTHGame.state.current;
     if (!s || !s.createdAt) {
@@ -214,12 +220,19 @@
       render(el);
     };
 
-    // No listener cleanup needed for static anchors.
-    const unsub = window.DMTHGame.state.onChange(() => {
-      if (location.hash === '#dashboard' || location.hash === '') render(el);
-    });
-    return unsub;
+    // No subscription here — render() only builds DOM (see mount()).
   }
 
-  window.DMTHRouter.register('dashboard', render);
+  // Page entry point: subscribe EXACTLY ONCE (replacing any prior listener), then re-render on
+  // every state change. The router registers this; render() never touches the listener Set.
+  function mount(el) {
+    if (dashUnsub) { try { dashUnsub(); } catch (e) { /* ignore */ } dashUnsub = null; }
+    render(el);
+    dashUnsub = window.DMTHGame.state.onChange(() => {
+      if (location.hash === '#dashboard' || location.hash === '') render(el);
+    });
+    return dashUnsub;
+  }
+
+  window.DMTHRouter.register('dashboard', mount);
 })();
