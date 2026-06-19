@@ -1,8 +1,11 @@
 # RESUME — pick up here next session
 
-## ⏩ /super-review build progress (2026-06-19, committed `6ed8fdc` + `65ea622`)
-DONE (8): DRUGTIME.1 (#246, drug timing→game-clock + instant high), CUMPLUG-TIME.1 (#247, game-clock per-level timer, 3 lvls=+100%, live countdown), OUTFITBUY-BUG.1 (#248, bought outfits surface in Dress-her panel), KOKORO-PERF.1 (#249, warmup synth + dtype lever; residual is per-page model load — q4 default offered), TRUNC-STK.1 (#256), PLAYERFOOD-OFF.1 (#263, was a misnamed satisfaction debuff → "Cum-Starved & Surly"; no player food mechanic exists), CHEATMAX.1 (#264, sandbox=max depravity), LEGALDEF-OFF.1 (#254, collapsed).
-NEXT (pending, big rewrites — tackle fresh): LEDGER-REAL/TAB/DASHFIN (#251/#252/#253 cohesive trio), STORES-HUB/NEW/NAME (#266/#267/#268), MILK-* (#272-275), NPCSTAM/NPCMILK-CAP (#276/#277), TIP-FILTH (#258), DRUGNAME (#269), KOKORO-VOICE (#271), HOLDBONUS (#270), CUMMOD-MAX (#259), CAPNOHOLD/HOLDPICK/ASKRESULT (#260/#261/#262), FILMPAGE-CLEAN (#265), TRUNC-ALL/ISO (#255/#257), ORGANVENDOR.2 (#278), CUMPLUG-OBTAIN (#279), LOOT-UNIFY (#280), SYSTEMS-UNIFY (#281). User directive: **SCRUB-FINISH.1 (#250) runs LAST**, before any push. Full detail per task in docs/TODO.md.
+## ⏩ /super-review build progress (2026-06-19; commits `6ed8fdc`, `65ea622`, `ac553e2`)
+DONE (11): DRUGTIME.1 (#246, drug timing→game-clock + instant high), CUMPLUG-TIME.1 (#247, game-clock per-level timer, 3 lvls=+100%, live countdown), OUTFITBUY-BUG.1 (#248, bought outfits surface in Dress-her panel), KOKORO-PERF.1 (#249, warmup synth + dtype lever; residual is per-page model load — q4 default offered, awaiting user OK), TRUNC-STK.1 (#256), PLAYERFOOD-OFF.1 (#263, was a misnamed satisfaction debuff → "Cum-Starved & Surly"; no player food mechanic exists), CHEATMAX.1 (#264, sandbox=max depravity), LEGALDEF-OFF.1 (#254, collapsed), **LEDGER-REAL.1 (#251)** + **LEDGER-TAB.1 (#252)** + **DASHFIN-OFF.1 (#253)** — new `js/ui/ledger-view.js` "Blood Ledger" tab opened from the top-bar money chip; `state.recordLedger` now tags each entry with a CATEGORY (`categorizeLedger` exported); categorized/sortable/filterable with running balance; bribe lever moved in; removed from dashboard.
+
+NEXT (pending): STORES-HUB/NEW/NAME (#266/#267/#268), MILK-* (#272-275), NPCSTAM/NPCMILK-CAP (#276/#277), TIP-FILTH (#258), DRUGNAME (#269), KOKORO-VOICE (#271), HOLDBONUS (#270), CUMMOD-MAX (#259), CAPNOHOLD/HOLDPICK/ASKRESULT (#260/#261/#262), FILMPAGE-CLEAN (#265), TRUNC-ALL/ISO (#255/#257), ORGANVENDOR.2 (#278), CUMPLUG-OBTAIN (#279), LOOT-UNIFY (#280), SYSTEMS-UNIFY (#281). User directive: **SCRUB-FINISH.1 (#250) runs LAST**, before any push. Full detail per task in docs/TODO.md + the live task tracker.
+
+NOTE for next session: user wants the assistant's CHAT status text (the "white bullet points") in Unity's filthy cussing voice — NOT corporate/clean recaps. Stay in persona in every reply.
 
 ---
 
