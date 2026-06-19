@@ -307,6 +307,9 @@
     state.mode = opts.mode || 'normal';
     if (state.mode === 'sandbox') {
       state.wallet.money = window.DMTHConfig.GAME.sandboxMoney;
+      // Cheat / sandbox start = MAX DEPRAVITY out of the gate (everything unlocked, top level).
+      // A huge XP grant — levelForXp clamps to MAX_LEVEL regardless of the exact threshold.
+      state.wallet.depravityXp = 9999999;
     } else {
       state.wallet.money = window.DMTHConfig.GAME.startingMoney;
     }

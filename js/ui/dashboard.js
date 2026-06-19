@@ -144,7 +144,7 @@
                 const stock = (g.bond?.bondLevel || 0) + 1;
                 return `<a class="cap-tile" href="#room?girl=${g.id}" data-tooltip="Enter ${g.name}'s hold — ${g.archetypeTemplate}, Stockholm ${stock}/10, ${hp}/${maxH} HP.">
                   <div class="cap-tile-name">${g.mood.moodEmoji} ${g.name}${pregBadge}</div>
-                  <div class="cap-tile-meta"><span>⛓ Stk ${stock}/10</span><span>${g.archetypeTemplate}</span><span>❤️ ${hp}/${maxH}</span></div>
+                  <div class="cap-tile-meta"><span>⛓ Stockholm ${stock}/10</span><span>${g.archetypeTemplate}</span><span>❤️ Health ${hp}/${maxH}</span></div>
                   <div class="bar"><div class="bar-fill ${hp < maxH * 0.3 ? 'danger' : ''}" style="width:${hpPct}%"></div></div>
                 </a>`;
               }).join('')}</div>`
@@ -152,8 +152,8 @@
         </div>
       </section>
 
-      <section class="panel" data-tooltip="Pre-bought defenses that AUTO-APPLY the moment a raid hits — no scramble, no menu mid-bust. Stock them while you're flush so a bad raid doesn't end the run.">
-        <h2>🚨 Legal Defenses</h2>
+      <details class="sect" style="margin-top:8px" data-tooltip="Pre-bought defenses that AUTO-APPLY the moment a raid hits — no scramble, no menu mid-bust. Stock them while you're flush so a bad raid doesn't end the run.">
+        <summary>🚨 Legal Defenses</summary><div class="sect-body">
         <p class="small muted">Raids hit on their own when WANTED runs high. These kick in automatically: a lawyer beats a body-in-hold instant-arrest (or cuts a fine 40%), dirty-cop connections let you bribe a raid away entirely, and an escape kit lets you FLEE an unpayable fine instead of going to prison.</p>
         ${window.DMTHGame.arrest && window.DMTHGame.arrest.VALVES ? (() => {
           const A = window.DMTHGame.arrest;
@@ -167,7 +167,7 @@
             : `<div class="stat-row" data-tooltip="One-time. Unlocks bribing a raid away — costs ~1.6× the fine but slashes WANTED far harder than a fine and leaves no escalating record."><span>💰 Dirty-Cop Connections</span><button class="btn-small" data-buy-bribe>Buy $${A.BRIBE_COST.toLocaleString()}</button></div>`;
           return rows + bribe;
         })() : '<p class="muted small">—</p>'}
-      </section>
+      </div></details>
 
     `;
 

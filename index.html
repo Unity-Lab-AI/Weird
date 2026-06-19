@@ -11,7 +11,7 @@
   <meta http-equiv="Expires" content="0" />
 
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
-  <link rel="stylesheet" href="css/landing.css?v=20260619084124" />
+  <link rel="stylesheet" href="css/landing.css?v=20260619084644" />
   <style>
     /* Public landing page sectioning. Each top-level section is anchor-routed via
        simple hash-based show/hide; default route = home. */
@@ -46,24 +46,24 @@
 <body>
 
   <!-- Env injection — optional, gitignored. No failure if absent. -->
-  <script src="js/env.local.js?v=20260619084124" onerror="console.debug('[env] no env.local.js — normal for deploy')"></script>
+  <script src="js/env.local.js?v=20260619084644" onerror="console.debug('[env] no env.local.js — normal for deploy')"></script>
 
   <!-- Age verification + legal acceptance gate — first thing that fires. -->
-  <script src="js/ui/age-gate.js?v=20260619084124"></script>
+  <script src="js/ui/age-gate.js?v=20260619084644"></script>
 
   <!-- Core config + modules. Non-module scripts in load-dependency order. -->
-  <script src="js/config.js?v=20260619084124"></script>
-  <script src="js/storage.js?v=20260619084124"></script>
-  <script src="js/voices/catalog.js?v=20260619084124"></script>
-  <script src="js/templates/ollama-templates.js?v=20260619084124"></script>
-  <script src="js/assets/catalog.js?v=20260619084124"></script>
-  <script src="js/assets/loader.js?v=20260619084124"></script>
-  <script src="js/setup/detector.js?v=20260619084124"></script>
-  <script src="js/setup/installer.js?v=20260619084124"></script>
-  <script src="js/setup/models.js?v=20260619084124"></script>
-  <script src="js/setup/ollama-repair.js?v=20260619084124"></script>
-  <script src="js/setup/kokoro.js?v=20260619084124"></script>
-  <script src="js/ui/ollama-repair-overlay.js?v=20260619084124"></script>
+  <script src="js/config.js?v=20260619084644"></script>
+  <script src="js/storage.js?v=20260619084644"></script>
+  <script src="js/voices/catalog.js?v=20260619084644"></script>
+  <script src="js/templates/ollama-templates.js?v=20260619084644"></script>
+  <script src="js/assets/catalog.js?v=20260619084644"></script>
+  <script src="js/assets/loader.js?v=20260619084644"></script>
+  <script src="js/setup/detector.js?v=20260619084644"></script>
+  <script src="js/setup/installer.js?v=20260619084644"></script>
+  <script src="js/setup/models.js?v=20260619084644"></script>
+  <script src="js/setup/ollama-repair.js?v=20260619084644"></script>
+  <script src="js/setup/kokoro.js?v=20260619084644"></script>
+  <script src="js/ui/ollama-repair-overlay.js?v=20260619084644"></script>
 
   <!-- Hero -->
   <header class="hero">
@@ -591,8 +591,8 @@
   </footer>
 
   <!-- UI controllers load last -->
-  <script src="js/ui/settings.js?v=20260619084124"></script>
-  <script src="js/ui/landing.js?v=20260619084124"></script>
+  <script src="js/ui/settings.js?v=20260619084644"></script>
+  <script src="js/ui/landing.js?v=20260619084644"></script>
 
   <!-- Public landing page router. Hash-based show/hide for the top-level sections
        (home / setup / about / terms / privacy / settings). Continue Game

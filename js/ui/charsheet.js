@@ -113,7 +113,7 @@
     }
     if (sat < 50) {
       const b = ((sat - 50) / 50) * 0.10;
-      debuffs.push({ emoji: '😒', name: 'Starved & Surly', detail: `${pct(b)} capture odds`, blurb: 'Unsatisfied and distracted — you\'re off your game in the field.' });
+      debuffs.push({ emoji: '😒', name: 'Cum-Starved & Surly', detail: `${pct(b)} capture odds`, blurb: 'Not your belly — your balls. You haven\'t nutted enough; backed-up and distracted in the field. You NEVER eat or drink (only your girls do) — fuck / film / edge a captive to spike satisfaction and shake this off.' });
     }
     if (corpses > 0 && wanted.level >= 60) {
       debuffs.push({ emoji: '⚰️', name: 'Bodies to Bury', detail: `${corpses} corpse${corpses === 1 ? '' : 's'} · raid risk up`, blurb: 'Too many missing girls trace back to you — a raid is coming.' });
