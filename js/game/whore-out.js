@@ -270,7 +270,7 @@
     const satMul = 1 + ((sat - 50) / 50) * 0.12;
     // CUMCAP.2 — a filled-up girl (cumLoad near her trained capacity) is premium content: johns
     // pay more the closer she is to maxed (up to +35% at cap).
-    const cumRatio = Math.min(1, (girl.body?.cumLoad || 0) / (girl.body?.cumLoadCap || 10));
+    const cumRatio = Math.min(1, (girl.body?.cumLoad || 0) / ((window.DMTHGame.cumtool && window.DMTHGame.cumtool.effectiveCap ? window.DMTHGame.cumtool.effectiveCap(girl.body) : (girl.body?.cumLoadCap || 10)) || 10));
     const cumMul = 1 + 0.35 * cumRatio;
     const payment = Math.round(basePay * happiness.multiplier * necroMult * satMul * cumMul);
     const tipRoll = Math.random() < arc.tipChance;
@@ -533,7 +533,7 @@
       }
       const gC = window.DMTHGame.state.getGirl(girl.id);
       if (gC && gC.body) {
-        const cap = gC.body.cumLoadCap ?? 10;
+        const cap = (window.DMTHGame.cumtool && window.DMTHGame.cumtool.effectiveCap) ? window.DMTHGame.cumtool.effectiveCap(gC.body) : (gC.body.cumLoadCap ?? 10);
         window.DMTHGame.state.updateGirl(girl.id, { body: { ...gC.body, cumLoad: Math.min(cap, (gC.body.cumLoad || 0) + FRIEND_CUM_WAD) } });
       }
     }
@@ -676,7 +676,7 @@
     let bukkake = null;
     const gAfter = window.DMTHGame.state.getGirl(girlId);
     if (encs.length >= 2 && gAfter && gAfter.encounterState === 'captive') {
-      const cap = gAfter.body?.cumLoadCap ?? 10;
+      const cap = (window.DMTHGame.cumtool && window.DMTHGame.cumtool.effectiveCap) ? window.DMTHGame.cumtool.effectiveCap(gAfter.body) : (gAfter.body?.cumLoadCap ?? 10);
       const body = { ...gAfter.body };
       body.cumLoad = Math.min(cap, (body.cumLoad || 0) + encs.length * 0.6);
       body.recentActTag = 'bukkake';

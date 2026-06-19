@@ -30,8 +30,9 @@
     const body = { ...girl.body };
     body.arousal = clamp(body.arousal + safeDelta.arousal, 0, 100);
     body.wetness = clamp(body.wetness + safeDelta.wetness, 0, 100);
-    // CUMCAP.1 — cumLoad is clamped to her trained storage capacity (default 10, raised by tools).
-    body.cumLoad = Math.max(0, Math.min(body.cumLoadCap ?? 10, body.cumLoad + safeDelta.cumLoad));
+    // CUMCAP.1 — cumLoad is clamped to her storage capacity (trained cap + any temporary modifier bonus, default 10).
+    const _cumCap = (window.DMTHGame.cumtool && window.DMTHGame.cumtool.effectiveCap) ? window.DMTHGame.cumtool.effectiveCap(body) : (body.cumLoadCap ?? 10);
+    body.cumLoad = Math.max(0, Math.min(_cumCap, body.cumLoad + safeDelta.cumLoad));
     body.bruises = Math.max(0, Math.min(99, body.bruises + safeDelta.bruises));
     body.high = clamp(body.high + safeDelta.high, 0, 100);
     delta = safeDelta;   // use the clamped version for everything below

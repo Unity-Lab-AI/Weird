@@ -94,7 +94,7 @@
       const stam = g.body.stamina ?? 70;
       const hp = g.body.health ?? 100;
       // STATNUM.1 — show value/capacity. CUMCAP.1 cum capacity + ROBUST-HP.1 max-health ceiling.
-      const cumCap = g.body.cumLoadCap ?? 10;
+      const cumCap = (window.DMTHGame.cumtool && window.DMTHGame.cumtool.effectiveCap) ? window.DMTHGame.cumtool.effectiveCap(g.body) : (g.body.cumLoadCap ?? 10);
       const maxH = (window.DMTHGame.actionEffects && window.DMTHGame.actionEffects.maxHealthFor) ? window.DMTHGame.actionEffects.maxHealthFor(g) : 100;
       const stamClass = stam >= 60 ? '' : stam >= 30 ? 'warn' : 'danger';
       const hpClass = hp >= 60 ? '' : hp >= 30 ? 'warn' : 'danger';

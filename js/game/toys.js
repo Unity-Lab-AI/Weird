@@ -146,7 +146,8 @@
     if (fx.arousal) b.arousal = clamp((b.arousal ?? 0) + fx.arousal + (maso ? 12 : 0), 0, 100);
     if (fx.wetness) b.wetness = clamp((b.wetness ?? 0) + fx.wetness + (maso ? 10 : 0), 0, 100);
     if (fx.bruises) b.bruises = clamp((b.bruises ?? 0) + fx.bruises, 0, 99);
-    if (fx.cumLoad) b.cumLoad = +(((b.cumLoad || 0) + fx.cumLoad).toFixed(1));
+    // CUMMOD-MAX — a toy doesn't PRODUCE cum; a cum-load modifier raises her cum-load MAX for a few days, not her current load.
+    if (fx.cumLoad && window.DMTHGame.cumtool) window.DMTHGame.cumtool.addTempCapBonus(b, fx.cumLoad);
     if (fx.tag) { b.recentActTag = fx.tag; if (window.DMTHGame.gameClock) b.recentActAt = window.DMTHGame.gameClock.now(); }
     // Stamp the in-use toy so her next image renders the implement on her body
     // (gag in her mouth, clamps, machine, etc.). TTL-faded by imaging like recentActTag.
@@ -191,7 +192,8 @@
     if (fx.arousal) b.arousal = clamp((b.arousal ?? 0) + fx.arousal, 0, 100);
     if (fx.wetness) b.wetness = clamp((b.wetness ?? 0) + fx.wetness, 0, 100);
     if (fx.bruises) b.bruises = clamp((b.bruises ?? 0) + fx.bruises, 0, 99);
-    if (fx.cumLoad) b.cumLoad = +(((b.cumLoad || 0) + fx.cumLoad).toFixed(1));
+    // CUMMOD-MAX — a toy doesn't PRODUCE cum; a cum-load modifier raises her cum-load MAX for a few days, not her current load.
+    if (fx.cumLoad && window.DMTHGame.cumtool) window.DMTHGame.cumtool.addTempCapBonus(b, fx.cumLoad);
     if (fx.tag) { b.recentActTag = fx.tag; if (window.DMTHGame.gameClock) b.recentActAt = window.DMTHGame.gameClock.now(); }
     if (TOY_IMG[toyId]) { b.recentToy = toyId; if (window.DMTHGame.gameClock) b.recentToyAt = window.DMTHGame.gameClock.now(); }
     const bond = { ...(girl.bond || {}) };

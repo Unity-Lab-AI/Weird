@@ -503,8 +503,8 @@
     if (action.arousal) body.arousal = clamp((body.arousal ?? 0) + action.arousal, 0, 100);
     if (action.wetness) body.wetness = clamp((body.wetness ?? 0) + action.wetness, 0, 100);
     if (action.bruises) body.bruises = clamp((body.bruises ?? 0) + (action.bruises < 0 ? action.bruises : action.bruises * strainMul), 0, 99);
-    // CUMCAP.1 — clamp cumLoad to her trained storage capacity (default 10).
-    if (action.cumLoad) body.cumLoad = Math.max(0, Math.min(body.cumLoadCap ?? 10, (body.cumLoad ?? 0) + action.cumLoad));
+    // CUMCAP.1 — clamp cumLoad to her storage capacity (trained cap + any temporary modifier bonus).
+    if (action.cumLoad) { const _cc = (window.DMTHGame.cumtool && window.DMTHGame.cumtool.effectiveCap) ? window.DMTHGame.cumtool.effectiveCap(body) : (body.cumLoadCap ?? 10); body.cumLoad = Math.max(0, Math.min(_cc, (body.cumLoad ?? 0) + action.cumLoad)); }
 
     // Mood was previously declared in 30+ ACTIONS entries but never applied. moodPressure
     // tracks cumulative drift so the model name reclassifies
@@ -1327,7 +1327,7 @@
       }
       // CUMCAP.2 — a girl stuffed near her cum-load capacity is uncomfortable: small stamina +
       // health drain (the escape + mood cost is applied to the patch below).
-      const cumRatio = (body.cumLoad || 0) / (body.cumLoadCap || 10);
+      const cumRatio = (body.cumLoad || 0) / ((window.DMTHGame.cumtool && window.DMTHGame.cumtool.effectiveCap ? window.DMTHGame.cumtool.effectiveCap(body) : (body.cumLoadCap || 10)) || 10);
       const overfull = cumRatio >= 0.85;
       if (overfull) {
         staminaDelta += -1;

@@ -13,6 +13,15 @@
 
 ---
 
+## 2026-06-19 — Session: CUMMOD-MAX — cum-load modifiers raise her MAX for a few days, never her current load
+
+**Gee verbatim:**
+> *"items like the Relentless Fucking Machine that give a cum load bonus ,, should not actuall increase giirls cum load but makes it so for next few days girl fucked by machine has higher cum load max, and that goes for all things that dont actually produce cum but have a cum load modifier"*
+
+- [x] **CUMMOD-MAX.1** ✅ — a toy/implement doesn't PRODUCE cum, so its cum-load modifier no longer adds to her CURRENT load — it raises her cum-load MAX for ~3 game-days. New temp-cap layer in `cumtool.js`: `addTempCapBonus(body, fxCumLoad)` stores `body.cumCapTemp = { bonus, untilMin }` (bonus = round(fx×5) → fucking-machine +4, loop-gag +3, anal-prolapser +2), refreshes (never infinitely stacks), and `effectiveCap(body)` = permanent trained cap + active temp bonus (expires lazily, no tick). `toys.js` applyToy + applyExternal now call addTempCapBonus instead of bumping `b.cumLoad`. Every gameplay cum-cap read-site switched to `effectiveCap`: the clamp in delta.js + action-effects applyAction (she can now HOLD more while boosted), the room stat-bar display, the CUMCAP.2 overfull check, and john/friend/gangbang pay ratios (whore-out ×3) + film value — so a maxed-while-boosted girl earns the higher premium. Permanent-cap training checks (cumtool insert ceiling, kegel CUMCAP_MAX) intentionally keep reading the raw trained cap. node -c clean. `js/game/cumtool.js`, `js/game/toys.js`, `js/game/delta.js`, `js/ui/room.js`, `js/game/action-effects.js`, `js/game/whore-out.js`
+
+---
+
 ## 2026-06-19 — Session: NO-PLANT + positive-prompt + girl-word — scrub defensive age disclaimers, kill negative prompts, "adult girl" not "adult woman"
 
 **Gee verbatim:**

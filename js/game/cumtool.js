@@ -100,6 +100,30 @@
     }
   }
 
+  // ── TEMPORARY cum-load-MAX bonus (CUMMOD-MAX) ──────────────────────────────
+  // A modifier that does NOT actually produce cum (the Relentless Fucking Machine, a plug left in,
+  // any cum-load-modifier toy) must NOT raise her CURRENT load — it raises her cum-load MAX for the
+  // next few days. Stored as { bonus, untilMin } on body.cumCapTemp; expires lazily (no tick needed).
+  const TEMP_CAP_GAME_MIN = 4320;   // ~3 game-days the raised max holds
+  function activeCapBonus(body) {
+    const t = body && body.cumCapTemp;
+    if (!t || !t.bonus) return 0;
+    return gnow() < (t.untilMin || 0) ? t.bonus : 0;   // 0 once the window lapses
+  }
+  // Effective cum-load cap = permanent trained cap + any active temporary modifier bonus.
+  function effectiveCap(body) {
+    return (body && body.cumLoadCap != null ? body.cumLoadCap : 10) + activeCapBonus(body);
+  }
+  // Apply a non-cum-producing modifier as a TEMPORARY max bump (never current load). Mutates body.
+  // fxCumLoad is the legacy per-use cum value (~0.4-0.8) — scaled to a meaningful cap bonus.
+  function addTempCapBonus(body, fxCumLoad) {
+    if (!body || !fxCumLoad) return 0;
+    const bonus = Math.max(1, Math.round(fxCumLoad * 5));
+    const keep = Math.max(activeCapBonus(body), bonus);   // refresh, don't infinitely stack
+    body.cumCapTemp = { bonus: keep, untilMin: gnow() + TEMP_CAP_GAME_MIN };
+    return keep;
+  }
+
   window.DMTHGame = window.DMTHGame || {};
-  window.DMTHGame.cumtool = Object.freeze({ insert, remove, progress, tick, plugLevel, PLUG_MAX_LEVEL, PLUG_LEVEL_GAME_MIN, CUMTOOL_CAP_CEILING });
+  window.DMTHGame.cumtool = Object.freeze({ insert, remove, progress, tick, plugLevel, PLUG_MAX_LEVEL, PLUG_LEVEL_GAME_MIN, CUMTOOL_CAP_CEILING, effectiveCap, activeCapBonus, addTempCapBonus, TEMP_CAP_GAME_MIN });
 })();
