@@ -214,6 +214,123 @@
       multiplier: 1.2,
       roleplay: 'cheerleader'
     },
+
+    // SKIMPYWEAR.1 (Gee) — per-girl-type SKIMPY / MAX-NUDITY outfits: "office worker a long male-suit-
+    // tie only all nude and nothing but a tie ... police woman ... as skimpy and as much nudity ... as
+    // is possible". Each is a `nude:'accessories'` outfit so imaging front-loads full nudity and renders
+    // ONLY the one scrap named in accessoriesOnly. `syncArchetype` tags the girl-type it's made for (OUTFITSYNC).
+    // NOTE (Gee): POSITIVE prompts only — NEVER write "no bra / no panties" (this gen latches onto
+    // the negated noun and renders it). Push affirmative nudity words: topless, bottomless, bare
+    // exposed breasts, nipples out, bare naked pussy, bare ass, fully nude.
+    {
+      id: 'skimpy-office-necktie', displayName: 'Office: Necktie Only', emoji: '👔', price: 160, tier: 3,
+      description: 'fully nude, topless, bottomless, only a long loosened man\'s silk necktie around her bare neck dangling between her bare exposed breasts with nipples out, bare naked pussy, high heels', multiplier: 1.4, roleplay: 'office',
+      nude: 'accessories', accessoriesOnly: 'only a long loosened man\'s silk necktie around her bare neck dangling between her bare exposed breasts, nipples out, topless, bottomless, bare naked pussy, fully nude, black high heels', syncArchetype: 'office'
+    },
+    {
+      id: 'skimpy-police', displayName: 'Police: Open Shirt', emoji: '👮', price: 175, tier: 3,
+      description: 'a police uniform shirt hanging wide open off her shoulders, topless, bare exposed breasts with nipples out, utility belt low on bare hips with handcuffs, bottomless, bare naked pussy, peaked cap', multiplier: 1.4, roleplay: 'police',
+      nude: 'accessories', accessoriesOnly: 'a police uniform shirt hanging wide open off her shoulders, topless with bare exposed breasts and nipples out, a utility belt low on her bare hips with handcuffs, bottomless, bare naked pussy, a peaked police cap', syncArchetype: 'police'
+    },
+    {
+      id: 'skimpy-nurse', displayName: 'Nurse: Open Smock', emoji: '🩺', price: 165, tier: 3,
+      description: 'a nurse smock hanging wide open off her shoulders, topless, bare exposed breasts with nipples out, white thigh-high stockings, nurse cap, stethoscope between her bare tits, bottomless, bare naked pussy', multiplier: 1.4, roleplay: 'nurse',
+      nude: 'accessories', accessoriesOnly: 'a nurse smock hanging open off her shoulders, topless with bare exposed breasts and nipples out, white thigh-high stockings, a nurse cap, a stethoscope between her bare tits, bottomless, bare naked pussy', syncArchetype: 'nurse'
+    },
+    {
+      id: 'skimpy-teacher', displayName: 'Teacher: Bare Under Blazer', emoji: '📐', price: 160, tier: 3,
+      description: 'an open blazer off her shoulders, topless, bare exposed breasts with nipples out, reading glasses, hair in a tight bun, pencil skirt shoved up around her waist, bottomless, bare ass and bare naked pussy', multiplier: 1.35, roleplay: 'teacher',
+      nude: 'accessories', accessoriesOnly: 'an open blazer hanging off her shoulders, topless with bare exposed breasts and nipples out, reading glasses, hair in a tight bun, a pencil skirt shoved up around her waist, bottomless, bare ass and bare naked pussy', syncArchetype: 'teacher'
+    },
+    {
+      id: 'skimpy-cheer', displayName: 'Cheer: Top Up, Skirt Up', emoji: '📣', price: 150, tier: 3,
+      description: 'a cheer crop-top shoved up above her bare exposed bouncing tits with nipples out, a tiny pleated skirt flipped up baring her bare ass and bare naked pussy, pom-poms, ankle socks, pigtails', multiplier: 1.35, roleplay: 'cheerleader',
+      nude: 'accessories', accessoriesOnly: 'a cheer crop-top shoved up above her bare exposed tits with nipples out, a tiny pleated skirt flipped up over her bare ass and bare naked pussy, pom-poms, ankle socks, pigtails', syncArchetype: 'sorority'
+    },
+    {
+      id: 'skimpy-maid', displayName: 'Maid: Apron Only', emoji: '🧹', price: 150, tier: 3,
+      description: 'only a frilly white maid apron tied at the waist, otherwise fully nude, bare exposed breasts and nipples at the sides, completely bare ass exposed from behind, bare naked pussy, lace choker, maid headpiece', multiplier: 1.35, roleplay: 'maid',
+      nude: 'accessories', accessoriesOnly: 'only a frilly white maid apron tied at the waist, otherwise fully nude, bare exposed breasts and nipples at the sides, completely bare ass exposed from behind, bare naked pussy, a lace choker and maid headpiece', syncArchetype: 'maid'
+    },
+    {
+      id: 'skimpy-schoolgirl', displayName: 'Schoolgirl: Tied Blouse', emoji: '🎒', price: 150, tier: 3,
+      description: 'a school blouse knotted up high under her bare exposed breasts with nipples out, topless, a micro pleated skirt, bottomless, bare naked pussy underneath, knee-high socks, pigtails', multiplier: 1.35, roleplay: 'schoolgirl',
+      nude: 'accessories', accessoriesOnly: 'a school blouse knotted up high under her bare exposed breasts and nipples out, topless, a micro pleated skirt, bottomless, bare naked pussy underneath, knee-high socks, pigtails', syncArchetype: 'college'
+    },
+    {
+      id: 'skimpy-waitress', displayName: 'Waitress: Bare Under Apron', emoji: '☕', price: 145, tier: 3,
+      description: 'a tiny diner half-apron over an otherwise fully nude body, topless, bare exposed tits with nipples out, a short skirt hiked up over bare hips, bottomless, bare naked pussy', multiplier: 1.3, roleplay: 'waitress',
+      nude: 'accessories', accessoriesOnly: 'a tiny diner half-apron over an otherwise fully nude body, topless with bare exposed tits and nipples out, a name tag by a bare nipple, a short skirt hiked up over bare hips, bottomless, bare naked pussy', syncArchetype: 'barista'
+    },
+    // PREGOUTFIT.1 (Gee) — a preggo "simi need" half-nude outfit that accentuates her swollen belly +
+    // milk-heavy tits. Positive nudity prompt; meant for a pregnant captive (belly/milk show). The soft
+    // bonus while pregnant is the OUTFITSYNC sync match (roleplay 'pregnant' / archetype-agnostic).
+    {
+      id: 'preggo-belly-harness', displayName: 'Breeder: Belly + Milk Harness', emoji: '🤰', price: 170, tier: 3,
+      description: 'an open strappy harness framing a heavily pregnant swollen belly and huge milk-swollen tits, bare exposed breasts with leaking nipples out, bottomless, bare naked pussy under the bump, barefoot', multiplier: 1.4, roleplay: 'pregnant',
+      nude: 'accessories', accessoriesOnly: 'an open strappy harness framing her heavily pregnant swollen belly and milk-swollen tits, bare exposed breasts with fat leaking nipples out, topless, bottomless, bare naked pussy below the bump, barefoot', syncArchetype: 'pregnant'
+    },
+    // STRIPPER.1 / SKIMPYEXOTIC.1 (Gee) — the stripper's signature: she works NUDE. Exotic, not
+    // modest — fully nude in nothing but fishnets + clear heels. DASHGROUP-friendly concept words.
+    {
+      id: 'skimpy-stripper', displayName: 'Stripper: Nude + Fishnets Only', emoji: '💃', price: 150, tier: 3,
+      description: 'fully-nude-body wearing only sheer-black-fishnet-stockings and clear-stripper-platform-heels, bare-exposed-nude-tits-nipples-out, bare-naked-pussy, a rhinestone choker, body-glitter on bare skin', multiplier: 1.45, roleplay: 'stripper',
+      nude: 'accessories', accessoriesOnly: 'fully-nude-body wearing only sheer-black-fishnet-stockings pulled up the thighs and clear-stripper-platform-heels, bare-exposed-nude-tits-nipples-out, bare-naked-pussy, a rhinestone choker, a lace-garter stuffed-with-cash on one thigh, body-glitter shimmering on bare skin', syncArchetype: 'stripper'
+    },
+    // SKIMPYALL.1 + SKIMPYEXOTIC.1 (Gee) — every girl type gets its OWN special nude-like outfit,
+    // and they are NOT modest: exotic, beyond-sexy variations of the type's normal look, max exposed
+    // nudity. Backfill for the archetypes that didn't already have a dedicated skimpy (the rest
+    // auto-sync via roleplay tags). DASHGROUP-friendly concept words (groupConcepts dashes them).
+    {
+      id: 'skimpy-library', displayName: 'Bookworm: Cardigan & Bare', emoji: '📚', price: 150, tier: 3,
+      description: 'an open oversized cardigan hanging off her bare shoulders over nothing, wire-rim glasses, fully-nude underneath, bare-exposed-breasts nipples-out, bottomless, bare-naked-pussy, white thigh-high stockings, an open book held against one hip', multiplier: 1.35, roleplay: 'library',
+      nude: 'accessories', accessoriesOnly: 'an open oversized cardigan hanging off her bare shoulders over an otherwise fully-nude body, wire-rim reading glasses, bare-exposed-breasts nipples-out, bottomless, bare-naked-pussy, white thigh-high stockings, an open book pressed to one bare hip', syncArchetype: 'library'
+    },
+    {
+      id: 'skimpy-club', displayName: 'Club: Body Chain Only', emoji: '🍸', price: 160, tier: 3,
+      description: 'only a glittering draped gold body chain over a fully-nude body, topless, bare-exposed-tits nipples-out, bottomless, bare-naked-pussy, a choker, strappy stilettos, club lights on bare skin', multiplier: 1.4, roleplay: 'club',
+      nude: 'accessories', accessoriesOnly: 'only a glittering draped gold body chain crossing an otherwise fully-nude body, topless, bare-exposed-tits nipples-out, bottomless, bare-naked-pussy, a thin choker, strappy stiletto heels, glitter on bare skin', syncArchetype: 'club'
+    },
+    {
+      id: 'skimpy-street', displayName: 'Street: Hoodie Open, Bare', emoji: '🧥', price: 145, tier: 3,
+      description: 'an unzipped cropped hoodie hanging open off her bare shoulders over nothing, topless, bare-exposed-tits nipples-out, bottomless, bare-naked-pussy, beat-up sneakers, a thin chain', multiplier: 1.3, roleplay: 'street',
+      nude: 'accessories', accessoriesOnly: 'an unzipped cropped hoodie hanging wide open off her bare shoulders over an otherwise fully-nude body, topless, bare-exposed-tits nipples-out, bottomless, bare-naked-pussy, beat-up sneakers', syncArchetype: 'street'
+    },
+    {
+      id: 'skimpy-gym', displayName: 'Gym: Stripped Mid-Workout', emoji: '🏋️', price: 150, tier: 3,
+      description: 'a sports bra shoved up above her bare-exposed-tits nipples-out, leggings peeled down around the ankles, bottomless, bare-naked-pussy, sweat-sheen on toned bare skin, sneakers', multiplier: 1.35, roleplay: 'gym',
+      nude: 'accessories', accessoriesOnly: 'a sports bra shoved up above her bare-exposed-tits nipples-out, leggings peeled all the way down around her ankles, bottomless, bare-naked-pussy, a sheen of sweat on toned bare skin, athletic sneakers', syncArchetype: 'gym'
+    },
+    {
+      id: 'skimpy-model', displayName: 'Model: Open Couture, Bare', emoji: '💄', price: 175, tier: 3,
+      description: 'an open designer blazer hanging off her bare shoulders over nothing, topless, bare-exposed-breasts nipples-out, bottomless, bare-naked-pussy, statement jewelry, stiletto heels, high-fashion editorial pose', multiplier: 1.4, roleplay: 'model',
+      nude: 'accessories', accessoriesOnly: 'an open designer blazer hanging off her bare shoulders over an otherwise fully-nude body, topless, bare-exposed-breasts nipples-out, bottomless, bare-naked-pussy, statement jewelry, stiletto heels, editorial high-fashion posture', syncArchetype: 'model'
+    },
+    {
+      id: 'skimpy-grad', displayName: 'Grad: Sash, Cap & Bare', emoji: '🎓', price: 150, tier: 3,
+      description: 'only a graduation sash draped across her bare-exposed-tits nipples-out and a mortarboard cap, otherwise fully-nude, bottomless, bare-naked-pussy, knee-high socks (adult 18+)', multiplier: 1.35, roleplay: 'highschool-grad',
+      nude: 'accessories', accessoriesOnly: 'only a satin graduation sash draped across her bare-exposed-tits nipples-out and a mortarboard graduation cap, otherwise fully-nude, bottomless, bare-naked-pussy, knee-high socks, eighteen years old', syncArchetype: 'highschool-grad'
+    },
+    {
+      id: 'skimpy-neighbor', displayName: 'Neighbor: Robe Falling Open', emoji: '🏡', price: 145, tier: 3,
+      description: 'a short silk robe falling open off her bare shoulders, untied at the waist, topless, bare-exposed-tits nipples-out, bottomless, bare-naked-pussy, barefoot, a coffee mug in one hand', multiplier: 1.3, roleplay: 'neighbor',
+      nude: 'accessories', accessoriesOnly: 'a short silk robe falling open off her bare shoulders and untied at the waist over an otherwise fully-nude body, topless, bare-exposed-tits nipples-out, bottomless, bare-naked-pussy, barefoot, a coffee mug in one hand', syncArchetype: 'neighbor'
+    },
+    {
+      id: 'skimpy-family-friend', displayName: 'Family Friend: Sundress Hiked', emoji: '🧺', price: 150, tier: 3,
+      description: 'a barbecue sundress with the straps pulled off her shoulders and the skirt hiked up to her waist, topless, bare-exposed-breasts nipples-out, bottomless, bare-naked-pussy, wedge sandals', multiplier: 1.35, roleplay: 'family-friend',
+      nude: 'accessories', accessoriesOnly: 'a floral barbecue sundress with the straps pulled off her shoulders and the skirt hiked up around her waist, topless, bare-exposed-breasts nipples-out, bottomless, bare-naked-pussy, wedge sandals', syncArchetype: 'family-friend'
+    },
+    {
+      id: 'skimpy-cousin', displayName: 'Cousin: Bikini Pulled Aside', emoji: '🏖️', price: 145, tier: 3,
+      description: 'a lake-house bikini with the top pulled down under her bare-exposed-tits nipples-out and the bottoms pulled aside baring her bare-naked-pussy, a sarong falling off her hips, barefoot, wet skin', multiplier: 1.3, roleplay: 'second-cousin',
+      nude: 'accessories', accessoriesOnly: 'a string bikini with the top pulled down under her bare-exposed-tits nipples-out and the bottoms pulled fully aside baring her bare-naked-pussy, a sarong falling off her hips, barefoot, sun-wet bare skin', syncArchetype: 'second-cousin'
+    },
+    {
+      id: 'skimpy-unity', displayName: 'Unity: Leather Harness, Bare', emoji: '🖤', price: 160, tier: 3,
+      description: 'a black-leather harness with buckles framing a fully-nude body, topless, bare-exposed-tits nipples-out, bottomless, bare-naked-pussy, a D-ring collar, fishnet stockings, combat boots, heavy smudged eyeliner', multiplier: 1.4, roleplay: 'goth',
+      nude: 'accessories', accessoriesOnly: 'a black-leather buckle harness framing an otherwise fully-nude body, topless, bare-exposed-tits nipples-out, bottomless, bare-naked-pussy, a D-ring collar, torn fishnet stockings, combat boots', syncArchetype: 'unity_seed'
+    },
     {
       id: 'goth-outfit',
       displayName: 'Goth Fit',
@@ -355,6 +472,33 @@
     return { ok: true, outfit };
   }
 
+  // OUTFITLOOT.1 (Gee) — the skimpy/special outfits are obtained two ways: bought in the Carcass
+  // Closet (buyForGirl) OR found as RARE loot / NPC gifts (granted free to a girl's wardrobe).
+  // These expose the skimpy set + a free grant for the loot/gift paths.
+  function skimpyOutfitIds() { return OUTFITS.filter(o => o.nude === 'accessories' && o.syncArchetype).map(o => o.id); }
+  function skimpyForArchetype(arc) {
+    if (!arc) return null;
+    const a = String(arc).toLowerCase();
+    const m = OUTFITS.filter(o => o.nude === 'accessories').find(o => {
+      const tags = [o.syncArchetype, o.roleplay].filter(Boolean).map(s => String(s).toLowerCase());
+      return tags.some(t => t === a || a.includes(t) || t.includes(a));
+    });
+    return m ? m.id : null;
+  }
+  // Add an outfit to a girl's wardrobe for FREE (loot find / NPC gift). No-op if she already owns it.
+  function grantOutfit(girlId, outfitId) {
+    const girl = window.DMTHGame.state.getGirl(girlId);
+    const outfit = getById(outfitId);
+    if (!girl || !outfit) return { ok: false, reason: 'no such girl/outfit' };
+    if ((girl.wardrobe || []).some(w => w.id === outfitId)) return { ok: false, reason: 'already owns this outfit' };
+    const newWardrobe = [...(girl.wardrobe || []), {
+      id: outfit.id, displayName: outfit.displayName, description: outfit.description,
+      source: 'looted', multiplier: outfit.multiplier, acquiredAt: Date.now()
+    }];
+    window.DMTHGame.state.updateGirl(girlId, { wardrobe: newWardrobe });
+    return { ok: true, outfit };
+  }
+
   function equip(girlId, outfitId) {
     const girl = window.DMTHGame.state.getGirl(girlId);
     if (!girl) throw new Error('no such girl');
@@ -408,10 +552,50 @@
     return current?.multiplier || 1.0;
   }
 
+  // Stat bonuses from the equipped outfit (CLOTHING.1). Derived from the outfit's content
+  // multiplier + nude/roleplay flags so we don't have to hand-author a bonus block per outfit:
+  //   - johnPayMul:         multiplier already applied to john pay via johnHappinessForGirl
+  //   - playerSatisfaction: a lewder/nuder outfit gives the player a bigger satisfaction hit per sex act
+  //   - girlArousal:        skin/lewd outfits leave her more exposed + worked-up
+  //   - escapeSuppress:     restraint-flavored outfits physically hold her (lowers escape risk)
+  // OUTFITSYNC.1 (Gee: "put a nurese in a nurse outfit its a major buff, a sority girl in a cheer
+  // outfit a big buff") — does the equipped outfit's type match her girl-type? Matches the outfit's
+  // syncArchetype OR roleplay against her archetypeTemplate (loose contains-match so nurse↔nurse,
+  // cheer↔sorority, office↔office-worker all land). Returns the matched outfit or null.
+  function syncMatch(girl) {
+    const o = getById(girl?.currentOutfit);
+    if (!o) return null;
+    const tags = [o.syncArchetype, o.roleplay].filter(Boolean).map(s => String(s).toLowerCase());
+    // PREGOUTFIT.1 — a 'pregnant'-tagged outfit (the belly/milk harness) syncs while she's pregnant.
+    if (tags.includes('pregnant') && girl?.pregnancy?.status === 'pregnant') return o;
+    const arc = String(girl?.archetypeTemplate || '').toLowerCase();
+    if (!arc) return null;
+    return tags.some(t => t === arc || arc.includes(t) || t.includes(arc)) ? o : null;
+  }
+  // Synergy multiplier applied to sale price + film value when she's dressed in her matching type.
+  function syncMultiplier(girl) { return syncMatch(girl) ? 1.25 : 1.0; }
+
+  function outfitBonuses(girl) {
+    const o = getById(girl?.currentOutfit) || {};
+    const mult = ((girl?.wardrobe || []).find(w => w.id === girl.currentOutfit)?.multiplier) || o.multiplier || 1.0;
+    const restraintFlavored = /restraint|cuff|harness|bondage|latex|catsuit|chain/i.test(`${o.roleplay || ''} ${o.id || ''} ${o.description || ''}`);
+    // OUTFITSYNC.1 — a TYPE-MATCHED outfit is a major buff: +25% john pay, more satisfaction + arousal.
+    const synced = !!syncMatch(girl);
+    const syncPay = synced ? 1.25 : 1.0;
+    return {
+      synced,
+      johnPayMul: mult * syncPay,
+      playerSatisfaction: Math.max(0, Math.round((mult - 1) * 6)) + (synced ? 3 : 0),
+      girlArousal: (o.nude ? 4 : Math.max(0, Math.round((mult - 1) * 8))) + (synced ? 5 : 0),
+      escapeSuppress: restraintFlavored ? 0.03 : 0
+    };
+  }
+
   window.DMTHGame = window.DMTHGame || {};
   window.DMTHGame.wardrobe = Object.freeze({
     OUTFITS, catalog, getById, buyForGirl, equip, derobe, stripEverything,
-    currentMultiplier, builtIns, isNude,
+    currentMultiplier, outfitBonuses, builtIns, isNude,
+    skimpyOutfitIds, skimpyForArchetype, grantOutfit,
     NUDE_PSEUDO_ID, NUDE_PSEUDO,
     NO_WARDROBE_PSEUDO_ID, NO_WARDROBE_PSEUDO,
     CONDOM_PSEUDO_ID, CONDOM_PSEUDO

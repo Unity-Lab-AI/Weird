@@ -53,6 +53,15 @@
     return CURVES.bondLevelXpRequired[Math.max(0, Math.min(9, level))];
   }
 
+  // STOCK-BUILD.1 — the bond LEVEL a given cumulative XP corresponds to. Used to recompute level
+  // both UP (normal indoctrination climb) and DOWN (only the most extreme acts subtract XP and can
+  // knock her back). Highest level whose cumulative threshold is met.
+  function bondLevelForXp(xp) {
+    let lvl = 0;
+    for (let n = 1; n <= 9; n++) { if (xp >= xpForLevel(n)) lvl = n; else break; }
+    return lvl;
+  }
+
   window.DMTHGame = window.DMTHGame || {};
-  window.DMTHGame.balancing = Object.freeze({ applyBalancing, decayTick, xpForLevel, CURVES });
+  window.DMTHGame.balancing = Object.freeze({ applyBalancing, decayTick, xpForLevel, bondLevelForXp, CURVES });
 })();

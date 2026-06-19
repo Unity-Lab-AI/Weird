@@ -55,6 +55,15 @@
       notes: 'Medium-difficulty. Drug-forward spawns. Loud, crowded.'
     },
     {
+      id: 'strip-club', displayName: 'The Velvet Cage (strip club)', emoji: '💃',
+      category: 'location', subcategory: 'medium',
+      prompt: 'exterior establishing shot of a seedy strip club at night, red neon outline of a dancer, blacked-out windows, a bouncer at the door, wet alley beside it, gritty nightlife photography, cinematic color grade',
+      personEnvPrompt: 'inside a dim strip club, red and purple stage lighting, a brass pole and mirrored stage behind her, velvet booths in shadow, dollar bills scattered on the floor, hazy smoke, bass-thumping nightclub interior, sleazy neon glow on bare skin',
+      cost: 800, unlock: { minNotoriety: 1 },
+      gridPlacement: { x: 2, y: 0 },
+      notes: 'Medium. Strippers spawn here — they work nude or near-nude, so they\'re captured already bare. Bouncers + cameras around.'
+    },
+    {
       id: 'library', displayName: 'Old Library', emoji: '📚',
       category: 'location', subcategory: 'medium',
       prompt: 'interior photograph of a vintage public library reading room, tall wooden shelves, warm reading lamps, late-afternoon light through arched windows, quiet studious atmosphere, shallow depth of field',
@@ -136,6 +145,15 @@
       notes: 'Hard. Invitation-only. Insider spawns. Risk of being recognized.'
     },
     {
+      id: 'prenatal-clinic', displayName: 'Prenatal Clinic', emoji: '🤰',
+      category: 'location', subcategory: 'hard',
+      prompt: 'exterior establishing shot of a quiet suburban prenatal / OB-GYN clinic at dusk, soft-lit waiting-room windows, a half-empty parking lot, tasteful signage, clinical-suburban photography, muted color grade',
+      personEnvPrompt: 'in the waiting room of a prenatal clinic, soft pastel walls and framed ultrasound posters behind her, a reception desk and parenting magazines on a low table, warm clinical lighting, suburban OB-GYN atmosphere',
+      cost: 900, unlock: { minNotoriety: 2 },
+      gridPlacement: { x: 3, y: 1 },
+      notes: 'Hard. Where expecting mothers come and go — the only place to catch an already-PREGNANT girl. Level-gated.'
+    },
+    {
       id: 'school-campus', displayName: 'Campus Quad', emoji: '🎓',
       category: 'location', subcategory: 'medium',
       prompt: 'wide shot of a university campus quad, ivy-covered brick buildings, students crossing with backpacks, autumn trees, cathedral-like clock tower in background, collegiate editorial photography',
@@ -206,8 +224,8 @@
       id: 'condom', displayName: 'Condom (3-pack)', emoji: '🎈',
       category: 'item', subcategory: 'contraception',
       prompt: 'product photograph of three plain unmarked square foil condom packets fanned out on a plain backdrop, generic pharmacy commerce style, muted lighting',
-      cost: 6, tier: 1,
-      notes: 'Preventive — when equipped/used during a turn, blocks conception roll. Stacks of 3. (Wardrobe-equip wiring deferred — for now, owning ≥1 is the gate.)'
+      cost: 27, tier: 1,
+      notes: 'Preventive — ONE per john, drawn from the hold/dungeon stock during a whore-out turn (you must stock the hold first; no stock = he goes raw = pregnancy risk). ~$9/condom ≈ 12% of an average starting-girl john\'s fee, so keeping a girl off the breeding track costs but never bankrupts you. Stacks of 3.'
     },
     {
       id: 'plan-b', displayName: 'Plan B Pill', emoji: '💊',
@@ -240,6 +258,73 @@
       cost: 600, tier: 4,
       pregnancyAbort: { window: [0, 200], complications: 0.03, notoriety: 0 },
       notes: 'Clean clinical referral — works any time before day 200. 3% complication. Zero notoriety. Expensive but safe.'
+    },
+
+    // --- PLAYER BOOST (PLAYERSTAM.2) — refill your 💦 Nut Reserve. `playerRefill` = amount
+    //     restored (999 = full). Lootable + purchasable; girl-milk does it too (milk.drinkPlayer). ---
+    {
+      id: 'blue-pill', displayName: 'Blue Pill (Viagra)', emoji: '💊',
+      category: 'item', subcategory: 'player-boost',
+      prompt: 'product photograph of a single diamond-shaped blue tablet beside its foil blister-pack on a plain backdrop, pharmacy commerce style',
+      cost: 40, tier: 1, playerRefill: 999,
+      notes: 'Pop one and you\'re iron-hard and bottomless again — FULLY refills your Nut Reserve. Buy it or loot it.'
+    },
+    {
+      id: 'energy-shot', displayName: 'Energy Shot', emoji: '⚡',
+      category: 'item', subcategory: 'player-boost',
+      prompt: 'product photograph of a small 2-ounce energy-shot bottle with a blank label on a plain backdrop, convenience-store commerce style',
+      cost: 12, tier: 0, playerRefill: 35,
+      notes: 'A quick jolt — restores a chunk of your Nut Reserve so you can keep going.'
+    },
+    {
+      id: 'the-good-coke', displayName: 'The Good Coke', emoji: '❄️',
+      category: 'item', subcategory: 'player-boost',
+      prompt: 'product photograph of a small folded paper bindle beside a thin white line on a dark glass surface, gritty noir commerce style',
+      cost: 30, tier: 1, playerRefill: 55,
+      notes: 'A fat rail for yourself — surges your Nut Reserve back up and keeps your dick raging.'
+    },
+    {
+      id: 'oyster-tonic', displayName: 'Oyster & Maca Tonic', emoji: '🦪',
+      category: 'item', subcategory: 'player-boost',
+      prompt: 'product photograph of a small amber tonic bottle with a blank kraft label beside a single raw oyster on a plain backdrop, apothecary commerce style',
+      cost: 18, tier: 0, playerRefill: 40,
+      notes: 'An aphrodisiac stamina tonic — restores a solid chunk of your Nut Reserve.'
+    },
+
+    {
+      id: 'ben-wa-balls', displayName: 'Ben Wa Balls (kegel trainer)', emoji: '⚪',
+      category: 'item', subcategory: 'consumables',
+      prompt: 'product photograph of a pair of small linked metallic weighted balls on a plain backdrop, intimate-wellness commerce style, soft lighting',
+      cost: 90, tier: 1, cumTrainer: 2,
+      notes: 'Reusable — make her hold these to train her muscles. Each session raises her cum-load STORAGE capacity +2 (more load = more money, but a full girl gets moody + restless). Buy once, use repeatedly.'
+    },
+    {
+      id: 'vaginal-plug', displayName: 'Weighted Vaginal Plug', emoji: '🟪',
+      category: 'item', subcategory: 'consumables',
+      prompt: 'product photograph of a smooth weighted silicone plug with a flared base on a plain backdrop, intimate-wellness commerce style',
+      cost: 130, tier: 1, cumTrainer: 2,
+      notes: 'Reusable plug — worn to train + stretch her. Each session raises her cum-load storage capacity +2. Stronger held-in versions come with the insertable tools later.'
+    },
+    {
+      id: 'vaginal-expander', displayName: 'Vaginal Expander / Dilator Set', emoji: '🔱',
+      category: 'item', subcategory: 'consumables',
+      prompt: 'product photograph of a graduated set of smooth tapered dilator rods of increasing girth on a plain backdrop, clinical intimate-wellness commerce style',
+      cost: 220, tier: 2, cumTrainer: 3,
+      notes: 'Reusable graduated dilator set — works her open hole by hole. Strongest trainer: each session raises her cum-load storage capacity +3.'
+    },
+    {
+      id: 'pussy-wrecker', displayName: 'Pussy Wrecker (massive hold-in plug)', emoji: '🥒',
+      category: 'item', subcategory: 'consumables',
+      prompt: 'product photograph of an enormous girthy silicone plug with a flared base on a plain backdrop, intimate-wellness commerce style, intimidating size',
+      cost: 480, tier: 3, cumImplant: { days: 1.5, capGain: 8 },
+      notes: 'INSERTABLE — left in over time, not a quick session. Plug her with it and leave it ~1.5 game days while a timer runs; when it completes her cum-load CAPACITY jumps +8 (pushable past the kegel cap, toward a 60 ceiling) and she earns a bigger cum premium. Stretches + gapes her — visible in her images while it\'s in.'
+    },
+    {
+      id: 'bone-saw', displayName: 'Bone Saw', emoji: '🪚',
+      category: 'item', subcategory: 'torture',
+      prompt: 'product photograph of a heavy surgical amputation bone saw with a worn wooden handle on a plain backdrop, grim antique-medical commerce style',
+      cost: 350, tier: 4,
+      notes: 'Reusable. REQUIRED to take a girl\'s limbs — nuggeting is slow, methodical work you can\'t do bare-handed. Buy once; the dismember/nugget actions gate on owning it. A full nugget can never run and never fight.'
     },
 
     // --- BLUNT ---

@@ -52,6 +52,7 @@
       unity.mood.moodEmoji = '👀';
 
       window.DMTHGame.state.addGirl(unity);
+      if (window.DMTHGame.state.noteUsedName) window.DMTHGame.state.noteUsedName(unity.name);   // NAMELOCK.1
       window.DMTHGame.state.updateDungeon(dungeonId, {
         holds: dungeon.holds.map((h, i) => i === 0 ? { ...h, captiveGirlId: unity.id } : h)
       });
@@ -101,7 +102,7 @@
       // violence on first spawn.
       // lastFedAt + lastWateredAt are seeded at spawn so the grace-period model in
       // tickStaminaHealth has a baseline.
-      body: { arousal: 87, wetness: 94, cumLoad: 0, bruises: 0, high: 91, activeDrugs: ['coke','weed'], pose: 'kneeling at the rope ladder, knees spread', outfitState: 'leather opened, tits exposed', stamina: 80, health: 100, lastFedAt: window.DMTHGame.gameClock?.now() ?? 0, lastWateredAt: window.DMTHGame.gameClock?.now() ?? 0 },
+      body: { arousal: 87, wetness: 94, cumLoad: 0, cumLoadCap: 10, bruises: 0, high: 91, activeDrugs: ['coke','weed'], pose: 'kneeling at the rope ladder, knees spread', outfitState: 'leather opened, tits exposed', stamina: 80, health: 100, lastFedAt: window.DMTHGame.gameClock?.now() ?? 0, lastWateredAt: window.DMTHGame.gameClock?.now() ?? 0 },
       mood: { mood: 'curious', moodEmoji: '👀', history: [] },
       stats: Object.fromEntries(Object.entries(unityTemplate.statsRanges).map(([k, [lo]]) => [k, lo])),
       bond: { bondLevel: 2, bondXP: 25, bondDebt: 0, milestones: ['came-willingly-first-time'] },

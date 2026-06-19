@@ -4,7 +4,9 @@
 
 A massive multi-page text+emoji adult game where you run a sex-slave operation. Start in a basic dungeon, hunt girls across town, capture them with progressively better tools, hold them in upgradeable rooms, form Stockholm bonds, record films, sell them on the slave market, dispose of the ones you tire of. Every captive has her own persona driven by a real local LLM with persistent body state, drug pharmacokinetics, pregnancy, and a memory of every john she's seen.
 
-> **Cross-references:** [`SETUP-README.md`](./SETUP-README.md) (technical setup) · [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) (system design) · [`docs/ROADMAP.md`](./docs/ROADMAP.md) (phase plan) · [`docs/SKILL_TREE.md`](./docs/SKILL_TREE.md) (capability matrix) · [`docs/TODO.md`](./docs/TODO.md) (active backlog) · [`docs/FINALIZED.md`](./docs/FINALIZED.md) (completion archive)
+> 📖 **The complete, browsable reference is the in-game [Game Wiki](./wiki.html)** — every system, item, toy, action and concept, plus how-to-play, how-to-keep-your-slaves, and how-to-stay-out-of-jail. This README is the markdown overview; the wiki is the full encyclopedia.
+
+> **Cross-references:** [`wiki.html`](./wiki.html) (full game wiki) · [`SETUP-README.md`](./SETUP-README.md) (technical setup) · [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) (system design) · [`docs/ROADMAP.md`](./docs/ROADMAP.md) (phase plan) · [`docs/SKILL_TREE.md`](./docs/SKILL_TREE.md) (capability matrix) · [`docs/TODO.md`](./docs/TODO.md) (active backlog) · [`docs/FINALIZED.md`](./docs/FINALIZED.md) (completion archive)
 
 ---
 
@@ -125,6 +127,35 @@ Six body bars (arousal / wetness / cum-load / bruises / high), plus stamina + he
 ```
 
 There is no win state. The game is the ever-growing collection and the ever-upgrading dungeon empire.
+
+---
+
+## Latest build — major systems (2026-06-18)
+
+The sections below this one document the original feature set in depth. The 2026-06-18 mega-build layered a full progression spine + depravity/economy/logistics systems on top. Each is covered fully in the [Game Wiki](./wiki.html); here's the map:
+
+- **😈 DEPRAVITY progression** — the player level. Every act earns XP; higher levels gate the heaviest depravities (🏷️ ownership marks L3 · ☠️ extreme acts L4 · 🪓 nugget-making L6 · 🔪 dismember L7 · ⚰️ snuff L7). Pay a steep fee to unlock a tier early. Some hunting grounds gate on level / roster size / bought access.
+- **📑 Character Sheet** — one screen of your whole build: DEPRAVITY, every buff + debuff (mapped to the real hunt/income math), unlocked tiers, operation tallies — all depraved-named.
+- **🍆 Player drives** — a sex-drive NEED (Cock-Hunger; ceiling scales with roster + level; using DIFFERENT girls/day fills faster, spamming one act diminishes; GRADED capture bonus by band), satisfaction, and 🐝 BUZZ. Plus **💦 Nut Reserve** — your gas tank that drains per act and refills with viagra / girl's-milk / energy items (empty = "running on fumes" debuff).
+- **💦 Gangbangs & 🩸 friends** — throw a captive a multi-john gangbang (stacked pay/cum-fill/toll), or toggle "let friends in" — rare extreme visitors (Butcher / Surgeon / Pack / Strangler) who near-kill her (~40-60 HP) for a fortune, logged to her trophy. Lethality-warned before they finish her.
+- **🩹 Lethality warnings** — a depraved confirm before any act/gangbang that would kill her, plus a non-intrusive alert when a held captive drops to ≤20 HP and needs care.
+- **🔗 Stockholm as a long indoctrination build** — bond climbs over game-*weeks* from a mix of regular abuse + loving/care acts (massage, pussy-petting — not just rape) and basically never degrades; only the most brutal acts (beatdown / choke-out) set her back. Higher Stockholm also makes her more robust (slower health decay).
+- **⚪ Cum-load capacity** — train her storage with Ben Wa balls (kegel trainer); a near-maxed girl pays a john premium, but staying stuffed drains her mood/health and nudges escape up.
+- **💊 Wide drug use-cases** — stimulants loosen a mute's tongue (she talks — just not what you want to hear), sedatives/ketamine pacify fighters and collapse speech, knockouts put her under.
+- **🗺️ Persistent hunting grounds** — the girls at a location stay put for a few game-days (same place, same day = same girls), so you can court the same girl across days for handouts before deciding to take her. Every girl gets a **unique full name** (no duplicates in a playthrough).
+- **🏷️ Ownership marks** — permanent brand / tattoo / piercings, render in every image, film premium.
+- **💊 Addiction & withdrawal** — forced dosing builds addiction; cut-off withdrawal hits mood/stamina/escape-risk. **OD death** — fast hard-dosing (≈10× molly) kills her → corpse. Captives **self-dose** from the dungeon drug pool to survive (never self-OD).
+- **💦 Breeding** — vaginal-only cum-fill meter + sustained-fill timer → guaranteed conception. **Typed + TIMED condoms** (wear off ~4h); a sabotaged **holed** condom breeds her instantly on one load. Full **newborn-disposal** catalog at term.
+- **🥛 Milk economy** — farm/drink/sell/suckle lactating captives.
+- **🧰 Toys & implements** — buy / loot / find them, **mount up to 5 per hold**, use only on that hold's girl; they **render on her image** while in use (gag, clamps, machine…). From a wand to torture-chamber implements; gore tiers DEPRAVITY-gated. Johns grab them too.
+- **🏪 Two-tier supplies** — per-hold reserve + a shared dungeon **pool** (food/water/condoms/drugs) every hold draws from.
+- **👯 Multi-girl scenes** — gather captives held in the same location into one room; each answers her own turn in her own voice.
+- **🚚 Transport** — move captives (risk gamble) or corpses (clean haul) between dungeons + hold-to-hold.
+- **⚰️ Snuff & death dossier** — 14 snuff methods (filmed or not) → a postmortem corpse (keeps her "sleeping" look, ~5-day decay window, narration-only). Every death saves a **dossier** (final stats + history + likeness) attached to her **trophy**.
+- **🏆 Keepsake trophies** — each girl carries 1–3 keepsakes (themed items + gore trophies); pick one at disposal for a permanent stacking buff.
+- **👥 John variety** — gentle → sadistic archetypes; pay scales with extremity; johns use your stocked toys + drugs; only glove up if condoms are stocked.
+- **🚨 Heat & arrest valves** — high WANTED triggers raids → fines → jail. Pre-buy a ⚖️ lawyer, 💰 dirty-cop connections, or a 🏃 escape kit.
+- **⏸ Pause & persist** — freeze time; progress saves + reloads when you return.
 
 ---
 
@@ -410,16 +441,19 @@ Dashboard + roster cards show 🤰 next to her name when pregnant + post-status 
 
 Open a captive to general-public john arrivals. Continuous passive flow distinct from the Propositioner (bespoke single deals).
 
-### Rate options
+### Cadence options (game-time)
 
-| Rate | Arrival chance | Max per tick |
-|---|---|---|
-| low | 10% | 1 |
-| standard | 25% | 2 |
-| premium | 40% | 3 |
-| all-comers | 60% | 4 |
+Cadence is set in game-time, with your 🐝 BUZZ multiplying arrivals on top (BUZZ 100 ≈ 2×):
 
-### 10 john archetypes
+| Cadence | Arrival pace |
+|---|---|
+| off | none |
+| trickle | 1 john / ~120 game min |
+| casual | 1 john / ~60 game min |
+| steady | 1 john / ~30 game min |
+| rapid | 1 john / ~10 game min |
+
+### 12 john archetypes
 
 | Archetype | Pay range | Tip chance | Condom compliance | Bias |
 |---|---|---|---|---|
@@ -432,7 +466,10 @@ Open a captive to general-public john arrivals. Continuous passive flow distinct
 | Quick Visit | $50-90 | 15% | 80% | low stamina drain |
 | Talker | $70-130 | 35% | 85% | overshares |
 | Breeder | $120-250 | 40% (1.5× mul) | **5%** | 1.8× pregnant bias |
+| Sadist | $130-260 | 25% (1.5× mul) | 30% | cruel — uses the room's mounted toys on her, bruises +4, premium pay |
 | Degrader | $90-180 | 20% | 40% | mood -15 |
+
+Plus a hidden **Postmortem Client** archetype (premium corpse content) that only appears for a deceased captive. JOHN-VARIETY: depraved johns (intensity ≥ 3) grab a mounted toy and/or a pool drug and use it on her — pay scales with the extremity of their whims; vaginal acts fill her cum-meter, anal/oral don't; johns only glove up if condoms are stocked.
 
 ### "Better stats = happier johns = more money"
 

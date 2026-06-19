@@ -10,6 +10,9 @@
         <p class="small">The game saves to this browser's IndexedDB. You can export / import saves in Settings.</p>
 
         <div class="settings-section">
+          <label class="field"><span>What your girls call you</span>
+            <input type="text" id="player-name" maxlength="24" placeholder="Master" value="Master" />
+          </label>
           <label class="field"><span>Mode</span>
             <select id="mode">
               <option value="normal">Normal — earn it from scratch</option>
@@ -48,8 +51,10 @@
     el.querySelector('#start').onclick = async () => {
       const mode = el.querySelector('#mode').value;
       const includeUnity = el.querySelector('#unity').checked;
+      const playerName = (el.querySelector('#player-name').value || 'Master').trim() || 'Master';
       await window.DMTHGame.state.load();  // ensure state is initialized
       await window.DMTHGame.bootstrap.newGame({ mode, includeUnity });
+      window.DMTHGame.state.setPlayerName(playerName);   // what the girls call the player
       window.DMTHRouter.go('dashboard');
     };
   }

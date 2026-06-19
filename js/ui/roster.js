@@ -40,11 +40,11 @@
       const preg = g.pregnancy || {};
       const pregBadge = preg.status === 'pregnant' ? ' 🤰' : '';
       const pregMeta = preg.status === 'pregnant'
-        ? `<span class="muted small" title="🤰 Pregnant — gestation day ${preg.gestationDays}/280 (trimester ${preg.trimester})">🤰T${preg.trimester}·d${preg.gestationDays}</span>`
-        : preg.status === 'aborted' ? `<span class="muted small" title="Pregnancy aborted">⚪aborted</span>`
-        : preg.status === 'miscarried' ? `<span class="muted small" title="Miscarried (complication)">🩸miscarried</span>`
-        : preg.status === 'birthed' ? `<span class="muted small" title="Birthed">🍼birthed</span>`
-        : preg.status === 'lost' ? `<span class="muted small" title="Lost to authorities">🚨lost</span>`
+        ? `<span class="muted small" data-tooltip="🤰 Pregnant — gestation day ${preg.gestationDays}/280 (trimester ${preg.trimester})">🤰T${preg.trimester}·d${preg.gestationDays}</span>`
+        : preg.status === 'aborted' ? `<span class="muted small" data-tooltip="Pregnancy aborted">⚪aborted</span>`
+        : preg.status === 'miscarried' ? `<span class="muted small" data-tooltip="Miscarried (complication)">🩸miscarried</span>`
+        : preg.status === 'birthed' ? `<span class="muted small" data-tooltip="Birthed">🍼birthed</span>`
+        : preg.status === 'lost' ? `<span class="muted small" data-tooltip="Lost to authorities">🚨lost</span>`
         : '';
       return `
         <a class="girl-card" href="#room?girl=${g.id}">

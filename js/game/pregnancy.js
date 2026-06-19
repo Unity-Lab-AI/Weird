@@ -46,6 +46,7 @@
     conceivedAtTick: null,
     gestationDays: 0,
     trimester: null,
+    breedingExposure: 0,            // accumulates per cum-inside event → consistency-based conception
     conceptionSource: null,
     johnEncounterId: null,
     outcomeHistory: [],
@@ -116,8 +117,12 @@
 
     // Gate: outfit must not be a condom wardrobe entry (none ship in catalog yet — leave
     // open hook for the 'condom-equipped' wardrobe item to land later).
-    const currentOutfitId = girl.currentOutfit || '';
-    if (currentOutfitId === 'condom-on') {
+    // Contraception gate (CONDOMS.1) — a BLOCKING condom stops conception; a holed/sabotaged
+    // one (blocks:false) does NOT, so breeding still takes.
+    const condomBlocks = window.DMTHGame.condoms
+      ? window.DMTHGame.condoms.blocks(girl)
+      : (girl.currentOutfit === 'condom-on');
+    if (condomBlocks) {
       return { rolled: false, reason: 'condom equipped' };
     }
 
@@ -127,12 +132,24 @@
       return { rolled: false, reason: 'fully-bonded captive uses contraception off-screen' };
     }
 
-    const chance = BASE_CONCEPTION_CHANCE * drugProtectionFactor(girl);
+    // Consistency-based conception (Gee): 3-4 game-days of consistent cum-inside should
+    // reliably breed her. Each qualifying cum-inside event raises a persistent breedingExposure
+    // counter; the chance escalates with it so sustained breeding becomes near-certain, while a
+    // one-off is far from guaranteed. Exposure persists across misses, resets on conception.
+    const exposure = (preg.breedingExposure || 0) + 1;
+    // SPECIALIZE.1 — a 🐎 brood-mare conceives more readily.
+    const fertility = window.DMTHGame.specialize ? window.DMTHGame.specialize.fertilityMultiplier(girl) : 1;
+    const chance = Math.min(0.95, (0.16 + exposure * 0.12) * drugProtectionFactor(girl) * fertility);
     const roll = Math.random();
-    const conceived = roll < chance;
+    // CUMFILL.1 — the sustained vaginal cum-fill timer (tickCumFill) calls this with
+    // guaranteed:true once she's been kept filled long enough, so conception is the payoff of
+    // maintained breeding rather than a per-event dice roll. The condom / L9 / already-pregnant
+    // gates above still apply regardless.
+    const conceived = opts?.guaranteed ? true : (roll < chance);
 
     if (!conceived) {
-      return { rolled: true, conceived: false, chance, roll };
+      window.DMTHGame.state.updateGirl(girlId, { pregnancy: { ...preg, breedingExposure: exposure } });
+      return { rolled: true, conceived: false, chance, roll, breedingExposure: exposure };
     }
 
     // Conception confirmed.
@@ -160,6 +177,59 @@
       window.DMTHNotify.show(`🤰 ${girl.name} is pregnant.`, { type: 'warn', durationMs: 3500 });
     }
     return { rolled: true, conceived: true, chance, roll };
+  }
+
+  // -----------------------------------------------------------------------
+  // CUMFILL.1 — vaginal cum-fill → sustained-fill preggo timer
+  // -----------------------------------------------------------------------
+  // ONLY cum deposited in the vagina raises this meter (anal / oral / ass-rape don't), so only
+  // vaginal breeding can make her pregnant. The fill LEAKS over time, so she has to be kept
+  // topped up. While it stays at/above PREGGO_FILL_MIN, a maintain-timer counts up; held long
+  // enough → guaranteed conception (the payoff of sustained breeding). Generic body.cumLoad is
+  // a SEPARATE meter (film value + image + john profit); this one drives pregnancy only.
+  const VAGINAL_CUM_MAX = 10;
+  const PREGGO_FILL_MIN = 3.0;          // vaginal-cum units to sit in "preggo territory"
+  const PREGGO_MAINTAIN_TICKS = 16;     // ticks kept filled before she takes (BAL-tunable)
+  const VAGINAL_CUM_DRAIN = 0.5;        // leaks per tick — must be re-topped to stay in the zone
+
+  function addVaginalCum(girlId, amount, opts) {
+    const girl = window.DMTHGame.state.getGirl(girlId);
+    if (!girl) return;
+    if (girl.encounterState && girl.encounterState !== 'captive') return;
+    const body = { ...girl.body };
+    body.vaginalCum = Math.max(0, Math.min(VAGINAL_CUM_MAX, (body.vaginalCum || 0) + (amount || 0)));
+    body._lastVaginalCumSource = (opts && opts.conceptionSource) || 'organic';
+    window.DMTHGame.state.updateGirl(girlId, { body });
+  }
+
+  // Called from tick.js each tick: drain the vaginal fill, run the maintain-timer, and fire a
+  // guaranteed conception once she's been kept filled long enough.
+  function tickCumFill() {
+    const s = window.DMTHGame.state.current;
+    if (!s) return;
+    for (const girl of s.roster) {
+      if (girl.encounterState !== 'captive') continue;
+      const cur = girl.body?.vaginalCum || 0;
+      const maintained = girl.body?.preggoFillMaintained || 0;
+      if (cur <= 0 && maintained <= 0) continue;
+      const body = { ...girl.body };
+      body.vaginalCum = Math.max(0, cur - VAGINAL_CUM_DRAIN);
+      const eligible = getPregnancy(girl).status !== 'pregnant';
+      if (eligible && body.vaginalCum >= PREGGO_FILL_MIN) {
+        body.preggoFillMaintained = maintained + 1;
+      } else {
+        body.preggoFillMaintained = Math.max(0, maintained - 1);
+      }
+      let conceive = false;
+      if (eligible && body.preggoFillMaintained >= PREGGO_MAINTAIN_TICKS) {
+        conceive = true;
+        body.preggoFillMaintained = 0;
+      }
+      window.DMTHGame.state.updateGirl(girl.id, { body });
+      if (conceive) {
+        attemptConception(girl.id, { conceptionSource: body._lastVaginalCumSource || 'organic', guaranteed: true });
+      }
+    }
   }
 
   // -----------------------------------------------------------------------
@@ -303,7 +373,89 @@
   // Full-term outcome resolver
   // -----------------------------------------------------------------------
 
-  // Day 280 — roll the outcome.
+  // NEWBORN.2 — the "mass" can't join the harem, so the player CHOOSES how to get rid of it.
+  // Each method has unique trade-offs: money / WANTED / notoriety / the mother's mind / DEPRAVITY
+  // XP / facility + level gates. Gee's seeds (dumpster / firehouse / trafficking / incinerator)
+  // PLUS expanded depraved options. money is a [min,max] range ([0,0] = none).
+  const NEWBORN_METHODS = Object.freeze({
+    'dumpster':      { displayName: 'Dumpster Drop',               emoji: '🗑️', money: [0, 0],       wanted: 2,  notoriety: 1, motherMood: -2,  xp: 4,  notes: 'Quick and cold — out with the trash. No benefit, low heat. The auto-default if you dawdle.' },
+    'safe-haven':    { displayName: 'Firehouse / Safe-Haven Drop', emoji: '🚒', money: [0, 0],       wanted: -3, notoriety: 0, motherMood: +2,  xp: 3,  notes: 'Anonymous legal drop-off — actually LOWERS your wanted heat; the mother takes it a little easier.' },
+    'church-step':   { displayName: 'Leave on a Church Step',      emoji: '⛪', money: [0, 0],       wanted: -1, notoriety: 0, motherMood: +1,  xp: 3,  notes: 'A basket at dawn. Slight heat relief; she clings to the mercy of it.' },
+    'bury':          { displayName: 'Bury on the Property',        emoji: '⚱️', money: [0, 0],       wanted: 1,  notoriety: 1, motherMood: -3,  xp: 5,  notes: 'Shallow grave on the grounds. Low heat when the dungeon is isolated, no paper trail.' },
+    'traffick':      { displayName: 'Sell to Traffickers',         emoji: '💸', money: [800, 2000],  wanted: 5,  notoriety: 3, motherMood: -6,  xp: 8,  notes: 'Black-market baby broker. Real cash, real heat, the mother crashes hard.' },
+    'incinerate':    { displayName: 'Incinerate',                  emoji: '🔥', money: [0, 0],       wanted: 0,  notoriety: 0, motherMood: 0,   xp: 6,  requiresFacility: 'incinerator', notes: 'Cleanest removal — needs an incinerator. No trace, no morale loss from the mother.' },
+    'feed-to-dog':   { displayName: 'Feed to the Guard Dog',       emoji: '🐕', money: [0, 0],       wanted: 1,  notoriety: 1, motherMood: -15, xp: 10, requiresSecurity: 'guard-dog', notes: 'No body, no trace — needs a guard dog on the property. Annihilates the mother\'s mind.' },
+    'organ-harvest': { displayName: 'Black-Market Organ Harvest',  emoji: '🫀', money: [1500, 3500], wanted: 8,  notoriety: 5, motherMood: -12, xp: 12, levelReq: 6, notes: 'Sell it for parts. Top dollar, maximum heat, shatters the mother. DEPRAVITY-gated.' },
+    'disposal-film': { displayName: 'Dark-Web Disposal Reel',      emoji: '📹', money: [600, 1400],  wanted: 9,  notoriety: 6, motherMood: -14, xp: 14, levelReq: 7, notes: 'Film getting rid of the mass for a sick collector black-market — disposal footage, not a sex tape. Big cash + DEPRAVITY, brutal heat. Top-tier gated.' },
+    'occult':        { displayName: 'Occult Sacrifice',           emoji: '🕯️', money: [0, 0],       wanted: 4,  notoriety: 3, motherMood: -10, xp: 16, levelReq: 8, notes: 'A rite in the dark. No money, but the most DEPRAVITY XP of any method. High heat. End-tier gated.' }
+  });
+
+  // Methods with their lock state for a given mother (level / facility / security gates).
+  function availableNewbornMethods(girl) {
+    const dungeon = girl ? window.DMTHGame.state.getDungeon(girl.assignedDungeonId) : null;
+    const p = window.DMTHGame.progression;
+    const cheat = p && p.isCheatUnlocked && p.isCheatUnlocked();
+    const lvl = p ? p.getLevel() : 1;
+    const ops = window.DMTHGame.dungeonOps;
+    return Object.entries(NEWBORN_METHODS).map(([id, m]) => {
+      let locked = false, reason = '';
+      if (m.levelReq && !cheat && lvl < m.levelReq) { locked = true; reason = `DEPRAVITY L${m.levelReq} required`; }
+      else if (m.requiresFacility && !(ops && ops.hasFacility(dungeon, m.requiresFacility))) { locked = true; reason = `needs an ${m.requiresFacility} facility`; }
+      else if (m.requiresSecurity && !(ops && ops.hasSecurity(dungeon, m.requiresSecurity))) { locked = true; reason = `needs a ${m.requiresSecurity}`; }
+      return { id, ...m, locked, reason };
+    });
+  }
+
+  // Execute a chosen newborn disposal. opts.auto skips the gates (auto-fallback path).
+  function disposeNewborn(girlId, methodId, opts = {}) {
+    const girl = window.DMTHGame.state.getGirl(girlId);
+    if (!girl) return { ok: false, reason: 'no such girl' };
+    const preg = getPregnancy(girl);
+    if (preg.status !== 'delivered' || !preg.pendingNewbornDisposal) {
+      return { ok: false, reason: 'no newborn awaiting disposal' };
+    }
+    const m = NEWBORN_METHODS[methodId];
+    if (!m) return { ok: false, reason: 'unknown method' };
+    if (!opts.auto) {
+      const p = window.DMTHGame.progression;
+      const cheat = p && p.isCheatUnlocked && p.isCheatUnlocked();
+      if (m.levelReq && !cheat && p && p.getLevel() < m.levelReq) return { ok: false, reason: `locked — reach DEPRAVITY level ${m.levelReq}` };
+      const dungeon = window.DMTHGame.state.getDungeon(girl.assignedDungeonId);
+      const ops = window.DMTHGame.dungeonOps;
+      if (m.requiresFacility && !(ops && ops.hasFacility(dungeon, m.requiresFacility))) return { ok: false, reason: `needs an ${m.requiresFacility} facility` };
+      if (m.requiresSecurity && !(ops && ops.hasSecurity(dungeon, m.requiresSecurity))) return { ok: false, reason: `needs a ${m.requiresSecurity}` };
+    }
+    let moneyGain = 0;
+    if (m.money && m.money[1] > 0) {
+      moneyGain = m.money[0] + Math.floor(Math.random() * (m.money[1] - m.money[0] + 1));
+      window.DMTHGame.state.addMoney(moneyGain, `newborn:${methodId}:${girl.id}`);
+    }
+    if (m.wanted && window.DMTHGame.state.addWanted) window.DMTHGame.state.addWanted(m.wanted, `newborn:${methodId}`);
+    if (m.notoriety && window.DMTHGame.state.addNotoriety) window.DMTHGame.state.addNotoriety(m.notoriety);
+    // The mother's mind — a bonded mother who wanted to keep it crashes harder than a hostile one.
+    const bond = girl.bond?.bondLevel || 0;
+    const moodHit = m.motherMood + (m.motherMood < 0 && bond >= 6 ? -4 : 0);
+    const mood = { ...(girl.mood || {}) };
+    mood.moodPressure = Math.max(-60, Math.min(60, (mood.moodPressure || 0) + moodHit));
+    const bondPatch = moodHit < 0 ? { ...girl.bond, bondDebt: (girl.bond?.bondDebt || 0) + Math.abs(moodHit) } : { ...girl.bond };
+    if (m.xp && window.DMTHGame.progression) window.DMTHGame.progression.grantXp(m.xp, 'newborn:' + methodId);
+    const newPreg = {
+      ...preg,
+      status: 'birthed',
+      pendingNewbornDisposal: false,
+      newbornDisposalMethod: methodId,
+      outcomeHistory: [...(preg.outcomeHistory || []), { status: 'newborn-disposed', method: methodId, day: preg.gestationDays, ts: Date.now(), notes: `newborn disposed via ${m.displayName}${moneyGain ? ` (+$${moneyGain})` : ''}${opts.auto ? ' (auto)' : ''}` }]
+    };
+    window.DMTHGame.state.updateGirl(girlId, { pregnancy: newPreg, mood, bond: bondPatch });
+    if (window.DMTHNotify) window.DMTHNotify.show(`${m.emoji} ${girl.name}'s newborn — ${m.displayName}${moneyGain ? ` · +$${moneyGain.toLocaleString()}` : ''}.`, { type: 'warn', durationMs: 6000 });
+    return { ok: true, methodId, moneyGain };
+  }
+
+  // Auto-fallback grace before the newborn is dumpstered for you if you ignore it (ms).
+  const NEWBORN_AUTO_MS = 5 * 60 * 1000;
+
+  // Day 280 — she delivers. The newborn can't join the harem, so it goes to a PENDING-DISPOSAL
+  // state and the player chooses a method (disposeNewborn). Auto-dumpstered if ignored too long.
   function resolveFullTerm(girlId) {
     const girl = window.DMTHGame.state.getGirl(girlId);
     if (!girl) return { ok: false, reason: 'no such girl' };
@@ -311,83 +463,34 @@
     if (preg.status !== 'pregnant' || preg.gestationDays < 280) {
       return { ok: false, reason: 'not at full term' };
     }
-
-    // Newborns NEVER enter the captive roster. The branches below cover every disposal
-    // path the operator (or fate) might take. Random distribution — UI may add a player-
-    // pick prompt later for the non-random methods.
-    //
-    //   stillbirth-trash        — random adverse outcome, baby never lived. No money,
-    //                             small notoriety, mild bond-debt from the trauma.
-    //   firestation-drop        — anonymous safe-haven drop-off. Zero money, low notoriety.
-    //   sold-to-black-market    — broker sale. Real money, moderate notoriety.
-    //   lost-to-authorities     — caught delivering / reported. Heavy notoriety, no money.
-    //   abandoned-trash         — dumped (river / dumpster / shallow grave). Tiny notoriety
-    //                             chance of low spike, but mostly clean. Cold.
-    const r = Math.random();
-    let outcome, notes, notorietyBump = 0, moneyGain = 0;
-    if (r < 0.15) {
-      outcome = 'stillbirth-trash';
-      notes = `${girl.name}'s baby was stillborn. The body is wrapped and disposed of quietly.`;
-      notorietyBump = 1;
-      const newBond = { ...girl.bond, bondDebt: (girl.bond?.bondDebt || 0) + 4 };
-      window.DMTHGame.state.updateGirl(girlId, { bond: newBond });
-    } else if (r < 0.40) {
-      outcome = 'firestation-drop';
-      notes = `${girl.name}'s newborn was dropped off anonymously at a firestation. No questions asked.`;
-      notorietyBump = 1;
-    } else if (r < 0.70) {
-      outcome = 'sold-to-black-market';
-      notes = `${girl.name} delivered. Child sold to black-market broker.`;
-      moneyGain = 800 + Math.floor(Math.random() * 1200);
-      notorietyBump = 3;
-      window.DMTHGame.state.addMoney(moneyGain, `pregnancy:broker-sale:${girl.id}`);
-    } else if (r < 0.88) {
-      outcome = 'abandoned-trash';
-      notes = `${girl.name}'s newborn was disposed of with the trash. No paper trail.`;
-      notorietyBump = Math.random() < 0.2 ? 5 : 0;   // small chance of being found
-    } else {
-      outcome = 'lost-to-authorities';
-      notes = `${girl.name}'s delivery was reported to authorities. Heavy notoriety.`;
-      notorietyBump = 8;
-    }
-
-    if (notorietyBump && window.DMTHGame.state.addNotoriety) {
-      window.DMTHGame.state.addNotoriety(notorietyBump);
-    }
-
     const newPreg = {
-      status: outcome,
-      conceivedAtTick: preg.conceivedAtTick,
-      gestationDays: preg.gestationDays,
+      ...preg,
+      status: 'delivered',
       trimester: 3,
-      conceptionSource: preg.conceptionSource,
-      johnEncounterId: preg.johnEncounterId,
-      outcomeHistory: [
-        ...(preg.outcomeHistory || []),
-        { status: outcome, day: preg.gestationDays, method: null, ts: Date.now(), notes }
-      ],
-      lastAbortMethod: preg.lastAbortMethod
+      pendingNewbornDisposal: true,
+      deliveredAt: Date.now(),
+      outcomeHistory: [...(preg.outcomeHistory || []), { status: 'delivered', day: preg.gestationDays, method: null, ts: Date.now(), notes: `${girl.name} delivered — newborn awaiting disposal` }]
     };
     window.DMTHGame.state.updateGirl(girlId, { pregnancy: newPreg });
-
+    // MILKBAL.1 — delivery opens her postpartum lactation window ("a few days after birth",
+    // extended for a big-tits girl), so her breasts keep producing milk after she's birthed.
+    if (window.DMTHGame.milk?.startPostpartum) window.DMTHGame.milk.startPostpartum(girlId);
     if (window.DMTHNotify) {
-      window.DMTHNotify.show(`🍼 ${girl.name}: ${notes}`, { type: outcome === 'lost' ? 'error' : 'success', durationMs: 5000 });
+      window.DMTHNotify.show(`🍼 ${girl.name} has given birth. The newborn can't join the harem — choose how to dispose of the mass (her room → pregnancy panel).`, { type: 'warn', durationMs: 7000 });
     }
-
-    return { ok: true, outcome, notes, notorietyBump, moneyGain };
+    return { ok: true, delivered: true };
   }
 
   // -----------------------------------------------------------------------
   // Tick advancement
   // -----------------------------------------------------------------------
 
-  // Days-per-tick for gestation advancement. Gestation pace target: 1 game day per
-  // trimester, 3 game days to full term. At 1 real-sec = 1 game-min, 1 game day =
-  // 24 real min. Tick fires every 30 real sec → 30 game min/tick → 48 ticks per game
-  // day → 144 ticks per full term. Full term is 280 pregnancyDays, so per-tick advance
-  // is 280 / 144 ≈ 1.944. Trimester boundaries at 93 / 186 / 280 pregnancyDays land at
-  // game-day 1 / 2 / 3 respectively.
-  const GESTATION_DAYS_PER_TICK = 280 / 144;
+  // Days-per-tick for gestation advancement. Pace target (Gee): 2 GAME DAYS per trimester →
+  // 6 game days to full term. 48 ticks per game day → 288 ticks per full term. Full term is
+  // 280 gestation-days, so per-tick advance is 280/288 ≈ 0.972. The internal 0-280 scale is
+  // kept (it drives the fine-grained abortion windows + the trimester image tiers); only the
+  // real-time PACE changes. Trimester boundaries (93/186/280) land at game-day 2 / 4 / 6.
+  const GESTATION_DAYS_PER_TICK = 280 / 288;
 
   // Called from tick.js once per engine tick. Advances gestation by GESTATION_DAYS_PER_TICK.
   // For each pregnant girl: increment gestationDays; recompute trimester; auto-resolve at 280.
@@ -397,14 +500,40 @@
     for (const girl of s.roster) {
       if (girl.encounterState !== 'captive') continue;
       const preg = getPregnancy(girl);
+      // NEWBORN.2 — a delivered newborn awaiting disposal auto-dumpsters if ignored too long.
+      if (preg.status === 'delivered' && preg.pendingNewbornDisposal) {
+        if (preg.deliveredAt && (Date.now() - preg.deliveredAt) > NEWBORN_AUTO_MS) {
+          disposeNewborn(girl.id, 'dumpster', { auto: true });
+        }
+        continue;
+      }
       if (preg.status !== 'pregnant') continue;
 
       const newDays = (preg.gestationDays || 0) + GESTATION_DAYS_PER_TICK;
       const newTrimester = trimesterFromDays(newDays);
 
-      window.DMTHGame.state.updateGirl(girl.id, {
-        pregnancy: { ...preg, gestationDays: newDays, trimester: newTrimester }
-      });
+      // Bond-split preggo feelings: an INDOCTRINATED captive (high Stockholm) wants to carry
+      // and raise it, to be part of the harem — pregnancy deepens her bond. A NON-indoctrinated
+      // one is horrified by it — being bred against her will rots her mood + spikes bond-debt.
+      const bond = girl.bond?.bondLevel || 0;
+      const patch = { pregnancy: { ...preg, gestationDays: newDays, trimester: newTrimester } };
+      // PREGNEED.1 (Gee) — a pregnant girl eats for two: extra food drain on top of the normal
+      // consumable tick (neglect her food and the starvation penalty bites faster while preggo).
+      if (girl.consumables && girl.consumables.food) {
+        const cons = JSON.parse(JSON.stringify(girl.consumables));
+        cons.food.stock = Math.max(0, (cons.food.stock || 0) - 1);
+        patch.consumables = cons;
+      }
+      if (bond >= 6) {
+        patch.bond = { ...girl.bond, bondXP: (girl.bond?.bondXP || 0) + 1 };
+        patch.mood = { ...girl.mood, mood: bond >= 8 ? 'devoted' : 'dependent', moodEmoji: '🥰' };
+      } else if (bond <= 3) {
+        patch.bond = { ...girl.bond, bondDebt: (girl.bond?.bondDebt || 0) + 1 };
+        const mp = { ...(girl.mood || {}) };
+        mp.moodPressure = Math.max(-60, (mp.moodPressure || 0) - 1);
+        patch.mood = mp;
+      }
+      window.DMTHGame.state.updateGirl(girl.id, patch);
 
       // Auto-resolve at full term.
       if (newDays >= 280) {
@@ -466,8 +595,15 @@
     isPregnant,
     trimesterFromDays,
     attemptConception,
+    addVaginalCum,
+    tickCumFill,
+    PREGGO_FILL_MIN,
+    PREGGO_MAINTAIN_TICKS,
     applyAbortion,
     resolveFullTerm,
+    NEWBORN_METHODS,
+    availableNewbornMethods,
+    disposeNewborn,
     tickPregnancies,
     describePregnancy,
     eligibleAbortionMethods,

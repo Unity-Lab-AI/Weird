@@ -24,6 +24,77 @@
     climate:        { label: '🌡️ Climate',         maxTier: 3, tierCosts: [0, 40, 180, 500], tierNames: ['none','fan','AC','full climate control'] }
   };
 
+  // --- Dungeon-level security facilities (escape containment counters) ---
+  // Purchased per-dungeon (not per-hold). Each installed facility adds its `containment`
+  // to the escape-containment math (tick.js holdContainment) and a small `wantedReduction`
+  // (a hardened, guarded property draws less attention). Guard dog is ONE of the set — the
+  // player buys whatever mix fits the dungeon. One-time purchase each, persists on the dungeon.
+  const SECURITY_FACILITIES = {
+    'reinforced-door':  { displayName: '🚪 Reinforced Door + Vault Locks', cost: 350,  containment: 0.10, wantedReduction: 0.02, notes: 'Steel-core door, multi-point deadbolts. Slows any break for the exit.' },
+    'guard-dog':        { displayName: '🐕 Guard Dog',                      cost: 500,  containment: 0.14, wantedReduction: 0.03, notes: 'Trained attack dog patrols the approach. Runners think twice.' },
+    'motion-sensors':   { displayName: '📡 Motion Sensors + Alarm',         cost: 650,  containment: 0.12, wantedReduction: 0.01, notes: 'Trips the instant she moves for an exit — you get the jump on a break.' },
+    'soundproofing':    { displayName: '🔇 Soundproofing',                  cost: 800,  containment: 0.08, wantedReduction: 0.06, notes: 'Screams don\'t carry. Big WANTED-heat reduction, modest containment.' },
+    'electric-fence':   { displayName: '⚡ Electrified Perimeter',          cost: 1400, containment: 0.18, wantedReduction: 0.02, notes: 'Hot wire on every exit. The hardest physical deterrent.' },
+    'sedation-collar':  { displayName: '💉 Auto-Sedation Collar',           cost: 2200, containment: 0.22, wantedReduction: 0.04, notes: 'Detects an escape spike and doses her down automatically. Near-total containment.' }
+  };
+
+  // Dungeon-level DISPOSAL facilities — gate the "involved" disposal methods (disposal.js
+  // requirementError reads dungeon.facilities[id]). One-time build per dungeon.
+  const DISPOSAL_FACILITIES = {
+    incinerator: { displayName: '🔥 Incinerator', cost: 1800, facilityKey: 'incinerator', notes: 'Unlocks the Incinerate disposal method — cleanest removal, no body to find.' },
+    boat:        { displayName: '⛵ Boat + coastal access', cost: 1200, facilityKey: 'boat', notes: 'Unlocks Lose at Sea — weighted, deep-water disposal.' }
+  };
+
+  function hasFacility(dungeon, facilityKey) {
+    return !!(dungeon?.facilities && dungeon.facilities[facilityKey]);
+  }
+
+  function buyDisposalFacility(dungeonId, facilityId) {
+    const fac = DISPOSAL_FACILITIES[facilityId];
+    if (!fac) throw new Error('unknown disposal facility: ' + facilityId);
+    const dungeon = window.DMTHGame.state.getDungeon(dungeonId);
+    if (!dungeon) throw new Error('no such dungeon');
+    if (hasFacility(dungeon, fac.facilityKey)) throw new Error('already built');
+    const ok = window.DMTHGame.state.spendMoney(fac.cost, `disposal-facility:${facilityId}:${dungeonId}`);
+    if (!ok) throw new Error('insufficient funds');
+    window.DMTHGame.state.updateDungeon(dungeonId, {
+      facilities: { ...(dungeon.facilities || {}), [fac.facilityKey]: true }
+    });
+    return { ok: true, facilityId, cost: fac.cost };
+  }
+
+  function hasSecurity(dungeon, facilityId) {
+    return !!(dungeon?.security && dungeon.security[facilityId]);
+  }
+
+  function buySecurityFacility(dungeonId, facilityId) {
+    const fac = SECURITY_FACILITIES[facilityId];
+    if (!fac) throw new Error('unknown security facility: ' + facilityId);
+    const dungeon = window.DMTHGame.state.getDungeon(dungeonId);
+    if (!dungeon) throw new Error('no such dungeon');
+    if (hasSecurity(dungeon, facilityId)) throw new Error('already installed');
+    const ok = window.DMTHGame.state.spendMoney(fac.cost, `security:${facilityId}:${dungeonId}`);
+    if (!ok) throw new Error('insufficient funds');
+    window.DMTHGame.state.updateDungeon(dungeonId, {
+      security: { ...(dungeon.security || {}), [facilityId]: true }
+    });
+    return { ok: true, facilityId, cost: fac.cost };
+  }
+
+  // Total passive WANTED reduction per tick from all installed facilities across all dungeons.
+  function totalWantedReduction() {
+    const s = window.DMTHGame.state.current;
+    if (!s) return 0;
+    let total = 0;
+    for (const d of s.dungeons || []) {
+      const sec = d.security || {};
+      for (const id of Object.keys(sec)) {
+        if (sec[id] && SECURITY_FACILITIES[id]) total += SECURITY_FACILITIES[id].wantedReduction || 0;
+      }
+    }
+    return total;
+  }
+
   function getHold(dungeonId, holdIdx) {
     const d = window.DMTHGame.state.getDungeon(dungeonId);
     if (!d) throw new Error('no such dungeon');
@@ -95,6 +166,8 @@
   window.DMTHGame = window.DMTHGame || {};
   window.DMTHGame.dungeonOps = Object.freeze({
     UPGRADE_TRACKS, getUpgradeLevel, upgrade,
-    nextCapacityUpgrade, expandCapacity
+    nextCapacityUpgrade, expandCapacity,
+    SECURITY_FACILITIES, hasSecurity, buySecurityFacility, totalWantedReduction,
+    DISPOSAL_FACILITIES, hasFacility, buyDisposalFacility
   });
 })();

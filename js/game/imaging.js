@@ -62,22 +62,105 @@
   function bodyStateTokens(body) {
     const out = [];
     if (!body) return '';
-    if (body.arousal >= 60)     out.push('flushed cheeks, parted lips');
-    if (body.arousal >= 85)     out.push('heavy-lidded eyes, bitten lower lip');
-    if (body.wetness >= 60)     out.push('damp inner thighs');
-    if (body.wetness >= 85)     out.push('glossy thighs');
-    if (body.cumLoad >= 0.5)    out.push('glazed stomach');
-    if (body.cumLoad >= 1.5)    out.push('streaks across collarbones');
-    if (body.bruises >= 3)      out.push('light bruising on arms');
-    if (body.bruises >= 8)      out.push('darker bruises visible on thighs and shoulders');
-    if (body.bruises >= 15)     out.push('heavy bruising, split lip, smudged makeup');
+    // TEMPL-CONCISE.1 — ONE concise token per body axis (highest applicable threshold only).
+    // Previously every crossed threshold stacked (arousal≥95 pushed 3 phrases, cum≥5 pushed 4),
+    // piling adjectives that drowned the location / outfit / toy slots. Single-token-per-axis
+    // keeps each component visible without one category eating the others.
+    // Arousal
+    if (body.arousal >= 95)      out.push('fucked-out ahegao, eyes rolling up, tongue lolling');
+    else if (body.arousal >= 85) out.push('heavy-lidded eyes, bitten lower lip');
+    else if (body.arousal >= 60) out.push('flushed cheeks, parted lips');
+    // Wetness
+    if (body.wetness >= 95)      out.push('soaked dripping cunt, slick down both thighs');
+    else if (body.wetness >= 85) out.push('glossy wet thighs');
+    else if (body.wetness >= 60) out.push('damp inner thighs');
+    // Cum on body
+    if (body.cumLoad >= 5)        out.push('drenched in cum face to thighs, thick ropes pooling');
+    else if (body.cumLoad >= 3)   out.push('cum dripping down her thighs and ass, glazed in spent loads');
+    else if (body.cumLoad >= 1.5) out.push('cum streaked across collarbones and stomach');
+    else if (body.cumLoad >= 0.5) out.push('glazed stomach');
+    // CUMFILL.1 — vaginal cum-fill (preggo meter) reads as a stuffed, plugged, leaking cunt.
+    if ((body.vaginalCum || 0) >= 6)      out.push('cunt overflowing with backed-up cum, bred-full and leaking');
+    else if ((body.vaginalCum || 0) >= 3) out.push('pussy stuffed full of cum, swollen and leaking');
+    // Bruises
+    if (body.bruises >= 25)      out.push('covered in welts and bruises, fingerprint marks ringing throat and hips');
+    else if (body.bruises >= 15) out.push('heavy bruising, split lip, smudged makeup');
+    else if (body.bruises >= 8)  out.push('bruises on thighs and shoulders');
+    else if (body.bruises >= 3)  out.push('light bruising on arms');
+    // Low HEALTH reads as visible sickness/injury so an unhealthy, damaged captive looks it.
+    if ((body.health ?? 100) < 20)      out.push('badly hurt and bloodied, deathly pale, barely conscious');
+    else if ((body.health ?? 100) < 40) out.push('weakened and unwell, pale and unsteady');
+    // Drug withdrawal — dope-sick markers (DEP-EXP.2). Set by drug-scheduler tickAll on body.withdrawalState.
+    if (body.withdrawalState && body.withdrawalState.severity >= 0.2) out.push('dope-sick — clammy grey sweat, shaking, hollow strung-out look');
     // NOTE: pupil/high markers moved to drugStateTokens() so they're sourced from the
     // specific active drug and scaled by body.high intensity. bodyStateTokens stays focused
     // on non-chemical body state (arousal / wetness / cum / bruises). Whiskey/alcohol still
     // get a base flush marker here as a redundancy guard if drug list is empty but
     // body.high carries an alcohol contribution.
-    if ((body.activeDrugs || []).some(d => (d.name || d) === 'whiskey')) out.push('flushed from alcohol');
+    // (Alcohol flush is emitted by drugStateTokens now — kept single-source there to avoid
+    // a doubled "flushed" marker bloating the prompt.)
     return out.join(', ');
+  }
+
+  // --- Recent-act aftermath markers ---
+  // The body shows what was just DONE to it. applyAction (action-effects.js) stamps
+  // body.recentActTag + body.recentActAt (game-minutes) for sex/violence acts; this renders
+  // the fresh aftermath for a short game-time window so the next image of her reflects the
+  // act, then fades (she cleans up / time passes). Suppressed for postmortem bodies.
+  const ACT_AFTERMATH = {
+    rough:     'freshly fucked-raw, red handprints gripped into her hips and thighs, used-hard, slightly gaping and puffy',
+    choked:    'fresh red finger-marks ringing her throat, gasping, breathless flush, watering bloodshot eyes',
+    anal:      'gaping used asshole, slick and puffy, recently-fucked, legs still trembling',
+    creampied: 'cum leaking and dripping out of a freshly-bred pussy, creampie overflow running down her inner thighs',
+    throated:  'mouth hanging open with tongue lolling out, gagging, drool and spit strands down her chin, ruined running mascara, throat-fucked flush',
+    whipped:   'fresh red welts striping her back, ass and thighs, raised and stinging',
+    beaten:    'doubled over and convulsing, both arms clutching her stomach, fresh swelling and split skin, blood at the lip, struck marks blooming',
+    slapped:   'a red handprint blooming hot across one cheek, head snapped to the side, watering eyes',
+    used:      'flushed and freshly-used, hair mussed, fucked-soft and rumpled',
+    kissed:    'soft flushed smile, lips parted and puckered, leaning into it, eyes half-closed and warm',
+    caressed:  'skin flushed and goosebumped, shivering softly, leaning into the touch, eyes fluttering',
+    marked:    'a fresh raw ownership mark on her body, skin swollen and reddened and inflamed around the new brand, tattoo or piercing, recently marked and stinging',
+    facial:    'face glazed and dripping with thick spent cum across her cheeks, lips, eyelashes and nose, ropes of it sliding down her chin',
+    bukkake:   'face and hair drenched and overflowing with load after load of cum, pooling in her open mouth, dripping off her chin and lashes, blinking through the mess',
+    fisted:    'cunt stretched obscenely wide and gaping, puffy and slick and ruined, trembling around the emptiness, fresh-fisted and wrecked',
+    prolapsed: 'wrecked hole fucked inside-out, swollen pink and slick and distended, pushed past its limit and gaping',
+    pissed:    'soaked and dripping, hair plastered to her flushed face, glistening wet and degraded, kneeling in the puddle',
+    // PERIOD.1 / IMGAFTERMATH.1 — on-the-rag aftermath. SLIGHT smear modifiers layered onto her
+    // locked seed/face (TTL-faded), so the bloody act shows without altering who she is.
+    'bloodied-mouth': 'a smear of period blood across her lips, mouth and chin with a red streak up one cheek, wiping her mouth, otherwise unchanged',
+    'bloody-fucked':  'faint streaks of period blood smeared across her inner thighs and hips and his handprints, freshly-used flush, otherwise unchanged',
+    // IMGAFTERMATH.1 (Gee: "all adjectives need to be added ... in any case where her apperance has
+    // changes for actions and a new image is needed") — caretaking that CLEANS her up is itself an
+    // appearance change, so it stamps a fresh-and-clean look (washing the mess away).
+    'cleaned':   'freshly bathed and wiped down, skin clean and soft, hair damp and combed, the mess washed away, calm and cared-for'
+  };
+  const ACT_AFTERMATH_TTL_GAMEMIN = 120;   // ~2 game-hours before the look fades
+  function actAftermathTokens(body) {
+    if (!body || !body.recentActTag) return '';
+    const tok = ACT_AFTERMATH[body.recentActTag];
+    if (!tok) return '';
+    const clock = window.DMTHGame?.gameClock;
+    if (clock && typeof body.recentActAt === 'number') {
+      if (clock.now() - body.recentActAt > ACT_AFTERMATH_TTL_GAMEMIN) return '';
+    }
+    return tok;
+  }
+
+  // TOY-IMG.1 — the implement currently in use on her (gag in mouth, clamps, plug, machine,
+  // etc.) rendered visibly on her body, like cuffs/clothing. Reads body.recentToy + recentToyAt
+  // (game-min), TTL-faded so it shows for a short window after use then clears. Suppressed
+  // postmortem. Visual descriptions live in toys.TOY_IMG.
+  const TOY_IMG_TTL_GAMEMIN = 90;
+  function toyTokens(body) {
+    if (!body || !body.recentToy) return '';
+    const map = window.DMTHGame?.toys?.TOY_IMG;
+    const tok = map && map[body.recentToy];
+    if (!tok) return '';
+    const clock = window.DMTHGame?.gameClock;
+    if (clock && typeof body.recentToyAt === 'number') {
+      if (clock.now() - body.recentToyAt > TOY_IMG_TTL_GAMEMIN) return '';
+    }
+    return tok;
   }
 
   // --- Drug-state visible markers ---
@@ -95,20 +178,37 @@
     const intensifier = high >= 75 ? 'extreme' : high >= 50 ? 'pronounced' : high >= 25 ? 'visible' : 'subtle';
     const names = new Set(active.map(d => String(d?.name || d || '').toLowerCase()).filter(Boolean));
     const out = [];
+    // DRUGPERSIST.1 — only depict the ACTIVE act of using when she physically can: a tranq'd
+    // (unconscious) or a nugget (no hands) girl can't hold a blunt or snort a line, so those props
+    // are suppressed (her physiological high markers still render).
+    const canActivelyUse = !names.has('tranquilizer') && !body.isNugget;
+    // DRUGPERSIST.1 (Gee) — render the ACT of using, not just the physiological after-effects:
+    // a girl on coke is snorting lines off a mirror; on weed she's smoking a blunt; etc. The
+    // drug-use prop composes ON TOP of her current clothed/nude state (handled by the outfit /
+    // nudity tokens elsewhere) — so she's shown smoking a blunt whether dressed or naked. Skipped
+    // for ketamine / tranquilizer (too gone to actively use anything).
     if (names.has('coke')) {
       out.push(`${intensifier} dilated pupils filling most of the iris, tight clenched jaw, twitchy restless fingers, faint reddened nostrils, hyperalert wide-eyed gaze, light sweat sheen on forehead and upper lip`);
+      if (canActivelyUse) out.push('actively snorting a thick line of white powder off a small mirror through a tightly rolled banknote, more white lines and a razor blade laid out on the mirror in front of her, leaning down over it');
+      // High coke load → physical wear: nosebleed, then a strung-out junkie look at the extreme.
+      if (high >= 75) out.push('thin trickle of blood from one raw red nostril, wiped-raw chafed skin under the nose');
+      if (high >= 90) out.push('strung-out hollow-cheeked junkie wear, faint old track marks along the inner arms');
     }
     if (names.has('weed')) {
       out.push(`heavy-lidded reddened glassy eyes, slow languid blinks, softly slack jaw, ${intensifier} relaxed loose posture, parted dry lips, hazy ambient atmosphere suggesting smoke`);
+      if (canActivelyUse) out.push('actively smoking a fat lit blunt, the joint held to her lips or between her fingers, glowing ember tip, thick curl of smoke drifting up around her face');
     }
     if (names.has('mdma')) {
       out.push(`${intensifier} flushed glowing cheeks, dilated dark pupils, dewy luminous skin with light sweat, subtle grinding jaw motion, euphoric soft-edged unfocused smile, restless hands`);
+      if (canActivelyUse) out.push('rolling hard — chewing gum or sucking a pacifier, clutching a water bottle, jaw working, hands roaming over her own skin');
     }
     if (names.has('acid')) {
       out.push(`${intensifier} fully dilated pupils swallowing the iris, distant unfocused fascinated gaze past the camera, slack open-mouthed wonderment expression, flushed cheeks, gently swaying posture`);
+      if (canActivelyUse) out.push('a small square paper blotter tab balanced on her outstretched tongue, mouth open, eyes rolled up');
     }
     if (names.has('whiskey') || names.has('alcohol')) {
       out.push(`${intensifier} alcohol-flushed cheeks and upper chest, glassy unfocused eyes, slightly smudged makeup, parted lips, faintly swaying posture, slightly disheveled hair`);
+      if (canActivelyUse) out.push('swigging straight from a bottle of brown whiskey or holding a half-empty glass, bottle tipped to her lips, a drink spilling slightly');
     }
     if (names.has('ketamine')) {
       out.push(`${intensifier} disconnected vacant stare, half-lidded eyes, fully slack jaw, motionless dissociated posture, body limp and unsteady, awareness distant and elsewhere`);
@@ -121,6 +221,33 @@
       out.push(`completely unconscious, deeply sedated, eyes fully closed with lashes resting on cheekbones, jaw slack and mouth slightly open, head tilted forward or to the side, body limp with no muscle tension, arms dropped slack, posture collapsed and supported only by restraints or surface, breathing slow and shallow, totally unresponsive`);
     }
     return out.join(', ');
+  }
+
+  // Amputee / nugget markers — front-loaded body-transform block. Reads body.limbs (set by
+  // action-effects.delimb). A full nugget = limbless torso; partial = per-limb stumps.
+  function limbTokens(body) {
+    const l = body?.limbs;
+    if (!l) return '';
+    const removed = ['leftArm', 'rightArm', 'leftLeg', 'rightLeg'].filter(k => l[k] === 'removed');
+    if (!removed.length) return '';
+    if (removed.length >= 4) return 'QUADRUPLE AMPUTEE — a living limbless torso, all four limbs amputated flush at the shoulders and hips, smooth rounded healed stumps, no arms and no legs at all, helpless armless legless body';
+    const map = {
+      leftArm: 'left arm amputated at the shoulder with a rounded stump',
+      rightArm: 'right arm amputated at the shoulder with a rounded stump',
+      leftLeg: 'left leg amputated at the hip with a rounded stump',
+      rightLeg: 'right leg amputated at the hip with a rounded stump'
+    };
+    return 'AMPUTEE — ' + removed.map(k => map[k]).join(', ');
+  }
+
+  // Permanent ownership marks — brand / owner-name tattoo / locked piercings. IRREVERSIBLE,
+  // so they render in EVERY image of her with NO TTL fade (unlike the recent-act aftermath),
+  // and persist even postmortem (a brand stays on a corpse). Front-loaded near the body slot
+  // so they aren't buried at the tail. Set by action-effects.applyMark → body.ownershipMarks.
+  function ownershipMarkTokens(body) {
+    const marks = body && body.ownershipMarks;
+    if (!marks || !marks.length) return '';
+    return marks.map(m => m.render).filter(Boolean).join(', ');
   }
 
   // Active-bondage visible markers, front-loaded near nudity/face slot so the bondage
@@ -155,8 +282,32 @@
     if (!girl || girl.encounterState !== 'dead') return '';
     const decayMin = girl.body?.decayedMinutes || 0;
     const decayDays = decayMin / 1440;
+    // Snuff cause-of-death marker (lifespan.snuffKill sets body.corpseMarker) — layered onto
+    // the corpse appearance so the body shows HOW she was killed.
+    // Each marker layers the WOUND + the death IMPLEMENT/evidence into the corpse scene, so the
+    // body visibly shows HOW she was killed (Gee: a stabbing shows blood wounds + the knife near
+    // her or in her — and likewise the weapon/evidence for every other death method). Kept concise
+    // so the implement token doesn't drown the rest of the prompt.
+    const CORPSE_CAUSE = {
+      'choked':        'deep ligature and fingertip bruising ringing the throat, pinpoint red petechiae in the eyes, a cord or belt left looped beside her neck',
+      'bloody-throat': 'a deep gaping slit opened across the throat, blood sheeting down the neck and chest, a bloodied knife lying beside her in the pooled blood',
+      'beaten':        'face and body battered and swollen, split skin, blood crusted at the nose and mouth, a bloodied pipe or bat discarded on the floor nearby',
+      'bled-out':      'drained waxy-white pallor, blood pooled beneath her and smeared down the thighs, a bloodied blade discarded beside the pool',
+      'drowned':       'damp matted hair and waterlogged bluish skin, lips and fingertips tinged blue, a water-filled tub or basin beside her and the floor soaked',
+      'broken-neck':   'head lolling at an unnatural broken angle, the neck visibly wrong',
+      'gutted':        'the lower belly torn open, abdomen split, dark blood pooled across the hips and thighs, a bloodied knife resting beside the open wound',
+      'flayed':        'raw skinless patches across the torso and limbs, exposed flesh, blood-slick, a flaying blade and sheets of removed skin laid nearby',
+      'impaled':       'a thick wooden stake run all the way through her body, dark blood soaked around the point of entry, body limp around the shaft',
+      'overdosed':     'a spent syringe and a loosened rubber tourniquet lying beside her arm, a fresh needle mark in the crook of the elbow, lips bluish and slack',
+      'crushed':       'the skull caved and misshapen on one side, blood haloed across the surface beneath the head, a bloodied cinderblock or hammer beside her',
+      'machine':       'a motorized fucking-machine still strapped to her hips with its shaft buried in her, body slumped inert against the rig',
+      'used-up':       'body wrung out and ruined, cum and dried blood crusted across her thighs and face, fucked literally to death',
+      'peaceful':      'unmarked and slack, as if merely asleep',
+      'wet':           'damp skin and hair'
+    };
+    const cause = CORPSE_CAUSE[girl.body?.corpseMarker] || '';
     // Common base — applies at every stage.
-    const base = 'DECEASED adult body, lifeless, eyes closed, slack jaw with lips parted, no muscle tension, no facial expression, no breath, no movement, body entirely inert';
+    const base = 'DECEASED adult body, lifeless, eyes closed, slack jaw with lips parted, no muscle tension, no facial expression, no breath, no movement, body entirely inert' + (cause ? ', ' + cause : '');
     if (decayDays < 1) {
       // Fresh — could pass for deep sleep. Cool pallor only, no advanced markers.
       return `${base}, fresh-postmortem appearance, pale skin with cooled flesh tone, peaceful sleeping-cold pose, head turned to one side, limbs slack and arranged where they fell, hair fanned across the surface beneath the head, no flush, no goosebumps, no involuntary twitch`;
@@ -262,6 +413,38 @@
     if (!wr || typeof wr.getById !== 'function') return null;
     const o = wr.getById(girl.currentOutfit);
     return o?.accessoriesOnly || null;
+  }
+
+  // DASHGROUP.1 (Gee) — connect the words of ONE visual concept with dashes so the image gen
+  // parses it as a single idea and renders the intended thing — e.g. "fishnet-stockings" instead
+  // of a literal fishing net, "bare-naked-pussy" as one concept instead of a stray token. Applied
+  // to the FINAL composed prompt (in BOTH compose paths) so EVERY template — every archetype's
+  // captured-at outfit, every skimpy outfit, the nudity block, the drug-use block — gets it
+  // uniformly without hand-dashing each string. Ordered longest-first so multi-word concepts group
+  // before their substrings; idempotent (already-dashed text has no spaces left to match).
+  const CONCEPT_GROUPS = [
+    'sheer black fishnet stockings', 'black fishnet stockings', 'fishnet bodystocking', 'fishnet stockings',
+    'bare exposed nude tits', 'bare exposed breasts', 'bare exposed tits', 'exposed bare breasts',
+    'bare naked pussy', 'bare naked cunt', 'naked pussy', 'bare pussy',
+    'milk-swollen tits', 'leaking nipples', 'nipples out', 'bare nipples',
+    'white thigh-high stockings', 'thigh-high stockings', 'thigh high stockings', 'white thigh-highs',
+    'rhinestone g-string thong', 'g-string thong', 'tiny thong',
+    'topless and bottomless', 'fully nude', 'completely nude', 'raw nakedness',
+    'bare ass', 'bare hips', 'bare thighs', 'bare belly',
+    'clear stripper platform heels', 'stripper platform heels', 'clear platform heels', 'stripper heels', 'platform heels',
+    'pom-poms', 'pom poms', 'knee-high socks', 'knee high socks', 'ankle socks',
+    'frilly white maid apron', 'maid apron', 'micro pleated skirt', 'pleated skirt', 'pencil skirt',
+    'utility belt', 'peaked police cap', 'reading glasses', 'ball-gag', 'spreader bar'
+  ];
+  function groupConcepts(prompt) {
+    if (!prompt) return prompt;
+    let out = String(prompt);
+    for (const phrase of CONCEPT_GROUPS) {
+      const dashed = phrase.replace(/\s+/g, '-');
+      const re = new RegExp(phrase.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&'), 'gi');
+      out = out.replace(re, dashed);
+    }
+    return out;
   }
 
   // --- Pose library per situation ---
@@ -422,7 +605,10 @@
 
     const vi = girl.visualIdentity || {};
     const faceBlock   = vi.facialDescription || 'natural face, soft features';
-    const baseOutfit  = vi.defaultOutfitDescription || 'plain comfortable outfit';
+    // ORIGINALOUTFIT.1 — her captured-at, type-unique outfit (defaultOutfitDescription) is the
+    // baseline; the fallback is explicitly FULLY DRESSED so a girl lacking outfit data is never
+    // rendered in underwear (Gee: hunt images must show her in real clothes, not her underwear).
+    const baseOutfit  = vi.defaultOutfitDescription || 'fully clothed in casual street clothes, fully dressed';
     // Condom-on is a state overlay, not a visible outfit.
     // When equipped, render her in her PREVIOUS outfit (tracked at equip time) so the image
     // matches what she actually looks like. The contraception flag stays effective for the
@@ -432,7 +618,11 @@
       : girl.currentOutfit;
     const currentOutfitEntry = (girl.wardrobe || []).find(w => w.id === effectiveOutfitId);
 
-    const nudeStrength = nudeStateOf(girl);
+    // ORIGINALOUTFIT.1 — a PRE-CAPTURE girl (out in the world being hunted: a hunt location is set,
+    // or she's not yet a captive) is ALWAYS shown CLOTHED in her own captured-at outfit — never nude
+    // or in her underwear (Gee). Only a captive in your hold can be derobed/nude.
+    const preCapture = !!options.locationId || (girl.encounterState && girl.encounterState !== 'captive' && girl.encounterState !== 'dead');
+    const nudeStrength = preCapture ? '' : nudeStateOf(girl);
 
     // Postmortem state suppresses live-body marker emissions — no arousal flush, no drug-
     // glow, no pregnancy bump emphasis, no involuntary signs of life. The postmortem
@@ -440,8 +630,12 @@
     const isPostmortem = girl.encounterState === 'dead';
     const stateTokens = isPostmortem ? '' : bodyStateTokens(girl.body);
     const drugTokens  = isPostmortem ? '' : drugStateTokens(girl.body);
+    const aftermathTokens = isPostmortem ? '' : actAftermathTokens(girl.body);
+    const toyTok      = isPostmortem ? '' : toyTokens(girl.body);   // implement in use on her (gag/clamps/machine…)
     const pregTokens  = isPostmortem ? '' : pregnancyTokens(girl.pregnancy);
     const bondTokens  = bondageTokens(girl.body);
+    const limbTok     = limbTokens(girl.body);   // amputee/nugget — persists even postmortem
+    const ownMarkTok  = ownershipMarkTokens(girl.body);  // permanent ownership marks — always render, even postmortem
     const postmortem  = postmortemTokens(girl);
     // Pose: explicit user staging > situation-default > sleeping/corpse pose when dead.
     // The "sleeping" pose family family puts the body lying flat with limbs in resting
@@ -485,14 +679,18 @@
       parts = [
         prefix,               // 1
         nudeBlock,            // 2 — aggressive nudity front-load (replaces face slot)
+        limbTok,              // 2.2 — amputee/nugget body-transform, front-loaded
         bondTokens,           // 2.3 — bondage transforms posture, front-loaded
         postmortem,           // 2.4 — postmortem markers (suppresses live-body markers below)
         pregTokens,           // 2.5 — pregnancy markers front-loaded so the bump isn't buried at tail
+        ownMarkTok,           // 2.6 — permanent ownership marks (brand/tattoo/piercings), always render
         env,                  // 3 — hold-specific environment, promoted from old pos 7
         faceBlock,            // 4 — face moves to 4 when nude (nude is at 2)
         pose,                 // 5
         drugTokens,           // 6 — drug-state visible markers
         stateTokens,          // 7 — body-state (arousal/wetness/cum/bruises)
+        aftermathTokens,      // 7.5 — fresh aftermath of the last act done to her (TTL-faded)
+        toyTok,               // 7.6 — implement currently in use on her (TOY-IMG.1, TTL-faded)
         effectiveAdditional,  // 8 — user-staging text appended here when present
         suffix                // 9
       ];
@@ -524,20 +722,24 @@
       parts = [
         prefix,                                                                   // 1
         faceBlock,                                                                // 2
+        limbTok,                                                                  // 2.2 — amputee/nugget body-transform, front-loaded
         bondTokens,                                                               // 2.3 — bondage transforms posture, front-loaded
         postmortem,                                                               // 2.4 — postmortem markers (suppresses live-body markers below)
         pregTokens,                                                               // 2.5 — pregnancy markers front-loaded so the bump isn't buried at tail
+        ownMarkTok,                                                               // 2.6 — permanent ownership marks (brand/tattoo/piercings), always render
         env,                                                                      // 3 — hold-specific environment, promoted from old pos 7
         outfitBlock + (outfitState ? ', ' + outfitState : ''),                    // 4
         pose,                                                                     // 5
         drugTokens,                                                               // 6 — drug-state visible markers
         stateTokens,                                                              // 7 — body-state (arousal/wetness/cum/bruises)
+        aftermathTokens,                                                          // 7.5 — fresh aftermath of the last act done to her (TTL-faded)
+        toyTok,                                                                   // 7.6 — implement currently in use on her (TOY-IMG.1, TTL-faded)
         effectiveAdditional,                                                      // 8 — user-staging text appended here when present
         suffix                                                                    // 9
       ];
     }
 
-    return enforceFullBody(parts.filter(s => s && String(s).trim().length).join(', '));
+    return groupConcepts(enforceFullBody(parts.filter(s => s && String(s).trim().length).join(', ')));
   }
 
   function promptHash(s) {
@@ -723,6 +925,7 @@ ${nudeStrength ? rulesNude : rulesClothed}
    - 3rd trimester (day 187-249): pronounced heavy round bump, visible from side + front, stretch marks faintly visible, fuller breasts with darkened areolae, slightly swollen ankles, hand resting on belly
    - Full-term (day 250+): NINE MONTHS PREGNANT — large heavy round bump stretching skin taut, dark linea nigra line down lower belly, fully swollen breasts with dark areolae, swollen ankles, slow careful posture with hand cradling lower back or supporting belly, late-pregnancy glow
    When pregnancy.status is 'none' / 'aborted' / 'miscarried' / 'birthed' / 'lost', do NOT render any pregnancy markers. Adult-floor invariant (age 18+) already enforced by girl-gen — every pregnant captive is necessarily an adult.
+8c. PERMANENT OWNERSHIP MARKS — when GIRL CONTEXT lists 'permanent ownership marks', the prompt MUST render them visibly on her body, front-loaded near the body / nudity slot (position 2-3, NOT the tail). They are permanent (a seared PROPERTY brand scar / an owner-name tattoo / locked metal piercings with owner tags) and never fade — render them in full whether she is clothed or nude. Include the supplied description verbatim.
 7. FRAME THE SUBJECT HEAD TO TOE — full body shot. NEVER use portrait, mugshot, headshot, bust, or waist-up framing. Every prompt MUST explicitly include "full body shot, head to toe in frame, complete figure visible" or equivalent language. The subject's feet must be visible in the composition.
 8. All subjects are adults age 18 or older. Use the GIRL CONTEXT 'age' value verbatim (e.g. "age 18", "age 22", "age 27") — NEVER hardcode "20s" or any range that excludes 18-19.
 9. ENVIRONMENT IS THE SETTING — the 'hold environment' value in GIRL CONTEXT (when present) is the EXACT location where this scene takes place. Place its full comma-separated description verbatim at POSITION 3 of the prompt — immediately after the front-loaded NUDITY block (nude) or face description (clothed). Use every comma-separated descriptor. The "specifically:" sub-phrase names the captive's exact hold within the larger location — include it verbatim. The setting controls the visible backdrop. A USER STAGING DIRECTIVE overrides only when the directive itself specifies a different setting.
@@ -735,6 +938,9 @@ GIRL CONTEXT (all numerical values shown with their full scale per [[feedback-ai
 - pregnancy: ${girl.pregnancy?.status || 'none'}${girl.pregnancy?.status === 'pregnant' ? ` (day ${girl.pregnancy.gestationDays}/280, trimester ${girl.pregnancy.trimester})` : ''}
 - outfit state: ${girl.body?.outfitState || 'intact'}
 - current outfit: ${currentOutfitEntry?.displayName || 'default'}
+${(() => { const a = actAftermathTokens(girl.body); return a ? `- recent-act aftermath (render this visibly — it just happened to her): "${a}"` : ''; })()}
+${(() => { const ty = toyTokens(girl.body); return ty ? `- implement currently in use on her (render it visibly on her body, like cuffs/clothing): "${ty}"` : ''; })()}
+${(() => { const mk = ownershipMarkTokens(girl.body); return mk ? `- permanent ownership marks (render these visibly on her body — they are PERMANENT and never fade): "${mk}"` : ''; })()}
 ${holdEnvText ? `- hold environment: "${holdEnvText}"` : ''}
 
 SITUATION: ${situation}
@@ -769,10 +975,45 @@ Write the Pollinations prompt now.`;
         .replace(/```$/, '')
         .replace(/^(prompt|image prompt|pollinations prompt)\s*:\s*/i, '')
         .trim();
-      return enforceFullBody(cleaned);
+      return groupConcepts(enforceFullBody(cleaned));   // DASHGROUP.1 — same concept-grouping on the Ollama-composed path
     } catch (err) {
       return null;   // caller falls back to hardcoded composer
     }
+  }
+
+  // Deterministic fingerprint of everything that affects how she RENDERS — situation,
+  // outfit, nudity, bond tier, drug set, banded body state, pregnancy/decay, location/hold,
+  // recent-act aftermath, custom pose/staging. The image cache keys on THIS, not on the
+  // (non-deterministic, Ollama-written) prompt text — so the same state reuses the cached
+  // image instead of re-billing Pollinations every render, while a real state change still
+  // busts the cache and regenerates.
+  function stateSignature(girl, options = {}) {
+    const b = girl.body || {};
+    const band = (v, step) => Math.floor((Number(v) || 0) / step);
+    const drugs = (b.activeDrugs || []).map(d => String(d?.name || d || '').toLowerCase()).filter(Boolean).sort().join('+') || 'sober';
+    const nude = nudeStateOf(girl) || 'clothed';
+    const preg = girl.pregnancy?.status === 'pregnant'
+      ? `p${girl.pregnancy.trimester || 1}${(girl.pregnancy.gestationDays || 0) >= 250 ? 'F' : ''}` : 'np';
+    const dead = girl.encounterState === 'dead' ? `dead${band(b.decayedMinutes, 1440)}${b.corpseMarker ? ':' + b.corpseMarker : ''}` : 'live';
+    const loc = options.locationId ? `loc:${options.locationId}`
+      : (girl.assignedDungeonId ? `dun:${girl.assignedDungeonId}:${options.holdIdx ?? girl.assignedHoldIdx ?? 0}` : 'nowhere');
+    return [
+      options.situation || 'profile',
+      girl.currentOutfit || 'default',
+      nude,
+      `b${girl.bond?.bondLevel || 0}`,
+      drugs,
+      `h${band(b.high, 25)}`, `ar${band(b.arousal, 30)}`, `wt${band(b.wetness, 30)}`,
+      `cl${band(b.cumLoad, 1)}`, `vc${band(b.vaginalCum, 3)}`, `br${band(b.bruises, 5)}`,
+      preg, dead, loc,
+      b.recentActTag ? `a:${b.recentActTag}` : '',
+      b.recentToy ? `ty:${b.recentToy}` : '',
+      b.activeBondage ? `bd:${String(b.activeBondage).toLowerCase().slice(0, 12)}` : '',
+      (b.ownershipMarks && b.ownershipMarks.length) ? 'mk:' + b.ownershipMarks.map(m => m.type).sort().join('') : '',
+      (b.withdrawalState && b.withdrawalState.severity >= 0.2) ? 'wd' : '',
+      options.customPose ? 'cp' + promptHash(String(options.customPose)) : '',
+      options.userStaging ? 'us' + promptHash(String(options.userStaging)) : ''
+    ].filter(Boolean).join('|');
   }
 
   // --- Generate + cache ---
@@ -785,7 +1026,28 @@ Write the Pollinations prompt now.`;
     if (!girl) throw new Error('no such girl');
     const girlId = girl.id;
 
-    // Try Ollama prompt-writer first if enabled, fall back to hardcoded composer
+    // Cache key = deterministic state signature (NOT the volatile prompt). Check BEFORE
+    // generating the prompt so a cache hit also skips the Ollama prompt-writer call.
+    const cacheKey = `${girlId}:${promptHash(stateSignature(girl, options))}`;
+    if (!options.forceRegenerate) {
+      const cached = await window.DMTHStorage.cache.get(cacheKey);
+      if (cached) {
+        // A persisted blobUrl string is DEAD after a page reload — rebuild from the stored Blob.
+        const liveUrl = cached.blob ? URL.createObjectURL(cached.blob) : cached.blobUrl;
+        if (liveUrl) {
+          if (cached.blob) await window.DMTHStorage.cache.put(cacheKey, { ...cached, blobUrl: liveUrl });
+          return { url: liveUrl, cached: true, cacheKey, prompt: cached.prompt };
+        }
+      }
+    }
+
+    // Don't re-attempt a generation that already hard-failed this session for this exact
+    // state (Pollinations down / blocked) — avoids a doomed network stall on every re-render.
+    if (!options.forceRegenerate && sessionFailures.has(cacheKey)) {
+      return { url: null, cached: false, error: 'session-failed', cacheKey, prompt: null };
+    }
+
+    // Cache miss → generate the prompt now (Ollama prompt-writer if enabled, else hardcoded).
     let prompt = null;
     if (cfg().useOllamaPromptWriter) {
       prompt = await composePromptViaOllama(girl, options);
@@ -793,15 +1055,7 @@ Write the Pollinations prompt now.`;
     if (!prompt) {
       prompt = composePrompt(girl, options);
     }
-
     const hash = promptHash(prompt);
-    const cacheKey = `${girlId}:${options.situation || 'profile'}:${hash}`;
-
-    // Check cache first
-    const cached = await window.DMTHStorage.cache.get(cacheKey);
-    if (cached && cached.blobUrl && !options.forceRegenerate) {
-      return { url: cached.blobUrl, cached: true, cacheKey, prompt };
-    }
 
     const seed = clampSeed(girl.visualIdentity?.seed, girl.id);
     let url = buildUrl(prompt, seed);
@@ -834,7 +1088,9 @@ Write the Pollinations prompt now.`;
     if (!attempt.ok && (attempt.status === 403 || attempt.status === 402)) {
       const safer = sanitizePrompt(prompt);
       if (safer !== prompt) {
-        const legacyUrl = `${cfg().imageEndpoint}${encodeURIComponent(safer).slice(0, 1800)}?model=${cfg().imageModel}&width=${cfg().width}&height=${cfg().height}&nologo=${cfg().nologo}&seed=${clampSeed(seed)}&safe=false&referrer=sex-slave-dungeon`;
+        // Route through buildUrl so the safe percent-encode truncation + Worker route +
+        // referrer are uniform (no hand-rolled .slice that can split a %XX → Cloudflare 400).
+        const legacyUrl = buildUrl(safer, seed);
         attempt = await tryFetch(legacyUrl);
         if (attempt.ok) url = legacyUrl;
       }
@@ -845,6 +1101,8 @@ Write the Pollinations prompt now.`;
       objUrl = URL.createObjectURL(blob);
     } else {
       fetchError = attempt.status;
+      // Hard failure — debounce this (girl × state) so re-renders don't keep stalling on it.
+      sessionFailures.add(cacheKey);
     }
 
     // Persist the cache record ONLY if we got a blob (fetch succeeded)
@@ -886,7 +1144,7 @@ Write the Pollinations prompt now.`;
         situation: options.situation || 'profile',
         pose: options.customPose || options.situation || 'profile',
         userStaging: options.userStaging || null,
-        url,
+        url: objUrl || url,    // prefer the cached blob URL so the gallery doesn't re-hit Pollinations
         cacheKey,
         promptHash: hash
       });
@@ -999,7 +1257,7 @@ Write the Pollinations prompt now.`;
     let attempt = await tryEnvFetch(url);
     if (!attempt.ok && (attempt.status === 403 || attempt.status === 402)) {
       const safer = sanitizePrompt(prompt);
-      const legacyUrl = `${cfg().imageEndpoint}${encodeURIComponent(safer).slice(0, 1800)}?model=${cfg().imageModel}&width=1792&height=1024&nologo=${cfg().nologo}&seed=${clampSeed(seed)}&safe=false&referrer=sex-slave-dungeon`;
+      const legacyUrl = buildUrl(safer, seed, { width: 1792, height: 1024 });
       attempt = await tryEnvFetch(legacyUrl);
       if (attempt.ok) url = legacyUrl;
     }
@@ -1094,7 +1352,7 @@ Write the Pollinations prompt now.`;
     if (!attempt.ok && (attempt.status === 403 || attempt.status === 402)) {
       const safer = sanitizePrompt(prompt);
       if (safer !== prompt) {
-        const legacyUrl = `${cfg().imageEndpoint}${encodeURIComponent(safer).slice(0, 1800)}?model=${cfg().imageModel}&width=${cfg().width}&height=${cfg().height}&nologo=${cfg().nologo}&seed=${clampSeed(seed)}&safe=false&referrer=sex-slave-dungeon`;
+        const legacyUrl = buildUrl(safer, seed);
         attempt = await tryFetch(legacyUrl);
         if (attempt.ok) url = legacyUrl;
       }

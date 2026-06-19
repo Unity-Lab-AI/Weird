@@ -1,14 +1,34 @@
 # SKILL_TREE — weird project
 
-**Generated:** 2026-04-21 · **Last revised:** 2026-05-14 (post-Phase-21 closeout)
+**Generated:** 2026-04-21 · **Last revised:** 2026-06-18 (DEPRAVITY-spine mega-build; pushed to branch `UpdateWork`)
 
-Capability matrix for the weird build. Organized by domain, complexity, dependency, and priority. As of 2026-05-14 every named capability is shipped and live; see `docs/FINALIZED.md` for per-session implementation detail.
+Capability matrix for the weird build. Organized by domain, complexity, dependency, and priority. As of 2026-06-18 every named capability is shipped and live (the 2026-06-18 mega-build capabilities are catalogued in the first domain block below); see `docs/FINALIZED.md` + `docs/resume.md` for per-session implementation detail.
 
 > **Cross-references:** [`../README.md`](../README.md) (gameplay wiki) · [`../SETUP-README.md`](../SETUP-README.md) (technical setup) · [`ROADMAP.md`](./ROADMAP.md) (phase plan) · [`ARCHITECTURE.md`](./ARCHITECTURE.md) (system design) · [`TODO.md`](./TODO.md) (active backlog) · [`FINALIZED.md`](./FINALIZED.md) (completion archive)
 
 ---
 
 ## By Domain
+
+### Game Systems (2026-06-18 mega-build — all shipped + `node -c` validated)
+- **DEPRAVITY progression** — player level derived from cumulative XP; tier gating (own/extreme/nugget/dismember/snuff); pay-to-unlock; hunting-ground gates by level / roster size / bought access
+- **Player Character Sheet** — aggregated buffs/debuffs mapped to real hunt/income math, with depraved naming
+- **Player drives** — scaling sex-drive NEED, satisfaction, BUZZ
+- **Ownership marks** — permanent brand/tattoo/piercing rendered in every image
+- **Addiction & withdrawal** — per-drug dependency, withdrawal effects, **OD death** (cumulative toxicity), captive **drug self-serve** (no self-OD)
+- **Breeding** — vaginal-only cum-fill meter + sustained-fill conception timer; **typed + TIMED condoms** (holed = instant breed); newborn-disposal catalog
+- **Snuff & corpses** — 14 snuff methods, postmortem corpse window (5 game days), method-specific corpse image markers, narration-only corpse chat
+- **Death dossier** — single chokepoint snapshot (final stats + history + likeness) across every death path
+- **Keepsake trophies** — 1–3 per girl, choose-one at disposal, permanent stacking perks
+- **Dismember + body-part market**; **milk economy** (farm/drink/sell/suckle)
+- **Toys & implements** — buy/loot/find, hold-mount (≤5), ownership-gated use, on-image rendering, masochist flip
+- **Two-tier supply** — per-hold reserve + shared dungeon pool (food/water/condoms/drugs) with even draw
+- **Multi-girl multi-speaker scenes** (same-location); **inter-dungeon transport + corpse moves** (tiered, risk roll)
+- **John variety** — gentle→sadistic archetypes, extremity-scaled pay, johns use stocked toys/drugs, condom-stock gating
+- **Arrest escape valves** — lawyer / dirty-cop bribe / escape-kit flee, auto-applied on raids
+- **Pause + persist** — clock freeze + save/reload across navigation
+- **Loot + passive archetype gifts**; **balance pass** (escape pacing + drain/curve audit)
+- **Module extraction** — `window.DMTHRoomPanels` (room/panels.js); migration backfill for all new persisted shapes
 
 ### Frontend
 - HTML5 structure (multi-page layout, body zones, toy panel, state bars, log pane, voice controls, page views)

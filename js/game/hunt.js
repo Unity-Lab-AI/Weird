@@ -6,17 +6,22 @@
   // Location archetype affinity — which girl archetypes spawn where, weighted.
   const LOCATION_SPAWNS = {
     street:        [{ arche: 'street', w: 0.55 }, { arche: 'barista', w: 0.2 }, { arche: 'club', w: 0.25 }],
-    club:          [{ arche: 'club', w: 0.55 }, { arche: 'sorority', w: 0.25 }, { arche: 'street', w: 0.2 }],
+    club:          [{ arche: 'club', w: 0.45 }, { arche: 'sorority', w: 0.2 }, { arche: 'stripper', w: 0.15 }, { arche: 'street', w: 0.2 }],
+    'strip-club':  [{ arche: 'stripper', w: 0.62 }, { arche: 'club', w: 0.18 }, { arche: 'street', w: 0.1 }, { arche: 'model', w: 0.1 }],
     library:       [{ arche: 'library', w: 0.6 }, { arche: 'barista', w: 0.25 }, { arche: 'sorority', w: 0.15 }],
-    park:          [{ arche: 'gym', w: 0.35 }, { arche: 'barista', w: 0.3 }, { arche: 'library', w: 0.2 }, { arche: 'street', w: 0.15 }],
+    park:          [{ arche: 'gym', w: 0.25 }, { arche: 'barista', w: 0.2 }, { arche: 'college-student', w: 0.2 }, { arche: 'neighbor', w: 0.15 }, { arche: 'library', w: 0.12 }, { arche: 'street', w: 0.08 }],
     gym:           [{ arche: 'gym', w: 0.7 }, { arche: 'sorority', w: 0.15 }, { arche: 'street', w: 0.15 }],
-    mall:          [{ arche: 'sorority', w: 0.3 }, { arche: 'club', w: 0.25 }, { arche: 'barista', w: 0.25 }, { arche: 'library', w: 0.2 }],
-    'coffee-shop': [{ arche: 'barista', w: 0.6 }, { arche: 'library', w: 0.25 }, { arche: 'club', w: 0.15 }],
-    sorority:      [{ arche: 'sorority', w: 0.7 }, { arche: 'club', w: 0.15 }, { arche: 'model', w: 0.1 }, { arche: 'gym', w: 0.05 }],
+    mall:          [{ arche: 'sorority', w: 0.22 }, { arche: 'college-student', w: 0.2 }, { arche: 'family-friend', w: 0.16 }, { arche: 'club', w: 0.16 }, { arche: 'barista', w: 0.16 }, { arche: 'library', w: 0.1 }],
+    'coffee-shop': [{ arche: 'barista', w: 0.4 }, { arche: 'college-student', w: 0.22 }, { arche: 'highschool-grad', w: 0.18 }, { arche: 'library', w: 0.12 }, { arche: 'club', w: 0.08 }],
+    sorority:      [{ arche: 'sorority', w: 0.55 }, { arche: 'cheerleader', w: 0.2 }, { arche: 'club', w: 0.12 }, { arche: 'model', w: 0.08 }, { arche: 'gym', w: 0.05 }],
     remote:        [{ arche: 'street', w: 0.4 }, { arche: 'waitress', w: 0.25 }, { arche: 'gym', w: 0.2 }, { arche: 'library', w: 0.15 }],
     'hotel-lobby': [{ arche: 'sorority', w: 0.3 }, { arche: 'model', w: 0.25 }, { arche: 'office', w: 0.2 }, { arche: 'club', w: 0.15 }, { arche: 'library', w: 0.1 }],
-    'private-party':[{ arche: 'sorority', w: 0.4 }, { arche: 'club', w: 0.3 }, { arche: 'model', w: 0.15 }, { arche: 'street', w: 0.15 }],
-    'school-campus':[{ arche: 'sorority', w: 0.4 }, { arche: 'library', w: 0.3 }, { arche: 'gym', w: 0.2 }, { arche: 'barista', w: 0.1 }]
+    'private-party':[{ arche: 'sorority', w: 0.3 }, { arche: 'club', w: 0.22 }, { arche: 'college-student', w: 0.18 }, { arche: 'second-cousin', w: 0.12 }, { arche: 'model', w: 0.1 }, { arche: 'street', w: 0.08 }],
+    'school-campus':[{ arche: 'college-student', w: 0.24 }, { arche: 'sorority', w: 0.16 }, { arche: 'cheerleader', w: 0.14 }, { arche: 'schoolgirl', w: 0.12 }, { arche: 'teacher', w: 0.12 }, { arche: 'highschool-grad', w: 0.12 }, { arche: 'library', w: 0.1 }],
+    'neighborhood': [{ arche: 'neighbor', w: 0.45 }, { arche: 'family-friend', w: 0.25 }, { arche: 'second-cousin', w: 0.15 }, { arche: 'college-student', w: 0.15 }],
+    // PREGGOCAP.1 — the only place to catch an already-pregnant girl. Spawns "normal women"
+    // archetypes; rollFreshSet flags every girl here PREGNANT after generation.
+    'prenatal-clinic': [{ arche: 'neighbor', w: 0.28 }, { arche: 'family-friend', w: 0.22 }, { arche: 'office', w: 0.18 }, { arche: 'college-student', w: 0.16 }, { arche: 'sorority', w: 0.16 }]
   };
 
   // Additional archetype locations for new archetypes
@@ -27,18 +32,66 @@
     model:    ['club', 'hotel-lobby', 'private-party', 'mall']
   };
 
-  function rollEncounters(locationId, count = 3) {
+  // LOCPERSIST.1 — the girls at a location PERSIST. The same set stays put for a randomized
+  // 2-4 game-day window so you can return and work the same girl across days (lott farming /
+  // mood-building) without capturing her. Captured girls drop out of the set; the window expires
+  // and a fresh set rolls in. Falls back to a one-off roll if state isn't ready.
+  function currentDay() {
+    const c = window.DMTHGame.gameClock;
+    return c ? Math.floor(c.now() / (c.MIN_PER_DAY || 1440)) + 1 : 1;
+  }
+  function rollFreshSet(locationId, count) {
     const spawns = LOCATION_SPAWNS[locationId] || LOCATION_SPAWNS.street;
     const girls = [];
+    const taken = new Set();   // keep names distinct WITHIN this set too
     for (let i = 0; i < count; i++) {
       const arche = weightedPick(spawns);
       const seed = Math.floor(Math.random() * 0x7FFFFFFF);
-      const girl = window.DMTHGame.girlGen.generate(arche, seed);
+      const girl = window.DMTHGame.girlGen.generate(arche, seed, { taken });
+      taken.add(String(girl.name).toLowerCase());
       girl.encounterState = 'encountered';
       girl.encounteredAt = { locationId, ts: Date.now() };
+      // PREGGOCAP.1 — girls at the prenatal clinic are ALREADY PREGNANT: stamp a real pregnancy
+      // (random gestation day → trimester) so she arrives breeding, captured belly-and-all.
+      if (locationId === 'prenatal-clinic') {
+        const gd = 40 + Math.floor(Math.random() * 200);   // ~day 40-240
+        girl.pregnancy = {
+          status: 'pregnant', gestationDays: gd,
+          trimester: gd < 94 ? 1 : gd < 187 ? 2 : 3,
+          conceptionSource: 'pre-capture', outcomeHistory: []
+        };
+      }
       girls.push(girl);
     }
     return girls;
+  }
+  function rollEncounters(locationId, count = 3) {
+    const st = window.DMTHGame.state;
+    if (!st || !st.getLocationSpawns) return rollFreshSet(locationId, count);   // pre-state fallback
+    const day = currentDay();
+    const rec = st.getLocationSpawns(locationId);
+    if (rec && Array.isArray(rec.girls) && day <= (rec.expiresDay || 0)) {
+      // Still within the window — same girls, minus any already captured.
+      const captured = rec.captured || {};
+      const live = rec.girls.filter(g => g && !captured[g.id]);
+      if (live.length) return live;
+      // everyone here got taken — fall through and roll a fresh set early
+    }
+    const girls = rollFreshSet(locationId, count);
+    const expiresDay = day + 2 + Math.floor(Math.random() * 3);   // persists 2-4 days
+    if (st.setLocationSpawns) st.setLocationSpawns(locationId, { girls, rolledDay: day, expiresDay, captured: {} });
+    return girls;
+  }
+
+  // LOCPERSIST.1 — mark an encountered girl as captured so she stops appearing at that location.
+  function markEncounterCaptured(locationId, girlId) {
+    const st = window.DMTHGame.state;
+    if (!st || !st.getLocationSpawns) return;
+    const rec = st.getLocationSpawns(locationId);
+    if (!rec) return;
+    const captured = { ...(rec.captured || {}) };
+    captured[girlId] = true;
+    if (st.updateLocationSpawns) st.updateLocationSpawns(locationId, { captured });
   }
 
   function weightedPick(entries) {
@@ -82,6 +135,12 @@
     waitress: 'throws a punch, swears loud, tries to scream for the cook, the regular, anybody',
     nurse:    'clinical first — tries de-escalation language — then the panic hits and she fights efficiently',
     model:    'shocked stillness then a burst of strength, thinks about her face the whole time',
+    stripper: 'thinks it\'s a customer crossing a line at first — practiced brush-off, then real fear when the grip doesn\'t let go',
+    cheerleader: 'shrieks a cheer-loud scream, kicks with athletic legs, calls for her squad',
+    schoolgirl: 'freezes wide-eyed, drops her bag, small terrified whimpers, asks what\'s happening',
+    teacher:  'tries to take control with a stern command voice, then the composure shatters into panic',
+    police:   'goes for her training — strikes, reaches for a weapon that isn\'t there, barks orders that mean nothing now',
+    maid:     'drops what she\'s holding, backs into a corner pleading in a low frightened voice, doesn\'t fight much',
     unity_seed: 'laughs — she came here on purpose'
   };
 
@@ -98,7 +157,9 @@
     remote:        'on the shoulder of a back road with headlights pointed at her, no traffic for miles',
     'hotel-lobby': 'in the service elevator bay, the lobby piano playing on the other side',
     'private-party': 'upstairs in a bedroom while the party thumps downstairs',
-    'school-campus': 'behind the science building where the security cameras don\'t reach'
+    'school-campus': 'behind the science building where the security cameras don\'t reach',
+    'strip-club':  'in the back hallway past the dressing rooms, mirror bulbs and discarded heels, bass thudding through the wall from the main floor',
+    'prenatal-clinic': 'in the clinic parking lot at dusk as she waddles to her car after an appointment, nobody else around, one hand on her swollen belly'
   };
 
   // --- Destination hideout flavor ---
@@ -132,6 +193,12 @@
     waitress: { approach: 25, engage: 25, subdue: 30, secure: 25 },
     nurse:    { approach: 25, engage: 30, subdue: 25, secure: 25 },
     model:    { approach: 35, engage: 35, subdue: 30, secure: 25 },
+    stripper: { approach: 30, engage: 20, subdue: 25, secure: 20 },   // used to handsy customers (low engage), bouncers nearby (mid approach)
+    cheerleader: { approach: 25, engage: 30, subdue: 30, secure: 20 },// athletic + screams for the squad
+    schoolgirl: { approach: 15, engage: 15, subdue: 15, secure: 15 }, // small, naive, easy
+    teacher:  { approach: 20, engage: 25, subdue: 20, secure: 20 },
+    police:   { approach: 30, engage: 35, subdue: 45, secure: 35 },   // trained + fights hard
+    maid:     { approach: 15, engage: 15, subdue: 20, secure: 20 },   // isolated + compliant
     unity_seed: { approach: 5, engage: 5, subdue: 5, secure: 5 }
   };
 
@@ -154,6 +221,14 @@
     waitress: 0.40,
     nurse:    0.60,
     model:    0.72,
+    stripper: 0.45,      // works half-naked already + drug-loose, but bouncers + cameras
+    'strip-club': 0.5,
+    cheerleader: 0.50,
+    schoolgirl: 0.30,    // naive, easy
+    teacher:  0.55,
+    police:   0.78,      // trained, armed, connected — the hardest grab
+    maid:     0.35,      // isolated + compliant
+    'prenatal-clinic': 0.55,   // pregnant girls — slower, but the clinic's watched
     unity_seed: 0.10     // Unity wants it
   };
 
@@ -184,12 +259,26 @@
     const notoriety = window.DMTHGame.state.current?.wallet?.notoriety || 0;
     const suspicion = (window.DMTHGame.state.current.wallet.suspicionByLocation[locationId] || 0);
     const suspicionPenalty = Math.min(0.45, suspicion * 0.08);
-    const exposure = LOCATION_EXPOSURE[locationId] || 0;
+    let exposure = LOCATION_EXPOSURE[locationId] || 0;
+    // BUYLOCATION.1 — OWNING the turf means the witnesses look away (lower exposure) and prey
+    // can't run far (home-turf capture boost). Perks come from progression.ownedLocationPerks.
+    const ownPerks = window.DMTHGame.progression?.ownedLocationPerks ? window.DMTHGame.progression.ownedLocationPerks(locationId) : null;
+    if (ownPerks) exposure = exposure * (1 - (ownPerks.witnessReduction || 0));
+    const ownedTurfBonus = ownPerks ? (ownPerks.captureBoost || 0) : 0;
 
     // Player satisfaction hunting bonus — fuck enough captives, the next catch is easier.
     // Center at 50 → 0 swing; full 100 → +0.20; floor 0 → -0.10.
     const playerSat = window.DMTHGame.state.current?.wallet?.playerSatisfaction ?? 50;
     const satisfactionBonus = ((playerSat - 50) / 50) * (playerSat >= 50 ? 0.20 : 0.10);
+
+    // WANTED is a pure hunting liability — the hotter you are, the harder the catch (cops
+    // watching, targets warier). Scales by tier (js/game/wanted.js). The legacy
+    // `notorietyBonus` stays for back-compat, but WANTED is the real heat pressure.
+    const wantedPenalty = window.DMTHGame.wanted ? window.DMTHGame.wanted.huntPenalty() : 0;
+    // Trophy perks — disposal trophies grant stacking hunt bonuses (some archetype-targeted).
+    const trophyBonus = window.DMTHGame.trophies ? window.DMTHGame.trophies.huntBonusFor(girl.archetypeTemplate) : 0;
+    // SEXDRIVE.1 — a maxed sexual drive sharpens the hunt; a deprived one dulls it.
+    const sexDriveBonus = window.DMTHGame.sexdrive ? window.DMTHGame.sexdrive.huntBonus() : 0;
 
     const breakdown = {
       baseline:            0.40,
@@ -198,9 +287,13 @@
       defiance:            -(defiance / 100) * 0.20,
       intelligence:        -(intelligence / 100) * 0.12,
       notorietyBonus:      +Math.min(0.12, notoriety * 0.004),
+      wantedPenalty:       -wantedPenalty,
+      trophyBonus:         +trophyBonus,
       suspicionPenalty:    -suspicionPenalty,
       exposurePenalty:     -exposure,
-      satisfactionBonus:   +satisfactionBonus
+      satisfactionBonus:   +satisfactionBonus,
+      sexDriveBonus:       +sexDriveBonus,
+      ownedTurfBonus:      +ownedTurfBonus
     };
     const sumRaw =
       breakdown.baseline +
@@ -209,9 +302,13 @@
       breakdown.defiance +
       breakdown.intelligence +
       breakdown.notorietyBonus +
+      breakdown.wantedPenalty +
+      breakdown.trophyBonus +
       breakdown.suspicionPenalty +
       breakdown.exposurePenalty +
-      breakdown.satisfactionBonus;
+      breakdown.satisfactionBonus +
+      breakdown.sexDriveBonus +
+      breakdown.ownedTurfBonus;
 
     const successP = Math.max(0.05, Math.min(0.95, sumRaw));
 
@@ -276,12 +373,49 @@
     girl.assignedDungeonId = dungeon.id;
     girl.assignedHoldIdx = openIdx;
     girl.captureDate = Date.now();
+    // Seed dungeon-occupancy history for the death dossier's "held longest at" stat (DEATHSTATS.1).
+    girl.dungeonHistory = [...(girl.dungeonHistory || []), { dungeonId: dungeon.id, at: Date.now() }];
+    // GIRLHIST.2 — log the capture as the first entry in her LIVE activity history.
+    if (window.DMTHGame.state.appendActivity) {
+      const loc = (girl.encounteredAt && girl.encounteredAt.locationId) || 'the streets';
+      window.DMTHGame.state.appendActivity(girl.id, { kind: 'capture', label: `⛓️ captured at ${loc}`, detail: `dragged into the dungeon` });
+    }
     girl.mood.mood = 'terrified';
     girl.mood.moodEmoji = '😱';
+    // STOCK-START.1 — new captives start at Stockholm 1-3 (internal bond 0-2) depending on the
+    // location they came from (easy grounds = more pliable) + the operator's DEPRAVITY level (a
+    // seasoned hunter breaks them in faster). Never overrides a higher seeded bond (e.g. Unity).
+    const EASY_START_LOCS = new Set(['street', 'library', 'park', 'coffee-shop', 'mall', 'gym', 'neighborhood']);
+    let startTier = 0;
+    if (girl.encounteredAt && EASY_START_LOCS.has(girl.encounteredAt.locationId)) startTier += 1;
+    if (window.DMTHGame.progression && window.DMTHGame.progression.getLevel() >= 5) startTier += 1;
+    startTier = Math.min(2, startTier);
+    if (startTier > 0) {
+      girl.bond = girl.bond || { bondLevel: 0, bondXP: 0, bondDebt: 0, milestones: [] };
+      if ((girl.bond.bondLevel || 0) < startTier) {
+        girl.bond.bondLevel = startTier;
+        const xp = window.DMTHGame.balancing ? window.DMTHGame.balancing.xpForLevel(startTier) : startTier * 50;
+        girl.bond.bondXP = Math.max(girl.bond.bondXP || 0, xp);
+      }
+    }
     window.DMTHGame.state.addGirl(girl);
+    // NAMELOCK.1 — lock her full name out of future generation now that she's in the collection.
+    if (window.DMTHGame.state.noteUsedName) window.DMTHGame.state.noteUsedName(girl.name);
     const newHolds = dungeon.holds.slice();
     newHolds[openIdx] = { ...newHolds[openIdx], captiveGirlId: girl.id };
     window.DMTHGame.state.updateDungeon(dungeon.id, { holds: newHolds });
+    // OUTFITLOOT.1 (Gee) — RARE: she comes with her own slutty special outfit stashed (type-matched
+    // when possible, else any skimpy). The special outfits are also buyable in the Carcass Closet;
+    // this is the rare-loot-find path. ~10% on capture.
+    if (window.DMTHGame.wardrobe?.grantOutfit && Math.random() < 0.10) {
+      const ids = window.DMTHGame.wardrobe.skimpyOutfitIds ? window.DMTHGame.wardrobe.skimpyOutfitIds() : [];
+      const oid = window.DMTHGame.wardrobe.skimpyForArchetype(girl.archetypeTemplate)
+        || (ids.length ? ids[Math.floor(Math.random() * ids.length)] : null);
+      if (oid) {
+        const r = window.DMTHGame.wardrobe.grantOutfit(girl.id, oid);
+        if (r && r.ok && window.DMTHLootPopup) window.DMTHLootPopup.show(`👗 Rare find — ${girl.name} had a ${r.outfit.displayName} stashed. It's hers now.`);
+      }
+    }
     // Fire-and-forget capture memorial + profile image — Pollinations overlay, silent if unavailable.
     if (window.DMTHGame.imaging && window.DMTHGame.imaging.isAvailable()) {
       window.DMTHGame.imaging.generateFor(girl.id, { situation: 'capture' }).catch(() => {});
@@ -314,6 +448,7 @@
   window.DMTHGame = window.DMTHGame || {};
   window.DMTHGame.hunt = Object.freeze({
     rollEncounters,
+    markEncounterCaptured,
     attemptCapture,
     previewCaptureOdds,
     escortToHold,

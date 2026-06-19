@@ -30,7 +30,8 @@
     const body = { ...girl.body };
     body.arousal = clamp(body.arousal + safeDelta.arousal, 0, 100);
     body.wetness = clamp(body.wetness + safeDelta.wetness, 0, 100);
-    body.cumLoad = Math.max(0, body.cumLoad + safeDelta.cumLoad);
+    // CUMCAP.1 — cumLoad is clamped to her trained storage capacity (default 10, raised by tools).
+    body.cumLoad = Math.max(0, Math.min(body.cumLoadCap ?? 10, body.cumLoad + safeDelta.cumLoad));
     body.bruises = Math.max(0, Math.min(99, body.bruises + safeDelta.bruises));
     body.high = clamp(body.high + safeDelta.high, 0, 100);
     delta = safeDelta;   // use the clamped version for everything below
@@ -46,13 +47,14 @@
     if (typeof delta.bondXP === 'number')   bond.bondXP   = Math.max(0, bond.bondXP + delta.bondXP);
     if (typeof delta.bondDebt === 'number') bond.bondDebt = Math.max(0, bond.bondDebt + delta.bondDebt);
 
-    // Level up if XP crosses threshold — balancing curve lookup (50/100/150/200/250/340/450/600/800)
-    const nextLevelXP = window.DMTHGame.balancing
-      ? window.DMTHGame.balancing.xpForLevel(bond.bondLevel + 1)
-      : (bond.bondLevel + 1) * 50;
+    // STOCK-BUILD.1 — recompute level from cumulative XP, UP (normal climb) AND DOWN. Bond never
+    // degrades from normal use (XP only ever rises there); ONLY the most extreme acts subtract XP
+    // (action-effects STOCKHOLM_SETBACK), so a drop only happens after real brutality.
     const prevLevel = bond.bondLevel;
-    if (bond.bondXP >= nextLevelXP && bond.bondLevel < 9) {
-      bond.bondLevel++;
+    bond.bondLevel = window.DMTHGame.balancing
+      ? window.DMTHGame.balancing.bondLevelForXp(bond.bondXP)
+      : Math.min(9, Math.floor(bond.bondXP / 50));
+    if (bond.bondLevel > prevLevel) {
       bond.milestones = [...(bond.milestones || []), `bond-up-L${bond.bondLevel}-${new Date().toISOString()}`];
     }
     // Fire memorial image on level-up (fire-and-forget, optional overlay)
@@ -82,14 +84,16 @@
     // AND (b) delta.tags contains at least one VAGINAL_CUM_TAG marker (so BJ / anal /
     // facial / body-shot don't fire conception). Inner gates (bond < 9, no condom, status
     // not already pregnant) live inside pregnancy.attemptConception() — defense in depth.
-    if (window.DMTHGame.pregnancy && delta.cumLoad >= 1.0) {
+    if (window.DMTHGame.pregnancy?.addVaginalCum && delta.cumLoad >= 1.0) {
       const tags = Array.isArray(delta.tags) ? delta.tags.map(t => String(t).toLowerCase()) : [];
       const isVaginalCum = tags.some(t => VAGINAL_CUM_TAGS.has(t));
-      if (isVaginalCum) {
+      // CUMFILL.1 — a vaginal creampie raises her vaginal cum-fill; the sustained-fill timer
+      // (pregnancy.tickCumFill) conceives. Gated on no condom equipped.
+      if (isVaginalCum && !(window.DMTHGame.condoms ? window.DMTHGame.condoms.blocks(girl) : girl.currentOutfit === 'condom-on')) {
         try {
-          window.DMTHGame.pregnancy.attemptConception(girlId, { conceptionSource: 'organic' });
+          window.DMTHGame.pregnancy.addVaginalCum(girlId, delta.cumLoad, { conceptionSource: 'organic' });
         } catch (err) {
-          console.debug('[pregnancy] conception hook error:', err);
+          console.debug('[pregnancy] vaginal cum-fill error:', err);
         }
       }
     }

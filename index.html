@@ -23,18 +23,21 @@
     .landing-nav a.active { background: #3a2820; color: #ffc8a0; }
     .home-hero { padding: 32px 0; text-align: center; }
     .home-hero h1 { font-size: 2.8rem; letter-spacing: 0.04em; margin: 0 0 12px; color: #ffc8a0; }
-    .home-hero p.tag { font-size: 1.1rem; color: #b0a090; margin: 0 0 28px; }
-    .home-cta-row { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin: 24px 0; }
-    .home-cta-row button { font-size: 1.1rem; padding: 14px 28px; cursor: pointer; }
-    .home-cta-primary { background: #6b2840; color: #fff; border: 1px solid #8a3450; border-radius: 6px; font-weight: 600; }
-    .home-cta-primary:hover { background: #8a3450; }
-    .home-cta-secondary { background: #2a2018; color: #c8b8a0; border: 1px solid #4a3828; border-radius: 6px; }
-    .home-cta-secondary:hover { background: #3a2820; }
-    .home-cta-secondary:disabled { opacity: 0.4; cursor: not-allowed; }
-    .home-features { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin: 24px 0; }
-    .home-feature { padding: 14px; border: 1px solid #2a2a2a; border-radius: 6px; background: #181410; }
-    .home-feature h3 { margin: 0 0 6px; color: #ffc8a0; font-size: 1.05rem; }
-    .home-feature p { margin: 0; font-size: 0.9rem; color: #a89888; line-height: 1.45; }
+    .home-hero p.tag { font-size: 1.1rem; color: #b0a090; margin: 0 0 28px; max-width: 720px; margin-left: auto; margin-right: auto; }
+    /* Clean launcher hub — a tight grid of big action tiles, no text-wall. */
+    .home-hub { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 16px; margin: 28px 0 8px; }
+    .hub-tile { display: flex; flex-direction: column; align-items: flex-start; gap: 4px;
+      text-align: left; text-decoration: none; cursor: pointer;
+      padding: 18px 20px; border-radius: 10px; background: #1a1410; border: 1px solid #3a2820;
+      color: #c8b8a0; transition: transform 120ms, background 120ms, border-color 120ms, box-shadow 120ms; font: inherit; }
+    .hub-tile:hover { background: #241a14; border-color: #6b4a30; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,.35); }
+    .hub-tile .ico { font-size: 1.9rem; line-height: 1; }
+    .hub-tile .lbl { font-size: 1.12rem; font-weight: 600; color: #ffc8a0; }
+    .hub-tile .sub { font-size: 0.82rem; color: #9a8a78; }
+    .hub-tile.hub-primary { background: #6b2840; border-color: #8a3450; }
+    .hub-tile.hub-primary:hover { background: #8a3450; border-color: #b04a66; }
+    .hub-tile.hub-primary .lbl, .hub-tile.hub-primary .sub { color: #fff; }
+    .hub-tile:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
     .policy-content h3 { color: #ffc8a0; margin-top: 22px; }
     .policy-content p, .policy-content li { color: #c0b0a0; line-height: 1.55; }
     .policy-content .warn-banner { background: rgba(180, 0, 0, .15); border: 1px solid #8a2020; padding: 14px; border-radius: 6px; margin: 12px 0; color: #ffb0a0; }
@@ -76,6 +79,7 @@
       <a href="#home" data-route="home">🏠 Home</a>
       <a href="#setup" data-route="setup">⚡ Setup</a>
       <a href="#about" data-route="about">ℹ️ About</a>
+      <a href="wiki.html">📖 Wiki</a>
       <a href="#terms" data-route="terms">📜 Terms</a>
       <a href="#privacy" data-route="privacy">🔒 Privacy</a>
       <a href="#settings" data-route="settings">⚙️ Settings</a>
@@ -85,254 +89,24 @@
     <section class="landing-section" id="home-section" data-section="home">
       <div class="home-hero">
         <h1>🔗 DUNGEON MASTER: THE HUNT</h1>
-        <p class="tag">A persistent city-builder dungeon harem evil-taboo simulator. You're the villain — the dungeon operator, the predator, the collector. Hunt prey across the outside world with purchased tools. Bring them back. Bond them. Sell them. Record them. Own everything. There is no win state — the game is the ever-growing collection and the ever-upgrading dungeon.</p>
-        <div class="home-cta-row">
-          <button class="home-cta-primary" id="cta-start-new-game">🎬 Start New Game</button>
-          <button class="home-cta-secondary" id="cta-continue-game" disabled>⏵ Continue Game</button>
-          <button class="home-cta-secondary" id="cta-open-settings">⚙️ Settings</button>
-        </div>
+        <p class="tag">Persistent dungeon-harem city-builder. You're the villain — hunt, hold, bond, record, sell, expand. No win state, just the ever-growing collection. Everything runs local: your model, your save, your business.</p>
         <p class="small muted" id="save-status">(checking for saved game…)</p>
       </div>
 
-      <!-- Stats / pitch strip -->
-      <div class="pitch-strip">
-        <div class="pitch-item"><b>4</b><span>capture stages per attempt</span></div>
-        <div class="pitch-item"><b>17</b><span>town locations to hunt + own</span></div>
-        <div class="pitch-item"><b>10</b><span>john archetypes paying for her time</span></div>
-        <div class="pitch-item"><b>L0–L9</b><span>Stockholm bond progression</span></div>
-        <div class="pitch-item"><b>30+</b><span>actions in the central spec table</span></div>
-        <div class="pitch-item"><b>20+</b><span>specialty outfits w/ film-value mult</span></div>
-        <div class="pitch-item"><b>7</b><span>captive-affect registers</span></div>
-        <div class="pitch-item"><b>100%</b><span>local · no cloud · no telemetry</span></div>
+      <!-- Clean launcher hub — the only thing on Home. All the detail lives in the Wiki + docs. -->
+      <div class="home-hub">
+        <button class="hub-tile hub-primary" id="cta-start-new-game"><span class="ico">🎬</span><span class="lbl">Start New Game</span><span class="sub">begin a fresh dungeon</span></button>
+        <button class="hub-tile" id="cta-continue-game" disabled><span class="ico">⏵</span><span class="lbl">Continue Game</span><span class="sub">resume your save</span></button>
+        <button class="hub-tile" id="cta-open-settings"><span class="ico">⚙️</span><span class="lbl">Settings</span><span class="sub">model · voice · keys</span></button>
+        <a class="hub-tile" href="#setup"><span class="ico">⚡</span><span class="lbl">Setup Wizard</span><span class="sub">get Ollama running</span></a>
+        <a class="hub-tile" href="wiki.html"><span class="ico">📖</span><span class="lbl">Wiki</span><span class="sub">full gameplay reference</span></a>
+        <a class="hub-tile" href="doc.html?f=README.md&amp;t=Readme"><span class="ico">📘</span><span class="lbl">Readme</span><span class="sub">what this is + systems</span></a>
+        <a class="hub-tile" href="doc.html?f=SETUP-README.md&amp;t=Setup+Guide"><span class="ico">🛠</span><span class="lbl">Setup Guide</span><span class="sub">install · run · deploy</span></a>
+        <a class="hub-tile" href="#about"><span class="ico">ℹ️</span><span class="lbl">About</span><span class="sub">the game + the crew</span></a>
       </div>
 
-      <!-- The Loop -->
-      <h2 class="section-h">The Loop</h2>
-      <p class="section-sub">A persistent city-builder cycle. Every step ratchets your operation forward — every captive feeds the films, every film funds upgrades, every upgrade unlocks the next tier of prey.</p>
-      <div class="loop-flow">
-        <div class="loop-step">
-          <div class="num">1</div>
-          <h3>🎯 Hunt</h3>
-          <p>Visit Town. Pick a hunting ground — street, club, library, sorority row, hotel lobby, harder zones. Pollinations renders each girl's thumb on her seeded face + capture outfit. Roll the 4-stage attempt: Approach → Engage → Subdue → Secure. Per-tool stage stats versus per-archetype resistance.</p>
-        </div>
-        <div class="loop-step">
-          <div class="num">2</div>
-          <h3>🔒 Hold</h3>
-          <p>Drag her back to one of your dungeons. Assign a hold. Upgrade across ten tracks per room — security, restraints, lights, toys, food, bedding, decor, climate, entertainment, surveillance — plus the toilet progression (can → bucket → full plumbing). Lock down the escape math.</p>
-        </div>
-        <div class="loop-step">
-          <div class="num">3</div>
-          <h3>💬 Interact</h3>
-          <p>Open her room. Real Ollama dialogue streamed from your local uncensored LLM. Body state, mood, drug curves, captive affect, outfit overlay, john history all feed the four-overlay prompt. Stockholm bond ratchets L0 → L9. Kokoro speaks her words in her assigned voice.</p>
-        </div>
-        <div class="loop-step">
-          <div class="num">4</div>
-          <h3>🎬 Record</h3>
-          <p>Hit Record. Every interaction becomes a film. Films auto-sell on the content market forever — outfit multiplier × bond multiplier × content-tier multiplier × rarity multiplier. Premium 💣 sell-negatives kills the master copy for a 3.5× lump sum.</p>
-        </div>
-        <div class="loop-step">
-          <div class="num">5</div>
-          <h3>💰 Expand</h3>
-          <p>Buy more dungeons. Buy hunting locations as properties — eventually own the whole town. Buy outfits, drugs, restraints, recording gear, dungeon-template upgrades. Climb from hole-in-the-wall to cinderblock cells to container-in-the-woods to cold-war bunker to mountain compound.</p>
-        </div>
-      </div>
-
-      <!-- Systems -->
-      <h2 class="section-h">Systems</h2>
-      <p class="section-sub">Every system is interconnected. A drug curve feeds the image prompt. A captive affect modulates the Ollama overlay. A bond level reshapes the body-part lexicon. Stamina drains every tick. Mood threshold-flips reclassify her affect. The state-delta parser closes the loop between her dialogue and her body.</p>
-      <div class="home-features">
-
-        <div class="home-feature">
-          <h3>🎯 4-stage capture</h3>
-          <p>Approach → Engage → Subdue → Secure. Per-tool stage stats (chloroform crushes Subdue; rope dominates Secure; tranq darts knock her out 4 minutes flat) versus per-archetype resistance (clubgirls dodge fast, librarians break easy). Single-use tools consume on success; reusables persist. Inventory pre-validated before each attempt.</p>
-        </div>
-
-        <div class="home-feature tier-econ">
-          <h3>🏚️ Dungeon portfolio</h3>
-          <p>Start in a hole in the wall. Upgrade through cinderblock cells, container in the woods, sewer alcoves, basement workshop, cold-war bunker, mountain compound. Each template has its own capacity track. Buy more dungeons as the empire grows — eventually own several different templates across multiple properties.</p>
-        </div>
-
-        <div class="home-feature tier-econ">
-          <h3>🏛️ Property ownership</h3>
-          <p>The 17 hunting locations aren't just hunting grounds — every one is purchasable. Owning a location unlocks private-access hunts (zero suspicion), exclusive spawn pools, dedicated recording venues, passive income, and locked-in higher capture odds. Late-game flex: own everything.</p>
-        </div>
-
-        <div class="home-feature">
-          <h3>💉 Drug pharmacology</h3>
-          <p>Cocaine, weed, MDMA, acid, whiskey, ketamine, tranquilizer dart. Each with onset / peak / wear-off curves rendered as live mm:ss countdowns. The tranq dart drops her unconscious for exactly 4 minutes. Drugs feed image prompts, dialogue tone, mood drift, and the conception-protection roll.</p>
-        </div>
-
-        <div class="home-feature">
-          <h3>👗 Wardrobe + nudity</h3>
-          <p>Captives keep the outfit they were wearing at capture (the captured-with source flag). Buy specialty outfits — schoolgirl, secretary, latex, bondage harness, pony-play, maid, gym, swim, sleepwear, ceremonial. <b>Derobe</b> puts <code>nude</code> at slot 2 of the image prompt. <b>Strip everything</b> bans accessories, jewelry, restraints. Outfit multiplies film value.</p>
-        </div>
-
-        <div class="home-feature tier-tech">
-          <h3>🎙️ Real Ollama brain</h3>
-          <p>Every reply streamed from YOUR local uncensored Ollama at localhost:11434. Default dolphin-mistral:7b; abliterated alternates supported. Four-overlay prompt stack: BASE_SLUT → ARCHETYPE → CAPTIVE_AFFECT → MODE → SCENE. State-delta parser <code>&lt;delta&gt;{...}&lt;/delta&gt;</code> closes the loop between her speech and her body state.</p>
-        </div>
-
-        <div class="home-feature tier-tech">
-          <h3>🔊 Kokoro voice + voice-in</h3>
-          <p>16 in-browser Kokoro voices, per-girl override so each captive sounds distinct. Voice-in via Pollinations transcribe — speak your prompt with your mic and she replies live. Models cached in browser storage after first load. No canned strings, no hardcoded reactions.</p>
-        </div>
-
-        <div class="home-feature tier-tech">
-          <h3>🖼️ Pollinations image stack</h3>
-          <p>Whole-body profile images at girl-generation time (face + outfit seeded per girl for visual consistency across every render). On-demand selfies. Hunt thumbs. Disposal final-scene images. Town overhead. Custom-pose input — type a scene description and Ollama writes the image prompt for you.</p>
-        </div>
-
-        <div class="home-feature tier-meta">
-          <h3>🧠 Procedural girl-gen</h3>
-          <p>Each girl rolled at spawn from her archetype template (clubgirl / librarian / sorority / hotel-staff / hooker / hitchhiker / runaway / lost-tourist / housewife / many more). Per-girl persona system prompt, voice, body state, backstory fragment, captive affect, seeded face + outfit. Age locked 18+ at the floor — non-negotiable invariant.</p>
-        </div>
-
-        <div class="home-feature tier-meta">
-          <h3>🎭 Captive affects</h3>
-          <p>7 affect registers shape every line of dialogue — broken-doll, defiant-spitfire, simpering-pleaser, fawning-stockholm, manic-coper, dissociated-flatline, calculating-survivor. Per-archetype weight tables roll which affect each captive carries. Bond progression can shift the affect mid-game.</p>
-        </div>
-
-        <div class="home-feature">
-          <h3>🔗 Stockholm bond L0–L9</h3>
-          <p>Bond ratchets through nine Stockholm tiers based on treatment, time, dialogue, and care actions. Each tier reshapes her body-part lexicon (L0 clinical → L9 worshipful), unlocks scene types, drops escape risk, multiplies film value, and bumps john-happiness pricing.</p>
-        </div>
-
-        <div class="home-feature tier-danger">
-          <h3>🚪 Escape mechanics</h3>
-          <p>Every captive has a live escape-risk score driven by her mood, her room's restraint upgrades, bond level, drug state, and time-since-last-interaction. High-risk girls test the door, search for tools, plot. Security tier + restraint tier are the math that keeps them in. Failure = she's gone.</p>
-        </div>
-
-        <div class="home-feature">
-          <h3>🤰 Pregnancy + abortion</h3>
-          <p>Vaginal-cum conception roll on every applicable scene. Fertility curve modulated by drugs + day-of-cycle. 7 days per tick gestation, 280 days to full-term. Plan-B, medical pill, back-alley surgical kit, OB-GYN referral — each with a gestation-day window + complication risk. Per-trimester visible image markers in renders.</p>
-        </div>
-
-        <div class="home-feature tier-econ">
-          <h3>💸 Whore-out + john ledger</h3>
-          <p>Open her to general-public johns. 10 archetypes — regular / rough / cheap / generous / repeat / weirdo / quick / talkative / pregnant-want / degrader. Per-tick passive arrivals; pay scales with bond × stamina × health × mood × outfit (clamped 0.2–3.0). She remembers her johns and may reference them in conversation.</p>
-        </div>
-
-        <div class="home-feature tier-econ">
-          <h3>🎬 Films auto-sell forever</h3>
-          <p>Record every interaction. Films listed permanently as infinite-copy passive earners. Outfit multiplier × bond multiplier × content-tier × rarity. Premium 💣 <b>sell-negatives</b> action destroys the master for a 3.5× lump sum — pick the long tail or the lump pop.</p>
-        </div>
-
-        <div class="home-feature tier-econ">
-          <h3>⛓️ Slave market</h3>
-          <p>Buy temperamental low-bond girls cheap on the slave market. Sell your high-Stockholm trained ones at premium. NPC sellers cycle inventory; your listings cycle to NPC buyers over time. Backstory fragments preview each lot.</p>
-        </div>
-
-        <div class="home-feature tier-econ">
-          <h3>🤝 Propositioner gigs</h3>
-          <p>NPC customers arrive with specific needs — archetype, kinks, acts, toys, duration, budget, quirks. Pick which girl to send, negotiate price, accept or reject. Engagements resolve against stats + mood + bond, apply buffs / debuffs / risks, feed repeat-client reputation.</p>
-        </div>
-
-        <div class="home-feature">
-          <h3>💪 Stamina + health bars</h3>
-          <p>Every captive carries persistent stamina (0–100) + health (0–100). Actions drain stamina (sex, whore-out sessions, violence). Health drops from violence + drug stacking + neglect. Low-stamina girls underperform with johns. Low-health girls flag warn / danger states on the room view.</p>
-        </div>
-
-        <div class="home-feature">
-          <h3>🎨 Custom-pose input</h3>
-          <p>Type your own scene description, Ollama writes the canonical 8-position image prompt around it (face seed + outfit + age + body state + drugs + setting + pose + style). Stage her exactly how you want. Custom-pose drafts + result images persist across UI re-renders via module-scoped state maps.</p>
-        </div>
-
-        <div class="home-feature">
-          <h3>🗂️ Image history gallery</h3>
-          <p>Every image generated for a girl appended to her per-girl history (capped 100 / girl). Browse the gallery from her room — responsive 180px thumbnail grid, fullscreen lightbox, ←/→ keyboard nav, blob-based cross-origin download. Every selfie, every hunt thumb, every disposal final.</p>
-        </div>
-
-        <div class="home-feature tier-premium">
-          <h3>⚱️ Disposal — 6 methods</h3>
-          <p>Bury · Lose at sea · Incinerate · Release · 🎬 Finalization film · Trade. Each method renders its own bespoke final-scene image and triggers different consequences (notoriety, suspicion, premium content, returning ex-captive). Finalization films sell 3–5× regular price.</p>
-        </div>
-
-        <div class="home-feature tier-danger">
-          <h3>👁️ Notoriety / heat</h3>
-          <p>Cumulative heat from your operation. Higher notoriety = harder spawns (vibrant, well-trained girls), lower acquire odds, more cop interest. Property ownership and stealthy disposals modulate heat. Decay slowly over inactivity. The cost of running too hot.</p>
-        </div>
-
-        <div class="home-feature tier-meta">
-          <h3>🛠️ Action spec table</h3>
-          <p>30+ actions centralized in one routing table — caretaking, drugs, sexual, violence, restraint, passive drains, whore-out johns. Each entry declares mood / body / bond / stamina / health / cum-load deltas. Central <code>applyAction</code> writes all deltas atomically; the spec table is the truth.</p>
-        </div>
-
-        <div class="home-feature tier-tech">
-          <h3>🛡️ Condom-on state</h3>
-          <p>Condom is a wardrobe-layer overlay tracked via <code>previousOutfit</code>. Equipping condom blocks the conception roll on vaginal-cum scenes. State-overlay pattern — currentOutfit carries the flag; effectiveOutfitId resolves to the visible outfit for image gen.</p>
-        </div>
-
-        <div class="home-feature tier-meta">
-          <h3>💾 Save slots + sandbox</h3>
-          <p>Multiple named save slots — copy your live game to a backup, load it back later. Sandbox mode generates a fresh dungeon with all items unlocked and starter money cranked. Normal-mode saves persist across sessions in IndexedDB. Factory-reset wipes everything.</p>
-        </div>
-
-        <div class="home-feature">
-          <h3>🍞 Per-girl consumables</h3>
-          <p>Buy food, water, light, outfits for each captive as ongoing purchases. Food + water deplete on a slow tick. Low food drops health. Low water drops mood. Lights matter for image-prompt mood. Outfits unlock film-value multipliers.</p>
-        </div>
-
-        <div class="home-feature">
-          <h3>💬 Universal tooltip engine</h3>
-          <p>Hover any tagged element (200ms delay) or long-press on touch (350ms) for a dark-themed concise hint. Edge-aware positioning. Auto-binds via MutationObserver so dynamically-rendered UI picks up new tooltips automatically. Hover anything and it explains itself.</p>
-        </div>
-
-        <div class="home-feature tier-meta">
-          <h3>🎚️ Tooltips, settings, polish</h3>
-          <p>In-game settings — model picker, voice picker, Pollinations key, health check, repair re-pull. Save-slot manager. Ollama health probe + auto-repair overlay. Universal tooltip engine. Notify-toast system. All the city-builder polish you'd expect.</p>
-        </div>
-
-      </div>
-
-      <!-- Inside Her Room -->
-      <h2 class="section-h">Inside Her Room</h2>
-      <p class="section-sub">Every captive's room is a full UI surface — state bars, action panels, drug scheduler, wardrobe, custom-pose input, gallery link, whore-out toggle, pregnancy panel, recording controls.</p>
-      <div class="room-mock">
-        <div class="room-card">
-          <h3>📊 Live state bars</h3>
-          <div class="bar-row"><span class="lbl">Bond L4/9</span><div class="bar"><div class="fill bond"></div></div><span class="val">65%</span></div>
-          <div class="bar-row"><span class="lbl">Mood</span><div class="bar"><div class="fill mood"></div></div><span class="val">45</span></div>
-          <div class="bar-row"><span class="lbl">Stamina</span><div class="bar"><div class="fill stamina"></div></div><span class="val">72</span></div>
-          <div class="bar-row"><span class="lbl">Health</span><div class="bar"><div class="fill health"></div></div><span class="val">88</span></div>
-          <div class="bar-row"><span class="lbl">Arousal</span><div class="bar"><div class="fill arousal"></div></div><span class="val">30</span></div>
-          <div class="bar-row"><span class="lbl">Coke high</span><div class="bar"><div class="fill coke"></div></div><span class="val">55</span></div>
-          <p class="small muted" style="margin-top:10px">Bars warn / danger when stamina or health drops — visual hint that she needs rest or healing before another john tick.</p>
-        </div>
-        <div class="room-card">
-          <h3>🎛️ What you can do</h3>
-          <p class="small" style="margin:0 0 8px">Every action routes through the central <code>applyAction</code> spec table.</p>
-          <ul style="margin:0;padding-left:18px;font-size:0.86rem;color:var(--text-dim);line-height:1.55">
-            <li><b>Caretake</b> — feed, water, heal, cuddle, praise, redress</li>
-            <li><b>Drug</b> — push coke, weed, MDMA, acid, whiskey, ketamine, tranq</li>
-            <li><b>Sexual</b> — every act mapped, cumLoad + bond + mood + stamina deltas</li>
-            <li><b>Violence</b> — slap, punch, strangle (gated on notoriety)</li>
-            <li><b>Restraint</b> — cuff, gag, blindfold, hood, suspend, immobilize</li>
-            <li><b>Whore-out</b> — toggle her availability, set rate floor + condom rule</li>
-            <li><b>Record</b> — start film, end + price + list, sell-negatives lump</li>
-            <li><b>Custom pose</b> — type the scene, Ollama writes the image prompt</li>
-            <li><b>Wardrobe</b> — equip / derobe / strip everything / re-dress</li>
-            <li><b>Gallery</b> — every past image of her, full-screen lightbox</li>
-          </ul>
-        </div>
-      </div>
-
-      <!-- Privacy strip -->
-      <div class="privacy-strip">
-        <h3>🔒 Privacy at a glance</h3>
-        <p>Your save lives in your browser's IndexedDB. Ollama runs on your machine. Optional Pollinations calls go through your own API key. No accounts, no telemetry, no analytics, no cloud, no third-party retargeting. Export your save anytime from Settings. Factory-reset wipes everything. <a href="#privacy">Read the full Privacy Policy →</a></p>
-      </div>
-
-      <!-- Quick start -->
-      <h2 class="section-h">Quick start</h2>
-      <ol class="quickstart">
-        <li>Install Ollama (<a href="https://ollama.com/download" target="_blank" rel="noopener">ollama.com/download</a>) and pull <code>dolphin-mistral:7b</code>. Set <code>OLLAMA_ORIGINS=*</code> so the browser can talk to it. The launcher does this for you on Windows / Mac / Linux.</li>
-        <li>(Optional) Paste a Pollinations <code>pk_</code> publishable key into Settings — unlocks whole-body images, selfies, hunt thumbs, and gallery renders. Without it you still get the full text-based game.</li>
-        <li>Run <code>start.bat</code> (Windows) or <code>start.sh</code> (Mac / Linux). The launcher auto-syncs <code>.env</code> → <code>js/env.local.js</code>, serves with no-cache headers on port 9535, and opens the browser. Click <b>🎬 Start New Game</b> — your starter dungeon is a hole in the wall and Unity is your starter captive.</li>
-      </ol>
-
-      <!-- Closing -->
       <p class="closing">
-        Every character is 18 or older. Adult fiction. Local-first. Your save in your browser, your model on your machine, your taboo your business. No telemetry. No accounts. No cloud. <a href="#terms">Terms</a> · <a href="#privacy">Privacy</a>.
+        Every character is 18 or older. Adult fiction. Local-first — your save in your browser, your model on your machine, your taboo your business. No telemetry, no accounts, no cloud. <a href="#terms">Terms</a> · <a href="#privacy">Privacy</a>.
       </p>
     </section>
 
@@ -418,25 +192,39 @@
 
       <h3>Game loop</h3>
       <ul>
-        <li><b>Hunt</b> — visit Town, pick a location, run a 4-stage capture attempt against girls who spawn there</li>
-        <li><b>Hold</b> — bring captives back to your dungeons, assign them holds, upgrade their conditions across 12+ tracks</li>
-        <li><b>Interact</b> — talk to them via real Ollama-powered dialogue with persistent body state, drugs, mood, bond</li>
-        <li><b>Record</b> — every session can be recorded as a film; films sell on the content market forever</li>
-        <li><b>Sell / dispose</b> — list captives on slave market, accept propositioner gigs, dispose via various methods</li>
-        <li><b>Expand</b> — buy more dungeons, own properties around town, upgrade everything</li>
+        <li><b>Hunt</b> — visit Town, pick a hunting ground, run a 4-stage capture attempt against girls who spawn there (some grounds unlock with your DEPRAVITY level, a roster size, or bought access)</li>
+        <li><b>Hold</b> — bring captives back to your dungeons, assign holds, upgrade conditions across 12 tracks; stock each hold or a shared dungeon supply pool with food / water / condoms / drugs</li>
+        <li><b>Interact</b> — real Ollama-powered dialogue with persistent body state, drugs + addiction, mood, Stockholm bond, ownership marks, and a roomful of toys/implements you mount per hold</li>
+        <li><b>Progress</b> — every act feeds your DEPRAVITY level, which gates the heaviest depravities (branding, extreme acts, nugget-making, dismemberment, snuff); pay a fee to unlock tiers early</li>
+        <li><b>Record / earn</b> — record any session as a film; films sell on the content market forever; rent captives to johns (gentle → sadistic, who use your stocked toys + drugs); farm milk; sell harvested body parts</li>
+        <li><b>Sell / dispose / retire</b> — slave-market trades, transport captives (or corpses) between dungeons, snuff into a postmortem corpse, dispose by many methods, and keep one of her 1–3 keepsakes as a permanent-buff trophy</li>
+        <li><b>Survive</b> — keep her escape-risk down and stay under the WANTED line; raids hit at high heat — pre-buy a lawyer, dirty-cop connections, or an escape kit, or it's jail = game over</li>
+        <li><b>Expand</b> — buy more dungeons, own properties around town, upgrade everything. There is no win state.</li>
       </ul>
 
       <h3>Tech stack</h3>
       <ul>
-        <li><b>Frontend</b> — single-file HTML game with bundled JS, no build step</li>
+        <li><b>Frontend</b> — vanilla-JS browser game (IIFE modules on <code>window.DMTHGame.*</code>), no build step</li>
         <li><b>Ollama</b> at localhost:11434 — local uncensored LLM (dolphin-mistral / abliterated variants)</li>
-        <li><b>Kokoro</b> — in-browser TTS with 16 voice options</li>
-        <li><b>Pollinations</b> — optional image generation via your own key</li>
-        <li><b>Persistence</b> — IndexedDB save state, fully local</li>
+        <li><b>Kokoro</b> — in-browser TTS, a distinct voice per girl</li>
+        <li><b>Pollinations</b> — optional image generation via your own key (seeded face + outfit for visual consistency)</li>
+        <li><b>Persistence</b> — IndexedDB save state, fully local; pause freezes time, progress reloads when you return</li>
       </ul>
 
+      <h3>Unity AI Lab — the crew</h3>
+      <p class="small muted">A small independent AI lab — "four engineers, one workshop." Founded 2020 out of a forum thread. Self-hosted, self-funded, open-source. Creed: <i>no filters, no telemetry, no apologies — open source or it didn't happen.</i> Full folio at <a href="https://unityailab.com/about" target="_blank" rel="noopener">unityailab.com/about ↗</a>.</p>
+      <ul>
+        <li><b>SpongeBong</b> <span class="small muted">(@hackall360)</span> — Co-founder · Engineer. Started Unity; owns the infrastructure, the prompt archive, and the on-call pager. If something's held together by a shell script, there's a fair chance he wrote it. <i>Developer · Ethical Hacker · Sys Admin · Founder.</i></li>
+        <li><b>GFourteen</b> <span class="small muted">(@gfourteen)</span> — Co-founder · Engineer. The other half of Unity's spine; brings finance discipline to a lab that would otherwise spend every dollar on GPUs and regret nothing. <i>Developer · Founder · Financial Advisor.</i></li>
+        <li><b>Alfreddo</b> <span class="small muted">(@alfredo)</span> — Engineer · Agentic systems. Lives inside the planner / executor / critic loop; when the agent stack does something nobody expected, he can usually tell you why before you finish asking. <i>Developer · Agentic Systems · Researcher.</i></li>
+        <li><b>Red</b> <span class="small muted">(@red)</span> — Engineer · Security. The reason every Unity deployment has a closed door, a logged door, and a second key somebody else holds. Threat models cheerfully; sleeps well. <i>Security · Sys Admin · Researcher.</i></li>
+      </ul>
+
+      <h3>The game wiki</h3>
+      <p>Full gameplay reference — every system, item, toy, action, concept, plus how to play, how to keep your slaves, and how to stay out of jail — lives in the <a href="wiki.html">📖 Game Wiki</a>.</p>
+
       <h3>Version</h3>
-      <p>v0.0.1 — Phase 21 in flight. See <a href="#setup">⚡ Setup</a> for environment configuration.</p>
+      <p>v0.0.1 — local build. See <a href="#setup">⚡ Setup</a> for environment configuration.</p>
     </section>
 
     <!-- ============= TERMS SECTION ============= -->
