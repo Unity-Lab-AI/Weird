@@ -92,33 +92,6 @@
       </div>
 
       <section class="panel">
-        <h2>📒 The Blood Books</h2>
-        ${(() => {
-          const led = window.DMTHGame.state.getLedger ? window.DMTHGame.state.getLedger() : [];
-          const totalIn = led.filter(e => e.delta > 0).reduce((a, e) => a + e.delta, 0);
-          const totalOut = led.filter(e => e.delta < 0).reduce((a, e) => a + Math.abs(e.delta), 0);
-          const w = window.DMTHGame.wanted ? window.DMTHGame.wanted.describe() : null;
-          const bq = (w && w.level > 0 && window.DMTHGame.wanted.bribeQuote) ? window.DMTHGame.wanted.bribeQuote(15) : null;
-          const recent = led.slice(-50).reverse();
-          const cleanReason = r => String(r || 'misc').replace(/[:|].*$/, '').replace(/-/g, ' ');
-          return `
-            <div class="dash-stats">
-              <div class="panel"><h2>💵 Taken in</h2><div class="big-num ok">+$${totalIn.toLocaleString()}</div></div>
-              <div class="panel"><h2>🩸 Bled out</h2><div class="big-num bad">−$${totalOut.toLocaleString()}</div></div>
-              <div class="panel"><h2>⚖️ Balance</h2><div class="big-num">$${s.wallet.money.toLocaleString()}</div></div>
-            </div>
-            ${bq ? `<div class="btn-row" style="margin:8px 0"><button class="btn-small" data-bribe data-tooltip="Grease the right palms — WANTED −${bq.drop} for $${bq.cost.toLocaleString()} (cost climbs with your tier). Or lay off hunting + show tenderness to cool it free.">💵 Bribe heat down — WANTED −${bq.drop} ($${bq.cost.toLocaleString()})</button></div>` : ''}
-            <details class="sect"><summary>📖 Open the books — every line (${led.length})</summary><div class="sect-body" style="max-height:320px;overflow-y:auto">
-              ${recent.length ? recent.map(e => {
-                const t = (window.DMTHGame.gameClock?.formatStamp && e.gameMin != null) ? window.DMTHGame.gameClock.formatStamp(e.gameMin) : '';
-                return `<div class="stat-row small"><span>${e.delta >= 0 ? '➕' : '➖'} ${cleanReason(e.reason)}${t ? ` <span class="muted">· ${t}</span>` : ''}</span><b class="${e.delta >= 0 ? 'ok' : 'bad'}">${e.delta >= 0 ? '+' : '−'}$${Math.abs(e.delta).toLocaleString()}</b></div>`;
-              }).join('') : '<p class="sect-stub">No transactions yet — earn or spend and every line lands here.</p>'}
-            </div></details>
-          `;
-        })()}
-      </section>
-
-      <section class="panel">
         <h2>🔗 Your Operation</h2>
         <div class="cap-hero">
           <div class="cap-hero-top">

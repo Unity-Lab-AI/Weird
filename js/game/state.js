@@ -326,8 +326,30 @@
   }
 
   // wallet
-  // The LEDGER (📒) — every money in/out is recorded with a signed delta + reason + running balance
-  // so the dashboard can show the full books. Bounded to the last 400 entries.
+  // The LEDGER (📒) — EVERY money in/out is recorded with a signed delta + reason + CATEGORY +
+  // running balance so the wallet tab can show the full, sortable, filterable books. Bounded to
+  // the last 800 entries.
+  // Classify a raw spend/earn reason string into a player-facing category for the filterable ledger.
+  function categorizeLedger(reason) {
+    const r = String(reason || '').toLowerCase();
+    if (r.startsWith('toy:')) return 'Toys';
+    if (r.startsWith('wardrobe')) return 'Wardrobe';
+    if (r.includes('film') || r.startsWith('sell-negatives') || r.startsWith('market:')) return 'Films';
+    if (r.startsWith('bodypart') || r.includes('organ')) return 'Organs';
+    if (r.startsWith('buy-out-location') || r.startsWith('location-access')) return 'Property — purchase';
+    if (r.includes('skim') || r.startsWith('location-income') || r.startsWith('passive')) return 'Property — income';
+    if (r.startsWith('logistics') || r.includes('upgrade') || r.includes('capacity') || r.startsWith('dungeon') || r.startsWith('hold')) return 'Dungeon / Holds';
+    if (r.startsWith('unlock')) return 'Unlocks';
+    if (r.startsWith('bribe') || r.includes('fine') || r.includes('wanted')) return 'Bribes / Heat';
+    if (r.startsWith('friend')) return 'Friends';
+    if (r.startsWith('john') || r.startsWith('whore') || r.startsWith('proposition') || r.startsWith('gangbang')) return 'Johns';
+    if (r.includes('milk')) return 'Milk';
+    if (r.startsWith('slave') || r.includes('sell-girl') || r.includes('buy-girl')) return 'Slave market';
+    if (r.startsWith('loot') || r.startsWith('grant')) return 'Loot';
+    if (r.startsWith('buy:')) return 'Supplies'; // shop-item buys (drugs / tools / food / restraints)
+    if (r.startsWith('odd-job') || r.startsWith('side') || r.startsWith('hustle')) return 'Odd jobs';
+    return 'Other';
+  }
   function recordLedger(s, delta, reason) {
     if (!s.ledger) s.ledger = [];
     s.ledger.push({
@@ -335,9 +357,10 @@
       gameMin: window.DMTHGame.gameClock ? window.DMTHGame.gameClock.now() : null,
       delta,
       reason: reason || 'misc',
+      category: categorizeLedger(reason),
       balance: s.wallet.money
     });
-    if (s.ledger.length > 400) s.ledger = s.ledger.slice(-400);
+    if (s.ledger.length > 800) s.ledger = s.ledger.slice(-800);
   }
   function addMoney(amount, reason) {
     mutate(s => {
@@ -672,6 +695,7 @@
     addBodyPart, getBodyParts, removeBodyPart,
     addUnlockedLocation, addOwnedLocation, setLogistics, addPurchasedUnlock,
     getLedger: () => (state && state.ledger) || [],
+    categorizeLedger,
     enqueuePropositioner, acceptPropositioner, completePropositioner, rejectPropositioner,
     listGirlForSale, unlistGirl,
     bumpTick,
