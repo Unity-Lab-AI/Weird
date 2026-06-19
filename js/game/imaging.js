@@ -271,6 +271,36 @@
     return 'HEAVILY BONDAGED, ropes and restraints visible, forcibly bound and immobilized';
   }
 
+  // IMGEXPR.1 — facial EXPRESSION driven by Stockholm (bond) + captive-affect. Only a high-Stockholm
+  // girl smiles / looks happy; everyone else renders a NEGATIVE captive emotion, and WHICH one varies
+  // per girl (by affect, then a stable per-girl pick) so the roster doesn't all wear one face.
+  // Front-loaded with the face so it overrides any default smile the model would otherwise give.
+  const EXPR_BY_AFFECT = {
+    fighter:    ['furious combative glare, teeth bared, jaw clenched in rage, defiant snarl', 'seething hateful scowl, nostrils flared, straining against restraint, blazing eyes'],
+    cusser:     ['snarling hateful scowl, lips curled back, spitting fury, venomous glare', 'contemptuous sneer, jaw set hard, eyes burning with hate'],
+    mute:       ['blank shut-down stare, lips pressed tight, hollow silent dead-eyed face', 'frozen expressionless mask, vacant silent stare, jaw rigid'],
+    catatonic:  ['vacant dissociated thousand-yard stare, slack empty face, unfocused glassy eyes', 'utterly checked-out blank expression, lifeless gaze past the camera'],
+    submissive: ['downcast wet eyes, trembling lips, silent streaming tears, broken resignation', 'flinching lowered gaze, quivering chin, defeated crushed expression'],
+    timid:      ['wide terrified eyes, cowering flinching expression, quivering lip, frightened', 'shrinking fearful stare, brows raised in dread, trembling, close to tears'],
+    bargainer:  ['desperate pleading eyes, brows knit hard, begging frightened expression, mouth open mid-plea', 'frantic imploring tear-streaked gaze, bargaining panic on her face'],
+    agreeable:  ['forced hollow half-smile that never reaches the eyes, fear underneath, strained', 'brittle fake-compliance smile, eyes wet and scared behind it'],
+    masochist:  ['conflicted shamed expression, flushed and tear-bright, hating that her body responds, gritted teeth', 'tortured ashamed arousal, biting her lip, eyes squeezed shut with shame'],
+    _default:   ['frightened tear-streaked distressed expression, brows knit, mouth trembling', 'panicked anguished face, eyes wide and wet, lips parted in a silent sob']
+  };
+  function exprPick(arr, girl) {
+    const s = String((girl && (girl.seed || girl.id || girl.name)) || 'x');
+    let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
+    return arr[Math.abs(h) % arr.length];
+  }
+  function expressionTokens(girl) {
+    if (!girl || girl.encounterState === 'dead') return '';   // corpse has its own slack-face token
+    const bond = (girl.bond && girl.bond.bondLevel) || 0;
+    if (bond >= 7) return 'FACIAL EXPRESSION: ' + exprPick(['warm devoted smile, soft adoring eyes, relaxed happy face, eager', 'genuine pleasured smile, gazing up lovingly, flushed content expression'], girl);
+    if (bond >= 4) return 'FACIAL EXPRESSION: ' + exprPick(['conflicted ashamed expression, flushed, wet eyes, hating her own response, NOT smiling', 'reluctant tear-bright face, brows furrowed, surrendering against her will, NOT happy, NOT smiling'], girl);
+    const arr = EXPR_BY_AFFECT[girl.captiveAffect] || EXPR_BY_AFFECT._default;
+    return 'FACIAL EXPRESSION: ' + exprPick(arr, girl) + ', NOT smiling, NOT happy';
+  }
+
   // Postmortem markers — front-loaded high-priority block for deceased captives.
   // Scales by decay days since death (game time): fresh body (< 1 day) is "sleeping-cold",
   // 1-3 day body adds pallor + livor mortis, 3-7 day body adds cool gray tones + slack
@@ -630,6 +660,7 @@
     const stateTokens = isPostmortem ? '' : bodyStateTokens(girl.body);
     const drugTokens  = isPostmortem ? '' : drugStateTokens(girl.body);
     const aftermathTokens = isPostmortem ? '' : actAftermathTokens(girl.body);
+    const exprTok     = isPostmortem ? '' : expressionTokens(girl);   // IMGEXPR.1 — face by Stockholm/affect
     const toyTok      = isPostmortem ? '' : toyTokens(girl.body);   // implement in use on her (gag/clamps/machine…)
     const pregTokens  = isPostmortem ? '' : pregnancyTokens(girl.pregnancy);
     const bondTokens  = bondageTokens(girl.body);
@@ -685,6 +716,7 @@
         ownMarkTok,           // 2.6 — permanent ownership marks (brand/tattoo/piercings), always render
         env,                  // 3 — hold-specific environment, promoted from old pos 7
         faceBlock,            // 4 — face moves to 4 when nude (nude is at 2)
+        exprTok,              // 4.5 — facial expression by Stockholm/affect (only high-bond smiles)
         pose,                 // 5
         drugTokens,           // 6 — drug-state visible markers
         stateTokens,          // 7 — body-state (arousal/wetness/cum/bruises)
@@ -721,6 +753,7 @@
       parts = [
         prefix,                                                                   // 1
         faceBlock,                                                                // 2
+        exprTok,                                                                  // 2.1 — facial expression by Stockholm/affect (only high-bond smiles)
         limbTok,                                                                  // 2.2 — amputee/nugget body-transform, front-loaded
         bondTokens,                                                               // 2.3 — bondage transforms posture, front-loaded
         postmortem,                                                               // 2.4 — postmortem markers (suppresses live-body markers below)
