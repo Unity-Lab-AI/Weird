@@ -63,6 +63,7 @@
     properties: [],                // [{ locationId, owned, passiveIncomePerTick }]
     unlockedLocations: [],         // [locationId] hunting grounds with bought private access (PLVL.2)
     ownedLocations: [],            // [locationId] locations BOUGHT OUT — you own the turf, grants perks (BUYLOCATION.1)
+    logistics: { unlocked: false, enabled: false, targets: { food: 20, water: 20, condoms: 10 } },   // AUTOLOGISTICS.1 — auto-distribute supplies to dungeon pools
     purchasedUnlocks: [],          // [unlockKey] gated action tiers bought early with cash (PAYUNLOCK.1)
 
     roster: [],                    // [GirlProfile+state]  id-keyed; see girl-gen.js
@@ -151,6 +152,7 @@
     if (!s.bodyParts) s.bodyParts = [];
     if (!s.unlockedLocations) s.unlockedLocations = [];
     if (!s.ownedLocations) s.ownedLocations = [];
+    if (!s.logistics) s.logistics = { unlocked: false, enabled: false, targets: { food: 20, water: 20, condoms: 10 } };
     if (!s.purchasedUnlocks) s.purchasedUnlocks = [];
     if (!s.settings) s.settings = {};
     if (!s.settings.playerName) s.settings.playerName = 'Master';
@@ -525,6 +527,8 @@
   function addUnlockedLocation(locId) { mutate(s => { if (!s.unlockedLocations) s.unlockedLocations = []; if (!s.unlockedLocations.includes(locId)) s.unlockedLocations.push(locId); }); }
   // BUYLOCATION.1 — locations BOUGHT OUT (you own the turf → perks). Never removed.
   function addOwnedLocation(locId) { mutate(s => { if (!s.ownedLocations) s.ownedLocations = []; if (!s.ownedLocations.includes(locId)) s.ownedLocations.push(locId); }); }
+  // AUTOLOGISTICS.1 — merge a patch into the logistics config (unlock / enable / target sliders).
+  function setLogistics(patch) { mutate(s => { s.logistics = { ...(s.logistics || { unlocked: false, enabled: false, targets: { food: 20, water: 20, condoms: 10 } }), ...patch }; }); }
   // purchased early-access action unlocks (PAYUNLOCK.1). Never removed.
   function addPurchasedUnlock(key) { mutate(s => { if (!s.purchasedUnlocks) s.purchasedUnlocks = []; if (!s.purchasedUnlocks.includes(key)) s.purchasedUnlocks.push(key); }); }
 
@@ -646,7 +650,7 @@
     addDisposal,
     addTrophy, getTrophies,
     addBodyPart, getBodyParts, removeBodyPart,
-    addUnlockedLocation, addOwnedLocation, addPurchasedUnlock,
+    addUnlockedLocation, addOwnedLocation, setLogistics, addPurchasedUnlock,
     enqueuePropositioner, acceptPropositioner, completePropositioner, rejectPropositioner,
     listGirlForSale, unlistGirl,
     bumpTick,

@@ -131,8 +131,9 @@
         { emoji: '🧍',  label: 'corner her, silent',     text: '*sends her to the corner on her knees, hands behind head, one hour silent*', applyId: 'restrain' },
         { emoji: '🧎',  label: 'kneel her on rice',      text: '*dumps a handful of rice, makes her kneel on it until I say stop*', applyId: 'slap' },
         { emoji: '🚫',  label: 'edge + deny her',        text: '*edges her for an hour, stops every time she tightens, no release*', applyId: 'sex-gentle' },
-        { emoji: '🔁',  label: 'ruin her with forced orgasms', text: '*the wand, no breaks, until she\'s crying and trying to crawl away*', applyId: 'sex-rough' },
-        { emoji: '🥣',  label: 'starve her today',       text: '*empties her food dish, shuts the slot, walks away*', applyId: 'restrain' },
+        { emoji: '🔁',  label: 'ruin her with forced orgasms', text: '*the wand, no breaks, until she\'s crying and trying to crawl away*', applyId: 'sex-rough', minStock: 3 },
+        { emoji: '🥣',  label: 'starve her today',       text: '*empties her food dish, shuts the slot, walks away*', applyId: 'restrain', starveDay: true },
+        { emoji: '🚱',  label: 'cut her water today',     text: '*drains her water dish, shuts the supply valve, walks away*', applyId: 'restrain', thirstDay: true },
         { emoji: '🚿',  label: 'hose her down cold',     text: '*turns the hose on her — icy — until her teeth chatter*', applyId: 'slap' },
         { emoji: '🎽',  label: 'belt her ass',           text: '*folds my belt, twenty strokes, tells her to count*', applyId: 'whip' },
         { emoji: '🪪',  label: 'make her watch in the mirror', text: '*forces her to watch herself in the mirror while I use her*', applyId: 'restrain' },
@@ -156,7 +157,7 @@
         { emoji: '🤡',  label: 'pose her open + describe it', text: '*makes her pose in the mirror holding herself open, describe what she sees*', sat: 4 },
         { emoji: '🌊',  label: 'piss + cum facial',      text: '*finishes across her face then keeps her kneeling and pisses over the cum, makes her hold her mouth open through all of it*', sat: 6, actTag: 'pissed' },
         { emoji: '❄️',  label: 'make her snowball it',   text: '*spits my own load back into her mouth and makes her hold it, swirl it, then swallow while I watch her throat move*', sat: 5, actTag: 'facial' },
-        { emoji: '🚶',  label: 'cum-walk of shame',      text: '*coats her face and tits, then makes her crawl the length of the room with it dripping, thanking me the whole way*', sat: 4, actTag: 'facial' }
+        { emoji: '🚶',  label: 'cum-walk of shame',      text: '*coats her face and tits, then makes her crawl the length of the room with it dripping, thanking me the whole way*', sat: 4, actTag: 'facial', minStock: 4 }
       ]
     },
     bondage: {
@@ -202,8 +203,8 @@
         { emoji: '🪮',  label: 'brush her hair',         text: '*sits behind her, brushes her hair slow, long strokes from the roots to the ends*', applyId: 'love-hair-brush' },
         { emoji: '🎵',  label: 'lullaby',                text: '*pulls her to my chest, hums low until her breathing slows, her body goes soft*', applyId: 'love-lullaby' },
         { emoji: '🤗',  label: 'just hold her',          text: '*sits on the floor next to her, no words, just an arm around her shoulders*', applyId: 'love-hold-her' },
-        { emoji: '🌷',  label: 'aftercare (full)',       text: '*water, blanket, clean every bruise, hold her until she sleeps. one full session of care.*', applyId: 'love-aftercare' },
-        { emoji: '🤫',  label: 'sweet promise',          text: 'shh. I\'ve got you. nothing\'s going to hurt you tonight. I promise.', applyId: 'love-promise-sweet' },
+        { emoji: '🌷',  label: 'aftercare (full)',       text: '*water, blanket, clean every bruise, hold her until she sleeps. one full session of care.*', applyId: 'love-aftercare', afterExtreme: true },
+        { emoji: '🤫',  label: 'sweet promise',          text: 'shh. I\'ve got you. nothing\'s going to hurt you tonight. I promise.', applyId: 'love-promise-sweet', minStock: 3 },
         { emoji: '🤱',  label: 'suck her milk',          text: '*latches onto her breast and sucks the warm milk straight from her nipple*', milkSuck: true },
         { emoji: '⚪',  label: 'train her kegels',        text: '*works the weighted balls into her and makes her hold them, training her to take and store more*', cumTrain: true }
       ]
@@ -213,7 +214,7 @@
       actions: [
         { emoji: '👅', label: 'brutal face-fuck',         text: '*both fists in her hair, slams her throat raw until her makeup runs black and she retches around it*', applyId: 'extreme-facefuck' },
         { emoji: '🍑', label: 'tear her ass open',        text: '*no prep, no mercy — forces all the way in and sets a tearing pace while she screams into the mattress*', applyId: 'extreme-rough-anal' },
-        { emoji: '🩸', label: 'breed her raw',            text: '*pins her down, fucks her bare and empties as deep as it goes, holds her hips so it takes*', applyId: 'extreme-breeding-rape' },
+        { emoji: '🩸', label: 'breed her raw',            text: '*pins her down, fucks her bare and empties as deep as it goes, holds her hips so it takes*', applyId: 'extreme-breeding-rape', maxHealth: 90 },
         { emoji: '🤮', label: 'total degradation',        text: '*spits in her open mouth, calls her every filthy name, films her ruin and makes her thank me for it*', applyId: 'extreme-degrade' },
         { emoji: '💀', label: 'beat her down',            text: '*rains down fists and boots until she\'s a bruised, bleeding, sobbing heap on the concrete*', applyId: 'extreme-beatdown' },
         { emoji: '🌑', label: 'choke to the edge',        text: '*crushes her throat shut while I fuck her, lets go the instant her eyes roll back, then does it again*', applyId: 'extreme-choke-out' },
@@ -419,6 +420,25 @@
         if (action.milkSuck && girl?.id && window.DMTHGame?.milk?.suckFromBreast) {
           const r = window.DMTHGame.milk.suckFromBreast(girl.id);
           if (!r.ok) { alert(r.reason); return; }
+        }
+        // STARVEDAY (Gee) — the "starve her today" punishment CUTS OFF her eating for a full game
+        // day: sets body.starveUntil; the tick's auto-consume skips food while it's active. One day
+        // of no food never kills her (FOOD_GRACE_DAYS = 5 game days before health even drops).
+        if (action.starveDay && girl?.id) {
+          const now = window.DMTHGame.gameClock ? window.DMTHGame.gameClock.now() : 0;
+          const dayMin = (window.DMTHGame.gameClock && window.DMTHGame.gameClock.MIN_PER_DAY) || 1440;
+          const g0 = window.DMTHGame.state.getGirl(girl.id);
+          window.DMTHGame.state.updateGirl(girl.id, { body: { ...(g0?.body || {}), starveUntil: now + dayMin } });
+          if (window.DMTHNotify) window.DMTHNotify.show(`🥣 ${g0?.name || 'She'} gets NOTHING to eat for 24 game-hours — food cut off.`, { type: 'warn', durationMs: 4500 });
+        }
+        // STARVEDAY (Gee: "and do water too") — deny-water punishment cuts off drinking for a full
+        // game day (body.thirstUntil). One day of no water never kills (WATER_GRACE_DAYS = 3 days).
+        if (action.thirstDay && girl?.id) {
+          const now = window.DMTHGame.gameClock ? window.DMTHGame.gameClock.now() : 0;
+          const dayMin = (window.DMTHGame.gameClock && window.DMTHGame.gameClock.MIN_PER_DAY) || 1440;
+          const g0 = window.DMTHGame.state.getGirl(girl.id);
+          window.DMTHGame.state.updateGirl(girl.id, { body: { ...(g0?.body || {}), thirstUntil: now + dayMin } });
+          if (window.DMTHNotify) window.DMTHNotify.show(`🚱 ${g0?.name || 'She'} gets NO water for 24 game-hours — supply cut off.`, { type: 'warn', durationMs: 4500 });
         }
         // applyId — primary stat mutation path. Routes through action-effects.applyAction
         // for deterministic stamina/health/mood/arousal/wetness/cumLoad/bruises/bondXP

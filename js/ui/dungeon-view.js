@@ -14,6 +14,28 @@
         ${dungeons.map(renderDungeon).join('')}
       </div>
 
+      ${(() => {
+        // AUTOLOGISTICS.1 — install + configure the auto-supply rig (sliders per kind).
+        const sup = window.DMTHGame.supply;
+        if (!sup || !sup.logisticsConfig) return '';
+        const cfg = sup.logisticsConfig();
+        if (!cfg.unlocked) {
+          return `<div class="panel">
+            <h2>🚚 Auto-Logistics</h2>
+            <p class="small muted">Install the auto-logistics rig — every tick it pulls food / water / condoms from your inventory into EVERY dungeon's shared pool, up to your slider targets (best-value source first). Set it once, stop hand-stocking.</p>
+            <button class="btn-small btn-primary" id="buy-logistics" data-tooltip="Install Auto-Logistics — $${sup.LOGISTICS_UNLOCK_COST.toLocaleString()}. Then set per-kind target sliders.">🚚 Install Auto-Logistics — $${sup.LOGISTICS_UNLOCK_COST.toLocaleString()}</button>
+          </div>`;
+        }
+        const t = cfg.targets || { food: 20, water: 20, condoms: 10 };
+        const slider = (kind, max) => `<div class="stat-row small" data-tooltip="Top every dungeon pool up to this many ${kind} units each tick (consumes matching inventory items)."><span>${kind}</span> <input type="range" id="log-${kind}" min="0" max="${max}" value="${t[kind] || 0}" style="flex:1"/> <b id="log-${kind}-val">${t[kind] || 0}</b></div>`;
+        return `<div class="panel">
+          <h2>🚚 Auto-Logistics ${cfg.enabled ? '<span class="ok small">· ON</span>' : '<span class="muted small">· off</span>'}</h2>
+          <p class="small muted">Each tick, tops every dungeon pool up to these targets from your inventory.</p>
+          <label class="field" style="flex-direction:row;gap:8px;align-items:center;cursor:pointer"><input type="checkbox" id="log-enabled" ${cfg.enabled ? 'checked' : ''}/> <span>Enabled</span></label>
+          ${slider('food', 60)}${slider('water', 60)}${slider('condoms', 40)}
+        </div>`;
+      })()}
+
       <div class="panel">
         <h2>Available hideouts to acquire</h2>
         ${window.DMTHAssets.DUNGEONS
@@ -102,6 +124,21 @@
 
     // Lazy-load any cover images dropped into asset folders
     if (window.DMTHAssetImg) window.DMTHAssetImg.decorate(el, 140);
+
+    // AUTOLOGISTICS.1 — install / toggle / configure the auto-supply rig.
+    const buyLog = el.querySelector('#buy-logistics');
+    if (buyLog) buyLog.onclick = () => { const r = window.DMTHGame.supply.unlockLogistics(); if (!r.ok) { alert(r.reason); return; } window.DMTHRouter.handle(); };
+    const logEnabled = el.querySelector('#log-enabled');
+    if (logEnabled) logEnabled.onchange = () => window.DMTHGame.state.setLogistics({ enabled: logEnabled.checked });
+    ['food', 'water', 'condoms'].forEach(kind => {
+      const sl = el.querySelector(`#log-${kind}`);
+      if (!sl) return;
+      sl.oninput = () => { const v = el.querySelector(`#log-${kind}-val`); if (v) v.textContent = sl.value; };
+      sl.onchange = () => {
+        const cur = window.DMTHGame.supply.logisticsConfig().targets || { food: 20, water: 20, condoms: 10 };
+        window.DMTHGame.state.setLogistics({ targets: { ...cur, [kind]: parseInt(sl.value, 10) || 0 } });
+      };
+    });
 
     el.querySelectorAll('[data-buy-sec]').forEach(b => {
       b.onclick = () => {

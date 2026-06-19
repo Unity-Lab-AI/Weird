@@ -1162,18 +1162,25 @@
       let holdDirty = false;
       const holdPatch = hold ? { ...hold } : null;
 
-      if (waterPlumbed) {
+      // STARVEDAY (Gee) — the starve / deny-water punishments cut off her eating / drinking for a
+      // full game day. While the timer's live she can't auto-consume (even from a plumbed faucet) —
+      // her hunger/thirst clock keeps climbing. One day never kills (food grace 5 days / water 3).
+      const nowMin = clock ? clock.now() : 0;
+      const blockEat = (body.starveUntil || 0) > nowMin;
+      const blockDrink = (body.thirstUntil || 0) > nowMin;
+
+      if (waterPlumbed && !blockDrink) {
         // Auto-drinks from plumbed source — never needs reserve, never dehydrates.
         if (clock) body.lastWateredAt = clock.now();
         daysSinceWatered = 0;
-      } else if (holdPatch && daysSinceWatered > WATER_AUTOCONSUME_DAYS && (holdPatch.waterReserve || 0) > 0) {
+      } else if (!blockDrink && holdPatch && daysSinceWatered > WATER_AUTOCONSUME_DAYS && (holdPatch.waterReserve || 0) > 0) {
         holdPatch.waterReserve = (holdPatch.waterReserve || 0) - 1;
         if (clock) body.lastWateredAt = clock.now();
         daysSinceWatered = 0;
         holdDirty = true;
       }
 
-      if (holdPatch && daysSinceFed > FOOD_AUTOCONSUME_DAYS && (holdPatch.foodReserve || 0) > 0) {
+      if (!blockEat && holdPatch && daysSinceFed > FOOD_AUTOCONSUME_DAYS && (holdPatch.foodReserve || 0) > 0) {
         holdPatch.foodReserve = (holdPatch.foodReserve || 0) - 1;
         if (clock) body.lastFedAt = clock.now();
         daysSinceFed = 0;
@@ -1188,10 +1195,10 @@
       // POOL-SUPPLY.1 — if her own hold reserve couldn't cover it, fall back to the dungeon
       // POOL (shared evenly across holds). Only fires when she's still hungry/thirsty after the
       // hold pass above (supply.draw tries hold-first, which is already empty here, then pool).
-      if (!waterPlumbed && daysSinceWatered > WATER_AUTOCONSUME_DAYS && window.DMTHGame.supply?.draw) {
+      if (!blockDrink && !waterPlumbed && daysSinceWatered > WATER_AUTOCONSUME_DAYS && window.DMTHGame.supply?.draw) {
         if (window.DMTHGame.supply.draw(girl, 'water', 1) > 0) { if (clock) body.lastWateredAt = clock.now(); daysSinceWatered = 0; }
       }
-      if (daysSinceFed > FOOD_AUTOCONSUME_DAYS && window.DMTHGame.supply?.draw) {
+      if (!blockEat && daysSinceFed > FOOD_AUTOCONSUME_DAYS && window.DMTHGame.supply?.draw) {
         if (window.DMTHGame.supply.draw(girl, 'food', 1) > 0) { if (clock) body.lastFedAt = clock.now(); daysSinceFed = 0; }
       }
 

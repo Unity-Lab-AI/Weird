@@ -13,6 +13,16 @@
 
 ---
 
+## 2026-06-18 — Session: STATGATE.1 + AUTOLOGISTICS.1 + MODMATRIX.1 + LEGACY-AUDIT.1 — final 7 backlog items closed — LOCAL ONLY (not pushed)
+
+- **STATGATE.1** ✅ — data pass on the (already-built) `gateOf` framework: tagged concrete acts demonstrating all gate directions — Love `aftercare (full)` → `afterExtreme` (tender-only-after-extreme), Love `sweet promise`/Punishment `forced orgasms` → `minStock:3`, Degrade `cum-walk of shame` → `minStock:4` (Stockholm-gated), Extreme `breed her raw` → `maxHealth:90` (HP-gated, forceable). `js/ui/quick-actions.js`.
+- **AUTOLOGISTICS.1** ✅ — Gee: *"an auto lagistics upgrade ... where u can slider selct how much of what to distribute to the differnt holds/dungeons from ur universal inventory"*. Installable rig ($4000): each tick `supply.autoDistribute()` tops every dungeon's shared pool up to per-kind slider TARGETS (food/water/condoms), consuming matching inventory items best-value-first. `state.logistics` config + `setLogistics`; `supply.logisticsConfig`/`unlockLogistics`/`autoDistribute`; `tick.js` hook; `dungeon-view.js` panel (install + enable + 3 sliders). `js/game/supply.js`, `state.js`, `tick.js`, `js/ui/dungeon-view.js`.
+- **MODMATRIX.1** ✅ (audit, no code) — confirmed every girl-need is addressable by at least an ACTION and most by a DRUG + TOY too (stamina/mood/arousal/wetness/cumLoad/high/escape/bruises all mapped); the player can heal/modify/moderate via just drugs, just actions, or just toys. Intentional gaps (no health-healing drug/toy) are by design. No coverage hole.
+- **LEGACY-AUDIT.1** ✅ (audit, no code) — swept the session: every verbatim directive captured in TODO + board (#124-235) and shipped; the 7 flagged-as-left items all closed; older backlog archived; nothing slipped. TUTORIAL.1 stays deferred.
+- All code files `node -c` clean.
+
+---
+
 ## 2026-06-18 — Session: ZONES.1 + BUYLOCATION.1 + FRIENDLOOT.1 — town zones, buy-out turf perks, friend loot floor — LOCAL ONLY (not pushed)
 
 - **ZONES.1** ✅ — Gee: *"i actually want to split the town up into zones so u have to be a certain level to unlock certain locations and sume u have to pay to unlock"*. Town split into named zones (The Gutter / The Meat District / The Quarter / The Heights / The Brood Ward / The Sticks / The Cul-de-sac) shown per town slot. Level/captives/pay gating already lived in `progression.LOCATION_GATES`; added `strip-club` (level 2) + `prenatal-clinic` (level 4) gates. `js/ui/town-view.js`, `js/game/progression.js`.

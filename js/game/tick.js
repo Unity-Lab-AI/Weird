@@ -107,6 +107,10 @@
     // produces its own gift over time (nurse → free scripts, sorority → allowance, etc.).
     if (window.DMTHGame.loot?.tickArchetypeGifts) window.DMTHGame.loot.tickArchetypeGifts();
 
+    // AUTOLOGISTICS.1 — auto-distribute supplies from inventory into every dungeon pool (if the
+    // upgrade is installed + enabled). No-op otherwise.
+    if (window.DMTHGame.supply?.autoDistribute) { try { window.DMTHGame.supply.autoDistribute(); } catch (e) { /* non-fatal */ } }
+
     // BUYLOCATION.1 — "The Skim": each BOUGHT-OUT location bleeds you a passive cut every tick.
     if (window.DMTHGame.progression?.OWNERSHIP_PERKS && window.DMTHGame.state.addMoney) {
       const owned = window.DMTHGame.state.current?.ownedLocations || [];

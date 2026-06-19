@@ -144,8 +144,57 @@
     return d ? ensurePool(d) : { food: 0, water: 0, condoms: 0, drugs: {} };
   }
 
+  // ── AUTOLOGISTICS.1 (Gee) — a bought UPGRADE that auto-distributes supplies from your universal
+  // inventory into every dungeon's shared pool each tick, up to per-kind slider TARGETS — so you set
+  // it once and stop hand-stocking. Consumes the matching inventory items (best-value source first).
+  const LOGISTICS_UNLOCK_COST = 4000;
+  const LOGISTICS_SOURCES = {
+    food:    [{ id: 'gourmet-meal', units: 7 }, { id: 'basic-meal', units: 3 }],
+    water:   [{ id: 'filtered-water', units: 12 }, { id: 'bottled-water', units: 6 }],
+    condoms: [{ id: 'condom-standard', units: 3 }, { id: 'condom', units: 1 }]
+  };
+  function logisticsConfig() {
+    const s = window.DMTHGame.state.current;
+    return (s && s.logistics) || { unlocked: false, enabled: false, targets: { food: 20, water: 20, condoms: 10 } };
+  }
+  function unlockLogistics() {
+    if (logisticsConfig().unlocked) return { ok: false, reason: 'already installed' };
+    if (!window.DMTHGame.state.spendMoney(LOGISTICS_UNLOCK_COST, 'logistics-upgrade')) return { ok: false, reason: `need $${LOGISTICS_UNLOCK_COST.toLocaleString()}` };
+    window.DMTHGame.state.setLogistics({ unlocked: true, enabled: true });
+    if (window.DMTHNotify) window.DMTHNotify.show('🚚 Auto-Logistics installed — your stock now flows to every dungeon pool automatically. Set the sliders in Dungeons.', { type: 'success', durationMs: 5000 });
+    return { ok: true, cost: LOGISTICS_UNLOCK_COST };
+  }
+  // Per-tick auto-distribution: top each dungeon's pool up to the target for every kind, consuming
+  // inventory items (best-value source first). Called from tick.js. No-op unless unlocked + enabled.
+  function autoDistribute() {
+    const cfg = logisticsConfig();
+    if (!cfg.unlocked || !cfg.enabled) return;
+    const s = window.DMTHGame.state.current;
+    if (!s || !Array.isArray(s.dungeons)) return;
+    const targets = cfg.targets || { food: 20, water: 20, condoms: 10 };
+    for (const d of s.dungeons) {
+      const pool = ensurePool(d);
+      let dirty = false;
+      for (const kind of KINDS) {
+        const target = targets[kind] || 0;
+        let cur = pool[kind] || 0;
+        const sources = LOGISTICS_SOURCES[kind] || [];
+        // Consume inventory items until at/over target or sources run dry.
+        while (cur < target) {
+          const src = sources.find(x => (window.DMTHGame.state.current.inventory?.[x.id] || 0) > 0);
+          if (!src) break;
+          if (!window.DMTHGame.state.consumeItem(src.id, 1)) break;
+          cur += src.units; dirty = true;
+        }
+        pool[kind] = cur;
+      }
+      if (dirty) window.DMTHGame.state.updateDungeon(d.id, { pool });
+    }
+  }
+
   window.DMTHGame = window.DMTHGame || {};
   window.DMTHGame.supply = Object.freeze({
-    KINDS, available, draw, drawDrug, stockPool, stockPoolDrug, stockHold, stockHoldDrug, poolOf
+    KINDS, available, draw, drawDrug, stockPool, stockPoolDrug, stockHold, stockHoldDrug, poolOf,
+    LOGISTICS_UNLOCK_COST, logisticsConfig, unlockLogistics, autoDistribute
   });
 })();
