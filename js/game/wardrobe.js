@@ -216,7 +216,7 @@
     },
 
     // Per-girl-type SKIMPY / MAX-NUDITY outfits (e.g. office worker in a necktie only, all else nude;
-    // police woman as skimpy + as much nudity as possible). Each is a `nude:'accessories'` outfit so
+    // police girl as skimpy + as much nudity as possible). Each is a `nude:'accessories'` outfit so
     // imaging front-loads full nudity and renders ONLY the one scrap named in accessoriesOnly.
     // `syncArchetype` tags the girl-type it's made for (outfit-sync buff).
     // POSITIVE prompts only — NEVER write "no bra / no panties" (this gen latches onto
