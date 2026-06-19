@@ -13,6 +13,22 @@
 
 ---
 
+## 2026-06-19 — Session: LANDING-DEDUP — kill redundant landing buttons (header is canonical, drop duplicate cards + the floating settings btn)
+
+**Gee verbatim quotes:**
+- *"why on the landing page is there a setting button on the header and in the top left of the screen, remove the top left settings button opn the landing page"*
+- *"and there is a settings button on the cards too and in the header remove the card settings button too"*
+- *"and wtf every button is in the header and has a fucking card too .. redundant!!!!!!!!!!!!!!!!!!!!!!!!!!"*
+
+- [x] **LANDING-DEDUP.1** 🟠 — the landing page had buttons triplicated (header nav link + home-hub card + a floating top-left button). Rule applied per Gee: **the header nav is the canonical location; any card/button that duplicates a header item is removed.**
+  - Removed the floating top-left **⚙️ Settings** button (`#open-settings-btn`) from the hero, its `onclick` wiring (`js/ui/landing.js`), and its `position:fixed; top:12px; left:16px` CSS rule (`css/landing.css`).
+  - Removed the home-hub **Settings** card (`#cta-open-settings`) + its inline-script wiring + the now-dead `settingsBtn` reference (was throwing `settingsBtn is not defined`).
+  - Removed the three home-hub cards that duplicate a header-nav item: **Setup Wizard** (= ⚡ Setup), **Wiki** (= 📖 Wiki), **About** (= ℹ️ About).
+  - KEPT (no header equivalent — unique launcher actions): **Start New Game**, **Continue Game**, **Readme**, **Setup Guide**. Header nav unchanged (Home / Setup / About / Wiki / Terms / Privacy / Settings).
+  - Files: `index.html`, `js/ui/landing.js`, `css/landing.css`. Cache token bumped. Verified headless (Playwright): floating-btn absent, card-settings absent, hub = 4 unique tiles, nav intact, **zero console errors**.
+
+---
+
 ## 2026-06-19 — Session: UX OVERHAUL (freeze fix + full-width + dashboard declutter + girls list + Treasury→Ledger + WANTED top bar) + Ollama bind fix + cache-busting
 
 **Gee verbatim quotes this session:**

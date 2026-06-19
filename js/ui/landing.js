@@ -497,10 +497,6 @@
       window.location.href = './game.html';
     };
 
-    $('#open-settings-btn').onclick = () => {
-      document.body.classList.toggle('settings-open');
-    };
-
     window.DMTHKokoro.onStateChange(() => refresh());
     window.addEventListener('storage', () => refresh());
   }

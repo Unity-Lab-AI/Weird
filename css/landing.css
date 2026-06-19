@@ -239,16 +239,6 @@ body.settings-open .settings-panel { right: 0; }
 }
 .settings-section:last-child { border-bottom: none; }
 
-/* Top-right settings button */
-#open-settings-btn {
-  position: fixed; top: 12px; left: 16px;
-  background: var(--bg-elev);
-  border: 1px solid var(--border);
-  font-size: 1.1rem;
-  padding: 6px 12px;
-  z-index: 90;
-}
-
 /* Links */
 a { color: var(--accent); text-decoration: none; }
 a:hover { text-decoration: underline; }

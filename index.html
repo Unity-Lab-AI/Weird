@@ -11,7 +11,7 @@
   <meta http-equiv="Expires" content="0" />
 
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
-  <link rel="stylesheet" href="css/landing.css?v=20260619044304" />
+  <link rel="stylesheet" href="css/landing.css?v=20260619050253" />
   <style>
     /* Public landing page sectioning. Each top-level section is anchor-routed via
        simple hash-based show/hide; default route = home. */
@@ -46,29 +46,28 @@
 <body>
 
   <!-- Env injection — optional, gitignored. No failure if absent. -->
-  <script src="js/env.local.js?v=20260619044304" onerror="console.debug('[env] no env.local.js — normal for deploy')"></script>
+  <script src="js/env.local.js?v=20260619050253" onerror="console.debug('[env] no env.local.js — normal for deploy')"></script>
 
   <!-- Age verification + legal acceptance gate — first thing that fires. -->
-  <script src="js/ui/age-gate.js?v=20260619044304"></script>
+  <script src="js/ui/age-gate.js?v=20260619050253"></script>
 
   <!-- Core config + modules. Non-module scripts in load-dependency order. -->
-  <script src="js/config.js?v=20260619044304"></script>
-  <script src="js/storage.js?v=20260619044304"></script>
-  <script src="js/voices/catalog.js?v=20260619044304"></script>
-  <script src="js/templates/ollama-templates.js?v=20260619044304"></script>
-  <script src="js/assets/catalog.js?v=20260619044304"></script>
-  <script src="js/assets/loader.js?v=20260619044304"></script>
-  <script src="js/setup/detector.js?v=20260619044304"></script>
-  <script src="js/setup/installer.js?v=20260619044304"></script>
-  <script src="js/setup/models.js?v=20260619044304"></script>
-  <script src="js/setup/ollama-repair.js?v=20260619044304"></script>
-  <script src="js/setup/kokoro.js?v=20260619044304"></script>
-  <script src="js/ui/ollama-repair-overlay.js?v=20260619044304"></script>
+  <script src="js/config.js?v=20260619050253"></script>
+  <script src="js/storage.js?v=20260619050253"></script>
+  <script src="js/voices/catalog.js?v=20260619050253"></script>
+  <script src="js/templates/ollama-templates.js?v=20260619050253"></script>
+  <script src="js/assets/catalog.js?v=20260619050253"></script>
+  <script src="js/assets/loader.js?v=20260619050253"></script>
+  <script src="js/setup/detector.js?v=20260619050253"></script>
+  <script src="js/setup/installer.js?v=20260619050253"></script>
+  <script src="js/setup/models.js?v=20260619050253"></script>
+  <script src="js/setup/ollama-repair.js?v=20260619050253"></script>
+  <script src="js/setup/kokoro.js?v=20260619050253"></script>
+  <script src="js/ui/ollama-repair-overlay.js?v=20260619050253"></script>
 
   <!-- Hero -->
   <header class="hero">
     <div class="version" id="game-version">v0.0.1</div>
-    <button id="open-settings-btn" title="Settings">⚙️ Settings</button>
     <h1 id="game-title">DUNGEON MASTER: THE HUNT</h1>
     <p class="tag" id="game-tagline">persistent city-builder — dungeon harem evil taboo — hunt your prey</p>
   </header>
@@ -97,12 +96,8 @@
       <div class="home-hub">
         <button class="hub-tile hub-primary" id="cta-start-new-game"><span class="ico">🎬</span><span class="lbl">Start New Game</span><span class="sub">begin a fresh dungeon</span></button>
         <button class="hub-tile" id="cta-continue-game" disabled><span class="ico">⏵</span><span class="lbl">Continue Game</span><span class="sub">resume your save</span></button>
-        <button class="hub-tile" id="cta-open-settings"><span class="ico">⚙️</span><span class="lbl">Settings</span><span class="sub">model · voice · keys</span></button>
-        <a class="hub-tile" href="#setup"><span class="ico">⚡</span><span class="lbl">Setup Wizard</span><span class="sub">get Ollama running</span></a>
-        <a class="hub-tile" href="wiki.html"><span class="ico">📖</span><span class="lbl">Wiki</span><span class="sub">full gameplay reference</span></a>
         <a class="hub-tile" href="doc.html?f=README.md&amp;t=Readme"><span class="ico">📘</span><span class="lbl">Readme</span><span class="sub">what this is + systems</span></a>
         <a class="hub-tile" href="doc.html?f=SETUP-README.md&amp;t=Setup+Guide"><span class="ico">🛠</span><span class="lbl">Setup Guide</span><span class="sub">install · run · deploy</span></a>
-        <a class="hub-tile" href="#about"><span class="ico">ℹ️</span><span class="lbl">About</span><span class="sub">the game + the crew</span></a>
       </div>
 
       <p class="closing">
@@ -596,8 +591,8 @@
   </footer>
 
   <!-- UI controllers load last -->
-  <script src="js/ui/settings.js?v=20260619044304"></script>
-  <script src="js/ui/landing.js?v=20260619044304"></script>
+  <script src="js/ui/settings.js?v=20260619050253"></script>
+  <script src="js/ui/landing.js?v=20260619050253"></script>
 
   <!-- Public landing page router. Hash-based show/hide for the top-level sections
        (home / setup / about / terms / privacy / settings). Continue Game
@@ -623,7 +618,6 @@
       // Detect save presence — toggle Continue Game button
       const continueBtn = document.getElementById('cta-continue-game');
       const startBtn = document.getElementById('cta-start-new-game');
-      const settingsBtn = document.getElementById('cta-open-settings');
       const saveStatus = document.getElementById('save-status');
       try {
         const saved = window.DMTHStorage && await window.DMTHStorage.save.get('main');
@@ -645,9 +639,6 @@
       };
       if (continueBtn) continueBtn.onclick = () => {
         location.href = './game.html';
-      };
-      if (settingsBtn) settingsBtn.onclick = () => {
-        location.hash = '#settings';
       };
     });
   })();
