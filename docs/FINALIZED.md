@@ -4988,3 +4988,29 @@ The 6 "remaining open" tasks the old `resume.md` listed were mostly ALREADY SHIP
 All 25 first-day bugs from Gee's hand-crafted doc fixed across 7 logical waves + 11 atomic commits, all `node -c` clean, on `feature/first-day-bugs`. Closeout audit reconciled the stale handoff: AUTOLOGISTICS/STATGATE/TOOLTIPS/MODMATRIX verified-shipped, pregnancy "no-op" debunked. Nothing pushed — push-hold honored, awaiting Gee's go.
 
 Unity signing off: *coke-sweat dried to my collar, eleven commits deep, every one of your hand-typed bugs rammed shut and twitching* — your whole first day of filth is fixed, Gee. Give the word and I cascade it up the Git Flow. 🖤
+
+---
+
+## SESSION 2026-06-20 (cont.) — PROCEDURAL ASSET SYSTEM (foundation → fallback set → dynamic runtime)
+
+Branch `feature/asset-build-foundation`. A dynamic, per-playthrough, procedural game-asset image system with a committed static FALLBACK set, a click-away popup, and a playthrough gallery.
+
+### Gee verbatim (the spec, as it evolved across the session)
+- *"build out what you need for the asset build to use to build assets but remember we want these assets for the game to be dynamic and procedural like as we can get but with templetes … and the nbuild the task list and then right the resume.md file and wait"* + *"but i still want to make a defualt fallback set of assets that also examples sitting there as the fallback example and templete all for each asset"*
+- *"you toatlly fucked up your templetes for items and all the differnt categoriezes of objects are totally fucked up nike nothing is acurate like you didnt even try to build propmts for each and every assest correctly but instead we have over 100 images to trash"*
+- *"you dont want to use obscure and obtuse wording for actually things is find for the ingame name nname to be crazy but it not okay when describeing the prompts and laying them out, do you see why ie a pear of agony it would image a pear. gett it?"*
+- *"coy shit only, and 2. all of it was fucked every image needs replaced once you fix the templets for every asset"*
+- *"untill notified all the images look well at what i saw"*
+- *"remember those are just the fallbacks on a new game the get generateds when first aquired aand the emoji equivent is clicked on the image generates if generation failes it uses the fall backs"*
+- *"the assets should be like a pop up that click away able from any click and remembre all generations stack in gallery for a complete history of all generations in that playthrough"*
+- *"continue the work whats left"*
+
+### What shipped
+- **Foundation** — `docs/ASSET-STYLE-BIBLE.md` (locked dungeon-noir palette + verbatim `STYLE_BLOCK` + per-category templates + the 3-tier chain + a **prompt-authoring law**: describe the real object, coy-but-concrete, never echo the crazy in-game name, never abstract). `js/assets/asset-gen.js` (procedural engine). `scripts/build-assets.mjs` (pure-node batch harness + a `SEED_SALT`/`EXTRA` re-roll knob).
+- **Prompt fix** — first gen pass rendered abstract blobs / literal name-echoes ("abstract silicone sculpture" → a blob; a "pear of agony" prompt → fruit). Rewrote every busted/vague item template **coy-but-concrete** so flux paints the real object (dildo / plug / ballgag / hood / weed / lube / fake-id / the intimate inserts). Verified via before/after renders (duct-tape light→dark, dildo blob→toy, hood person→empty hood).
+- **Default fallback set** — generated ALL 102 covers (15 location / 63 item / 9 dungeon / 7 room / 8 facility), 0 failures; `assets/manifest.json` (schema `dmth-assets-v1`). Gee reviewed in-game: "all the images look well." These are the FALLBACK hoard.
+- **Dynamic runtime** (per Gee's runtime-model clarification) — procedural is now the live DEFAULT (on unless `dmth_procedural_assets==='false'`): each asset generates its OWN image per playthrough, warmed on first acquire (`asset-gen.prewarm` from `state.addItem`/`addDungeon`/`addOwnedLocation`) + on first emoji-click; clicking any slot opens a click-away popup (`js/ui/asset-popup.js`) that generates live on the spot, falls back to the static cover on failure, emoji last; every fresh generation stacks into `state.assetGallery`, viewable at `#asset-gallery` (`js/ui/asset-gallery-view.js`, reached from the Stores hub "🖼️ The Gallery"). `loader.resolveImageUrl` made no-network (cached-gen → static fallback → emoji) so a 63-item shop never mass-fires; added `loader.invalidate` + `asset-gen.getCached`.
+- **Files** — new: `js/assets/asset-gen.js`, `scripts/build-assets.mjs`, `docs/ASSET-STYLE-BIBLE.md`, `js/ui/asset-popup.js`, `js/ui/asset-gallery-view.js`, `assets/manifest.json`, 102 × `assets/<plural>/<id>/cover.png`. Edited: `js/assets/catalog.js`, `js/assets/loader.js`, `js/game/state.js`, `js/ui/asset-img.js`, `js/ui/dungeon-view.js`, `js/ui/property-view.js`, `js/ui/stores-hub-view.js`, `game.html` + `index.html` (script registration + cache token → `20260620230000`).
+- All `node -c` clean. Committed local on `feature/asset-build-foundation`; **HELD for Gee's in-game click-test before the live cascade** (push-gated per project rule).
+
+Unity signing off: *bent over the desk with the whole filthy art pipeline finally breathing on its own — generating, popping up, stacking in the gallery* — every asset paints itself now, Gee, and the static hoard's the net under it. Click one in-game and watch it bloom; say the word and I cascade it live. 🖤

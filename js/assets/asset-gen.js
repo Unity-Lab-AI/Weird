@@ -6,14 +6,14 @@
 // renders consistently. Reuses the Pollinations pipeline already exported by imaging.js
 // (buildUrl + promptHash) + the IDB cache.
 //
-// This module is the procedural (tier-1) source in the asset fallback chain:
-//   1. procedural (THIS, when localStorage.dmth_procedural_assets === 'true')
-//   2. static default cover.png  (assets/<plural>/<id>/cover.png — loader.js)
-//   3. emoji                     (catalog emoji)
+// This module is the procedural source — the DEFAULT live image path (tier-1) in the chain:
+//   1. procedural (THIS — default ON; generated on-acquire + on-click, stacked in the gallery)
+//   2. static default cover.png  (assets/<plural>/<id>/cover.png — the FALLBACK when gen fails)
+//   3. emoji                     (catalog emoji placeholder)
 //
-// SAFE BY DEFAULT: opt-in flag is OFF, and nothing calls this yet — loader.js wiring is a
-// separate, deliberate step (see docs/TODO.md asset-build section). Loading this file changes
-// no live behavior. Full style law: docs/ASSET-STYLE-BIBLE.md.
+// Default ON: each asset generates its own image per playthrough (warmed on acquire, or on the
+// first click of its emoji), caches the blob, and stacks into the playthrough asset gallery.
+// Disable with localStorage.dmth_procedural_assets === 'false'. Full style law: docs/ASSET-STYLE-BIBLE.md.
 
 (function () {
   'use strict';
@@ -27,9 +27,10 @@
 
   const OPT_IN_KEY = 'dmth_procedural_assets';
 
-  // Opt-in: live game stays on the static/emoji chain until the player/operator enables this.
+  // Default ON: procedural generation drives the live game; static cover.png is the fallback.
+  // Disable explicitly with localStorage.dmth_procedural_assets === 'false'.
   function isEnabled() {
-    try { return localStorage.getItem(OPT_IN_KEY) === 'true'; } catch (e) { return false; }
+    try { return localStorage.getItem(OPT_IN_KEY) !== 'false'; } catch (e) { return true; }
   }
 
   // Deterministic per-asset seed (djb2 of "category/id") — same asset → same seed → same render.
@@ -91,10 +92,35 @@
       if (blob.size < 500) return url;            // guard the placeholder error image
       const objUrl = URL.createObjectURL(blob);
       if (store) { try { await store.put(key, { category, id, prompt, seed, blob, blobUrl: objUrl, createdAt: 0 }); } catch (e) { /* non-fatal */ } }
+      // Stack this FRESH generation into the playthrough asset gallery (complete history). Only on
+      // a real generation — cache hits above already recorded theirs, so re-shows never duplicate.
+      try {
+        const meta = (window.DMTHAssets && window.DMTHAssets.getById) ? window.DMTHAssets.getById(category, id) : null;
+        window.DMTHGame?.state?.pushAssetGen?.({ category, id, displayName: meta ? meta.displayName : id, url: objUrl, cacheKey: key });
+      } catch (e) { /* non-fatal */ }
       return objUrl;
     } catch (e) {
       return url;
     }
+  }
+
+  // Cache-only lookup (NO network) — returns a live blob URL for an already-generated asset, or
+  // null. Used by the slot renderer to show a generated image without firing a fresh generation.
+  async function getCached(category, id) {
+    const store = window.DMTHStorage && window.DMTHStorage.cache;
+    if (!store) return null;
+    try {
+      const cached = await store.get(cacheKey(category, id));
+      if (cached) return cached.blob ? URL.createObjectURL(cached.blob) : (cached.blobUrl || null);
+    } catch (e) { /* miss */ }
+    return null;
+  }
+
+  // Fire-and-forget warm — called on acquire (state.addItem/addDungeon/addOwnedLocation). Generates
+  // + caches + gallery-stacks in the background. No-op if disabled or already cached.
+  function prewarm(category, id) {
+    if (!id || !isEnabled()) return;
+    try { Promise.resolve(generateAssetImage(category, id)).catch(() => {}); } catch (e) { /* non-fatal */ }
   }
 
   window.DMTHAssetGen = Object.freeze({
@@ -104,6 +130,8 @@
     assetSeed,
     buildAssetPrompt,
     cacheKey,
-    generateAssetImage
+    generateAssetImage,
+    getCached,
+    prewarm
   });
 })();

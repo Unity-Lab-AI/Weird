@@ -30,7 +30,9 @@
     { emoji: '🩸', name: 'The Gristle Pimp', route: '#gristle',
       desc: 'Fence the limbs + organs you saw + knife off your captives. Parts sell passively each tick — or dump one instantly for cash.' },
     { emoji: '🏚️', name: 'Bloodland Holdings', route: '#property',
-      desc: 'Deeds & turf — buy new hideouts (dungeons) to stuff with meat, buy private access to the hunting grounds, then BUY OUT the turf so the whole rotten town answers to you (fewer witnesses, less WANTED, better capture odds, a passive skim).' }
+      desc: 'Deeds & turf — buy new hideouts (dungeons) to stuff with meat, buy private access to the hunting grounds, then BUY OUT the turf so the whole rotten town answers to you (fewer witnesses, less WANTED, better capture odds, a passive skim).' },
+    { emoji: '🖼️', name: 'The Gallery', route: '#asset-gallery',
+      desc: 'Every game-asset image generated this playthrough — locations, items, dungeons, rooms, facilities — stacked into one complete history. Click any asset\'s emoji anywhere in the game to generate + view it; it all collects here.' }
   ];
 
   function render(el) {

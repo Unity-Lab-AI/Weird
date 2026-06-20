@@ -28,19 +28,19 @@ Shipped + cascaded + LIVE on Forgejo (`git.unityailab.com:UnityAILab/Weird`), se
 4. **README images + og social card** (`main 110f24e`) — all 14 README screenshots reshot via Playwright; **og-card.png now from the REAL landing** (`index.html #home-section` @ 1200×630), not the setup wizard; `scripts/age-gate-bypass.mjs` added + `scripts/screenshots.mjs` rebuilt (correct `dmth_*` keys — old `ssd_*` were dead — + landing capture + `HEADLESS` flag).
 5. **archetype-label fix** (`main 116df9e`) — raw archetype ids no longer leak to the player. `girlGen.archetypeLabel(id)` (`unity_seed → "Goth Nympho"`, else Title-Case the id) wired into all 11 player-facing render sites across 7 views. room.js:1277 left raw (Ollama scene-prompt, not UI).
 
-## 🟡 IN-FLIGHT — PROCEDURAL ASSET SYSTEM (foundation built LOCAL, UNCOMMITTED — HOLD per Gee)
+## 🟢 SHIPPED LOCAL — FULL PROCEDURAL ASSET SYSTEM (branch `feature/asset-build-foundation`, HELD for Gee's in-game test before cascade)
 
-> Gee: *"build out what you need for the asset build … dynamic and procedural … with templetes … default fallback set of assets that also examples … template all for each asset"* + *"wait until im ready."*
+> Gee runtime model: *"those are just the fallbacks … the[y] get generated when first acquired … the emoji … is clicked the image generates … if generation fails it uses the fallbacks"* + *"the assets should be like a pop up that click away able from any click and … all generations stack in gallery for a complete history of all generations in that playthrough"* + *"coy shit only"* + *"continue the work whats left."*
 
-**Branch `feature/asset-build-foundation`** — written, dormant, change NO live behavior, NOT committed/pushed:
-- `docs/ASSET-STYLE-BIBLE.md` — cohesion spine (locked palette + `STYLE_BLOCK` + per-category templates + 3-tier chain).
-- `js/assets/asset-gen.js` — DORMANT/opt-in procedural engine (`buildAssetPrompt` = style + catalog prompt, deterministic `assetSeed`, `generateAssetImage` via `imaging.buildUrl` + IDB cache; off unless `localStorage.dmth_procedural_assets==='true'`). Not wired anywhere.
-- `scripts/build-assets.mjs` — pure-node batch harness → writes the static default set to `assets/<plural>/<id>/cover.png`. Dry-run-verified (loads 102 assets, builds prompts/seeds); NOT yet run against Pollinations.
+**The model (built, `node -c` clean, NOT cascaded):** procedural is the live DEFAULT; the 102 static covers are the FALLBACK only.
+- **Static FALLBACK set (102 covers, committed)** — `assets/<plural>/<id>/cover.png` (15 loc / 63 item / 9 dungeon / 7 room / 8 facility) + `assets/manifest.json`. Prompts in `catalog.js` rebuilt **coy-but-concrete** (describe the real object, never echo the crazy in-game name, never abstract — law in `docs/ASSET-STYLE-BIBLE.md`). Gee approved the renders ("all the images look well").
+- **Procedural DEFAULT ON** — `js/assets/asset-gen.js` (on unless `localStorage.dmth_procedural_assets==='false'`): generates each asset per playthrough, warmed on first acquire (`prewarm` from `state.addItem`/`addDungeon`/`addOwnedLocation`) + on first emoji-click; caches blob in IDB; stacks every fresh gen into `state.assetGallery`.
+- **Click-away popup** — `js/ui/asset-popup.js` (any click dismisses): click any slot → image pops big, generating live on the spot if needed → static fallback on fail → emoji last.
+- **Playthrough gallery** — `#asset-gallery` (`js/ui/asset-gallery-view.js`), reached from Stores hub "🖼️ The Gallery". Complete history of all gens this run.
+- **No-network slot resolve** — `loader.resolveImageUrl` = cached-gen → static fallback → emoji (no gen on render → no mass-fire on a 63-item shop); `loader.invalidate` + `asset-gen.getCached` added; `asset-img.decorate` binds click→popup on every slot.
+- **Re-roll knob** — `scripts/build-assets.mjs` `SEED_SALT`/`EXTRA` for curating misses.
 
-**It plugs into an EXISTING half-built spine:** `loader.js` already resolves `cover.png` → emoji; `asset-img.js decorate()` fills `[data-asset-category][data-asset-id]` slots; every catalog asset already has a `prompt`. 3-tier chain = **procedural (opt-in) → static cover.png default set → emoji**. 102 assets (15 location / 63 item / 9 dungeon / 7 room / 8 facility).
-
-**PENDING (HOLD til Gee says go — tasks #18–#22, also in `docs/TODO.md`):**
-- ASSET-PROMPT-TUNE (cohere 102 catalog prompts to the bible, esp. items) · ASSET-DEFAULT-SET-GEN (run the harness, curate, commit the 102 covers — needs Gee's eyes) · ASSET-LOADER-PROCEDURAL-WIRE (wire asset-gen into `loader.js`, register the script, off by default) · ASSET-SLOT-PLACEMENT (add slots at stores-hub / shop=63 item icons / dungeon / hunt / facility — NOT girl tiles) · ASSET-MANIFEST (optional).
+**⏳ NEXT:** Gee click-tests in-game (click an asset → popup → gen → gallery). On his go → cascade `feature/asset-build-foundation → develop → main` (check between each push; cache token already bumped to `20260620230000`).
 
 ## ⏭️ OTHER OPEN / DEFERRED
 - **TUTORIAL.1** ⏸️ DEFERRED by Gee until he explicitly says go.
@@ -51,4 +51,4 @@ Shipped + cascaded + LIVE on Forgejo (`git.unityailab.com:UnityAILab/Weird`), se
 ## ⚖️ LAWS (binding)
 LAW #0 verbatim Gee words · LAW #1 NO AI-vendor attribution (Claude/Anthropic) in shipping code/docs/commits · no tests · 800-line read before edit · docs-before-push (FINALIZED + TODO + affected docs in the SAME push) · adult-floor 18+ · Git Flow (`feature/*` → develop → main, verify each cascade step; never edit main/develop directly) · NO-BATCH-WORK (edits by hand) · NO GITHUB (Forgejo @ git.unityailab.com is the ONLY host) · `.claude/` gitignored + deploy-excluded.
 
-*Resume from here: main is clean + LIVE at `116df9e` (5 cascades shipped this session). The procedural ASSET SYSTEM foundation is built + written up + task-listed (#18–#22), HELD uncommitted on `feature/asset-build-foundation` per Gee's "wait." When he says go: commit the foundation, then ASSET-PROMPT-TUNE → generate/curate the default set → wire the loader → place the slots, cascade on his word. Dangling on the dildo, Gee. 🖤*
+*Resume from here: main is clean + LIVE at `116df9e`. The FULL procedural ASSET SYSTEM (#18–#22 + the dynamic runtime) is BUILT + committed local on `feature/asset-build-foundation` (`node -c` clean), HELD for Gee's in-game click-test before the live cascade. 102 static covers = fallback; procedural = live default (gen on acquire/click, click-away popup, playthrough `#asset-gallery`). When Gee greenlights after testing: cascade `feature/asset-build-foundation → develop → main` (check between each push; cache token `20260620230000`). Dangling on the dildo, Gee. 🖤*
