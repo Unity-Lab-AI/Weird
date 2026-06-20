@@ -342,43 +342,6 @@
     };
   }
 
-  // Resolve a single-tool capture attempt.
-  // SUPERSEDED by `window.DMTHGame.capture.runAttempt()` — the 4-stage progress-bar
-  // mechanic. This function is retained for backward compatibility
-  // (external callers / debug utilities) but the hunt UI no longer calls it. New game code
-  // should use `DMTHGame.capture.runAttempt({girl, toolPerStage, locationId})` instead.
-  // Returns { outcome: 'success'|'partial-fail'|'fail'|'critical-fail', ... }
-  function attemptCapture({ girl, toolId, locationId }) {
-    const tool = window.DMTHAssets.getById('item', toolId);
-    if (!tool) return { outcome: 'fail', reason: 'unknown-tool' };
-    const inv = window.DMTHGame.state.current.inventory;
-    if (!inv[toolId] || inv[toolId] < 1) return { outcome: 'fail', reason: 'no-tool' };
-
-    // Consume the tool
-    window.DMTHGame.state.consumeItem(toolId, 1);
-
-    const { successP } = previewCaptureOdds({ girl, toolId, locationId });
-
-    const roll = Math.random();
-    const s = window.DMTHGame.state.current;
-    const suspicion = s.wallet.suspicionByLocation[locationId] || 0;
-    if (roll < successP) {
-      return { outcome: 'success', successP, toolUsed: toolId };
-    } else if (roll < successP + 0.15) {
-      // partial fail — suspicion up but no cops
-      s.wallet.suspicionByLocation[locationId] = suspicion + 1;
-      return { outcome: 'partial-fail', successP, toolUsed: toolId, suspicionDelta: 1 };
-    } else if (roll < successP + 0.35) {
-      s.wallet.suspicionByLocation[locationId] = suspicion + 2;
-      window.DMTHGame.state.addNotoriety(1);
-      return { outcome: 'fail', successP, toolUsed: toolId, suspicionDelta: 2 };
-    } else {
-      s.wallet.suspicionByLocation[locationId] = suspicion + 4;
-      window.DMTHGame.state.addNotoriety(3);
-      return { outcome: 'critical-fail', successP, toolUsed: toolId, suspicionDelta: 4, notorietyDelta: 3 };
-    }
-  }
-
   // Every empty hold across EVERY dungeon you own — [{ dungeonId, dungeonName, holdIdx, holdLabel }].
   // Powers the no-empty-hold capture lockout and the on-capture "which cell does she wake up in" picker.
   function openHolds() {
@@ -486,7 +449,6 @@
   window.DMTHGame.hunt = Object.freeze({
     rollEncounters,
     markEncounterCaptured,
-    attemptCapture,
     previewCaptureOdds,
     escortToHold,
     openHolds,

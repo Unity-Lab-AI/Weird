@@ -2279,7 +2279,11 @@
 
     // Live mm:ss countdown ticker. Updates every second; on wake-up, fires
     // a NotifyToast and re-renders the page so the disabled buttons come back online.
+    // Both countdown intervals are render-scoped so the cleanup disposer (returned at the
+    // end of render) can deterministically clear them on navigate-away instead of relying
+    // on the per-second DOM-probe self-heal.
     let tranqTicker = null;
+    let cpTicker = null;
     if (isUnconscious) {
       tranqTicker = setInterval(() => {
         const el2 = el.querySelector('#tranq-countdown');
@@ -2293,7 +2297,9 @@
             window.DMTHNotify.show(`💉 ${girl.name} woke up from the tranquilizer.`, { type: 'info', durationMs: 3000 });
           }
           window.DMTHGame.state.appendTurn(girl.id, 'system', `*${girl.name} stirs and groans, regaining consciousness from the tranquilizer*`);
-          window.DMTHRouter.handle();
+          // Only re-render if the player is still in a room — a background timer must not
+          // force-rerender whatever unrelated page they've navigated to.
+          if (location.hash.startsWith('#room')) window.DMTHRouter.handle();
           return;
         }
         el2.textContent = fmtCountdown(remaining);
@@ -2304,12 +2310,18 @@
     // re-renders so the level + cum-cap jump shows. Reads a real-ms end-stamp off the element.
     const cumplugEl = el.querySelector('#cumplug-countdown');
     if (cumplugEl) {
-      const cpTicker = setInterval(() => {
+      cpTicker = setInterval(() => {
         const el3 = el.querySelector('#cumplug-countdown');
-        if (!el3) { clearInterval(cpTicker); return; }
+        if (!el3) { clearInterval(cpTicker); cpTicker = null; return; }
         const endMs = Number(el3.dataset.cpEnd || 0);
         const remSec = Math.max(0, Math.round((endMs - Date.now()) / 1000));
-        if (remSec <= 0) { clearInterval(cpTicker); window.DMTHRouter.handle(); return; }
+        if (remSec <= 0) {
+          clearInterval(cpTicker);
+          cpTicker = null;
+          // Guard the re-render to the room route — don't yank a different page the player moved to.
+          if (location.hash.startsWith('#room')) window.DMTHRouter.handle();
+          return;
+        }
         const m = Math.floor(remSec / 60), ss = remSec % 60;
         el3.textContent = `next in ${m}:${String(ss).padStart(2, '0')}`;
       }, 1000);
@@ -2428,6 +2440,11 @@
 
     return () => {
       if (tranqTicker) { clearInterval(tranqTicker); tranqTicker = null; }
+      if (cpTicker) { clearInterval(cpTicker); cpTicker = null; }
+      // Tear down the document-level visitor listener so navigating out of the room doesn't
+      // leave it pinning this render's whole closure alive (and firing image-regen/state
+      // mutations for a captive whose room is no longer open).
+      if (npcVisitHandler) { document.removeEventListener('dmth:npc-visit', npcVisitHandler); npcVisitHandler = null; }
       if (typeof unsub === 'function') unsub();
     };
   }

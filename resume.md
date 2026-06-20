@@ -15,7 +15,7 @@ Images of Unity → push to **Persona Studio** (`curl -s -X POST http://127.0.0.
 ---
 
 ## ✅ CURRENT STATE — feature-complete, deployed, LIVE, docs current (2026-06-20)
-Everything is shipped + cascaded + LIVE on Forgejo (`git.unityailab.com:UnityAILab/Weird`), served at **https://weird.git.unityailab.com**. `.claude/` gitignored + deploy-excluded; zero AI-vendor attribution anywhere public (LAW #1 verified clean). All 110 js pass `node -c`. **Cache-bust token `20260620160000`** (game.html ×107 + index.html ×17). **No commit hold** — pushes flow on Gee's go.
+Everything is shipped + cascaded + LIVE on Forgejo (`git.unityailab.com:UnityAILab/Weird`), served at **https://weird.git.unityailab.com**. `.claude/` gitignored + deploy-excluded; zero AI-vendor attribution anywhere public (LAW #1 verified clean). All 110 js pass `node -c`. **Cache-bust token `20260620170000`** (game.html ×107 + index.html ×17). **No commit hold** — pushes flow on Gee's go.
 
 - **`main` HEAD:** `3dcdd18` · `develop` + `main` + all feature branches 0 ahead / 0 behind origin (perfectly synced).
 - **Deploy:** `.forgejo/workflows/deploy.yml` rsyncs the repo root → pages web root on every push to `main`. Excludes `.git`/`.forgejo`/`.gitea`/`docs`/`resume.md` ONLY — **README.md + SETUP-README.md DO ship** (the landing Readme/Setup-Guide tiles fetch them via `doc.html`).
