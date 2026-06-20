@@ -30,6 +30,17 @@ Capability matrix for the weird build. Organized by domain, complexity, dependen
 - **Loot + passive archetype gifts**; **balance pass** (escape pacing + drain/curve audit)
 - **Module extraction** — `window.DMTHRoomPanels` (room/panels.js); migration backfill for all new persisted shapes
 
+### Game Systems (2026-06-19/20 mega-session — all shipped LOCAL + `node -c` validated; commit hold active)
+- **Financial underworld** — Vault/pocket money model + usable credit cards (growing limit + compounding interest) + 3 loan sharks + queueable shady gigs (earn/steal/break-in/kidnap, crew-scaled) + dirty-cop payroll heat-management + multi-option pay button + sex-aware broke wording
+- **NPC action expansion** — `chooseNpcAction`: johns/friends perform nearly the full player action range, gated by archetype intensity (johns, incl. tame care) + creep (friends → extreme/snuff/torture), applied `byJohn`
+- **Stores overhaul (destructive)** — single 🏬 Stores hub; wardrobe deduped apply-only; NEW 🏚️ Bloodland Holdings property store (dungeons + turf); facilities buy-to-inventory → install-from-dungeon
+- **NPC trait economy** — `rollNpcTraits`/`corpseUseWillingness`: corpse-use gated by trait × decay (rare masochist/necrophile pays high dollar for rot)
+- **Escape intervention** — danger-band warning popup naming root causes + hold link + grace timer + max-WANTED law-issue (`notify` action-buttons/sticky)
+- **John timing forecast** — granular cadence ladder + per-option clock-time stamina-0% + fresh-corpse projection
+- **Procedural location naming** (per-save seed) · **disposal labor-time** (world reconciles per dump) · **unified loot picker** (all drops through one tier+rarity spine)
+- **Whole-game balance audit** — every balance-bearing number mapped + verified-tuned (no blind retuning)
+- **TIP-FILTH** — depraved tooltip/name rewrite across item notes + room/action/dungeon/market UI (safe-scoped off prompt-fed names)
+
 ### Frontend
 - HTML5 structure (multi-page layout, body zones, toy panel, state bars, log pane, voice controls, page views)
 - Vanilla JS DOM manipulation

@@ -122,6 +122,24 @@
       </div>
 
       <div class="panel">
+        <h2>📸 Scene / Images</h2>
+        ${(() => { const t = window.DMTHGame.state.getSceneToggles ? window.DMTHGame.state.getSceneToggles() : {}; return `
+        <label class="field" style="flex-direction:row;align-items:center;gap:8px;cursor:pointer">
+          <input type="checkbox" id="s-tog-player" ${t.playerInShot ? 'checked' : ''} />
+          <span>🤳 Put me in the shot — your created character renders into every scene image WITH the girl (actively using her), instead of her solo.</span>
+        </label>
+        <label class="field" style="flex-direction:row;align-items:center;gap:8px;cursor:pointer">
+          <input type="checkbox" id="s-tog-pov" ${t.pov ? 'checked' : ''} />
+          <span>👁️ POV shots — scene images render first-person from your eyes (your own arms/hands in frame). Overrides "in the shot".</span>
+        </label>
+        <label class="field" style="flex-direction:row;align-items:center;gap:8px;cursor:pointer">
+          <input type="checkbox" id="s-tog-watch" ${t.watchVisitors ? 'checked' : ''} />
+          <span>👁️‍🗨️ Watch her visitors — when a whored-out girl gets used, the scene image shows her WITH the john/friend on her (not solo). Voiced gangbangs already do this.</span>
+        </label>
+        `; })()}
+      </div>
+
+      <div class="panel">
         <h2>Danger zone</h2>
         <div class="btn-row">
           <button class="btn-small btn-danger" id="new-game-btn" data-tooltip="Wipe the current save + open new-game setup. KEEPS your Ollama / Kokoro / Pollinations settings. Confirms first.">🔄 Start over (new game)</button>
@@ -142,6 +160,14 @@
       if (e.target.checked) localStorage.setItem('dmth_lootpops_off', '1');
       else localStorage.removeItem('dmth_lootpops_off');
     };
+
+    // player/scene image toggles (no reload; roomScene reads them live on next regen).
+    const togPlayer = el.querySelector('#s-tog-player');
+    if (togPlayer) togPlayer.onchange = e => window.DMTHGame.state.setSceneToggles({ playerInShot: e.target.checked });
+    const togPov = el.querySelector('#s-tog-pov');
+    if (togPov) togPov.onchange = e => window.DMTHGame.state.setSceneToggles({ pov: e.target.checked });
+    const togWatch = el.querySelector('#s-tog-watch');
+    if (togWatch) togWatch.onchange = e => window.DMTHGame.state.setSceneToggles({ watchVisitors: e.target.checked });
 
     el.querySelector('#s-model').onchange = e => { localStorage.setItem('dmth_ollama_model', e.target.value); location.reload(); };
     el.querySelector('#s-temp').onchange  = e => { localStorage.setItem('dmth_ollama_temp', e.target.value); location.reload(); };

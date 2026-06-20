@@ -49,7 +49,7 @@
       if (canary.ok) { _probesDisabled = false; return false; }
     } catch {}
     _probesDisabled = true;
-    console.debug('[asset-loader] no local assets/ files detected — disabling probes for this session (emoji fallback only). Drop a file + set localStorage.dmth_asset_probes_enabled=true to re-enable.');
+    void 0;
     return true;
   }
 

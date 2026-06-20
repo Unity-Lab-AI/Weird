@@ -1,4 +1,4 @@
-// DUNGEON MASTER: THE HUNT — player progression: the DEPRAVITY level (PLVL.1 / PLVL.2).
+// DUNGEON MASTER: THE HUNT — player progression: the DEPRAVITY level.
 // The spine the whole game hangs off. The player earns DEPRAVITY XP from EVERY successful
 // action — a kiss, a sex act, a capture, a disposal, a "mass" dumpster-drop — and levels up.
 // Higher-tier depravities (branding, extreme acts, nugget/delimb, dismemberment, later
@@ -70,12 +70,12 @@
   function purchasedUnlocks() { return window.DMTHGame.state.current?.purchasedUnlocks || []; }
   function isUnlocked(key) {
     if (isCheatUnlocked()) return true;
-    if (purchasedUnlocks().includes(key)) return true;     // bought early access (PAYUNLOCK.1)
+    if (purchasedUnlocks().includes(key)) return true;     // bought early access
     return getLevel() >= (UNLOCKS[key] || 1);
   }
   function requiredLevel(key) { return UNLOCKS[key] || 1; }
 
-  // Pay-to-unlock (PAYUNLOCK.1) — buy a gated tier early instead of grinding to its level.
+  // Pay-to-unlock — buy a gated tier early instead of grinding to its level.
   // Fees are steep so leveling is still the default path; this is the "fast-track with cash" lever.
   const UNLOCK_FEES = Object.freeze({ own: 400, extreme: 900, nugget: 2500, dismember: 3500, snuff: 4000 });
   function unlockFee(key) { return UNLOCK_FEES[key] || 0; }
@@ -85,18 +85,18 @@
     const fee = UNLOCK_FEES[key] || 0;
     if (!fee) return { ok: false, reason: 'no fee defined' };
     const ok = window.DMTHGame.state.spendMoney(fee, 'unlock:' + key);
-    if (!ok) return { ok: false, reason: 'insufficient funds' };
+    if (!ok) return { ok: false, reason: (window.DMTHGame.state.brokeLine ? window.DMTHGame.state.brokeLine() : 'broke') };
     window.DMTHGame.state.addPurchasedUnlock(key);
     if (window.DMTHNotify) window.DMTHNotify.show(`🔓 Bought early access — "${key}" unlocked for $${fee.toLocaleString()}.`, { type: 'success', durationMs: 5000 });
     return { ok: true, key, fee };
   }
 
-  // PLAYERCUMLVL.1 — the player's cum-wad (the vaginal cum-fill he deposits) GROWS with DEPRAVITY
+  // The player's cum-wad (the vaginal cum-fill he deposits) GROWS with DEPRAVITY
   // level: L1 ×1.0 → L12 ×1.88. Bigger loads = faster breeding + more cum-fill content premium.
-  // (Friends bust a much bigger wad than the player/johns — FRIENDCUMWAD.1, applied in whore-out.)
+  // (Friends bust a much bigger wad than the player/johns, applied in whore-out.)
   function cumWadMultiplier() { return 1 + (getLevel() - 1) * 0.08; }
 
-  // LEVELVIEW.1 — which gated features unlock AT exactly this level (for the viewable detail).
+  // Which gated features unlock AT exactly this level (for the viewable detail).
   function unlocksAtLevel(level) {
     return Object.entries(UNLOCKS).filter(([, req]) => req === level).map(([k]) => k);
   }
@@ -124,7 +124,7 @@
       : `😈 DEPRAVITY L${lvl} "${titleFor(lvl)}" · MAX`;
   }
 
-  // ---- HUNTING-GROUND GATES (PLVL.2) ----
+  // ---- HUNTING-GROUND GATES ----
   // The richer hunting grounds aren't all open at the start. Some unlock with DEPRAVITY level,
   // some require you to already hold a stable of captives, and some are bought as private
   // access. Easy grounds (street / park / library / coffee-shop / club / gym / neighborhood)
@@ -136,7 +136,8 @@
     'hotel-lobby':   { cost: 1500 },
     'private-party': { level: 3, girlCount: 4 },
     'school-campus': { level: 5 },
-    'prenatal-clinic': { level: 4 },          // PREGGOCAP.1 — pregnant-girl hunting ground
+    'prenatal-clinic': { level: 4 },          // pregnant-girl hunting ground
+    'family-reunion': { level: 3 },           // the gathering — your own relations within reach
     remote:          { level: 6 }
   });
   function captiveCount() {
@@ -169,20 +170,20 @@
     if (!g || !g.cost) return { ok: false, reason: 'not purchasable' };
     if ((window.DMTHGame.state.current?.unlockedLocations || []).includes(locId)) return { ok: false, reason: 'you already own access' };
     const ok = window.DMTHGame.state.spendMoney(g.cost, 'location-access:' + locId);
-    if (!ok) return { ok: false, reason: 'insufficient funds' };
+    if (!ok) return { ok: false, reason: (window.DMTHGame.state.brokeLine ? window.DMTHGame.state.brokeLine() : 'broke') };
     window.DMTHGame.state.addUnlockedLocation(locId);
     if (window.DMTHNotify) window.DMTHNotify.show(`🗝️ Bought private access to ${locId}.`, { type: 'success', durationMs: 4000 });
     return { ok: true, cost: g.cost };
   }
 
-  // ── BUYLOCATION.1 (Gee) — BUYING OUT a location (you OWN the turf, distinct from buying ACCESS).
+  // BUYING OUT a location (you OWN the turf, distinct from buying ACCESS).
   // One buy-out grants the whole perk PACKAGE for that location, each perk with a fucked-up taboo
   // name. Perks are read by hunt (exposure / wanted / capture odds) + tick (passive income).
   const OWNERSHIP_PERKS = Object.freeze({
     witnessReduction: 0.5,   // fewer witnesses → hunt exposure here halved
     wantedReduction:  0.6,   // WANTED accrued from hunts here cut 60%
     captureBoost:     0.15,  // home-turf capture-odds boost
-    passiveIncome:    120    // $/tick skim off the operation you now own
+    passiveIncome:    40     // $/tick skim per owned location — a supplement, NOT a film/john replacement (was 120, trivialized active income once you owned a few)
   });
   const OWNERSHIP_PERK_NAMES = Object.freeze([
     '🙈 The Blind Eye — the whole block has learned not to see a thing (witnesses −50%)',
@@ -211,6 +212,78 @@
     return { ok: true, cost, perks: OWNERSHIP_PERKS };
   }
 
+  // ── Organized item-unlock gating across EVERY purchasable type (drug / tool / equipment /
+  // toy / clothing). You can't buy everything from the git-go: each item's
+  // unlock requirement flows with the game across four dimensions — your DEPRAVITY level, how
+  // many girls you hold, how many dungeons you own, and a stockpile prereq (own N of a
+  // prerequisite item) on the heaviest gear. The requirement is DERIVED from the item's tier by
+  // ONE ladder so every item gates consistently, with optional per-item `unlock` overrides.
+  const TIER_GATE_LADDER = Object.freeze({
+    1: { level: 1 },
+    2: { level: 2 },
+    3: { level: 3, girls: 2 },
+    4: { level: 5, dungeons: 2 },
+    5: { level: 7, girls: 5 }
+  });
+  function dungeonCount() {
+    const s = window.DMTHGame.state.current;
+    return s && Array.isArray(s.dungeons) ? s.dungeons.length : 0;
+  }
+  function ownedQty(itemId) {
+    const s = window.DMTHGame.state.current;
+    return (s && s.inventory && s.inventory[itemId]) || 0;
+  }
+  // Resolve an item's full unlock requirement: tier-ladder baseline merged with any explicit
+  // `unlock` override on the item (override wins per-field). Accepts a catalog item OR any object
+  // carrying { tier, unlock }.
+  function itemRequirement(item) {
+    if (!item) return {};
+    const base = TIER_GATE_LADDER[item.tier || 1] || TIER_GATE_LADDER[1];
+    const ov = item.unlock || {};
+    return {
+      level:     ov.level     != null ? ov.level     : base.level,
+      girls:     ov.girls     != null ? ov.girls     : base.girls,
+      dungeons:  ov.dungeons  != null ? ov.dungeons  : base.dungeons,
+      stockpile: ov.stockpile != null ? ov.stockpile : base.stockpile
+    };
+  }
+  // Status of an item's gate right now. Cheat/sandbox bypasses every gate.
+  function itemUnlockStatus(item) {
+    const req = itemRequirement(item);
+    if (isCheatUnlocked()) return { locked: false, req, unmet: [] };
+    const unmet = [];
+    if (req.level && getLevel() < req.level) unmet.push(`DEPRAVITY L${req.level}`);
+    if (req.girls && captiveCount() < req.girls) unmet.push(`${req.girls} girls held`);
+    if (req.dungeons && dungeonCount() < req.dungeons) unmet.push(`${req.dungeons} dungeons`);
+    if (req.stockpile && req.stockpile.item && ownedQty(req.stockpile.item) < (req.stockpile.n || 1)) {
+      unmet.push(`stockpile ${req.stockpile.n || 1}× ${req.stockpile.label || req.stockpile.item}`);
+    }
+    return { locked: unmet.length > 0, req, unmet };
+  }
+  function isItemLocked(item) { return itemUnlockStatus(item).locked; }
+  // "DEPRAVITY L3 + 2 girls held" — the unmet requirement, for the locked-row label. '' when open.
+  function itemGateText(item) {
+    const st = itemUnlockStatus(item);
+    return st.unmet.length ? st.unmet.join(' + ') : '';
+  }
+  // The FULL requirement text (met or not) — for a forward-looking "unlocks at" readout.
+  function itemRequirementText(item) {
+    const req = itemRequirement(item);
+    const parts = [];
+    if (req.level) parts.push(`DEPRAVITY L${req.level}`);
+    if (req.girls) parts.push(`${req.girls} girls held`);
+    if (req.dungeons) parts.push(`${req.dungeons} dungeons`);
+    if (req.stockpile && req.stockpile.item) parts.push(`stockpile ${req.stockpile.n || 1}× ${req.stockpile.label || req.stockpile.item}`);
+    return parts.length ? parts.join(' + ') : 'no requirement';
+  }
+  // Toys carry a `levelReq` (and optionally girls/dungeons/stockpile) instead of a catalog tier —
+  // map that into the same gate engine so a toy's BUY gates exactly like every other item type.
+  function toyRequirementItem(toy) {
+    const lr = toy && toy.levelReq ? toy.levelReq : 1;
+    const tier = Math.max(1, Math.min(5, Math.ceil(lr / 2)));   // L1-2→t1 … L9-10→t5
+    return { tier, unlock: Object.assign({ level: lr }, toy && toy.unlock ? toy.unlock : {}) };
+  }
+
   window.DMTHGame = window.DMTHGame || {};
   window.DMTHGame.progression = Object.freeze({
     LEVEL_THRESHOLDS, LEVEL_TITLES, MAX_LEVEL, UNLOCKS, LOCATION_GATES,
@@ -219,6 +292,8 @@
     isCheatUnlocked, isUnlocked, requiredLevel, describe,
     UNLOCK_FEES, unlockFee, buyUnlock,
     isLocationUnlocked, locationGateReason, locationCost, buyLocationAccess,
-    OWNERSHIP_PERKS, OWNERSHIP_PERK_NAMES, buyOutCost, ownsLocation, ownedLocationPerks, buyOutLocation
+    OWNERSHIP_PERKS, OWNERSHIP_PERK_NAMES, buyOutCost, ownsLocation, ownedLocationPerks, buyOutLocation,
+    TIER_GATE_LADDER, dungeonCount, ownedQty, captiveCount,
+    itemRequirement, itemUnlockStatus, isItemLocked, itemGateText, itemRequirementText, toyRequirementItem
   });
 })();

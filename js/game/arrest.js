@@ -49,17 +49,47 @@
   function buyValve(id) {
     const v = VALVES[id];
     if (!v) return { ok: false, reason: 'unknown defense' };
-    if (!window.DMTHGame.state.spendMoney(v.cost, `valve:${id}`)) return { ok: false, reason: 'insufficient funds' };
+    if (!window.DMTHGame.state.spendMoney(v.cost, `valve:${id}`)) return { ok: false, reason: (window.DMTHGame.state.brokeLine ? window.DMTHGame.state.brokeLine() : 'broke') };
     window.DMTHGame.state.addItem(id, 1);
     if (window.DMTHNotify) window.DMTHNotify.show(`${v.emoji} Bought ${v.displayName} ($${v.cost.toLocaleString()}).`, { type: 'success', durationMs: 4000 });
     return { ok: true, id, cost: v.cost };
   }
   function buyBribeContacts() {
     if (hasBribeContacts()) return { ok: false, reason: 'already connected' };
-    if (!window.DMTHGame.state.spendMoney(BRIBE_COST, 'valve:bribe-contacts')) return { ok: false, reason: 'insufficient funds' };
+    if (!window.DMTHGame.state.spendMoney(BRIBE_COST, 'valve:bribe-contacts')) return { ok: false, reason: (window.DMTHGame.state.brokeLine ? window.DMTHGame.state.brokeLine() : 'broke') };
     window.DMTHGame.state.addPurchasedUnlock(BRIBE_UNLOCK);
     if (window.DMTHNotify) window.DMTHNotify.show(`💰 Dirty-cop connections made ($${BRIBE_COST.toLocaleString()}). Raids can now be bribed away.`, { type: 'success', durationMs: 5000 });
     return { ok: true, cost: BRIBE_COST };
+  }
+
+  // DIRTY-COP PAYROLL. Pay the badges off in escalating tiers: each tier makes raids
+  // far RARER (raidMul on the per-tick roll) AND cools WANTED faster (decayBonus, read by wanted.js).
+  // The mid/end-game answer to "no one would play if they're jailed every day" — a flush operator
+  // buys breathing room. Stacks on top of the lawyer/bribe/escape-kit valves. One-time tier buys.
+  const PAYROLL_TIERS = [
+    { name: 'no payroll',            cost: 0,     raidMul: 1.0,  decayBonus: 0 },
+    { name: '🚓 Beat-Cop Envelope',  cost: 4000,  raidMul: 0.55, decayBonus: 0.25 },
+    { name: '🥇 Precinct Captain',   cost: 15000, raidMul: 0.30, decayBonus: 0.6 },
+    { name: "🏛️ City Hall's Pocket", cost: 50000, raidMul: 0.12, decayBonus: 1.2 }
+  ];
+  function payrollTier() {
+    const t = window.DMTHGame.state.getCopPayrollTier ? window.DMTHGame.state.getCopPayrollTier() : 0;
+    return Math.max(0, Math.min(PAYROLL_TIERS.length - 1, t));
+  }
+  function payrollRaidMul() { return PAYROLL_TIERS[payrollTier()].raidMul; }
+  function payrollDecayBonus() { return PAYROLL_TIERS[payrollTier()].decayBonus; }   // read by wanted.decayTick
+  function payrollInfo() {
+    const t = payrollTier();
+    return { tier: t, current: PAYROLL_TIERS[t], next: PAYROLL_TIERS[t + 1] || null };
+  }
+  function buyPayroll() {
+    const t = payrollTier();
+    const next = PAYROLL_TIERS[t + 1];
+    if (!next) return { ok: false, reason: 'the whole city is already on your payroll' };
+    if (!window.DMTHGame.state.spendMoney(next.cost, `cop-payroll:tier${t + 1}`)) return { ok: false, reason: window.DMTHGame.state.brokeLine ? window.DMTHGame.state.brokeLine() : 'insufficient funds' };
+    window.DMTHGame.state.setCopPayrollTier(t + 1);
+    if (window.DMTHNotify) window.DMTHNotify.show(`💵 ${next.name} on the payroll ($${next.cost.toLocaleString()}) — raids ${Math.round((1 - next.raidMul) * 100)}% rarer, heat cools faster. Stay paid, stay free.`, { type: 'success', durationMs: 6000 });
+    return { ok: true, tier: t + 1 };
   }
 
   // FLEE — consume an escape kit, lose half your cash + up to 2 captives, reset WANTED, survive.
@@ -170,7 +200,8 @@
     const s = window.DMTHGame.state.current;
     if (!s || s.gameOver || s.mode === 'sandbox') return;   // sandbox is consequence-free
     if (!window.DMTHGame.wanted) return;
-    const chance = window.DMTHGame.wanted.raidChancePerTick();
+    // the Dirty-Cop Payroll multiplies the raid roll down (a paid-off city rarely kicks doors).
+    const chance = window.DMTHGame.wanted.raidChancePerTick() * payrollRaidMul();
     if (chance <= 0) return;
     if (Math.random() < chance) triggerRaid();
   }
@@ -178,6 +209,7 @@
   window.DMTHGame = window.DMTHGame || {};
   window.DMTHGame.arrest = Object.freeze({
     runRaidTick, triggerRaid, fineFor, bodyCounts, finalStats, FINE_BASE,
-    VALVES, BRIBE_UNLOCK, BRIBE_COST, valveCount, hasBribeContacts, buyValve, buyBribeContacts
+    VALVES, BRIBE_UNLOCK, BRIBE_COST, valveCount, hasBribeContacts, buyValve, buyBribeContacts,
+    PAYROLL_TIERS, payrollTier, payrollRaidMul, payrollDecayBonus, payrollInfo, buyPayroll
   });
 })();

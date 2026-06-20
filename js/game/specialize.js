@@ -1,4 +1,4 @@
-// DUNGEON MASTER: THE HUNT — per-girl SPECIALIZATIONS (SPECIALIZE.1).
+// DUNGEON MASTER: THE HUNT — per-girl SPECIALIZATIONS .
 // Fucked-up "upgrades" you buy onto an individual captive to specialize her for a role —
 // a cow-titted milk machine, a bottomless cum-dump, a brood mare, a body that won't break.
 // Each is permanent, costs money, and either bumps a persistent stat once (cum-dump → bigger
@@ -47,7 +47,7 @@
     if (!girl) return { ok: false, reason: 'no such girl' };
     if (girl.encounterState !== 'captive') return { ok: false, reason: 'she has to be a captive in your dungeon' };
     if (has(girl, id)) return { ok: false, reason: `she already has ${spec.displayName}` };
-    if (!window.DMTHGame.state.spendMoney(spec.cost, `specialize:${id}`)) return { ok: false, reason: 'insufficient funds' };
+    if (!window.DMTHGame.state.spendMoney(spec.cost, `specialize:${id}`)) return { ok: false, reason: (window.DMTHGame.state.brokeLine ? window.DMTHGame.state.brokeLine() : 'broke') };
     const patch = { specializations: [...(girl.specializations || []), id] };
     if (typeof spec.onApply === 'function') {
       const p = spec.onApply(girl) || {};

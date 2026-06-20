@@ -14,7 +14,7 @@
 
     el.innerHTML = `
       <div class="panel">
-        <h2>⛓️ Slave Market</h2>
+        <h2>⛓️ The Flesh Auction — Slave Market</h2>
         <div class="btn-row">
           <button id="refresh-market" class="btn-small" data-tooltip="Refresh the NPC listings. New procedurally-generated captives appear from other sellers.">Refresh listings</button>
         </div>
@@ -27,7 +27,7 @@
             <div class="girl-card" data-tooltip="${l.girl.name} listed for $${l.price.toLocaleString()}. Buyer-tick ticks her down to NPC buyers over time.">
               <div class="girl-emoji">${l.girl.mood.moodEmoji}</div>
               <div class="girl-name">${l.girl.name}</div>
-              <div class="girl-meta"><span>L${l.girl.bond.bondLevel}</span><span>${l.girl.archetypeTemplate}</span></div>
+              <div class="girl-meta"><span data-tooltip="Stockholm bond level 0-9.">Stockholm Level ${l.girl.bond.bondLevel}</span><span>${l.girl.archetypeTemplate}</span></div>
               <div class="stat-row small" data-tooltip="Asking price. Scales with bond + stats + outfit + rarity."><span>Asking</span><b>$${l.price.toLocaleString()}</b></div>
               <button class="btn-small" data-unlist="${l.girl.id || l.girlId}" data-tooltip="Pull her off the market. She returns to your roster + assigned hold.">Unlist</button>
             </div>
@@ -42,12 +42,12 @@
             <div class="girl-card" data-tooltip="${(l.girl.backstoryFragment || '').replace(/"/g, '&quot;')}">
               <div class="girl-emoji">${l.girl.mood.moodEmoji}</div>
               <div class="girl-name">${l.girl.name} <span class="muted small">(${l.girl.age})</span></div>
-              <div class="girl-meta"><span>L${l.girl.bond.bondLevel}</span><span>${l.girl.archetypeTemplate}</span></div>
+              <div class="girl-meta"><span data-tooltip="Stockholm bond level 0-9.">Stockholm Level ${l.girl.bond.bondLevel}</span><span>${l.girl.archetypeTemplate}</span></div>
               <div class="small muted">${l.girl.backstoryFragment}</div>
               <div class="stat-row small" data-tooltip="NPC selling her — different sellers have different rep + reliability"><span>Seller</span><b>${l.sellerId}</b></div>
               <div class="stat-row" data-tooltip="Purchase price"><span>Price</span><b>$${l.price.toLocaleString()}</b></div>
               <button class="btn-small ${s.wallet.money >= l.price ? 'btn-primary' : ''}" data-buy="${idx}" ${s.wallet.money >= l.price ? '' : 'disabled'} data-tooltip="${s.wallet.money >= l.price ? 'Buy her. Auto-assigns to first empty hold.' : 'Need $' + l.price.toLocaleString() + ' — earn more first.'}">
-                ${s.wallet.money >= l.price ? 'Buy' : 'Too poor'}
+                ${s.wallet.money >= l.price ? 'Buy' : (window.DMTHGame.state.brokeShort ? window.DMTHGame.state.brokeShort() : 'broke')}
               </button>
             </div>
           `).join('')}</div>`

@@ -50,15 +50,20 @@ echo   + Setting OLLAMA_ORIGINS=* for browser access
 setx OLLAMA_ORIGINS "*" >nul 2>&1
 set "OLLAMA_ORIGINS=*"
 
-REM Check if Ollama is already serving
-powershell -NoProfile -Command "try { $r = Invoke-WebRequest -Uri 'http://localhost:11434/api/tags' -UseBasicParsing -TimeoutSec 2 -ErrorAction Stop; exit 0 } catch { exit 1 }" >nul 2>&1
+REM Only launch a server if PORT 11434 is actually free. Testing the TCP port (not just an HTTP
+REM ping) is what matters: Ollama on Windows auto-starts as a tray/background service that already
+REM OWNS the port, so an HTTP /api/tags check can transiently fail (slow start / no CORS) and trick
+REM us into starting a SECOND `ollama serve` that then dies with
+REM "bind: Only one usage of each socket address". A TcpClient connect succeeds only if something is
+REM already listening, so we skip launching when the port is taken.
+powershell -NoProfile -Command "try { $c = New-Object Net.Sockets.TcpClient; $c.Connect('127.0.0.1',11434); $c.Close(); exit 0 } catch { exit 1 }" >nul 2>&1
 if errorlevel 1 (
-    echo   + Launching Ollama in a new window...
+    echo   + Port 11434 is free - launching Ollama in a new window...
     start "Ollama serve" cmd /k "set OLLAMA_ORIGINS=* && ollama serve"
     echo   + Waiting 4 seconds for Ollama to come up...
     powershell -NoProfile -Command "Start-Sleep -Seconds 4" >nul 2>&1
 ) else (
-    echo   + Ollama already running at localhost:11434
+    echo   + Ollama already running on localhost:11434 - not starting a second instance.
 )
 
 echo.

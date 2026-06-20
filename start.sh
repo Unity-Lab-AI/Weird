@@ -77,10 +77,14 @@ if command -v ollama >/dev/null 2>&1; then
   echo "  + Ollama found."
   export OLLAMA_ORIGINS="*"
 
-  if curl -sSf --max-time 2 http://localhost:11434/api/tags >/dev/null 2>&1; then
-    echo "  + Ollama already running at localhost:11434"
+  # Only launch if PORT 11434 is actually free. Test the TCP port, not just an HTTP ping: Ollama
+  # auto-starts as a background service that already OWNS the port, so an HTTP /api/tags check can
+  # transiently fail and trick us into starting a SECOND `ollama serve` that dies with
+  # "bind: address already in use". A successful connect means something is already listening.
+  if (exec 3<>/dev/tcp/127.0.0.1/11434) >/dev/null 2>&1; then
+    echo "  + Ollama already running on localhost:11434 - not starting a second instance."
   else
-    echo "  + Launching Ollama in the background..."
+    echo "  + Port 11434 is free - launching Ollama in the background..."
     ( OLLAMA_ORIGINS="*" nohup ollama serve >/tmp/ssd-ollama.log 2>&1 & )
     sleep 4
   fi

@@ -13,13 +13,13 @@
       <div class="panel">
         <h2>⚱️ Dispose of ${girl.name}</h2>
         <p class="small muted">${girl.backstoryFragment}</p>
-        <div class="stat-row" data-tooltip="Her Stockholm bond level 0-9. Higher levels = bigger premium on finalization films + lower notoriety on bury/release."><span>Stockholm rating</span><b>L${girl.bond.bondLevel}/9</b></div>
+        <div class="stat-row" data-tooltip="Her Stockholm bond level 0-9. Higher levels = bigger premium on finalization films + lower notoriety on bury/release."><span>Stockholm rating</span><b>Level ${girl.bond.bondLevel}/9</b></div>
         <div class="stat-row" data-tooltip="How isolated this dungeon is. Higher isolation reduces notoriety bumps on every method."><span>Dungeon isolation</span><b>${Math.round((dungeonTpl?.isolation || 0) * 100)}%</b></div>
         <a href="#room?girl=${girl.id}" class="btn-small" data-tooltip="Back to her hold — no harm done.">← cancel</a>
       </div>
 
       ${window.DMTHGame.trophies?.personalKeepsakes ? (() => {
-        // TROPHYLOOT.1 — she has 1-3 keepsakes on her person; pick ONE to keep forever as a
+        // she has 1-3 keepsakes on her person; pick ONE to keep forever as a
         // small permanent stacking buff (applies on a TERMINAL disposal — bury / incinerate /
         // lose-at-sea / finalization / dismember; trade/release route her out alive, no trophy).
         const ks = window.DMTHGame.trophies.personalKeepsakes(girl);
@@ -47,6 +47,7 @@
               <div class="model-notes small">${m.notes}</div>
               <div class="stat-row small" data-tooltip="Up-front money cost for this disposal method"><span>Cost</span><b>$${m.moneyCost}</b></div>
               <div class="stat-row small" data-tooltip="Notoriety added to your operation. Higher = more heat from authorities."><span>Notoriety</span><b>+${m.notorietyFactor(girl, dungeonTpl) || 0}</b></div>
+              <div class="stat-row small" data-tooltip="Game-time this disposal eats — digging the grave / running the boat out / cooking her down / butchering her. The world moves on (johns arrive, corpses decay, meters drift) across the whole job. You can't dump bodies in a single click anymore."><span>⏱️ Labor</span><b>${window.DMTHGame.gameClock?.formatDuration ? window.DMTHGame.gameClock.formatDuration((window.DMTHGame.disposal.METHOD_LABOR_MIN && window.DMTHGame.disposal.METHOD_LABOR_MIN[key]) || 30) : (((window.DMTHGame.disposal.METHOD_LABOR_MIN && window.DMTHGame.disposal.METHOD_LABOR_MIN[key]) || 30) + 'm')}</b></div>
               ${m.generatesFilm ? `<div class="small gold" data-tooltip="Generates a premium finalization film — 3-5× regular film value, one-shot.">🎬 Generates finalization film</div>` : ''}
               ${reqErr ? `<div class="small warn" data-tooltip="${reqErr.replace(/"/g, '&quot;')}">🔒 ${reqErr}</div>` : ''}
               <button data-method="${key}" class="btn-small btn-danger" ${reqErr ? 'disabled style="opacity:.5;cursor:not-allowed"' : ''} data-tooltip="Dispose via ${m.displayName}. Cannot be undone.">Dispose via ${m.displayName}</button>
@@ -61,7 +62,9 @@
     el.querySelectorAll('[data-method]').forEach(b => {
       b.onclick = async () => {
         const method = b.dataset.method;
-        if (!confirm(`Dispose of ${girl.name} via ${window.DMTHGame.disposal.METHODS[method].displayName}? This cannot be undone.`)) return;
+        const laborMin = (window.DMTHGame.disposal.METHOD_LABOR_MIN && window.DMTHGame.disposal.METHOD_LABOR_MIN[method]) || 30;
+        const laborTxt = window.DMTHGame.gameClock?.formatDuration ? window.DMTHGame.gameClock.formatDuration(laborMin) : (laborMin + 'm');
+        if (!confirm(`Dispose of ${girl.name} via ${window.DMTHGame.disposal.METHODS[method].displayName}? It takes ~${laborTxt} of work (game-time passes — the world moves on) and CANNOT be undone.`)) return;
         try {
           // Capture the girl ref BEFORE disposal mutates state, so we can narrate the final scene
           const girlSnapshot = JSON.parse(JSON.stringify(girl));
@@ -70,6 +73,7 @@
           // Show final narration from Ollama
           const narration = await window.DMTHGame.disposal.narrateDisposal(girlSnapshot, method);
           const resultHtml = `<div class="panel"><h3>${window.DMTHGame.disposal.METHODS[method].emoji} ${window.DMTHGame.disposal.METHODS[method].displayName}</h3>
+            <p class="small muted">⏱️ ${laborTxt} of work behind you${window.DMTHGame.gameClock?.formatNow ? ` — it's now ${window.DMTHGame.gameClock.formatNow()}` : ''}. ${result.leftEvidence ? '🩸 You left a trace — WANTED ticked up.' : '🧼 Clean job — no trace left.'}</p>
             ${narration ? `<div class="log"><div class="log-entry assistant"><b>${girlSnapshot.name}:</b> ${escapeHtml(narration)}</div></div>` : ''}
             ${result.generatedFilmId ? `<p class="small gold">Finalization film ${result.generatedFilmId} recorded and listed.</p>` : ''}
             <div class="dispose-final-image-slot" id="dispose-final-image">

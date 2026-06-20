@@ -104,7 +104,7 @@
     const item = getItem(itemId);
     if (!item) throw new Error('unknown item');
     if (!window.DMTHGame.state.spendMoney(item.cost, `facility:${itemId}:${dungeonId}`)) {
-      throw new Error('insufficient funds');
+      throw new Error(window.DMTHGame.state.brokeLine ? window.DMTHGame.state.brokeLine() : 'broke');
     }
     const dungeon = window.DMTHGame.state.getDungeon(dungeonId);
     const plan = { ...(dungeon.plotPlan || {}) };

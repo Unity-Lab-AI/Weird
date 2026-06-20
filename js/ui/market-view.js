@@ -14,50 +14,17 @@
     const sold = s.films.filter(f => f.status === 'sold').slice(-20).reverse();
     const destroyed = s.films.filter(f => f.status === 'destroyed').slice(-20).reverse();
     const archived = s.films.filter(f => f.status === 'archived');
-    const bodyParts = (s.bodyParts || []).filter(p => p.listed);
-    const bodyPartsTotal = bodyParts.reduce((t, p) => t + (p.value || 0), 0);
-    const milk = window.DMTHGame.milk;
-    const milkStock = milk ? milk.milkStock() : 0;
-    const ownedSuckers = milk ? milk.ownedTitSuckers() : 0;
-    const lactating = milk ? milk.lactatingCount() : 0;
 
     const totalPerTick = listed.reduce((t, f) => t + window.DMTHGame.market.estimatePerTick(f), 0);
     const totalLifetimePassive = listed.reduce((t, f) => t + (f.passiveEarnings || 0), 0);
 
     el.innerHTML = `
       <div class="panel">
-        <h2>🎬 Content Market</h2>
+        <h2>🎬 The Cutting Room — Content Market</h2>
         <p class="small muted">Films auto-sell every tick — passive infinite-copies model. Destroy a master via "💣 Sell negatives" for a one-time premium payout (much bigger than passive lifetime, but the film stops earning).</p>
         <div class="stat-row"><span>🔄 Auto-selling on tick</span><b class="ok">~$${totalPerTick.toLocaleString()} / tick (${listed.length} listed)</b></div>
         <div class="stat-row"><span>Lifetime passive earnings (still-listed)</span><b>$${totalLifetimePassive.toLocaleString()}</b></div>
         <div class="stat-row"><span>Demand multiplier</span><b>${window.DMTHGame.market.getDemand().overallBase.toFixed(2)}×</b></div>
-      </div>
-
-      <div class="panel">
-        <h2>🥛 Milk Trade</h2>
-        <p class="small muted">Buy a <b>Tit Sucker</b> machine and attach one per hold (in her room) to passively bottle that lactating girl's milk over time. A girl lactates while pregnant (2nd trimester+) or freshly postpartum; her tits refill slowly, so milk's only abundant once you keep several preggos going at once (a 🍈 Cow-Tits girl makes double). Bottled girl-milk auto-sells a little each tick to johns / black-market buyers — or sell / drink it here. A girl drinking it is soothed + made pliable; you drinking it tops Nut Reserve + satisfaction + buzz.</p>
-        <div class="stat-row"><span>🍼 Tit Suckers (unattached)</span><b>${ownedSuckers}</b></div>
-        <div class="stat-row"><span>🤰 Lactating captives</span><b>${lactating}</b></div>
-        <div class="stat-row"><span>🥛 Girl-milk in stock</span><b class="gold">${milkStock}L</b></div>
-        <div class="stat-row" style="gap:6px;flex-wrap:wrap">
-          <button class="btn-small btn-primary" data-buy-titsucker data-tooltip="A Tit Sucker machine — attach one to a hold (her room) to bottle that girl's milk while she lactates. One per hold; buy as many as you have holds to rig.">Buy Tit Sucker — $${milk ? milk.TIT_SUCKER_COST : 600}</button>
-          <button class="btn-small" data-sell-milk ${milkStock < 1 ? 'disabled' : ''} data-tooltip="Sell ALL girl-milk in stock instantly at the market for $${milk ? milk.MILK_PRICE : 18}/L.">Sell all milk — $${(milkStock * (milk ? milk.MILK_PRICE : 18)).toLocaleString()}</button>
-          <button class="btn-small" data-drink-milk-player ${milkStock < 1 ? 'disabled' : ''} data-tooltip="You drink 1L — +satisfaction (feeds hunting bonus) + buzz + Nut Reserve.">🥛 Drink 1L (stat boost)</button>
-        </div>
-      </div>
-
-      <div class="panel">
-        <h2>🦴 Body-Part Market (${bodyParts.length})</h2>
-        <p class="small muted">Organs + limbs harvested via the 🪓 Dismember disposal path. They sell passively to black-market buyers each tick — or fence one instantly below at a small discount. Moving parts is hot: each sale adds a little WANTED heat.</p>
-        ${bodyParts.length === 0 ? `<p class="muted small">No parts listed. Dismember a captive (Dispose → 🪓 Dismember + Harvest) to stock the organ trade.</p>` :
-          `<div class="stat-row"><span>Listed value (passive)</span><b class="gold">≈ $${bodyPartsTotal.toLocaleString()}</b></div>
-           <ul class="film-list">${bodyParts.map(p => `
-             <li class="film-item">
-               <div><b>${p.emoji || '🦴'} ${escapeHtml(p.name)}</b> <span class="muted small">· ${escapeHtml(p.girlName || '?')} · ${escapeHtml(p.archetype || '')}</span></div>
-               <div class="stat-row small"><span>market value</span><b class="gold">$${(p.value || 0).toLocaleString()}</b></div>
-               <div class="stat-row small"><button class="btn-small btn-danger" data-sell-part="${p.id}" data-tooltip="Fence this part to a black-market buyer right now for ~80% of value. Adds a little WANTED heat.">Fence now — $${Math.round((p.value||0)*0.8).toLocaleString()}</button></div>
-             </li>`).join('')}</ul>`
-        }
       </div>
 
       <div class="panel">
@@ -115,21 +82,6 @@
       </div>
     `;
 
-    const milkBuy = el.querySelector('[data-buy-titsucker]');
-    if (milkBuy) milkBuy.onclick = () => { const r = window.DMTHGame.milk.buyTitSucker(); if (!r.ok) alert(r.reason); window.DMTHRouter.handle(); };
-    const milkSell = el.querySelector('[data-sell-milk]');
-    if (milkSell) milkSell.onclick = () => { const r = window.DMTHGame.milk.sellMilk(window.DMTHGame.milk.milkStock()); if (!r.ok) { alert(r.reason); return; } alert(`🥛 Sold ${r.qty}L for $${r.price.toLocaleString()}.`); window.DMTHRouter.handle(); };
-    const milkDrink = el.querySelector('[data-drink-milk-player]');
-    if (milkDrink) milkDrink.onclick = () => { const r = window.DMTHGame.milk.drinkPlayer(); if (!r.ok) { alert(r.reason); return; } window.DMTHRouter.handle(); };
-    el.querySelectorAll('[data-sell-part]').forEach(b => {
-      b.onclick = () => {
-        try {
-          const r = window.DMTHGame.market.sellBodyPartNow(b.dataset.sellPart);
-          alert(`🦴 Fenced for $${r.price.toLocaleString()}.`);
-          window.DMTHRouter.handle();
-        } catch (err) { alert(err.message); }
-      };
-    });
     el.querySelectorAll('[data-unlist]').forEach(b => { b.onclick = () => { window.DMTHGame.market.unlist(b.dataset.unlist); window.DMTHRouter.handle(); }; });
     el.querySelectorAll('[data-relist]').forEach(a => { a.onclick = e => { e.preventDefault(); window.DMTHGame.market.relist(a.dataset.relist); window.DMTHRouter.handle(); }; });
     el.querySelectorAll('[data-sell-negatives]').forEach(b => {
@@ -176,8 +128,8 @@
           <b>$${lifetime.toLocaleString()}</b>
         </div>
         <div class="stat-row small">
-          <button class="btn-small" data-unlist="${f.id}" data-tooltip="Pull this film off the market temporarily. Goes to archive. Relist any time. No income while unlisted.">Unlist</button>
-          <button class="btn-small btn-danger" data-sell-negatives="${f.id}" data-tooltip="Destroys the master copy for a one-time 3.5× premium payout. Film stops earning forever. +2 notoriety hit.">💣 Sell negatives — $${premium.toLocaleString()}</button>
+          <button class="btn-small" data-unlist="${f.id}" data-tooltip="Yank this filth off the market for now — shelved in the archive, earns nothing while it sits, relist the depravity whenever you want the cash flowing again.">Unlist</button>
+          <button class="btn-small btn-danger" data-sell-negatives="${f.id}" data-tooltip="Burn the master copy for a one-time 3.5× premium — buyers pay a fortune for the ONLY copy of her ruin, but this filth never earns again after. +2 notoriety.">💣 Sell negatives — $${premium.toLocaleString()}</button>
         </div>
       </li>
     `;

@@ -48,7 +48,7 @@
       `}
 
       <div id="lightbox-overlay" class="gallery-lightbox" style="display:none">
-        <button class="gallery-close" id="lightbox-close" data-tooltip="Close lightbox (Esc)">✕</button>
+        <button class="gallery-close" id="lightbox-close" data-tooltip="Close lightbox (Escape key)">✕</button>
         <button class="gallery-nav prev" id="lightbox-prev" data-tooltip="Previous image (←)">‹</button>
         <button class="gallery-nav next" id="lightbox-next" data-tooltip="Next image (→)">›</button>
         <div class="gallery-main">

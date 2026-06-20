@@ -3,7 +3,7 @@
 (function () {
   'use strict';
 
-  // ZONES.1 (Gee) — the town is split into ZONES. Each location belongs to one; some are level-
+  //   — the town is split into ZONES. Each location belongs to one; some are level-
   // gated, some pay-to-unlock (handled by progression.LOCATION_GATES). Zone is shown on each slot.
   const LOCATION_ZONES = {
     street: 'The Gutter', 'coffee-shop': 'The Gutter', library: 'The Gutter', park: 'The Gutter',
@@ -11,6 +11,7 @@
     gym: 'The Quarter', mall: 'The Quarter', 'school-campus': 'The Quarter', sorority: 'The Quarter',
     'hotel-lobby': 'The Heights', 'private-party': 'The Heights',
     'prenatal-clinic': 'The Brood Ward',
+    'family-reunion': 'The Cul-de-sac',
     remote: 'The Sticks', neighborhood: 'The Cul-de-sac'
   };
   function zoneOf(locId) { return LOCATION_ZONES[locId] || 'Outskirts'; }
@@ -52,28 +53,10 @@
       };
     });
 
-    // PLVL.2 — buy private access to a cost-gated hunting ground.
-    el.querySelectorAll('[data-buy-location]').forEach(b => {
-      b.onclick = () => {
-        const r = window.DMTHGame.progression.buyLocationAccess(b.dataset.buyLocation);
-        if (!r.ok) { alert(r.reason); return; }
-        window.DMTHRouter.handle();
-      };
-    });
+    // turf access + buyout moved to the property storefront (#property / Bloodland
+    // Holdings) in the Stores hub; the town map just links there. The buy handlers used to live here.
 
-    // BUYLOCATION.1 — buy OUT a location you have access to (own the turf → perks).
-    el.querySelectorAll('[data-buyout-location]').forEach(b => {
-      b.onclick = () => {
-        const locId = b.dataset.buyoutLocation;
-        const cost = window.DMTHGame.progression.buyOutCost(locId);
-        if (!confirm(`Buy out this turf for $${cost.toLocaleString()}? You'll own it — fewer witnesses, less WANTED, better capture odds, and a passive skim every tick.`)) return;
-        const r = window.DMTHGame.progression.buyOutLocation(locId);
-        if (!r.ok) { alert(r.reason); return; }
-        window.DMTHRouter.handle();
-      };
-    });
-
-    // LOOT.2 — town action: case the streets for loose loot (generic + rare full-catalog pulls).
+    // town action: case the streets for loose loot (generic + rare full-catalog pulls).
     const caseBtn = el.querySelector('#case-streets');
     if (caseBtn) caseBtn.onclick = () => {
       const r = window.DMTHGame.loot.scavengeLocation('__town__');
@@ -106,7 +89,10 @@
       </div>`;
     }
     const diff = s.subcategory === 'easy' ? '🟢' : s.subcategory === 'medium' ? '🟡' : '🔴';
-    // PLVL.2 — gated hunting grounds. Locked ones can't be visited until the level / roster /
+    // the player-facing name is this playthrough's rolled location name (state.locationName
+    // self-falls-back to the catalog displayName when there's no pool / no state).
+    const label = (window.DMTHGame.state && window.DMTHGame.state.locationName) ? window.DMTHGame.state.locationName(s.itemId) : s.label;
+    // gated hunting grounds. Locked ones can't be visited until the level / roster /
     // purchase requirement is met; cost-gated ones show a Buy-access button.
     const prog = window.DMTHGame.progression;
     const locked = prog && !prog.isLocationUnlocked(s.itemId);
@@ -115,29 +101,29 @@
       const cost = prog.locationCost(s.itemId);
       return `<div class="plot-slot filled locked" style="grid-column:${s.x+1};grid-row:${s.y+1};opacity:.6" data-tooltip="🔒 ${reason.replace(/"/g, '&quot;')}">
         <div class="asset-slot slot-emoji" data-asset-category="location" data-asset-id="${s.itemId}" data-asset-size="64">${s.emoji}</div>
-        <div class="slot-label">${s.label} 🔒</div>
+        <div class="slot-label">${label} 🔒</div>
         <div class="slot-meta small">${reason}</div>
-        ${cost ? `<button class="btn-small" data-buy-location="${s.itemId}" data-tooltip="Buy private access to ${s.label} — $${cost.toLocaleString()}. Unlocks hunting here.">🗝️ Buy access $${cost.toLocaleString()}</button>` : ''}
+        ${cost ? `<div class="small muted" data-tooltip="Property acquisition lives in the Stores hub now.">🗝️ Buy access ($${cost.toLocaleString()}) at <a href="#property">🏚️ Bloodland Holdings</a></div>` : ''}
       </div>`;
     }
-    // BUYLOCATION.1 — once access is unlocked, you can BUY OUT the turf for perks. Owned turf shows
+    // once access is unlocked, you can BUY OUT the turf for perks. Owned turf shows
     // a badge + its perk package in the tooltip; un-owned shows a Buy-out button.
     const owns = prog && prog.ownsLocation && prog.ownsLocation(s.itemId);
     const boCost = prog && prog.buyOutCost ? prog.buyOutCost(s.itemId) : 0;
     const perkList = (prog && prog.OWNERSHIP_PERK_NAMES) ? prog.OWNERSHIP_PERK_NAMES.join(' · ') : '';
     const tip = owns
-      ? `${s.label} (${zoneOf(s.itemId)}) — 🏴 YOUR TURF. Perks: ${perkList}`
-      : `${s.label} — ${zoneOf(s.itemId)} zone · ${s.subcategory} difficulty. Click to visit + hunt.`;
+      ? `${label} (${zoneOf(s.itemId)}) — 🏴 YOUR TURF. Perks: ${perkList}`
+      : `${label} — ${zoneOf(s.itemId)} zone · ${s.subcategory} difficulty. Click to visit + hunt.`;
     return `
       <div class="plot-slot filled${owns ? ' owned' : ''}" style="grid-column:${s.x+1};grid-row:${s.y+1}" data-tooltip="${tip.replace(/"/g, '&quot;')}">
         <button class="slot-visit-btn" data-visit="${s.itemId}" style="all:unset;cursor:pointer;display:block;width:100%">
           <div class="asset-slot slot-emoji" data-asset-category="location" data-asset-id="${s.itemId}" data-asset-size="64">${s.emoji}</div>
-          <div class="slot-label">${s.label}${owns ? ' 🏴' : ''}</div>
+          <div class="slot-label">${label}${owns ? ' 🏴' : ''}</div>
           <div class="slot-meta">${diff} ${s.subcategory} · <span class="muted">${zoneOf(s.itemId)}</span></div>
         </button>
         ${owns
           ? `<div class="small ok" data-tooltip="You own this turf — ${perkList.replace(/"/g, '&quot;')}">🏴 Owned — perks active</div>`
-          : (boCost ? `<button class="btn-small" data-buyout-location="${s.itemId}" data-tooltip="BUY OUT ${s.label} — $${boCost.toLocaleString()}. Own the turf: 🙈 fewer witnesses, 💋 less WANTED, 🩸 better capture odds, 💰 a passive skim.">🏴 Buy out $${boCost.toLocaleString()}</button>` : '')}
+          : (boCost ? `<div class="small muted" data-tooltip="Own the turf at the property storefront — 🙈 fewer witnesses, 💋 less WANTED, 🩸 better capture odds, 💰 a passive skim.">🏴 Buy out ($${boCost.toLocaleString()}) at <a href="#property">🏚️ Bloodland Holdings</a></div>` : '')}
       </div>
     `;
   }

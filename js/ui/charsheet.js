@@ -1,4 +1,4 @@
-// DUNGEON MASTER: THE HUNT — player CHARACTER SHEET (CHARSHEET.1).
+// DUNGEON MASTER: THE HUNT — player CHARACTER SHEET .
 // One screen that pulls EVERY player-wide stat, buff, debuff, perk and unlock into a single
 // overview so you can read your whole fucked-up build at a glance. Pure aggregator — it owns
 // no state of its own; it reads the real getters from every system (progression / sexdrive /
@@ -8,6 +8,10 @@
 
 (function () {
   'use strict';
+
+  // Single persistent state-change subscription (subscribing inside render() loops forever: the
+  // emit() listener-Set re-visits listeners added during iteration). Subscription lives in mount().
+  let sheetUnsub = null;
 
   // ---- TABOO PERK NAMING ----
   // Every aggregated trophy-perk category gets a depraved display name + emoji. The underlying
@@ -109,7 +113,7 @@
     }
     if (sat < 50) {
       const b = ((sat - 50) / 50) * 0.10;
-      debuffs.push({ emoji: '😒', name: 'Starved & Surly', detail: `${pct(b)} capture odds`, blurb: 'Unsatisfied and distracted — you\'re off your game in the field.' });
+      debuffs.push({ emoji: '😒', name: 'Cum-Starved & Surly', detail: `${pct(b)} capture odds`, blurb: 'Not your belly — your balls. You haven\'t nutted enough; backed-up and distracted in the field. You NEVER eat or drink (only your girls do) — fuck / film / edge a captive to spike satisfaction and shake this off.' });
     }
     if (corpses > 0 && wanted.level >= 60) {
       debuffs.push({ emoji: '⚰️', name: 'Bodies to Bury', detail: `${corpses} corpse${corpses === 1 ? '' : 's'} · raid risk up`, blurb: 'Too many missing girls trace back to you — a raid is coming.' });
@@ -120,9 +124,9 @@
       const open = prog.isUnlocked(k);
       const req = prog.requiredLevel(k);
       const bought = (s.purchasedUnlocks || []).includes(k);
-      const how = cheat ? 'cheat-start' : bought ? 'bought early' : open ? `reached L${req}` : `locked — needs L${req} or $${(prog.unlockFee(k) || 0).toLocaleString()}`;
+      const how = cheat ? 'cheat-start' : bought ? 'bought early' : open ? `reached Level ${req}` : `locked — needs Level ${req} or $${(prog.unlockFee(k) || 0).toLocaleString()}`;
       const nm = UNLOCK_NAME[k] || k;
-      return `<div class="stat-row" data-tooltip="${open ? 'Unlocked.' : 'Locked.'} ${how}."><span>${open ? '🔓' : '🔒'} ${nm}</span><b class="${open ? 'ok' : 'muted'}">${open ? how : `L${req}`}</b></div>`;
+      return `<div class="stat-row" data-tooltip="${open ? 'Unlocked.' : 'Locked.'} ${how}."><span>${open ? '🔓' : '🔒'} ${nm}</span><b class="${open ? 'ok' : 'muted'}">${open ? how : `Level ${req}`}</b></div>`;
     }).join('') : '';
     const ownedLocs = (s.unlockedLocations || []);
 
@@ -133,11 +137,11 @@
       </div>
 
       <div class="grid-2">
-        <section class="panel" data-tooltip="DEPRAVITY — your player level. XP from EVERY successful act; gentle deeds a sliver, atrocities a flood.">
+        <section class="panel" data-tooltip="DEPRAVITY — your player level. Experience from EVERY successful act; gentle deeds a sliver, atrocities a flood.">
           <h2>😈 Depravity</h2>
-          <div class="big-num">L${lvl} <span class="sub">"${escapeHtml(title)}"</span></div>
+          <div class="big-num">Level ${lvl} <span class="sub">"${escapeHtml(title)}"</span></div>
           <div class="bar"><div class="bar-fill" style="width:${xpPct}%;background:#8e44ad"></div></div>
-          <div class="sub small">${nx ? `${nx.have} / ${nx.need} XP → L${nx.next}` : 'MAX — The Depraved'}${cheat ? ' · 🔓 all unlocked (cheat)' : ''}</div>
+          <div class="sub small">${nx ? `${nx.have} / ${nx.need} experience → Level ${nx.next}` : 'MAX — The Depraved'}${cheat ? ' · 🔓 all unlocked (cheat)' : ''}</div>
         </section>
 
         <section class="panel" data-tooltip="Liquid cash + your two reputation axes: WANTED (law heat, pure liability) and Notoriety (legacy stat).">
@@ -197,16 +201,21 @@
       </section>
     `;
 
-    // Re-render live when state changes while this page is open.
-    const unsub = window.DMTHGame.state.onChange(() => {
+    // No subscription inside render (it would loop during emit) — see mount().
+  }
+
+  function mount(el) {
+    if (sheetUnsub) { try { sheetUnsub(); } catch (e) { /* ignore */ } sheetUnsub = null; }
+    render(el);
+    sheetUnsub = window.DMTHGame.state.onChange(() => {
       if (location.hash.startsWith('#charsheet')) render(el);
     });
-    return unsub;
+    return sheetUnsub;
   }
 
   function escapeHtml(s) {
     return String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
   }
 
-  window.DMTHRouter.register('charsheet', render);
+  window.DMTHRouter.register("charsheet", mount);
 })();

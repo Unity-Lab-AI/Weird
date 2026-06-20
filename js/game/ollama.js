@@ -165,7 +165,7 @@
     const system = buildSystemPrompt(girl, mode, sceneKey, sceneVars, opts);
     const girlState = { body: girl.body, mood: girl.mood, bond: girl.bond, stats: girl.stats };
     // Only this girl's OWN turns feed her context. Speaker-tagged turns are partner-captive
-    // lines mirrored into a HOST girl's shared log by the multi-girl scene (MULTIGIRL.2) —
+    // lines mirrored into a HOST girl's shared log by the multi-girl scene  —
     // filter them out so a girl never mistakes a roommate's line for her own prior reply.
     const recentTurns = window.DMTHGame.state.getTurns(girl.id, 16)
       .filter(t => !t.speaker)

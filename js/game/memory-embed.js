@@ -21,7 +21,7 @@
       const data = await res.json();
       const models = (data.models || []).map(m => m.name || m.model).filter(Boolean);
       _availability = models.some(m => m.includes('nomic-embed') || m.includes('embed'));
-      if (!_availability) console.debug('[memory-embed] no embedding model pulled — embedding disabled for this session');
+      if (!_availability) void 0;
       return _availability;
     } catch {
       _availability = false;
@@ -61,7 +61,7 @@
       if (!second.notFound) { _embedEndpoint = '/api/embeddings'; return second.vector || null; }
     } catch {}
     _availability = false;
-    console.debug('[memory-embed] neither /api/embed nor /api/embeddings responded — embedding disabled for this session');
+    void 0;
     return null;
   }
 

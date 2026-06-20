@@ -215,6 +215,37 @@
     'feral_devoted'       // L9
   ];
 
+  // Per-girl-type LOW/MID-bond emotion override (L0-3) so different TYPES sound DIFFERENT at the
+  // same Stockholm level — a police girl resists hard + dry-eyed (defiant), a schoolgirl panics +
+  // cries (panicked/scared), a street girl spits (defiant). At L4+ every type trends into the
+  // shared arousal → devotion arc as she breaks. Keyed by archetypeTemplate; off-list types use
+  // the shared BOND_TO_EMOTION. Mirrors the per-type ATTITUDE arc on the text side.
+  const ARCHETYPE_LOW_EMOTION = {
+    police:            ['defiant', 'defiant', 'defiant', 'scared'],
+    teacher:           ['defiant', 'scared', 'scared', 'shaken'],
+    street:            ['defiant', 'defiant', 'scared', 'shaken'],
+    waitress:          ['defiant', 'scared', 'scared', 'shaken'],
+    gym:               ['defiant', 'defiant', 'scared', 'shaken'],
+    model:             ['defiant', 'scared', 'shaken', 'curious'],
+    nurse:             ['scared', 'scared', 'shaken', 'curious'],
+    office:            ['scared', 'scared', 'shaken', 'curious'],
+    schoolgirl:        ['panicked', 'panicked', 'scared', 'shaken'],
+    'highschool-grad': ['panicked', 'panicked', 'scared', 'shaken'],
+    'college-student': ['panicked', 'scared', 'scared', 'shaken'],
+    cheerleader:       ['panicked', 'scared', 'scared', 'shaken'],
+    library:           ['scared', 'scared', 'shaken', 'curious'],
+    barista:           ['scared', 'scared', 'shaken', 'curious'],
+    maid:              ['scared', 'shaken', 'shaken', 'curious'],
+    niece:             ['panicked', 'scared', 'scared', 'shaken'],
+    'step-daughter':   ['panicked', 'scared', 'scared', 'shaken'],
+    'half-sister':     ['scared', 'scared', 'shaken', 'curious'],
+    'long-lost-sister':['scared', 'scared', 'shaken', 'curious'],
+    'family-friend':   ['scared', 'shaken', 'shaken', 'curious'],
+    'second-cousin':   ['scared', 'scared', 'shaken', 'curious'],
+    stripper:          ['scared', 'shaken', 'curious', 'aroused'],
+    unity_seed:        ['aroused', 'aroused', 'eager', 'eager']   // came willing — never terror
+  };
+
   // Pick a default voice for a newly generated girl of a given archetype.
   // Deterministic on the girl's visualIdentity.seed so we can persist without storing extra state.
   function pickVoiceForArchetype(archetype, seed) {
@@ -236,6 +267,7 @@
   function pickEmotion(girlState) {
     if (!girlState) return 'neutral';
     if (girlState.mode === 'hurtme') return 'defiant';
+    const arche = girlState.archetype || girlState.archetypeTemplate;
     const bond = typeof girlState.bondLevel === 'number'
       ? Math.max(0, Math.min(9, girlState.bondLevel))
       : null;
@@ -245,7 +277,13 @@
     if (girlState.activeDrugs?.includes('whiskey')) return 'drunk';
     if (girlState.activeDrugs?.includes('coke'))    return 'high_coke';
     if (girlState.activeDrugs?.includes('weed'))    return 'high_weed';
-    if (bond !== null) return BOND_TO_EMOTION[bond];
+    if (bond !== null) {
+      // Per-type LOW-bond tone (distinct per girl-type) before the shared arc. L4+ falls through
+      // to BOND_TO_EMOTION (everyone trends into arousal → devotion as she breaks).
+      const arc = arche && ARCHETYPE_LOW_EMOTION[arche];
+      if (arc && bond < arc.length) return arc[bond];
+      return BOND_TO_EMOTION[bond];
+    }
     return 'neutral';
   }
 
@@ -266,6 +304,7 @@
     VOICES,
     EMOTIONS: Object.keys(EMOTIONS),
     BOND_TO_EMOTION,
+    ARCHETYPE_LOW_EMOTION,
     pickVoiceForArchetype,
     pickEmotion,
     buildSpeakParams,

@@ -10,21 +10,21 @@
 
 ---
 
-## Deployment Architecture — STATIC CLIENT (GitHub Pages compatible)
+## Deployment Architecture — STATIC CLIENT (deployable to any static host)
 
 **Gee verbatim 2026-04-21:** *"get a landing page and all the settings and shit and the auto install of aollam and tts kokoro setup on auto with all the differnt sexy female vocies with theri emotion states and line templetes for ollama and the models download for ollama all pre set and auto setting up everything with ever visitor to the webpage and it shall work on github static page deplot ment too"*.
 
-**The primary deployment is a pure static frontend.** Zero server-side code. Deploys to GitHub Pages (or any static host) unchanged.
+**The primary deployment is a pure static frontend.** Zero server-side code. Deploys to any static host unchanged.
 
 | Layer | Where it runs | Notes |
 |-------|---------------|-------|
-| Static site (HTML/JS/CSS) | GitHub Pages | Everything the visitor sees |
+| Static site (HTML/JS/CSS) | any static host | Everything the visitor sees |
 | **Ollama** | Visitor's local machine at `localhost:11434` | User installs via a guided one-command install shown on landing page. Browser connects directly via `fetch()` once `OLLAMA_ORIGINS` is set to allow the site. |
 | **Kokoro TTS** | **In the visitor's browser** via `kokoro-js` | No install. Model ~300MB, loaded to IndexedDB on first visit, cached thereafter. |
 | **Pollinations** | Pollinations cloud | Called directly from browser with user-supplied API key |
 | **Save data** | Browser `IndexedDB` | Per-visitor, stays on their machine. Export/import for portability. |
 
-**Every file in `server/*` described below is implemented as a client JS module** (in `js/` or `js/worker/`) with the same responsibility. The word "server" appears in file names only as a conceptual grouping; nothing runs on our infrastructure. The earlier Node.js sketch was replaced with this static-client design on 2026-04-21 when Gee called for GitHub Pages compatibility + auto-setup.
+**Every file in `server/*` described below is implemented as a client JS module** (in `js/` or `js/worker/`) with the same responsibility. The word "server" appears in file names only as a conceptual grouping; nothing runs on our infrastructure. The earlier Node.js sketch was replaced with this static-client design on 2026-04-21 when the call came for static-host compatibility + auto-setup.
 
 **Auto-setup for every visitor:**
 1. Landing page (`index.html`) loads
@@ -215,6 +215,19 @@ weird/
 ```
 
 _(Note from 2026-04-21: at that time only `weird.html` and the local workflow tooling folder existed. As of 2026-05-14 the full target structure above is shipped.)_
+
+> ⚠️ **DRIFT NOTE (2026-06-20):** the `server/*.mjs` tree above is the ORIGINAL aspirational target. The game actually shipped as a **STATIC CLIENT** — there is no Node server. The real code lives in `js/game/*.js` (logic IIFE modules hung on `window.DMTHGame.*`) + `js/ui/*.js` (view modules registered on `window.DMTHRouter`), loaded by `game.html` (each `<script>` cache-busted with `?v=<token>`). The accurate current module map is below.
+
+### ACTUAL SHIPPED MODULE MAP (2026-06-20)
+
+**`js/game/*.js` — logic modules (each an IIFE exporting onto `window.DMTHGame.<name>`):**
+`state` (central state + wallet/vault/credit/pocket/loans + inventory + sceneToggles + locationName + roster/dungeons), `tick` (the 30-game-min heartbeat: vitals, escape rolls, john arrivals, reconcileSpan), `game-clock`, `action-effects` (the ACTIONS delta registry + applyAction + chooseNpcAction + tickStaminaHealth + delimb/harvest/marks + johnHappiness), `whore-out` (john/friend passive income + resolveEncounter/resolveFriendEncounter/resolveGangbang/resolveDirectedEncounter + johnTimingProjection), `hunt`, `capture` (4-stage), `girl-gen`, `imaging` (Pollinations prompt build + roomScene + npcInFrameTokens), `drug-scheduler`, `pregnancy`, `period`, `milk`, `cumtool`, `lifespan`, `death`, `delta`, `disposal` (+ METHOD_LABOR_MIN), `dungeon-ops` (upgrade tracks + SECURITY/DISPOSAL facilities + buyFacilityToInventory/installSecurityFacility/installDisposalFacility + capacity), `dungeon-plot` (interior visual grid), `town-plot`, `progression` (DEPRAVITY level + unlocks + LOCATION_GATES + buyLocationAccess/buyOutLocation), `wanted` (heat + tiers + raid chance), `arrest` (raids + dirty-cop payroll), `loanshark` ⭐NEW (3 sharks), `gigs` ⭐NEW (queueable hustles + crew + kidnap), `market` (film passive sales + body-part market), `film`, `slave-market`, `propositioner`, `trophies`, `specialize`, `sexdrive`, `playerstamina`, `wardrobe`, `player-wardrobe`, `condoms`, `toys`, `supply`, `loot` (unified `pickLootByTier` spine), `transport`, `escape-recovery`, `balancing`, `achievements`, `save-slots`, `memory-embed`, `ollama`, `voice-in`, `bootstrap`.
+
+**`js/templates/*.js`:** `john-archetypes` (JOHN_ARCHETYPES + FRIEND_ARCHETYPES + FRIEND_APPEARANCE/JOHN_BUILDS + FRIEND_TRAITS + rollNpcTraits + corpseUseWillingness + mintNpcIdentity), `ollama-templates`. **`js/assets/catalog.js`** (LOCATIONS/ITEMS/DUNGEONS/ROOMS/FACILITIES + town plot). **`js/voices/catalog.js`.**
+
+**`js/ui/*.js` — views (registered via `DMTHRouter.register(route, render)`):** `room` (the core interaction screen), `dashboard`, `charsheet`, `roster`, `town-view`, `hunt-view`, `dungeon-view`, `dungeon-plot-view`, `upgrade-view`, `dispose-view`, `slave-market-view`, `market-view`, `gallery-view`, `timeline-view`, `trophy-room-view`, `escape-recovery-view`, `propositioner-view`, `gigs-view` ⭐NEW, `ledger-view` (finance: vault/credit/loansharks/pocket), `stores-hub-view` (🏬 Stores hub), `property-view` ⭐NEW (🏚️ Bloodland Holdings — dungeons + turf), `shop-view`, `clothing-store-view`, `player-clothing-store-view`, `wardrobe-view`, `dairy-view`, `gristle-view`, `in-game-settings`, `settings`, `newgame`, `quick-actions`, `notify` (+ action-button + sticky), `tooltips`, `loot-popup`, `voice-queue`, `asset-img`, `router`, `landing`, `age-gate`, `death-dossier-overlay`, `ollama-repair-overlay`, `game-over-view`.
+
+**Systems added in the 2026-06-19/20 mega-session:** the financial underworld (vault/credit/loan-sharks/shady-gigs/dirty-cop-payroll/pocket-vault money model), NPC-action expansion (`chooseNpcAction`), the Stores hub + Bloodland property store + facility buy→install, the escape warning-popup + grace timer + max-WANTED law-issue, DYNGEN procedural location names, disposal labor-time, the unified loot picker, and the TIP-FILTH tooltip depravity sweep. See `docs/FINALIZED.md` 2026-06-19 entry for the full archive.
 
 ---
 
@@ -1238,7 +1251,7 @@ The static-client implementation lives entirely under `js/`. Engine modules are 
 - **No tests** — project policy (manual verification + `node -c` only).
 
 ### Minor (polish phase)
-- No bundler — vanilla JS, no build step (intentional, keeps GitHub-Pages-static deploy trivial).
+- No bundler — vanilla JS, no build step (intentional, keeps static-host deploy trivial).
 
 ---
 

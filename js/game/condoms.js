@@ -1,4 +1,4 @@
-// DUNGEON MASTER: THE HUNT — condom types (CONDOMS.1).
+// DUNGEON MASTER: THE HUNT — condom types.
 // Different condoms with distinct stats. They ride on the existing 'condom-on' outfit overlay
 // (invisible in images) but now track WHICH type via girl.condomType. The pregnancy / cum-fill
 // gate reads condoms.blocks(girl) instead of a bare 'condom-on' check — so a SABOTAGED (holed)
@@ -13,7 +13,7 @@
   'use strict';
 
   const CONDOM_ON = 'condom-on';
-  // CONDOM-TIMED.1 — a player-equipped condom is a TIMED tool effect: it protects for a few
+  // A player-equipped condom is a TIMED tool effect: it protects for a few
   // game hours, then wears off (auto-reverts to her prior outfit on the tick). 1 game hour =
   // 60 game minutes, so 4 hours = 240 game minutes.
   const CONDOM_DURATION_MIN = 240;
@@ -54,7 +54,7 @@
     return !!(t && t.blocks === false);
   }
 
-  // Per-tick wear-off (CONDOM-TIMED.1) — revert any expired condom to her prior outfit.
+  // Per-tick wear-off — revert any expired condom to her prior outfit.
   function tickExpiry() {
     const s = window.DMTHGame.state.current;
     if (!s) return;
@@ -82,7 +82,7 @@
     if (!t) return { ok: false, reason: 'unknown condom' };
     if (!isLevelUnlocked(typeId)) return { ok: false, reason: `${t.displayName} is locked — reach DEPRAVITY level ${t.levelReq} first` };
     const ok = window.DMTHGame.state.spendMoney(t.cost, 'buy:' + typeId);
-    if (!ok) return { ok: false, reason: 'insufficient funds' };
+    if (!ok) return { ok: false, reason: (window.DMTHGame.state.brokeLine ? window.DMTHGame.state.brokeLine() : 'broke') };
     window.DMTHGame.state.addItem(typeId, 1);
     return { ok: true, typeId, cost: t.cost };
   }

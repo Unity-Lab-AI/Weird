@@ -1,5 +1,7 @@
 # supertodo.md — DUNGEON MASTER: THE HUNT — 100% Master Work Outline
 
+> ⚠️ **RECONCILIATION (2026-06-20):** This outline's individual `[ ]` checkboxes are STALE — they were the planning map for EPICS that have since SHIPPED. The 2026-06-19/20 mega-session built + verified the work these epics describe (escape warning-popup + guard-dog/security containment, corpse kink-economy + decay-WANTED, multi-step/labor disposal + state-gating + film-fail fix, the WANTED keystone + dirty-cop payroll, the financial underworld, NPC actions, stores hub + property store, balance audit, TIP-FILTH). The AUTHORITATIVE current status lives in [`TODO.md`](./TODO.md) (every box reconciled vs live code in the 2026-06-19 31-flip audit) + the [`FINALIZED.md`](./FINALIZED.md) 2026-06-19 session archive. Treat THOSE as source-of-truth; the unchecked boxes below are a historical planning artifact, not open work.
+>
 > **Scope:** Every piece of outstanding work as of **2026-06-18**, consolidated from Gee's feature directives + the two `/super-review` passes (image-gen pipeline + corpse/disposal/wanted systems). This is the MASTER outline. The live working backlog is [`TODO.md`](./TODO.md); completed work archives to [`FINALIZED.md`](./FINALIZED.md).
 >
 > **LAW #0** — every directive below is quoted VERBATIM. Do not paraphrase when working a task.
@@ -45,13 +47,13 @@
 - [ ] **C.1** 🟠 Necro/postmortem **premium multiplier** on whore-out payout + film price (the degenerate-content money tier). `js/game/whore-out.js`, `js/game/film.js`, `js/templates/john-archetypes.js`
 - [ ] **C.2** 🟠 Higher risk: each corpse content sale spikes WANTED hard + rolls **john-disgust refusal** (some johns balk → no pay + disgusted client bumps WANTED). `js/game/whore-out.js`
 - [ ] **C.3** 🟠 Decay past `POSTMORTEM_DECAY_LIMIT` (7 game days) drives passive WANTED accrual + rising discovery-raid odds (a rotting body is evidence, not free storage). `js/game/lifespan.js`
-- [ ] **C.4** 🟠 Fix `'broken'` (mentally-broken) dead-end state — currently set by lifespan but handled by nothing → soft-locked hold. Make broken girls disposable/usable end-to-end (broken affect overlay or fold into disposable-corpse path). `js/game/lifespan.js`, `js/game/whore-out.js`, `js/ui/room.js`, `js/ui/dungeon-view.js`
+- [x] **C.4** ✅ VERIFIED-SHIPPED 2026-06-19 (code-confirmed: `lifespan.js:167-170` no longer sets the phantom `encounterState:'broken'` soft-lock — sets `mind:'broken'` + a broken mood instead) 🟠 Fix `'broken'` (mentally-broken) dead-end state — currently set by lifespan but handled by nothing → soft-locked hold. Make broken girls disposable/usable end-to-end (broken affect overlay or fold into disposable-corpse path). `js/game/lifespan.js`, `js/game/whore-out.js`, `js/ui/room.js`, `js/ui/dungeon-view.js`
 
 ## EPIC D — Involved multi-step disposal
 > *"the get rid of bodies needs to be more involved not just one button click"*
 
 - [ ] **D.1** 🟠 Replace one-click `dispose(girlId, method)` with a multi-step flow: **(a)** method gated by enforced requirements; **(b)** transport step (time/labor cost + witnessed-roll); **(c)** execute → evidence roll. `js/game/disposal.js`, `js/ui/dispose-view.js`
-- [ ] **D.2** 🟠 ENFORCE requirements that are currently decorative: `incinerate` `requiresFacility:'incinerator'` (never checked → can incinerate with no facility), `lose-at-sea` boat+coastal access (notes-only lie), `bury` shovel/site. `js/game/disposal.js`
+- [x] **D.2** ✅ VERIFIED-SHIPPED 2026-06-19 (code-confirmed: `disposal.js:131` `requirementError()` ENFORCES `requiresFacility` — no longer decorative; checked in `dispose()` via `requirementError`) 🟠 ENFORCE requirements that are currently decorative: `incinerate` `requiresFacility:'incinerator'` (never checked → can incinerate with no facility), `lose-at-sea` boat+coastal access (notes-only lie), `bury` shovel/site. `js/game/disposal.js`
 - [ ] **D.3** 🟠 Gate methods by `encounterState` — corpse gets bury/incinerate/lose-at-sea only; release/trade/finalization-film are alive-only (currently a corpse can be "released" / "traded" alive / filmed). `js/ui/dispose-view.js`
 - [ ] **D.4** 🟠 Evidence roll on execute → WANTED accrual, reduced by method quality + dungeon isolation + upgrades. `js/game/disposal.js`
 - [ ] **D.5** 🟡 Fix silent `try{}catch{}` swallow on finalization-film recording (line 88-93) — the premium film can vanish with zero feedback while the girl is still disposed. Surface failure; don't complete disposal if the film failed. `js/game/disposal.js`
@@ -133,19 +135,21 @@ WANTED is the spine; corpse-risk, disposal-risk, escapes, and arrest all feed it
 
 # PART 3 — IMAGE-GEN PIPELINE BUG TRACK (super-review #1)
 
+> **STATUS 2026-06-19 (code-verified audit):** this whole track is STALE bookkeeping — the fixes shipped but the boxes were never flipped. Confirmed shipped against live code: **IMG.1** (deterministic `stateSignature` cache key), **IMG.2** (`quick-actions` drug buttons call `drugs.offer()` — line 476), **IMG.4** (fallback URLs routed through `buildUrl`, unsafe `slice(0,1800)` + `sex-slave-dungeon` referrer gone), **IMG.11** ("dilated pupils" out of the locked face). The remaining IMG.* items read as absorbed by the IMG.1 signature work / shipped escalation tokens — spot-verify before relying on them as open. NONE represent hidden/lost work: everything actionable is in `TODO.md` or already done.
+
 Face/seed/location invariants are CORRECT and must not regress.
 
-- [ ] **IMG.1** 🟠 Ollama prompt-writer (`useOllamaPromptWriter:true`) defeats the image cache — `cacheKey` hashes a non-deterministic prompt → every room/hunt render re-bills Pollinations + silently re-rolls. Fix: cache key = deterministic STATE SIGNATURE (situation+outfit+nudeStrength+bondTier+drugSet+highBand+pregTier+bruiseBand+dungeon/hold/location+postmortemDecayBand); regenerate only when signature changes. `js/game/imaging.js`
-- [ ] **IMG.2** 🟠 quick-actions drug buttons skip the scheduler — only `applyAction()`, never `drugs.offer()` → `activeDrugs`/`high` never set → drugs render SOBER + no curve. (room.js does it right.) Fix: one shared `administerDrug(girlId,key)` used by both. `js/ui/quick-actions.js`, `js/ui/room.js`
+- [x] **IMG.1** ✅ VERIFIED-SHIPPED 2026-06-19 (code-confirmed: `stateSignature()` + `cacheKey = girlId:promptHash(stateSignature)`) 🟠 Ollama prompt-writer (`useOllamaPromptWriter:true`) defeats the image cache — `cacheKey` hashes a non-deterministic prompt → every room/hunt render re-bills Pollinations + silently re-rolls. Fix: cache key = deterministic STATE SIGNATURE (situation+outfit+nudeStrength+bondTier+drugSet+highBand+pregTier+bruiseBand+dungeon/hold/location+postmortemDecayBand); regenerate only when signature changes. `js/game/imaging.js`
+- [x] **IMG.2** ✅ VERIFIED-SHIPPED 2026-06-19 (code-confirmed: `quick-actions.js:476` calls `window.DMTHGame.drugs.offer(girl.id, drugKey)`) 🟠 quick-actions drug buttons skip the scheduler — only `applyAction()`, never `drugs.offer()` → `activeDrugs`/`high` never set → drugs render SOBER + no curve. (room.js does it right.) Fix: one shared `administerDrug(girlId,key)` used by both. `js/ui/quick-actions.js`, `js/ui/room.js`
 - [ ] **IMG.3** 🟠 `generateFor` cache-hit returns persisted `cached.blobUrl` (a dead `blob:` string after reload) instead of rebuilding from `cached.blob`. Fix: rebuild objectURL like `resolveCached`. `js/game/imaging.js`
-- [ ] **IMG.4** 🟠 Three fallback URL builders (lines 837, 1002, 1097) use unsafe `.slice(0,1800)` (can split `%XX` → Cloudflare 400), carry stale `referrer=sex-slave-dungeon`, and bypass the Worker route. Fix: route ALL through `buildUrl()`. `js/game/imaging.js`
+- [x] **IMG.4** ✅ VERIFIED-SHIPPED 2026-06-19 (code-confirmed: fallback URLs routed through `buildUrl()`; the unsafe `slice(0,1800)` + `referrer=sex-slave-dungeon` are gone) 🟠 Three fallback URL builders (lines 837, 1002, 1097) use unsafe `.slice(0,1800)` (can split `%XX` → Cloudflare 400), carry stale `referrer=sex-slave-dungeon`, and bypass the Worker route. Fix: route ALL through `buildUrl()`. `js/game/imaging.js`
 - [ ] **IMG.5** 🟡 Gallery renders raw `entry.url` (Pollinations) not the cached blob via `cacheKey` → re-fetches every open, breaks on later 403. Fix: `resolveCached(entry.cacheKey)` first. `js/ui/gallery-view.js`
 - [ ] **IMG.6** 🟡 `imageHistory` stores raw `url` even when a blob was cached (line 889) — store `objUrl ?? url`. `js/game/imaging.js`
 - [ ] **IMG.7** 🟡 `state.load()` shallow-merges nested state → old saves miss newly-added nested keys (`slaveMarket.available`, `propositioners.*`, `wallet.buzz/wanted`). Fix: deep-merge defaults / extend `migrateLoadedState`. `js/game/state.js`
 - [ ] **IMG.8** 🟡 Mood ladder dead-ends — `acclimating`/`reciprocated` excluded from upgrade lists, `moodPressure` unbounded/no decay. Fix: ordered band table + clamp/decay. `js/game/action-effects.js`
 - [ ] **IMG.9** 🟢 `sessionFailures` only debounces `:profile` — room/hunt/milestone retry doomed gens every render when Pollinations down. `js/game/imaging.js`
 - [ ] **IMG.10** 🟢 Whiskey double flush marker (`bodyStateTokens` line 79 + `drugStateTokens` line 110). Drop the `bodyStateTokens` whiskey branch. `js/game/imaging.js`
-- [ ] **IMG.11** 🟢 `unity_seed` bakes "dilated pupils" into the LOCKED face block → Unity renders coked even sober. Move to drug-state channel. `js/game/girl-gen.js`
+- [x] **IMG.11** ✅ VERIFIED-SHIPPED 2026-06-19 (code-confirmed: no "dilated" in `girl-gen.js` locked face — moved to the drug-state channel) 🟢 `unity_seed` bakes "dilated pupils" into the LOCKED face block → Unity renders coked even sober. Move to drug-state channel. `js/game/girl-gen.js`
 - [ ] **IMG.12** 🟢 Double `clampSeed` (generateFor + buildUrl). Clamp once at URL boundary. `js/game/imaging.js`
 
 ## IMG content escalation (D-review: "more sexual and nasty and extreme and taboo the better")

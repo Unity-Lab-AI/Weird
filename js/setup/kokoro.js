@@ -22,6 +22,27 @@
   // Main-thread fallback state (only used if Worker spawn fails)
   let mainTts = null;
   let mainLoading = false;
+  let warmedUp = false;
+
+  // Fire ONE tiny throwaway synth the instant the model is ready so the FIRST real line skips the
+  // cold-inference penalty (WASM kernel compile + default-voice load) that otherwise stacks on top
+  // of the model load and delays the first spoken response. Result discarded; failures ignored.
+  function maybeWarmup() {
+    if (warmedUp) return;
+    warmedUp = true;
+    setTimeout(() => {
+      try {
+        const voice = cfg().KOKORO.defaultFemaleVoice;
+        if (worker && !mainTts) {
+          const id = ++nextReqId;
+          pending.set(id, { resolve: () => {}, reject: () => {} });
+          worker.postMessage({ type: 'speak', id, text: 'mm', voice, speed: 1.0 });
+        } else if (mainTts) {
+          mainTts.generate('mm', { voice, speed: 1.0 }).catch(() => {});
+        }
+      } catch (e) { /* warmup is best-effort */ }
+    }, 0);
+  }
 
   const listeners = new Set();
   function emit() {
@@ -47,6 +68,7 @@
         ready = true;
         loading = false;
         emit();
+        maybeWarmup();
       } else if (m.type === 'error') {
         lastError = new Error(m.message);
         loading = false;
@@ -191,6 +213,7 @@
       loading = false;
       mainLoading = false;
       emit();
+      maybeWarmup();
     } catch (err) {
       lastError = err;
       loading = false;

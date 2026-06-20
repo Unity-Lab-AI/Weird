@@ -15,7 +15,7 @@
       </div>
 
       ${(() => {
-        // AUTOLOGISTICS.1 — install + configure the auto-supply rig (sliders per kind).
+        // install + configure the auto-supply rig (sliders per kind).
         const sup = window.DMTHGame.supply;
         if (!sup || !sup.logisticsConfig) return '';
         const cfg = sup.logisticsConfig();
@@ -37,26 +37,8 @@
       })()}
 
       <div class="panel">
-        <h2>Available hideouts to acquire</h2>
-        ${window.DMTHAssets.DUNGEONS
-          .filter(t => !dungeons.some(d => d.templateId === t.id))
-          .map(t => {
-            const tooltip = `${t.notes || ''}`.replace(/"/g, '&quot;');
-            return `<div class="model-card" data-tooltip="${tooltip}">
-              <div class="model-name">${t.emoji} ${t.displayName}</div>
-              <div class="model-meta">
-                <span data-tooltip="Purchase cost">$${t.cost.toLocaleString()}</span>
-                <span data-tooltip="Number of captive holds this dungeon provides at base capacity">${t.roomSlots} hold${t.roomSlots === 1 ? '' : 's'}</span>
-                <span data-tooltip="Isolation — how far from civilization. Higher = lower suspicion when transporting captives.">iso ${Math.round((t.isolation || 0.5) * 100)}%</span>
-                <span data-tooltip="Concealment — how hidden from accidental discovery. Higher = lower escape-aftermath notoriety.">conc ${Math.round((t.concealment || 0.5) * 100)}%</span>
-              </div>
-              <div class="model-notes">${t.notes}</div>
-              <div class="asset-slot" data-asset-category="dungeon" data-asset-id="${t.id}" data-asset-size="140"></div>
-              <button class="btn-small ${s.wallet.money >= t.cost ? 'btn-primary' : ''}" data-buy="${t.id}" ${s.wallet.money < t.cost ? 'disabled' : ''} data-tooltip="${s.wallet.money < t.cost ? 'Need $' + t.cost.toLocaleString() + ' — earn more from films + properties.' : 'Buy this hideout. Adds ' + t.roomSlots + ' empty hold' + (t.roomSlots === 1 ? '' : 's') + ' to your portfolio.'}">
-                ${s.wallet.money < t.cost ? 'Insufficient funds' : 'Acquire →'}
-              </button>
-            </div>`;
-          }).join('')}
+        <h2>🏚️ Need another hideout?</h2>
+        <p class="small muted">Buying new dungeons moved to the property storefront. Acquire hideouts (and buy out the town's turf) at <a href="#property">🏚️ Bloodland Holdings</a> in the 🏬 Stores hub — then come back here to install facilities + run upgrades on what you own.</p>
       </div>
     `;
 
@@ -66,7 +48,7 @@
         <div class="model-card">
           <div class="model-name">${tpl?.emoji || '⛓️'} ${tpl?.displayName || d.templateId} <span class="muted small">— ${d.locationDescriptor}</span></div>
           <div class="model-meta">
-            <span data-tooltip="Filled holds / total capacity">${d.holds.filter(h => h.captiveGirlId).length}/${d.capacity} held</span>
+            <span data-tooltip="Cages full of meat / total cages you've got to fill">${d.holds.filter(h => h.captiveGirlId).length}/${d.capacity} held</span>
             <a href="#upgrade?dungeon=${d.id}" class="btn-small" data-tooltip="Configure per-hold upgrade tracks (security / restraints / lights / toys / food / toilet / waterSupply / feedAutomation / bedding / entertainment / decor / climate) + buy more capacity.">⚙️ Upgrades + capacity</a>
           </div>
           ${renderFacilities(d)}
@@ -88,9 +70,9 @@
               const moodEmoji = g?.mood?.moodEmoji ?? '🙂';
               const arch = g?.archetypeTemplate ?? '—';
               const holdType = h.holdType || 'cell';
-              return `<div class="hold-slot ${g ? 'filled' : 'empty'}" data-tooltip="${g ? displayName + ' — L' + bondLevel + ' Stockholm rating, ' + arch + '. Click to enter her hold.' : 'Empty ' + holdType + ' hold. Assign a captive on successful hunt.'}">
+              return `<div class="hold-slot ${g ? 'filled' : 'empty'}" data-tooltip="${g ? displayName + ' — Level ' + bondLevel + ' Stockholm rating, ' + arch + '. Click to enter her hold.' : 'Empty ' + holdType + ' cage — drag a fresh girl back from the hunt to fill it.'}">
                 ${g
-                  ? `<a href="#room?girl=${g.id}">${moodEmoji} ${displayName} <span class="muted small">L${bondLevel}</span></a>`
+                  ? `<a href="#room?girl=${g.id}">${moodEmoji} ${displayName} <span class="muted small">Level ${bondLevel}</span></a>`
                   : `<span class="muted small">hold ${i+1} · empty · ${holdType}</span>`
                 }
               </div>`;
@@ -103,29 +85,35 @@
     function renderFacilities(d) {
       const ops = window.DMTHGame.dungeonOps;
       if (!ops || !ops.SECURITY_FACILITIES) return '';
-      const money = s.wallet.money;
+      //  (a) — facilities are BOUGHT at the shop (into inventory), then INSTALLED here.
+      // Installed = ✓; held in inventory = 🔧 Install button (consumes one); none = a shop pointer.
+      const qtyOf = (id) => ops.facilityOwnedQty ? ops.facilityOwnedQty(id) : 0;
       const secRows = Object.entries(ops.SECURITY_FACILITIES).map(([id, f]) => {
         const owned = ops.hasSecurity(d, id);
+        const qty = qtyOf(id);
         const tip = `${f.notes} (+${Math.round((f.containment||0)*100)}% containment, −${(f.wantedReduction||0).toFixed(2)} WANTED/tick)`.replace(/"/g, '&quot;');
         if (owned) return `<span class="ok small" data-tooltip="${tip}">✓ ${f.displayName}</span>`;
-        return `<button class="btn-small" data-buy-sec="${id}" data-dungeon="${d.id}" ${money < f.cost ? 'disabled' : ''} data-tooltip="${tip}">${f.displayName} — $${f.cost.toLocaleString()}</button>`;
+        if (qty > 0) return `<button class="btn-small btn-primary" data-install-sec="${id}" data-dungeon="${d.id}" data-tooltip="${tip} · Install one from your inventory (you hold ${qty}).">🔧 Install ${f.displayName} <span class="muted">(inv ${qty})</span></button>`;
+        return `<span class="small muted" data-tooltip="${tip} · Buy it at 🏴 The Defilers' Bloc, then install it here.">${f.displayName} — buy at <a href="#shop?sub=dungeon-upgrade">shop</a> ($${f.cost.toLocaleString()})</span>`;
       }).join(' ');
       const dispRows = Object.entries(ops.DISPOSAL_FACILITIES || {}).map(([id, f]) => {
         const owned = ops.hasFacility(d, f.facilityKey);
+        const qty = qtyOf(id);
         const tip = `${f.notes}`.replace(/"/g, '&quot;');
         if (owned) return `<span class="ok small" data-tooltip="${tip}">✓ ${f.displayName}</span>`;
-        return `<button class="btn-small" data-buy-disp="${id}" data-dungeon="${d.id}" ${money < f.cost ? 'disabled' : ''} data-tooltip="${tip}">${f.displayName} — $${f.cost.toLocaleString()}</button>`;
+        if (qty > 0) return `<button class="btn-small btn-primary" data-install-disp="${id}" data-dungeon="${d.id}" data-tooltip="${tip} · Install from your inventory (you hold ${qty}).">🔧 Install ${f.displayName} <span class="muted">(inv ${qty})</span></button>`;
+        return `<span class="small muted" data-tooltip="${tip} · Buy it at 🏴 The Defilers' Bloc, then install it here.">${f.displayName} — buy at <a href="#shop?sub=dungeon-upgrade">shop</a> ($${f.cost.toLocaleString()})</span>`;
       }).join(' ');
       return `<div class="facilities small" style="margin:6px 0">
-        <div class="muted" data-tooltip="Dungeon-wide security — suppresses escape-risk + auto-contains breaks once invested. Guard dog is just one option.">🔒 Containment: ${secRows}</div>
-        <div class="muted" style="margin-top:4px" data-tooltip="Build these to unlock the gated disposal methods.">⚱️ Disposal: ${dispRows}</div>
+        <div class="muted" data-tooltip="Dungeon-wide security — suppresses escape-risk + auto-contains breaks once invested. Guard dog is just one option. Buy facilities at the shop, install them here.">🔒 Containment: ${secRows}</div>
+        <div class="muted" style="margin-top:4px" data-tooltip="Buy + install these to unlock the gated disposal methods (incinerator → Incinerate, boat → Lose at Sea).">⚱️ Disposal: ${dispRows}</div>
       </div>`;
     }
 
     // Lazy-load any cover images dropped into asset folders
     if (window.DMTHAssetImg) window.DMTHAssetImg.decorate(el, 140);
 
-    // AUTOLOGISTICS.1 — install / toggle / configure the auto-supply rig.
+    // install / toggle / configure the auto-supply rig.
     const buyLog = el.querySelector('#buy-logistics');
     if (buyLog) buyLog.onclick = () => { const r = window.DMTHGame.supply.unlockLogistics(); if (!r.ok) { alert(r.reason); return; } window.DMTHRouter.handle(); };
     const logEnabled = el.querySelector('#log-enabled');
@@ -140,16 +128,18 @@
       };
     });
 
-    el.querySelectorAll('[data-buy-sec]').forEach(b => {
+    el.querySelectorAll('[data-install-sec]').forEach(b => {
       b.onclick = () => {
-        try { window.DMTHGame.dungeonOps.buySecurityFacility(b.dataset.dungeon, b.dataset.buySec); window.DMTHRouter.handle(); }
-        catch (e) { alert(e.message); }
+        const r = window.DMTHGame.dungeonOps.installSecurityFacility(b.dataset.dungeon, b.dataset.installSec);
+        if (!r.ok) { alert(r.reason); return; }
+        window.DMTHRouter.handle();
       };
     });
-    el.querySelectorAll('[data-buy-disp]').forEach(b => {
+    el.querySelectorAll('[data-install-disp]').forEach(b => {
       b.onclick = () => {
-        try { window.DMTHGame.dungeonOps.buyDisposalFacility(b.dataset.dungeon, b.dataset.buyDisp); window.DMTHRouter.handle(); }
-        catch (e) { alert(e.message); }
+        const r = window.DMTHGame.dungeonOps.installDisposalFacility(b.dataset.dungeon, b.dataset.installDisp);
+        if (!r.ok) { alert(r.reason); return; }
+        window.DMTHRouter.handle();
       };
     });
 
@@ -158,7 +148,7 @@
         const tplId = b.dataset.buy;
         const tpl = window.DMTHAssets.getById('dungeon', tplId);
         if (!window.DMTHGame.state.spendMoney(tpl.cost, `buy-dungeon:${tplId}`)) {
-          alert('Insufficient funds'); return;
+          alert(window.DMTHGame.state.brokeLine ? window.DMTHGame.state.brokeLine() : 'broke'); return;
         }
         const id = 'dun_' + Date.now().toString(36);
         window.DMTHGame.state.addDungeon({

@@ -21,7 +21,7 @@
   // Each module load resets the anchor to Date.now(), so realDelta is measured
   // from the boot of THIS tab session.
   let anchorRealMs = null;
-  // PAUSE.1 — when paused, game time FREEZES: now() stops advancing and the tick is gated
+  // when paused, game time FREEZES: now() stops advancing and the tick is gated
   // (tick.js early-returns), so escapes / decay / johns / raids all halt while the player
   // steps away with the tab open. Closing the tab already freezes time (the anchor isn't
   // persisted), so this covers the "tab open but walked away" case + an explicit stop.
@@ -57,6 +57,18 @@
     const realDeltaSec = Math.max(0, (Date.now() - anchorRealMs) / 1000);
     s.gameMinutes += realDeltaSec;
     anchorRealMs = Date.now();
+  }
+
+  // burn an EXPLICIT chunk of game-time forward (a physical act consumes time:
+  // a kiss ~1 min, a torture session ~hours). Distinct from advanceFromTick (which folds in the
+  // real-clock delta): this jumps gameMinutes by an explicit game-minute amount. The real-time
+  // anchor is left untouched, so the next now()/advanceFromTick stays correct (no double-count).
+  // Works even while paused — the player chose to spend that time. Returns the minutes burned.
+  function advanceBy(minutes) {
+    const s = ensureSeed();
+    if (!s || !(minutes > 0)) return 0;
+    s.gameMinutes += minutes;
+    return minutes;
   }
 
   // Freeze the clock — bakes the elapsed real-time delta into gameMinutes, then stops.
@@ -129,6 +141,7 @@
   window.DMTHGame.gameClock = Object.freeze({
     now,
     advanceFromTick,
+    advanceBy,
     pause, resume, isPaused,
     daysSince,
     minutesToDays,
