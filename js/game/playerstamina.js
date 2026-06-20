@@ -1,4 +1,4 @@
-// DUNGEON MASTER: THE HUNT — PLAYERSTAM.1: the player's "💦 Nut Reserve".
+// DUNGEON MASTER: THE HUNT — the player's "💦 Nut Reserve".
 //
 // A depraved-named player resource (NOT "stamina"): every act you perform on a girl spends it,
 // it regenerates each tick at a brisk rate (no sitting-and-waiting), and refill items (viagra /
@@ -60,7 +60,7 @@
   function refill(amount) { set(Math.min(MAX, get() + (amount || 0))); }
   function refillFull() { set(MAX); }
 
-  // PLAYERSTAM.2 — refill items. Any catalog item with a numeric `playerRefill` tops up the
+  // Refill items. Any catalog item with a numeric `playerRefill` tops up the
   // reserve (999 = full). Owned ones surface as quick "pop" buttons by the dashboard bar.
   function refillItemDefs() {
     const items = (window.DMTHAssets && window.DMTHAssets.ITEMS) || [];

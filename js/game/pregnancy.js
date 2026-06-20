@@ -15,9 +15,10 @@
 //   }
 //
 // Conception: fired from delta.applyDelta() when cumLoad crosses ~1.0 in a turn (semen
-// delivery proxy) AND outfit ID is not 'condom-on' AND bond.bondLevel < 9 (fully-bonded
-// captives use birth-control off-screen). Conception chance modulated by fertility curve
-// (peaks mid-cycle, simplified to a flat base + per-drug protection factor).
+// delivery proxy) AND no blocking condom is on AND she is NOT covered by a stocked birth-control
+// pill (a captive auto-takes one when pills are stocked in her hold / the dungeon pool — one pill
+// = two game-days of protection, re-taken the instant it lapses, no gap). Conception chance is
+// modulated by a fertility curve (simplified to a flat base + per-drug protection factor).
 //
 // Abortion methods (catalog items, see catalog.js entries shipped with this milestone):
 //   - condom            $2/stack  — preventive (worn as wardrobe; not technically abort)
@@ -70,6 +71,48 @@
   }
 
   // -----------------------------------------------------------------------
+  // Birth-control pill — stock it in a hold / the dungeon pool and a captive takes one
+  // AUTOMATICALLY whenever she isn't already covered. One pill keeps her off the breeding
+  // track for exactly two game-days; the instant that window lapses she takes another (if any
+  // are stocked) so there is never a tick-gap to conceive in. Max one pill per girl per two days.
+  // -----------------------------------------------------------------------
+  const BIRTH_CONTROL_DURATION_MIN = 2 * 24 * 60;   // two game-days = 2880 game-minutes
+  function gameMin() { return window.DMTHGame.gameClock ? window.DMTHGame.gameClock.now() : 0; }
+
+  // Is she currently covered by a pill (still inside its two-day window)?
+  function isOnBirthControl(girl) {
+    return !!(girl && girl.birthControlUntil != null && gameMin() < girl.birthControlUntil);
+  }
+
+  // She takes a pill the instant she needs one if any are stocked. Returns true if she ends up
+  // covered (already-covered OR just took one). Consumes one pill (hold first, then pool) and
+  // sets her two-day window. Mutates the passed `girl` object too so a caller re-checking the
+  // same object immediately sees the new coverage (no wiggle room at the conception roll).
+  function takeBirthControlIfNeeded(girl) {
+    if (!girl) return false;
+    if (isOnBirthControl(girl)) return true;            // still covered — no second pill, no waste
+    if (!window.DMTHGame.supply || window.DMTHGame.supply.available(girl, 'birthControl') <= 0) return false;
+    if (window.DMTHGame.supply.draw(girl, 'birthControl', 1) <= 0) return false;
+    const until = gameMin() + BIRTH_CONTROL_DURATION_MIN;
+    girl.birthControlUntil = until;                     // mutate local copy for same-tick re-checks
+    window.DMTHGame.state.updateGirl(girl.id, { birthControlUntil: until });
+    return true;
+  }
+
+  // Per-tick top-up — keep every captive covered the moment her window lapses (if pills stocked),
+  // so her status reads "on the pill" and the protection is continuous with no gap.
+  function tickBirthControl() {
+    const s = window.DMTHGame.state.current;
+    if (!s || !Array.isArray(s.roster)) return;
+    for (const g of s.roster) {
+      if (g.encounterState && g.encounterState !== 'captive') continue;
+      if (isPregnant(g)) continue;                      // pointless on an already-pregnant girl
+      if (isOnBirthControl(g)) continue;
+      takeBirthControlIfNeeded(g);
+    }
+  }
+
+  // -----------------------------------------------------------------------
   // Conception
   // -----------------------------------------------------------------------
 
@@ -117,7 +160,7 @@
 
     // Gate: outfit must not be a condom wardrobe entry (none ship in catalog yet — leave
     // open hook for the 'condom-equipped' wardrobe item to land later).
-    // Contraception gate (CONDOMS.1) — a BLOCKING condom stops conception; a holed/sabotaged
+    // Contraception gate — a BLOCKING condom stops conception; a holed/sabotaged
     // one (blocks:false) does NOT, so breeding still takes.
     const condomBlocks = window.DMTHGame.condoms
       ? window.DMTHGame.condoms.blocks(girl)
@@ -126,22 +169,25 @@
       return { rolled: false, reason: 'condom equipped' };
     }
 
-    // Gate: fully-bonded captives (L9) use birth-control off-screen unless source is forced.
-    const bondLevel = girl?.bond?.bondLevel || 0;
-    if (bondLevel >= 9 && opts?.conceptionSource !== 'whore-out') {
-      return { rolled: false, reason: 'fully-bonded captive uses contraception off-screen' };
+    // Gate: birth-control pill. If pills are stocked in her hold / the dungeon pool she takes one
+    // the instant she isn't already covered — so the moment a prior pill's two-day window lapses,
+    // a new one is taken right here before any breeding roll. No wiggle room: stocked pills = no
+    // pregnancy, with zero gap. (No off-screen Stockholm/bond contraception — that was never asked
+    // for and is gone; only an actual stocked pill protects her.)
+    if (takeBirthControlIfNeeded(girl)) {
+      return { rolled: false, reason: 'on birth control' };
     }
 
-    // Consistency-based conception (Gee): 3-4 game-days of consistent cum-inside should
+    // Consistency-based conception: 3-4 game-days of consistent cum-inside should
     // reliably breed her. Each qualifying cum-inside event raises a persistent breedingExposure
     // counter; the chance escalates with it so sustained breeding becomes near-certain, while a
     // one-off is far from guaranteed. Exposure persists across misses, resets on conception.
     const exposure = (preg.breedingExposure || 0) + 1;
-    // SPECIALIZE.1 — a 🐎 brood-mare conceives more readily.
+    // A 🐎 brood-mare conceives more readily.
     const fertility = window.DMTHGame.specialize ? window.DMTHGame.specialize.fertilityMultiplier(girl) : 1;
     const chance = Math.min(0.95, (0.16 + exposure * 0.12) * drugProtectionFactor(girl) * fertility);
     const roll = Math.random();
-    // CUMFILL.1 — the sustained vaginal cum-fill timer (tickCumFill) calls this with
+    // The sustained vaginal cum-fill timer (tickCumFill) calls this with
     // guaranteed:true once she's been kept filled long enough, so conception is the payoff of
     // maintained breeding rather than a per-event dice roll. The condom / L9 / already-pregnant
     // gates above still apply regardless.
@@ -180,7 +226,7 @@
   }
 
   // -----------------------------------------------------------------------
-  // CUMFILL.1 — vaginal cum-fill → sustained-fill preggo timer
+  // Vaginal cum-fill → sustained-fill preggo timer
   // -----------------------------------------------------------------------
   // ONLY cum deposited in the vagina raises this meter (anal / oral / ass-rape don't), so only
   // vaginal breeding can make her pregnant. The fill LEAKS over time, so she has to be kept
@@ -373,9 +419,9 @@
   // Full-term outcome resolver
   // -----------------------------------------------------------------------
 
-  // NEWBORN.2 — the "mass" can't join the harem, so the player CHOOSES how to get rid of it.
+  // The "mass" can't join the harem, so the player CHOOSES how to get rid of it.
   // Each method has unique trade-offs: money / WANTED / notoriety / the mother's mind / DEPRAVITY
-  // XP / facility + level gates. Gee's seeds (dumpster / firehouse / trafficking / incinerator)
+  // XP / facility + level gates (dumpster / firehouse / trafficking / incinerator)
   // PLUS expanded depraved options. money is a [min,max] range ([0,0] = none).
   const NEWBORN_METHODS = Object.freeze({
     'dumpster':      { displayName: 'Dumpster Drop',               emoji: '🗑️', money: [0, 0],       wanted: 2,  notoriety: 1, motherMood: -2,  xp: 4,  notes: 'Quick and cold — out with the trash. No benefit, low heat. The auto-default if you dawdle.' },
@@ -472,7 +518,7 @@
       outcomeHistory: [...(preg.outcomeHistory || []), { status: 'delivered', day: preg.gestationDays, method: null, ts: Date.now(), notes: `${girl.name} delivered — newborn awaiting disposal` }]
     };
     window.DMTHGame.state.updateGirl(girlId, { pregnancy: newPreg });
-    // MILKBAL.1 — delivery opens her postpartum lactation window ("a few days after birth",
+    // Delivery opens her postpartum lactation window ("a few days after birth",
     // extended for a big-tits girl), so her breasts keep producing milk after she's birthed.
     if (window.DMTHGame.milk?.startPostpartum) window.DMTHGame.milk.startPostpartum(girlId);
     if (window.DMTHNotify) {
@@ -485,7 +531,7 @@
   // Tick advancement
   // -----------------------------------------------------------------------
 
-  // Days-per-tick for gestation advancement. Pace target (Gee): 2 GAME DAYS per trimester →
+  // Days-per-tick for gestation advancement. Pace target: 2 GAME DAYS per trimester →
   // 6 game days to full term. 48 ticks per game day → 288 ticks per full term. Full term is
   // 280 gestation-days, so per-tick advance is 280/288 ≈ 0.972. The internal 0-280 scale is
   // kept (it drives the fine-grained abortion windows + the trimester image tiers); only the
@@ -500,7 +546,7 @@
     for (const girl of s.roster) {
       if (girl.encounterState !== 'captive') continue;
       const preg = getPregnancy(girl);
-      // NEWBORN.2 — a delivered newborn awaiting disposal auto-dumpsters if ignored too long.
+      // A delivered newborn awaiting disposal auto-dumpsters if ignored too long.
       if (preg.status === 'delivered' && preg.pendingNewbornDisposal) {
         if (preg.deliveredAt && (Date.now() - preg.deliveredAt) > NEWBORN_AUTO_MS) {
           disposeNewborn(girl.id, 'dumpster', { auto: true });
@@ -517,7 +563,7 @@
       // one is horrified by it — being bred against her will rots her mood + spikes bond-debt.
       const bond = girl.bond?.bondLevel || 0;
       const patch = { pregnancy: { ...preg, gestationDays: newDays, trimester: newTrimester } };
-      // PREGNEED.1 (Gee) — a pregnant girl eats for two: extra food drain on top of the normal
+      // A pregnant girl eats for two: extra food drain on top of the normal
       // consumable tick (neglect her food and the starvation penalty bites faster while preggo).
       if (girl.consumables && girl.consumables.food) {
         const cons = JSON.parse(JSON.stringify(girl.consumables));
@@ -594,6 +640,9 @@
     getPregnancy,
     isPregnant,
     trimesterFromDays,
+    isOnBirthControl,
+    takeBirthControlIfNeeded,
+    tickBirthControl,
     attemptConception,
     addVaginalCum,
     tickCumFill,

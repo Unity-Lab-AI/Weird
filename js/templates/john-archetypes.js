@@ -210,7 +210,7 @@
     }
   });
 
-  // FRIENDS.1/.2 — "friends" are special recurring visitors, RARER and FAR more extreme than
+  // /.2 — "friends" are special recurring visitors, RARER and FAR more extreme than
   // normal johns. When the player toggles them on for a girl, a slice of arrivals become a
   // friend who uses an EXTREME act and a unique near-kill ability — a direct ~40-60 health drop
   // (he'll nearly kill her). Pays a fortune. Every friend visit is logged to her history for the
@@ -228,7 +228,7 @@
       displayName: 'The Surgeon', arrivalWeight: 8, payRange: [450, 800],
       healthDrop: [35, 50], bruisesAdded: 3, johnActionId: 'masochist-overload',
       permittedActsPreference: ['toys', 'pain', 'humiliation'],
-      chamberToy: 'breast-ripper',   // FRIENDTOY.1 — brings his own chamber-grade implement
+      chamberToy: 'breast-ripper',   // brings his own chamber-grade implement
       ability: 'brings his own instruments and opens her up clinical and slow',
       dialogueTone: 'cold, invasive, talks her through every cut'
     },
@@ -252,7 +252,7 @@
       displayName: 'The Collector', arrivalWeight: 6, payRange: [500, 900],
       healthDrop: [30, 45], bruisesAdded: 4, johnActionId: 'extreme-degrade',
       permittedActsPreference: ['humiliation', 'sex-rough', 'toys'],
-      chamberToy: 'pear-of-anguish',   // FRIENDTOY.1 — brings the worst chamber implement
+      chamberToy: 'pear-of-anguish',   // brings the worst chamber implement
       ability: 'marks and ruins her like he\'s claiming a trophy, wants a piece of her to keep',
       dialogueTone: 'collector\'s patience, cataloguing every part of her out loud as he wrecks it'
     },
@@ -272,7 +272,7 @@
       ability: 'two of them at once, never giving her a second\'s rest between holes',
       dialogueTone: 'finishing each other\'s sentences, egging each other on over her'
     },
-    // FRIENDKILL.1 — the snuff specialist. The rarest, highest-paying friend, and the only one
+    // the snuff specialist. The rarest, highest-paying friend, and the only one
     // who comes to FINISH her: if she's already low enough that his debuff crosses her remaining
     // health, he kills her on camera (the lethal-finish gate in whore-out resolves it). `lethal`
     // marks him as a deliberate executioner; `killLine` is his signature end. A massive payout +
@@ -287,7 +287,7 @@
       dialogueTone: 'calm, surgical, almost bored — he\'s carved up more girls than he can count'
     }
   });
-  // FRIENDKINK.1 (Gee) — each friend has a UNIQUE kink + dislike matched against the GIRL's traits
+  //   — each friend has a UNIQUE kink + dislike matched against the GIRL's traits
   // that swing his payment + loot: "u dont want to put a nazi frined in with a black person, or hell
   // maybe the nazi guy has a kink for dark meat". A kink-match → premium pay + extra loot; a
   // dislike-hit → slashed pay + worse loot (and some bigots will outright refuse). One of MANY — add
@@ -301,11 +301,58 @@
     'the-collector':   { kink: { tags: ['black', 'asian', 'indian', 'middle-eastern', 'mixed'], payMult: 1.5, lootBonus: 2, note: 'a collector\'s fetish for exotic + dark meat' }, dislike: { tags: ['white'], payMult: 0.85, lootBonus: 0, note: 'a plain white one bores his collection' } },
     'the-priest':      { kink: { tags: ['library', 'innocent'], payMult: 1.45, lootBonus: 1, note: 'a defrocked hunger to ruin the innocent + pure' }, dislike: { tags: ['high-bond', 'whore'], payMult: 0.7, lootBonus: -1, note: 'no thrill in one already corrupted' } },
     'the-twins':       { kink: { tags: ['teen', 'sorority'], payMult: 1.4, lootBonus: 1, note: 'both of them want the youngest, freshest one' }, dislike: { tags: ['milf', 'preggo'], payMult: 0.75, lootBonus: 0, note: 'pass on an older or pregnant one' } },
-    // The Executioner is a bigot (Gee's "nazi friend") — he pays POORLY on a non-white girl and will
+    // The Executioner is a bigot  — he pays POORLY on a non-white girl and will
     // often REFUSE to touch her; he pays a premium for a white/blonde one. Putting him on a black or
     // latina girl is a costly mistake.
     'the-executioner': { kink: { tags: ['white'], payMult: 1.3, lootBonus: 1, note: 'a supremacist preference for a white girl' }, dislike: { tags: ['black', 'latina', 'middle-eastern', 'indian', 'mixed', 'asian'], payMult: 0.5, lootBonus: -2, refuseChance: 0.45, note: 'a vicious bigot — he despises a non-white girl, pays scraps, often refuses outright' } }
   });
+
+  //   — each friend has a PERSISTENT visual BUILD so he renders as the SAME man
+  // every time he crawls back, feeding both image-prompt injection (the secondary figure in her
+  // whore-out / gangbang pic) and chat-prompt injection (the model voices him knowing his look).
+  // Deterministic per archetype = persistent by construction (no per-instance storage needed). Kept
+  // CONCISE (the image model fixates if overloaded) + dash-grouped per the DASHGROUP rule + EXTREME/
+  // taboo per the game. NO genital focus — men crop waist-out / implied (the biological-male image
+  // rule); the menace is face / build / marks / what he wears + carries.
+  const FRIEND_APPEARANCE = Object.freeze({
+    'the-butcher':      'a hulking shaven-headed brute, dead-flat eyes, a blood-stained rubber butcher-apron over a bare scarred barrel-chest, thick meat-cutter forearms',
+    'the-surgeon':      'a gaunt tall pale man in blood-flecked surgical scrubs, latex gloves, a surgical mask pulled down under cold clinical eyes, wire-rimmed glasses',
+    'the-pack':         'a crew of rough unshaven men in stained wifebeaters, prison-ink crawling up their necks, crowding in jeering and grinning',
+    'the-strangler':    'a wiry sinewy man in tight black leather gloves, hollow fixated stare, a thin cruel mouth, propane-veined forearms flexed',
+    'the-collector':    'a lean fastidious older man in a tweed-and-leather coat, gloved hands, predatory patient eyes cataloguing her, a trophy-hunter\'s calm',
+    'the-priest':       'a gaunt sweating defrocked priest, a black cassock hanging open over a bare bony chest, an upside-down crucifix, fevered hollow eyes',
+    'the-twins':        'two identical broad shaven-headed men, matching cold flat grins, moving in mirrored sync',
+    'the-executioner':  'a massive man in a blood-slick rubber apron and a blank black gas-mask, heavy gloved hands, a bonesaw and a long blade hung at his belt, utterly calm dead eyes'
+  });
+  // Generic john builds — a small pool so a NAMED john ("Marcus") renders consistently within a
+  // scene (deterministic by his name). Plain, seedy, forgettable men — the girl stays the subject.
+  const JOHN_BUILDS = Object.freeze([
+    'a heavyset balding middle-aged man, sweat-sheened, gut hanging over his belt',
+    'a wiry twitchy man with greasy thinning hair and a patchy beard, darting eyes',
+    'a lean older man in a rumpled cheap suit, wedding ring, nervous jowls',
+    'a stocky tattooed trucker in a grease-stained flannel, three-day stubble',
+    'a soft pudgy office-drone with glasses and a damp comb-over, pasty skin',
+    'a tall gaunt rough-handed laborer, leathery sunburnt neck, dead tired eyes',
+    'a young cocky gym-rat in a tight tank, backwards cap, smirking',
+    'a grizzled grey-bearded biker, leather vest, scarred knuckles'
+  ]);
+  // Resolve an NPC's persistent appearance. Friend → his archetype build; john → a deterministic
+  // pick from JOHN_BUILDS by his name (so the same name looks the same). creepLevel (friends) adds
+  // a scaled menace suffix so a high-creep regular looks more battle-worn + marked the more he returns.
+  function appearanceFor(npc, creepLevel) {
+    if (!npc) return '';
+    let base;
+    if (npc.isFriend) base = FRIEND_APPEARANCE[npc.archetype] || 'a hulking masked man in blood-stained gear';
+    else {
+      const nm = String(npc.name || 'john');
+      let h = 0; for (let i = 0; i < nm.length; i++) h = (h * 31 + nm.charCodeAt(i)) >>> 0;
+      base = JOHN_BUILDS[h % JOHN_BUILDS.length];
+    }
+    const cl = creepLevel || 0;
+    if (npc.isFriend && cl >= 7) base += ', scarred and grizzled from a long body-count, utterly unhurried';
+    else if (npc.isFriend && cl >= 4) base += ', visibly hardened, marked from repeat visits';
+    return base;
+  }
 
   // Derive the trait tokens a girl exposes for friend-kink matching.
   function girlTraitTokens(girl) {
@@ -351,6 +398,62 @@
     return out;
   }
 
+  //   — NPC TRAITS. The rare, high-powered ones are what keep a DECAYING
+  // corpse in service: as she rots, ordinary clients refuse outright, and only a trait-bearer will
+  // still use her — the deeper the rot, the bigger the premium that rare trait commands. JOHNS
+  // RARELY roll a high-powered trait; FRIENDS carry them far more often (some are masochists/
+  // necrophiles by nature). A fresh body anyone uses; a pile of bones is cents to a stray degenerate
+  // but HIGH DOLLAR to the very rare necrophile/masochist.
+  const NPC_TRAITS = Object.freeze(['degenerate', 'masochist', 'necrophile']);   // escalating corpse-tolerance
+  // Friends with an innate corpse-tolerant trait, by archetype — the sickest of the set.
+  const FRIEND_TRAITS = Object.freeze({
+    'the-surgeon':     ['necrophile', 'masochist'],   // a clinical taste for the helpless + the dead
+    'the-priest':      ['masochist', 'degenerate'],
+    'the-collector':   ['necrophile', 'degenerate'],
+    'the-butcher':     ['degenerate'],
+    'the-executioner': ['necrophile']
+  });
+  // Roll the traits an NPC carries. A JOHN rarely has a high-powered trait (~8% degenerate, ~3%
+  // masochist, ~1% necrophile). A FRIEND uses his archetype's innate set + a small extra degenerate
+  // chance. These gate corpse-use willingness + pricing (corpseUseWillingness below).
+  function rollNpcTraits(archetypeId, isFriend, rng) {
+    const r = rng || Math.random;
+    if (isFriend) {
+      const innate = (FRIEND_TRAITS[archetypeId] || []).slice();
+      if (r() < 0.2 && !innate.includes('degenerate')) innate.push('degenerate');
+      return innate;
+    }
+    const t = [];
+    if (r() < 0.08) t.push('degenerate');
+    if (r() < 0.03) t.push('masochist');
+    if (r() < 0.01) t.push('necrophile');
+    return t;
+  }
+  // Will this NPC fuck a corpse at this decay stage, and at what pay multiplier? Stages: fresh (<2
+  // game days) anyone the corpse-use toggle allows; ripe (2-8) + rotted (8-16) only a trait-bearer
+  // (ordinary clients balk), the rot itself commanding a premium for the rare trait; bones (16+) a
+  // stray degenerate pays CENTS while the very rare necrophile/masochist pays HIGH DOLLAR.
+  function corpseUseWillingness(traits, decayDays) {
+    traits = traits || [];
+    const has = t => traits.includes(t);
+    if (decayDays < 2) return { willing: true, payMult: 1.0, note: 'fresh — anyone' };
+    if (decayDays < 8) {
+      if (has('necrophile')) return { willing: true, payMult: 1.4, note: 'ripe — necrophile premium' };
+      if (has('masochist') || has('degenerate')) return { willing: true, payMult: 1.15, note: 'ripe — trait client' };
+      return { willing: false, payMult: 0, note: 'ripe — balks' };
+    }
+    if (decayDays < 16) {
+      if (has('necrophile')) return { willing: true, payMult: 2.2, note: 'rotted — necrophile pays for the rot' };
+      if (has('masochist')) return { willing: true, payMult: 1.8, note: 'rotted — masochist pays for the rot' };
+      return { willing: false, payMult: 0, note: 'rotted — only a trait fiend will touch it' };
+    }
+    // bones
+    if (has('necrophile')) return { willing: true, payMult: 3.0, note: 'bones — rare high-dollar necrophile' };
+    if (has('masochist')) return { willing: true, payMult: 2.4, note: 'bones — rare high-dollar masochist' };
+    if (has('degenerate')) return { willing: true, payMult: 0.08, note: 'bones — a stray degenerate pays cents' };
+    return { willing: false, payMult: 0, note: 'bones — no one' };
+  }
+
   function rollFriendArchetype(rng) {
     const entries = Object.entries(FRIEND_ARCHETYPES);
     const total = entries.reduce((t, [, a]) => t + (a.arrivalWeight || 0), 0);
@@ -359,7 +462,7 @@
     return entries[entries.length - 1][0];
   }
 
-  // NPC-IDENT.1 — johns + friends need an identity so a multi-party scene can name them and the
+  // johns + friends need an identity so a multi-party scene can name them and the
   // model knows WHO the player is addressing ("tell Marcus to..."). Mint a name + pronouns per
   // encounter. Johns get a first name; friends keep their archetype title ("The Butcher") as the
   // recognizable handle but still carry a name + pronouns for dialogue.
@@ -382,7 +485,12 @@
       archetype: archetypeId,
       isFriend,
       // What the player + model SEE/address him by — a friend leads with his title, a john by name.
-      handle: isFriend ? `${title} (${name})` : `${name} the ${title.toLowerCase()}`
+      handle: isFriend ? `${title} (${name})` : `${name} the ${title.toLowerCase()}`,
+      // his PERSISTENT visual build, carried on the minted identity so image + chat
+      // injection render the same man every time. Friend → archetype build; john → name-deterministic.
+      appearance: appearanceFor({ archetype: archetypeId, isFriend, name }, opts.creepLevel),
+      // the traits he carries, gating his corpse-use willingness + pricing.
+      traits: rollNpcTraits(archetypeId, isFriend, opts.rng)
     };
   }
 
@@ -424,13 +532,20 @@
     JOHN_ARCHETYPES,
     FRIEND_ARCHETYPES,
     FRIEND_KINKS,
+    FRIEND_APPEARANCE,
+    JOHN_BUILDS,
     JOHN_NAMES,
     NPC_PRONOUNS,
     mintNpcIdentity,
+    appearanceFor,
     rollJohnArchetype,
     rollFriendArchetype,
     rollJohnActs,
     girlTraitTokens,
-    friendMatch
+    friendMatch,
+    NPC_TRAITS,
+    FRIEND_TRAITS,
+    rollNpcTraits,
+    corpseUseWillingness
   });
 })();

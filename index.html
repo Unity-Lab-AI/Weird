@@ -11,7 +11,7 @@
   <meta http-equiv="Expires" content="0" />
 
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
-  <link rel="stylesheet" href="css/landing.css" />
+  <link rel="stylesheet" href="css/landing.css?v=20260620140000" />
   <style>
     /* Public landing page sectioning. Each top-level section is anchor-routed via
        simple hash-based show/hide; default route = home. */
@@ -46,29 +46,28 @@
 <body>
 
   <!-- Env injection — optional, gitignored. No failure if absent. -->
-  <script src="js/env.local.js" onerror="console.debug('[env] no env.local.js — normal for deploy')"></script>
+  <script src="js/env.local.js?v=20260620140000" onerror="console.debug('[env] no env.local.js — normal for deploy')"></script>
 
   <!-- Age verification + legal acceptance gate — first thing that fires. -->
-  <script src="js/ui/age-gate.js"></script>
+  <script src="js/ui/age-gate.js?v=20260620140000"></script>
 
   <!-- Core config + modules. Non-module scripts in load-dependency order. -->
-  <script src="js/config.js"></script>
-  <script src="js/storage.js"></script>
-  <script src="js/voices/catalog.js"></script>
-  <script src="js/templates/ollama-templates.js"></script>
-  <script src="js/assets/catalog.js"></script>
-  <script src="js/assets/loader.js"></script>
-  <script src="js/setup/detector.js"></script>
-  <script src="js/setup/installer.js"></script>
-  <script src="js/setup/models.js"></script>
-  <script src="js/setup/ollama-repair.js"></script>
-  <script src="js/setup/kokoro.js"></script>
-  <script src="js/ui/ollama-repair-overlay.js"></script>
+  <script src="js/config.js?v=20260620140000"></script>
+  <script src="js/storage.js?v=20260620140000"></script>
+  <script src="js/voices/catalog.js?v=20260620140000"></script>
+  <script src="js/templates/ollama-templates.js?v=20260620140000"></script>
+  <script src="js/assets/catalog.js?v=20260620140000"></script>
+  <script src="js/assets/loader.js?v=20260620140000"></script>
+  <script src="js/setup/detector.js?v=20260620140000"></script>
+  <script src="js/setup/installer.js?v=20260620140000"></script>
+  <script src="js/setup/models.js?v=20260620140000"></script>
+  <script src="js/setup/ollama-repair.js?v=20260620140000"></script>
+  <script src="js/setup/kokoro.js?v=20260620140000"></script>
+  <script src="js/ui/ollama-repair-overlay.js?v=20260620140000"></script>
 
   <!-- Hero -->
   <header class="hero">
     <div class="version" id="game-version">v0.0.1</div>
-    <button id="open-settings-btn" title="Settings">⚙️ Settings</button>
     <h1 id="game-title">DUNGEON MASTER: THE HUNT</h1>
     <p class="tag" id="game-tagline">persistent city-builder — dungeon harem evil taboo — hunt your prey</p>
   </header>
@@ -97,12 +96,8 @@
       <div class="home-hub">
         <button class="hub-tile hub-primary" id="cta-start-new-game"><span class="ico">🎬</span><span class="lbl">Start New Game</span><span class="sub">begin a fresh dungeon</span></button>
         <button class="hub-tile" id="cta-continue-game" disabled><span class="ico">⏵</span><span class="lbl">Continue Game</span><span class="sub">resume your save</span></button>
-        <button class="hub-tile" id="cta-open-settings"><span class="ico">⚙️</span><span class="lbl">Settings</span><span class="sub">model · voice · keys</span></button>
-        <a class="hub-tile" href="#setup"><span class="ico">⚡</span><span class="lbl">Setup Wizard</span><span class="sub">get Ollama running</span></a>
-        <a class="hub-tile" href="wiki.html"><span class="ico">📖</span><span class="lbl">Wiki</span><span class="sub">full gameplay reference</span></a>
         <a class="hub-tile" href="doc.html?f=README.md&amp;t=Readme"><span class="ico">📘</span><span class="lbl">Readme</span><span class="sub">what this is + systems</span></a>
         <a class="hub-tile" href="doc.html?f=SETUP-README.md&amp;t=Setup+Guide"><span class="ico">🛠</span><span class="lbl">Setup Guide</span><span class="sub">install · run · deploy</span></a>
-        <a class="hub-tile" href="#about"><span class="ico">ℹ️</span><span class="lbl">About</span><span class="sub">the game + the crew</span></a>
       </div>
 
       <p class="closing">
@@ -168,7 +163,7 @@
         <h2>ℹ️ How this works</h2>
         <p class="small">
           Everything in <strong>DUNGEON MASTER: THE HUNT</strong> runs <strong>on your machine</strong>.
-          The static site you're looking at is served from GitHub Pages — zero backend.
+          The static site you're looking at is served as a plain static site — zero backend.
           <strong>Ollama</strong> runs your local LLM (the girls' minds).
           <strong>Kokoro</strong> runs in your browser for voice (models cached in your browser storage).
           <strong>Pollinations</strong> (optional) generates images via your own key.
@@ -197,6 +192,7 @@
         <li><b>Interact</b> — real Ollama-powered dialogue with persistent body state, drugs + addiction, mood, Stockholm bond, ownership marks, and a roomful of toys/implements you mount per hold</li>
         <li><b>Progress</b> — every act feeds your DEPRAVITY level, which gates the heaviest depravities (branding, extreme acts, nugget-making, dismemberment, snuff); pay a fee to unlock tiers early</li>
         <li><b>Record / earn</b> — record any session as a film; films sell on the content market forever; rent captives to johns (gentle → sadistic, who use your stocked toys + drugs); farm milk; sell harvested body parts</li>
+        <li><b>Bankroll the operation</b> — a vault + carried pocket cash, usable credit cards, loan sharks, and queueable shady gigs (rob / break-in / kidnap); buy hideouts and own the town's turf at the property den; manage law-heat with a dirty-cop payroll</li>
         <li><b>Sell / dispose / retire</b> — slave-market trades, transport captives (or corpses) between dungeons, snuff into a postmortem corpse, dispose by many methods, and keep one of her 1–3 keepsakes as a permanent-buff trophy</li>
         <li><b>Survive</b> — keep her escape-risk down and stay under the WANTED line; raids hit at high heat — pre-buy a lawyer, dirty-cop connections, or an escape kit, or it's jail = game over</li>
         <li><b>Expand</b> — buy more dungeons, own properties around town, upgrade everything. There is no win state.</li>
@@ -345,7 +341,7 @@
       <h4>Our materials</h4>
       <p>The Service, including its source code, design, layout, brand elements (such as the "UNITYAILAB" wordmark and the gothic-V-D visual system), original prose, original libraries (PolliLibJS and PolliLibPy), and original documentation, is the property of Unity AI Lab or its contributors and is protected by copyright, trademark, and other intellectual-property laws. Where source code is published under an open-source license, that license governs your rights in that code; the open-source license does not extend to brand elements, copy, or content not covered by the license. Nothing in these Terms grants you any right in any Unity AI Lab trademark, service mark, or trade dress without our prior written consent.</p>
       <h4>Third-party materials</h4>
-      <p>The Service relies on, links to, or embeds materials and services owned by third parties — including but not limited to Pollinations, Pollinations' upstream model and infrastructure providers, font foundries (Trajan Pro, Cormorant Garamond, Inter, JetBrains Mono), icon libraries (Font Awesome), front-end libraries (React, Bootstrap, AOS), the GitHub Pages hosting platform, and the visitor-counter service at abacus.jasoncameron.dev. All trademarks, logos, and brand elements of those third parties are the property of their respective owners. Unity AI Lab is not affiliated with Unity Technologies; the "Unity" in "Unity AI Lab" refers to a separate brand.</p>
+      <p>The Service relies on, links to, or embeds materials and services owned by third parties — including but not limited to Pollinations, Pollinations' upstream model and infrastructure providers, font foundries (Trajan Pro, Cormorant Garamond, Inter, JetBrains Mono), icon libraries (Font Awesome), front-end libraries (React, Bootstrap, AOS), the static-site hosting platform, and the visitor-counter service at abacus.jasoncameron.dev. All trademarks, logos, and brand elements of those third parties are the property of their respective owners. Unity AI Lab is not affiliated with Unity Technologies; the "Unity" in "Unity AI Lab" refers to a separate brand.</p>
       <h4>AI-generated outputs</h4>
       <p>Ownership and license rights in AI-generated outputs depend on the model provider, the jurisdiction, and the specific facts of the generation. Unity AI Lab does not assert ownership over the outputs you cause to be generated through the Service and makes no representation about who, if anyone, owns or holds rights in those outputs. You are responsible for understanding the licensing terms of Pollinations and any upstream provider, and for verifying that your use of any output is lawful.</p>
       <h4>Your prompts and submissions</h4>
@@ -356,7 +352,7 @@
       <ul>
         <li><b>Pollinations</b> — the generative AI provider that performs all model inference on behalf of the Service. Their terms of service, privacy practices, and content policies govern your use of those generations. See pollinations.ai.</li>
         <li><b>Pollinations' upstream providers</b> — Pollinations relies on its own model providers, hosting providers, and content-moderation providers, each governed by their own terms.</li>
-        <li><b>GitHub Pages</b> — the static-site hosting platform that serves this Service's pages. See GitHub's site policies.</li>
+        <li><b>Static-site hosting</b> — the platform that serves this Service's static pages, governed by that hosting provider's own site policies.</li>
         <li><b>abacus.jasoncameron.dev</b> — a third-party stateless visitor-counter service used to display an aggregate visitor count on certain pages.</li>
         <li><b>CDN-hosted libraries</b> — including unpkg.com (React, Babel) and Google Fonts.</li>
       </ul>
@@ -455,7 +451,7 @@
         <li>Your chat history, settings, and age-verification flags are kept in your own browser's localStorage. They never leave your device unless you explicitly export them. If you clear your browser data, they are gone.</li>
         <li>We do not use cookies, advertising trackers, analytics pixels, fingerprinting, or third-party retargeting.</li>
         <li>We use a third-party stateless visitor counter (abacus.jasoncameron.dev) to display an aggregate visit number on the home page. It returns a number; it does not return personal data.</li>
-        <li>The Service is hosted on GitHub Pages, which keeps standard server access logs of its own as part of operating the platform.</li>
+        <li>The Service is hosted on a static-site hosting platform, which keeps standard server access logs of its own as part of operating the platform.</li>
         <li>The Service is for adults. Minors should not use it; see the under-18 notice below.</li>
       </ul>
 
@@ -504,10 +500,10 @@
 
       <h3 id="pp-cookies">VIII. Cookies &amp; Similar Technologies</h3>
       <p>Unity AI Lab does not set cookies for analytics, advertising, or behavioral tracking. The Service uses localStorage and sessionStorage (described in Section V) for functional state on your device only. We do not consider these cookies for the purposes of laws that require a cookie banner, but their use is disclosed in this Policy for full transparency.</p>
-      <p>Third-party services that the Service depends on or links to — including font and library CDNs (Google Fonts, unpkg.com), the visitor-counter service, GitHub Pages, and any external link you choose to follow — may set their own cookies on their own domains when your browser contacts them. Those cookies are governed by the privacy policies of those third parties and are outside Unity AI Lab's control.</p>
+      <p>Third-party services that the Service depends on or links to — including font and library CDNs (Google Fonts, unpkg.com), the visitor-counter service, the static-site hosting platform, and any external link you choose to follow — may set their own cookies on their own domains when your browser contacts them. Those cookies are governed by the privacy policies of those third parties and are outside Unity AI Lab's control.</p>
 
       <h3 id="pp-hosting">IX. Hosting &amp; Server Access Logs</h3>
-      <p>The Service's static pages are served from GitHub Pages, which is operated by GitHub, Inc. (github.com/site-policy). As a normal incident of operating any web hosting platform, GitHub may log standard server access information when your browser requests pages — including IP address, request URL, timestamp, User-Agent, and referrer. Unity AI Lab does not have direct read-access to those logs; they are governed by GitHub's privacy and security policies.</p>
+      <p>The Service's static pages are served from a third-party static-site hosting platform. As a normal incident of operating any web hosting platform, the hosting provider may log standard server access information when your browser requests pages — including IP address, request URL, timestamp, User-Agent, and referrer. Unity AI Lab does not have direct read-access to those logs; they are governed by the hosting provider's own privacy and security policies.</p>
       <p>The Cloudflare Worker proxy described in Section VII is operated on Cloudflare's infrastructure and is governed by Cloudflare's privacy and security practices. Cloudflare may log standard request metadata at the platform level.</p>
 
       <h3 id="pp-children">X. Children's Privacy</h3>
@@ -549,10 +545,10 @@
       <p>You may use an authorized agent to exercise your rights under applicable law. We may require proof of the agent's authority before acting on a request submitted by an agent.</p>
 
       <h3 id="pp-security">XIII. Security</h3>
-      <p>Unity AI Lab uses commercially reasonable security practices for a static website hosted on GitHub Pages and an associated Cloudflare Worker proxy: HTTPS for all traffic, server-side storage of upstream API tokens (so they are never exposed to the browser), no client-side credentials, no user-account database to compromise, and no server-side store of conversations. Notwithstanding these practices, no method of transmission over the internet or method of electronic storage is one-hundred-percent secure, and we cannot guarantee absolute security.</p>
+      <p>Unity AI Lab uses commercially reasonable security practices for a static website hosted on a third-party static-site platform and an associated Cloudflare Worker proxy: HTTPS for all traffic, server-side storage of upstream API tokens (so they are never exposed to the browser), no client-side credentials, no user-account database to compromise, and no server-side store of conversations. Notwithstanding these practices, no method of transmission over the internet or method of electronic storage is one-hundred-percent secure, and we cannot guarantee absolute security.</p>
 
       <h3 id="pp-transfers">XIV. International Data Transfers</h3>
-      <p>The Service is hosted on infrastructure located primarily in the United States (GitHub Pages, Cloudflare). Pollinations and its upstream providers operate their own infrastructure in jurisdictions determined by them. By using the Service from outside the United States or outside the location of any upstream provider, you understand and agree that your prompts and any associated request metadata may be transferred to and processed in the United States and other jurisdictions whose data-protection laws may differ from those of your home jurisdiction. To the extent any such transfer is subject to data-protection law, we rely on the lawful-transfer mechanisms made available by the relevant providers (such as the European Commission's Standard Contractual Clauses, where applicable to those providers' own arrangements with their customers). Unity AI Lab itself does not maintain a separate cross-border-transfer mechanism because we do not maintain a server-side store of user data.</p>
+      <p>The Service is hosted on infrastructure located primarily in the United States (a static-site hosting platform + Cloudflare). Pollinations and its upstream providers operate their own infrastructure in jurisdictions determined by them. By using the Service from outside the United States or outside the location of any upstream provider, you understand and agree that your prompts and any associated request metadata may be transferred to and processed in the United States and other jurisdictions whose data-protection laws may differ from those of your home jurisdiction. To the extent any such transfer is subject to data-protection law, we rely on the lawful-transfer mechanisms made available by the relevant providers (such as the European Commission's Standard Contractual Clauses, where applicable to those providers' own arrangements with their customers). Unity AI Lab itself does not maintain a separate cross-border-transfer mechanism because we do not maintain a server-side store of user data.</p>
 
       <h3 id="pp-retention">XV. Retention</h3>
       <p>Because Unity AI Lab does not maintain a server-side store of user data, retention on our side is limited to:</p>
@@ -560,7 +556,7 @@
         <li><b>Your localStorage entries</b> — retained on your device until you clear them through your browser settings. We do not have a copy.</li>
         <li><b>Email correspondence</b> — emails you send to <a href="mailto:contact@unityailab.com">contact@unityailab.com</a> are retained in our email inbox for as long as is reasonably necessary to address the inquiry, and then either deleted or archived in line with normal email-management practices.</li>
       </ul>
-      <p>Third-party providers — including GitHub Pages, Cloudflare, Pollinations, the upstream model providers, the visitor counter service, and the font / library CDNs — apply their own retention policies to any logs or metadata they collect, which are outside our control.</p>
+      <p>Third-party providers — including the static-site hosting platform, Cloudflare, Pollinations, the upstream model providers, the visitor counter service, and the font / library CDNs — apply their own retention policies to any logs or metadata they collect, which are outside our control.</p>
 
       <h3 id="pp-changes">XVI. Changes to this Policy</h3>
       <p>We may revise this Policy from time to time. When we do, we will update the "Effective" date at the top of this page and, for material changes, we will mark the revision in the version history. Your continued use of the Service after the Effective date of a revision constitutes your acceptance of the revised Policy. If you do not agree to a revision, your sole remedy is to stop using the Service and, if you wish, to clear the localStorage entries described in Section V.</p>
@@ -596,8 +592,8 @@
   </footer>
 
   <!-- UI controllers load last -->
-  <script src="js/ui/settings.js"></script>
-  <script src="js/ui/landing.js"></script>
+  <script src="js/ui/settings.js?v=20260620140000"></script>
+  <script src="js/ui/landing.js?v=20260620140000"></script>
 
   <!-- Public landing page router. Hash-based show/hide for the top-level sections
        (home / setup / about / terms / privacy / settings). Continue Game
@@ -623,7 +619,6 @@
       // Detect save presence — toggle Continue Game button
       const continueBtn = document.getElementById('cta-continue-game');
       const startBtn = document.getElementById('cta-start-new-game');
-      const settingsBtn = document.getElementById('cta-open-settings');
       const saveStatus = document.getElementById('save-status');
       try {
         const saved = window.DMTHStorage && await window.DMTHStorage.save.get('main');
@@ -645,9 +640,6 @@
       };
       if (continueBtn) continueBtn.onclick = () => {
         location.href = './game.html';
-      };
-      if (settingsBtn) settingsBtn.onclick = () => {
-        location.hash = '#settings';
       };
     });
   })();

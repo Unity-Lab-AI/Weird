@@ -42,7 +42,7 @@
       // milestone string format: "bond-up-L3-2026-04-21..."
       const matches = String(m).match(/bond-up-L(\d+)-(.+)/);
       if (matches) {
-        events.push({ ts: Date.parse(matches[2]) || Date.now(), emoji: '💖', title: `Bond level up → L${matches[1]}`, detail: '' });
+        events.push({ ts: Date.parse(matches[2]) || Date.now(), emoji: '💖', title: `Bond level up → Level ${matches[1]}`, detail: '' });
       } else if (m === 'came-willingly-first-time') {
         events.push({ ts: girl.captureDate || Date.now(), emoji: '😏', title: 'Came willingly', detail: 'her choice, day one' });
       } else {

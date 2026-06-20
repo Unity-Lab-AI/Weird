@@ -3,6 +3,12 @@
 (function () {
   'use strict';
 
+  // Single persistent state-change subscription for this page. Subscribing from inside render()
+  // is a freeze bug: state.emit() iterates the listener Set, and a Set re-visits elements added
+  // during iteration — so subscribing from within an emit-triggered render loops forever in one
+  // emit. The subscription lives in mount() (once); render() only builds DOM.
+  let dashUnsub = null;
+
   function render(el) {
     const s = window.DMTHGame.state.current;
     if (!s || !s.createdAt) {
@@ -17,24 +23,8 @@
     const totalEarned = s.films.reduce((t, f) => f.saleRecord ? t + f.saleRecord.price : t, 0);
 
     el.innerHTML = `
-      <div class="grid-2">
-        <section class="panel" data-tooltip="Liquid cash on hand. WANTED = law-heat — builds from hunts, escapes, deaths, sloppy disposal, and corpse content; decays slowly. High tiers trigger raids → fines → jail. Notoriety = legacy heat stat.">
-          <h2>💰 Treasury</h2>
-          <div class="big-num">$${s.wallet.money.toLocaleString()}</div>
-          ${(() => {
-            const w = window.DMTHGame.wanted ? window.DMTHGame.wanted.describe() : null;
-            if (!w) return `<div class="sub">Notoriety: ${s.wallet.notoriety} · Tick: ${s.tickCount}</div>`;
-            // WANTEDDOWN.1 — bribe button to actively buy heat down (cost climbs with the tier).
-            const bq = (w.level > 0 && window.DMTHGame.wanted.bribeQuote) ? window.DMTHGame.wanted.bribeQuote(15) : null;
-            const bribeBtn = bq
-              ? `<button class="btn-small" data-bribe data-tooltip="Grease the right palms — drop WANTED −${bq.drop} for $${bq.cost.toLocaleString()} (per-point cost climbs with your tier). Lay off hunting + show your girls tenderness to cool it free over time.">💵 Bribe — WANTED −${bq.drop} ($${bq.cost.toLocaleString()})</button>`
-              : '';
-            return `<div class="sub">${w.emoji} WANTED: <b>${w.label}</b> (${w.level}/100) · Notoriety: ${s.wallet.notoriety} · Tick: ${s.tickCount}</div>
-                 <div class="bar" data-tooltip="WANTED level 0-100. ${w.label}. Lower it: bribe (below), lay off hunting (cools ~2.5× faster), or tenderness to your girls (love/feed/heal shave a little)."><div class="bar-fill" style="width:${w.level}%;background:${w.level>=60?'#c0392b':w.level>=40?'#e67e22':w.level>=20?'#f1c40f':'#27ae60'}"></div></div>
-                 ${bribeBtn ? `<div class="btn-row" style="margin-top:6px">${bribeBtn}</div>` : ''}`;
-          })()}
-        </section>
-        <section class="panel" data-tooltip="DEPRAVITY — the player level. Earns XP from EVERY successful act (a kiss to a capture to a 'mass' drop). Higher level unlocks the heaviest depravities: branding (L3), extreme acts (L4), nugget-making (L6), dismemberment (L7). Cheat/sandbox start unlocks everything.">
+      <div class="dash-stats">
+        <section class="panel" data-tooltip="DEPRAVITY — the player level. Earns experience from EVERY successful act (a kiss to a capture to a 'mass' drop). Higher level unlocks the heaviest depravities: branding (Level 3), extreme acts (Level 4), nugget-making (Level 6), dismemberment (Level 7). Cheat/sandbox start unlocks everything.">
           <h2>😈 Depravity</h2>
           ${(() => {
             const p = window.DMTHGame.progression;
@@ -43,16 +33,16 @@
             const nx = p.xpToNext();
             const lo = p.LEVEL_THRESHOLDS[lvl - 1] || 0;
             const pct = nx ? Math.max(0, Math.min(100, Math.round(((nx.have - lo) / Math.max(1, nx.need - lo)) * 100))) : 100;
-            return `<div class="big-num">L${lvl}</div>
+            return `<div class="big-num">Level ${lvl}</div>
               <div class="sub">"${p.titleFor(lvl)}"${p.isCheatUnlocked() ? ' · 🔓 all unlocked (cheat)' : ''}</div>
               <div class="bar"><div class="bar-fill" style="width:${pct}%;background:#8e44ad"></div></div>
-              <div class="sub small">${nx ? `${nx.have} / ${nx.need} XP → L${nx.next}` : 'MAX LEVEL — The Depraved'}</div>
+              <div class="sub small">${nx ? `${nx.have} / ${nx.need} experience → Level ${nx.next}` : 'MAX LEVEL — The Depraved'}</div>
               ${(() => {
-                // LEVELVIEW.1 — viewable detail of what the NEXT level unlocks (cum-wad growth + features).
+                // viewable detail of what the NEXT level unlocks (cum-wad growth + features).
                 const ni = p.nextLevelInfo && p.nextLevelInfo();
                 if (!ni) return '';
                 return `<details class="sub small" style="margin-top:4px" data-tooltip="What hitting the next DEPRAVITY level gets you.">
-                  <summary style="cursor:pointer">▸ Next: L${ni.level} "${ni.title}"</summary>
+                  <summary style="cursor:pointer">▸ Next: Level ${ni.level} "${ni.title}"</summary>
                   <ul style="margin:4px 0 0;padding-left:16px">${ni.perks.map(pk => `<li>${pk}</li>`).join('')}</ul>
                 </details>`;
               })()}
@@ -81,7 +71,7 @@
                 const keys = Object.keys(p.UNLOCKS).filter(k => !p.isUnlocked(k) && p.unlockFee(k) > 0);
                 if (!keys.length) return '';
                 return `<div class="sub small" style="margin-top:6px"><b>🔒 Locked — level up, or buy early:</b></div>` +
-                  keys.map(k => `<div class="stat-row small" data-tooltip="Unlock &quot;${k}&quot; now for $${p.unlockFee(k).toLocaleString()} instead of grinding to DEPRAVITY level ${p.requiredLevel(k)}."><span>${k} <span class="muted">L${p.requiredLevel(k)}</span></span><button class="btn-small" data-buy-unlock="${k}">🔓 $${p.unlockFee(k).toLocaleString()}</button></div>`).join('');
+                  keys.map(k => `<div class="stat-row small" data-tooltip="Unlock &quot;${k}&quot; now for $${p.unlockFee(k).toLocaleString()} instead of grinding to DEPRAVITY level ${p.requiredLevel(k)}."><span>${k} <span class="muted">Level ${p.requiredLevel(k)}</span></span><button class="btn-small" data-buy-unlock="${k}">🔓 $${p.unlockFee(k).toLocaleString()}</button></div>`).join('');
               })()}`;
           })()}
         </section>
@@ -91,13 +81,6 @@
           <div class="stat-row" data-tooltip="Legacy sold count (pre-auto-sell). Auto-sell films stay listed.">Sold<b>${soldFilms}</b></div>
           <div class="stat-row" data-tooltip="Cumulative payouts from films across the entire save.">Total earned<b>$${totalEarned.toLocaleString()}</b></div>
           <a data-route="market" href="#market" class="btn-small" data-tooltip="Open the films market — list / sell-negatives / view passive income.">Open market →</a>
-        </section>
-        <section class="panel" data-tooltip="Captives in your operation across all dungeons.">
-          <h2>🔗 Captives</h2>
-          <div class="big-num">${captives.length}</div>
-          <div class="sub">across ${s.dungeons.length} dungeon${s.dungeons.length === 1 ? '' : 's'}</div>
-          <a data-route="roster" href="#roster" class="btn-small" data-tooltip="Full roster + disposal log + listings.">Roster →</a>
-          <a data-route="dungeon" href="#dungeon" class="btn-small" data-tooltip="Dungeon portfolio + hold upgrades.">Dungeons →</a>
         </section>
         <section class="panel" data-tooltip="John inbox — upmarket clientele requesting specific rental gigs. Accept/reject per request.">
           <h2>📬 Propositioners</h2>
@@ -109,21 +92,41 @@
       </div>
 
       <section class="panel">
-        <h2>Quick actions</h2>
-        <div class="btn-row">
-          <a href="#town" class="btn-primary" data-tooltip="The map. Visit locations + own properties.">🌆 Town</a>
-          <a href="#hunt" class="btn-small" data-tooltip="Pick a target + loadout. Run a 4-stage capture attempt.">🎯 Hunt</a>
-          <a href="#shop" class="btn-small" data-tooltip="The Defilers' Bloc — off-grid anarchist supply cell. Kidnap chems, restraints, chamber implements, drugs, food, water, contraception, abortion supplies. High-tier stock is level-locked + limited per day.">🏴 The Defilers' Bloc</a>
-          <a href="#slave-market" class="btn-small" data-tooltip="Buy/sell captives. Untrained cheap, trained premium.">⛓️ Slave market</a>
-          <a href="#achievements" class="btn-small" data-tooltip="Unlocked milestones.">🏆 Achievements</a>
-          <a href="#trophy-room" class="btn-small" data-tooltip="Keepsakes kept from the girls you've snuffed, buried, burned, or dumped for good — taken off her (panties, a lock of hair, jewelry) or cut off her (a tooth, a nipple) — each grants stacking perks.">🏆 Trophy room</a>
-          ${window.DMTHGame.escapeRecovery && window.DMTHGame.escapeRecovery.recoverable().length > 0 ? `<a href="#escape-recovery" class="btn-small btn-danger" data-tooltip="Girls have escaped — recapture them before they alert authorities.">🏃 ${window.DMTHGame.escapeRecovery.recoverable().length} on the run</a>` : ''}
-          ${captives.length > 0 ? `<a href="#room?girl=${captives[0].id}" class="btn-small" data-tooltip="Jump straight into ${captives[0].name}'s hold.">🚪 Enter ${captives[0].name}'s hold</a>` : ''}
+        <h2>🔗 Your Operation</h2>
+        <div class="cap-hero">
+          <div class="cap-hero-top">
+            <div>
+              <div class="big-num">${captives.length}</div>
+              <div class="sub">captive${captives.length === 1 ? '' : 's'} across ${s.dungeons.length} dungeon${s.dungeons.length === 1 ? '' : 's'}</div>
+            </div>
+            <div class="cap-hero-cta">
+              <a data-route="roster" href="#roster" data-tooltip="Full roster — every captive, escaped girl, corpse + disposal log + listings.">📋 Roster →</a>
+              <a data-route="dungeon" href="#dungeon" data-tooltip="Dungeon portfolio — holds, upgrades, capacity, security.">🏚️ Dungeons →</a>
+              <a href="#hunt" data-tooltip="Pick a target + loadout, run a capture attempt.">🎯 Hunt →</a>
+              ${window.DMTHGame.escapeRecovery && window.DMTHGame.escapeRecovery.recoverable().length > 0 ? `<a href="#escape-recovery" class="btn-danger" style="border-color:#c0392b;color:#ff8a8a" data-tooltip="Girls have escaped — recapture them before they alert authorities.">🏃 ${window.DMTHGame.escapeRecovery.recoverable().length} on the run</a>` : ''}
+            </div>
+          </div>
+          ${captives.length === 0
+            ? `<p class="muted small">No captives yet. <a href="#hunt">Go hunt one →</a></p>`
+            : `<div class="cap-tiles">${captives.map(g => {
+                const hp = Math.round(g.body?.health ?? 100);
+                const maxH = (window.DMTHGame.actionEffects?.maxHealthFor) ? window.DMTHGame.actionEffects.maxHealthFor(g) : 100;
+                const hpPct = Math.min(100, Math.round((hp / maxH) * 100));
+                const preg = g.pregnancy || {};
+                const pregBadge = preg.status === 'pregnant' ? ' 🤰' : '';
+                const stock = (g.bond?.bondLevel || 0) + 1;
+                return `<a class="cap-tile" href="#room?girl=${g.id}" data-tooltip="Enter ${g.name}'s hold — ${g.archetypeTemplate}, Stockholm ${stock}/10, ${hp}/${maxH} Health.">
+                  <div class="cap-tile-name">${g.mood.moodEmoji} ${g.name}${pregBadge}</div>
+                  <div class="cap-tile-meta"><span>⛓ Stockholm ${stock}/10</span><span>${g.archetypeTemplate}</span><span>❤️ Health ${hp}/${maxH}</span></div>
+                  <div class="bar"><div class="bar-fill ${hp < maxH * 0.3 ? 'danger' : ''}" style="width:${hpPct}%"></div></div>
+                </a>`;
+              }).join('')}</div>`
+          }
         </div>
       </section>
 
-      <section class="panel" data-tooltip="Pre-bought defenses that AUTO-APPLY the moment a raid hits — no scramble, no menu mid-bust. Stock them while you're flush so a bad raid doesn't end the run.">
-        <h2>🚨 Legal Defenses</h2>
+      <details class="sect" style="margin-top:8px" data-tooltip="Pre-bought defenses that AUTO-APPLY the moment a raid hits — no scramble, no menu mid-bust. Stock them while you're flush so a bad raid doesn't end the run.">
+        <summary>🚨 Legal Defenses</summary><div class="sect-body">
         <p class="small muted">Raids hit on their own when WANTED runs high. These kick in automatically: a lawyer beats a body-in-hold instant-arrest (or cuts a fine 40%), dirty-cop connections let you bribe a raid away entirely, and an escape kit lets you FLEE an unpayable fine instead of going to prison.</p>
         ${window.DMTHGame.arrest && window.DMTHGame.arrest.VALVES ? (() => {
           const A = window.DMTHGame.arrest;
@@ -135,39 +138,22 @@
           const bribe = A.hasBribeContacts()
             ? `<div class="stat-row" data-tooltip="Active — a raid you can afford the bribe on (~1.6× the fine) auto-resolves with WANTED slashed and no record."><span>💰 Dirty-Cop Connections</span><b class="ok">✓ active</b></div>`
             : `<div class="stat-row" data-tooltip="One-time. Unlocks bribing a raid away — costs ~1.6× the fine but slashes WANTED far harder than a fine and leaves no escalating record."><span>💰 Dirty-Cop Connections</span><button class="btn-small" data-buy-bribe>Buy $${A.BRIBE_COST.toLocaleString()}</button></div>`;
-          return rows + bribe;
+          // the standing Dirty-Cop Payroll: pay the badges off in tiers so raids get
+          // far rarer + WANTED cools faster — the mid/end-game way to not get stopped + jailed daily.
+          const pr = A.payrollInfo ? A.payrollInfo() : null;
+          const payroll = pr
+            ? `<div class="stat-row" data-tooltip="Dirty-Cop Payroll — buy the badges off in tiers. Each tier makes raids far RARER and cools WANTED faster, so a high-heat empire isn't raided every day. Beat-Cop Envelope → Precinct Captain → City Hall's Pocket.">
+                <span>🚓 Dirty-Cop Payroll <b class="${pr.tier > 0 ? 'ok' : 'muted'}">${pr.current.name}</b>${pr.tier > 0 ? ` <span class="muted small">(raids ${Math.round((1 - A.payrollRaidMul()) * 100)}% rarer)</span>` : ''}</span>
+                ${pr.next ? `<button class="btn-small" data-buy-payroll data-tooltip="Upgrade to ${pr.next.name}: raids ${Math.round((1 - pr.next.raidMul) * 100)}% rarer + faster WANTED cooling.">${pr.next.name} — $${pr.next.cost.toLocaleString()}</button>` : '<b class="ok small">whole city owned</b>'}
+              </div>`
+            : '';
+          return rows + bribe + payroll;
         })() : '<p class="muted small">—</p>'}
-      </section>
+      </div></details>
 
-      <section class="panel">
-        <h2>Recent captives</h2>
-        ${captives.length === 0
-          ? `<p class="muted small">No captives. <a href="#hunt">Go hunt one.</a></p>`
-          : `<div class="girl-grid">${captives.map(g => {
-              const preg = g.pregnancy || {};
-              const pregLight = preg.status === 'pregnant'
-                ? `<span class="preg-light" data-tooltip="🤰 Pregnant — gestation day ${preg.gestationDays}/280 (trimester ${preg.trimester})">🤰</span>`
-                : preg.status === 'aborted' ? `<span class="preg-light" data-tooltip="Pregnancy aborted (day ${preg.outcomeHistory?.slice(-1)[0]?.day || '?'})">⚪</span>`
-                : preg.status === 'miscarried' ? `<span class="preg-light" data-tooltip="Miscarried (complication)">🩸</span>`
-                : preg.status === 'birthed' ? `<span class="preg-light" data-tooltip="Birthed">🍼</span>`
-                : preg.status === 'lost' ? `<span class="preg-light" data-tooltip="Lost to authorities">🚨</span>`
-                : '';
-              return `<a class="girl-card" href="#room?girl=${g.id}">
-                <div class="girl-emoji">${g.mood.moodEmoji}${pregLight}</div>
-                <div class="girl-name">${g.name}${preg.status === 'pregnant' ? ' 🤰' : ''}</div>
-                <div class="girl-meta">
-                  <span>L${g.bond.bondLevel}</span>
-                  <span>${g.archetypeTemplate}</span>
-                  ${preg.status === 'pregnant' ? `<span class="muted small" data-tooltip="gestation day ${preg.gestationDays}/280">T${preg.trimester}·d${preg.gestationDays}</span>` : ''}
-                </div>
-                <div class="bar"><div class="bar-fill" style="width:${Math.round(((g.bond.bondXP % 50) / 50) * 100)}%"></div></div>
-              </a>`;
-            }).join('')}</div>`
-        }
-      </section>
     `;
 
-    // PLAYERSTAM.2 — pop a refill item / drink girl-milk to top up Nut Reserve.
+    // pop a refill item / drink girl-milk to top up Nut Reserve.
     el.querySelectorAll('[data-pop-refill]').forEach(b => {
       b.onclick = () => {
         const r = window.DMTHGame.playerStamina.popRefill(b.dataset.popRefill);
@@ -182,7 +168,7 @@
       render(el);
     };
 
-    // PAYUNLOCK.1 — buy early access to a gated action tier.
+    // buy early access to a gated action tier.
     el.querySelectorAll('[data-buy-unlock]').forEach(b => {
       b.onclick = () => {
         const r = window.DMTHGame.progression.buyUnlock(b.dataset.buyUnlock);
@@ -205,8 +191,15 @@
       if (!r.ok) { alert(r.reason); return; }
       render(el);
     };
+    // buy / upgrade the Dirty-Cop Payroll tier.
+    const payrollBtn = el.querySelector('[data-buy-payroll]');
+    if (payrollBtn) payrollBtn.onclick = () => {
+      const r = window.DMTHGame.arrest.buyPayroll();
+      if (!r.ok) { alert(r.reason); return; }
+      render(el);
+    };
 
-    // WANTEDDOWN.1 — bribe heat down directly.
+    // bribe heat down directly.
     const wantedBribe = el.querySelector('[data-bribe]');
     if (wantedBribe) wantedBribe.onclick = () => {
       const r = window.DMTHGame.wanted.bribe(15);
@@ -214,12 +207,19 @@
       render(el);
     };
 
-    // No listener cleanup needed for static anchors.
-    const unsub = window.DMTHGame.state.onChange(() => {
-      if (location.hash === '#dashboard' || location.hash === '') render(el);
-    });
-    return unsub;
+    // No subscription here — render() only builds DOM (see mount()).
   }
 
-  window.DMTHRouter.register('dashboard', render);
+  // Page entry point: subscribe EXACTLY ONCE (replacing any prior listener), then re-render on
+  // every state change. The router registers this; render() never touches the listener Set.
+  function mount(el) {
+    if (dashUnsub) { try { dashUnsub(); } catch (e) { /* ignore */ } dashUnsub = null; }
+    render(el);
+    dashUnsub = window.DMTHGame.state.onChange(() => {
+      if (location.hash === '#dashboard' || location.hash === '') render(el);
+    });
+    return dashUnsub;
+  }
+
+  window.DMTHRouter.register('dashboard', mount);
 })();

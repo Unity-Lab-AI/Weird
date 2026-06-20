@@ -37,7 +37,7 @@
               <div class="model-notes small">${next.describedAs}</div>
               <div class="stat-row"><span>Cost</span><b>$${next.cost.toLocaleString()}</b></div>
               <button id="expand-btn" class="btn-small ${money >= next.cost ? 'btn-primary' : ''}" ${money >= next.cost ? '' : 'disabled'}>
-                ${money >= next.cost ? 'Expand capacity' : 'Insufficient funds'}
+                ${money >= next.cost ? 'Expand capacity' : (window.DMTHGame.state.brokeShort ? window.DMTHGame.state.brokeShort() : 'broke')}
               </button>
             </div>`
           : `<p class="muted small">This hideout is at max capacity for its template. Acquire a larger template to hold more.</p>`
@@ -97,12 +97,13 @@
             const canAfford = money >= nextCost;
             return `<div class="upgrade-track">
               <div class="track-label">${track.label}</div>
+              ${track.bonus ? `<div class="track-bonus small muted">${track.bonus}</div>` : ''}
               <div class="track-current">Tier ${tier}/${track.maxTier} — <i>${track.tierNames[tier]}</i></div>
               ${atMax
                 ? `<div class="small gold">MAX TIER</div>`
                 : `<div class="track-next">Next: <i>${track.tierNames[tier + 1]}</i> — $${nextCost.toLocaleString()}</div>
                    <button class="btn-small ${canAfford ? 'btn-primary' : ''}" data-upgrade="${key}" ${canAfford ? '' : 'disabled'}>
-                     ${canAfford ? 'Upgrade' : 'Too poor'}
+                     ${canAfford ? 'Upgrade' : (window.DMTHGame.state.brokeShort ? window.DMTHGame.state.brokeShort() : 'broke')}
                    </button>`
               }
             </div>`;

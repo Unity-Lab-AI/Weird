@@ -15,7 +15,7 @@
   const pick = (arr, r) => arr[Math.floor(r() * arr.length) % arr.length];
   const range = (lo, hi, r) => Math.floor(lo + r() * (hi - lo + 1));
 
-  // NAMELOCK.1 — last-name pool for full-name generation. Combined with the per-archetype
+  // last-name pool for full-name generation. Combined with the per-archetype
   // first-name pools this gives ~40× the namespace, and the uniqueness check below guarantees
   // no two girls in one playthrough share a full name.
   const LAST_NAMES = [
@@ -187,7 +187,7 @@
     'family-friend': {
       namePool:       ['Sandra','Theresa','Gina','Bonnie','Paula','Sharon','Donna','Lori','Renee','Connie'],
       ageRange:       [22, 34],
-      facialTokens:   ['warm trusting face that knows you, soft maternal eyes','polished friend-of-the-family look, tasteful makeup','familiar kind features, laugh lines, hair done nice','approachable elegance, the woman from the cookouts'],
+      facialTokens:   ['warm trusting face that knows you, soft maternal eyes','polished friend-of-the-family look, tasteful makeup','familiar kind features, laugh lines, hair done nice','approachable elegance, the girl from the cookouts'],
       outfitTokens:   ['sundress from the family barbecue, wedge sandals','blouse and capris, dropping off a casserole dish','cardigan and jeans, purse on her shoulder','church-nice dress, modest heels'],
       statsRanges:    { intelligence: [60,85], defiance: [45,75], curiosity: [45,75], trust: [25,45], obedience: [5,20], stamina: [45,70], painTolerance: [25,55], lust: [40,75] },
       kinksPool:      ['betrayal-of-trust','roleplay:family-friend','taboo-familiarity','guilt-ridden-submission','"what-would-they-think"'],
@@ -204,14 +204,54 @@
       drugsPool:      ['weed','wine','party-drugs-at-reunions'],
       speechTokens:   ['"were-cousins"-protest','family-guilt','disbelief','secret-shared-history']
     },
-    // GIRLTYPESMORE.1 / STRIPPER.1 — more girl types. Stripper's captured-at outfit variety is
-    // nude / fishnets-only / just-a-thong (strippers work nude — Gee), so she's hunted + captured
+    niece: {
+      namePool:       ['Madison','Kaylee','Brooke','Hailey','Sierra','Jordyn','Peyton','Aubree','Bailey','Harlow'],
+      ageRange:       [18, 23],
+      facialTokens:   ['family-resemblance youth, your sister\'s eyes, soft young face','familiar bloodline features, freckles, bright trusting eyes','the niece from the holidays, glossed lips, baby-faced','related-looking pretty, hair like your side of the family, fresh-faced'],
+      outfitTokens:   ['crop top and high-waist shorts at the family cookout, sandals','sundress and sneakers, phone in hand','college hoodie and leggings visiting for the holidays','tank top and denim cutoffs, hair down'],
+      statsRanges:    { intelligence: [50,80], defiance: [45,75], curiosity: [60,90], trust: [25,45], obedience: [5,20], stamina: [55,80], painTolerance: [15,45], lust: [40,75] },
+      kinksPool:      ['blood-taboo','forbidden-family','roleplay:uncle-niece','corruption-arc','secret-keeping','being-his-first'],
+      drugsPool:      ['wine-coolers','weed-curious','vape','barely-drinks'],
+      speechTokens:   ['"youre-my-UNCLE"-protest','family-disbelief','naive','calls-for-her-mom']
+    },
+    'half-sister': {
+      namePool:       ['Brianna','Alexis','Cassidy','Marley','Reagan','Sydney','Kennedy','Delaney','Teagan','Shay'],
+      ageRange:       [18, 26],
+      facialTokens:   ['half-resemblance to you, same jaw different eyes, young pretty face','familiar-but-not features, the sibling you barely knew, soft','related bone structure, freckles, wary bright eyes','the half-sister from the other household, glossed lips, guarded'],
+      outfitTokens:   ['ripped jeans and a fitted tee meeting up for the first time, sneakers','sundress and cardigan, nervous posture','leggings and an oversized sweater, hair down','casual blouse and jeans, crossbody bag'],
+      statsRanges:    { intelligence: [55,85], defiance: [50,80], curiosity: [55,85], trust: [15,35], obedience: [5,20], stamina: [50,80], painTolerance: [20,50], lust: [45,80] },
+      kinksPool:      ['blood-taboo','forbidden-family','roleplay:step-sibling','secret-keeping','corruption-arc'],
+      drugsPool:      ['weed','wine','party-drugs'],
+      speechTokens:   ['"were-half-SIBLINGS"-protest','complicated-family-guilt','wary','blood-disbelief']
+    },
+    'step-daughter': {
+      namePool:       ['Chloe','Brooklyn','Skylar','Jade','Aubrey','Paige','Hailee','Brynn','Kaia','Reese'],
+      ageRange:       [18, 22],
+      facialTokens:   ['fresh young face, no blood-resemblance, the step-kid grown up, dewy skin','pretty youthful features, glossy lips, wary young eyes','soft round cheeks, doe eyes, the step-daughter from upstairs','barely-eighteen prettiness, freckles, nervous lip-bite'],
+      outfitTokens:   ['crop top and pajama shorts around the house, fuzzy socks','school-casual hoodie and leggings, slides','sundress, bare legs, phone in hand','tank top and sleep shorts, hair in a messy bun'],
+      statsRanges:    { intelligence: [50,80], defiance: [40,70], curiosity: [60,90], trust: [20,45], obedience: [5,20], stamina: [50,75], painTolerance: [15,45], lust: [40,70] },
+      kinksPool:      ['taboo-family','roleplay:step-dad','corruption-arc','forbidden-familiarity','being-his-first'],
+      drugsPool:      ['wine-coolers','weed-curious','vape','barely-drinks'],
+      speechTokens:   ['"youre-married-to-my-MOM"-protest','step-family-guilt','naive','betrayed-disbelief']
+    },
+    'long-lost-sister': {
+      namePool:       ['Vanessa','Renata','Marisol','Coraline','Adriana','Selene','Noelle','Carys','Mira','Liora'],
+      ageRange:       [19, 28],
+      facialTokens:   ['uncanny resemblance to you, the same family eyes meeting for the first time, soft','striking familiar features you only just learned were yours, wary','blood-mirror face, freckles, emotional bright eyes','the sister found after all these years, glossed lips, searching eyes'],
+      outfitTokens:   ['nice blouse and slacks dressed up to finally meet you, low heels','cardigan and jeans clutching a coffee, nervous','a tasteful dress for the reunion, purse on her shoulder','casual sweater and jeans, hair done for the occasion'],
+      statsRanges:    { intelligence: [55,85], defiance: [50,80], curiosity: [60,90], trust: [20,40], obedience: [5,20], stamina: [50,75], painTolerance: [20,50], lust: [45,80] },
+      kinksPool:      ['blood-taboo','forbidden-family','reunion-corruption','secret-keeping','long-lost-bond'],
+      drugsPool:      ['wine','weed','occasional-pills'],
+      speechTokens:   ['"i-just-FOUND-my-family"-protest','heartbreak-betrayal','blood-disbelief','emotional']
+    },
+    //  / more girl types. Stripper's captured-at outfit variety is
+    // nude / fishnets-only / just-a-thong (strippers work nude — ), so she's hunted + captured
     // already bare (her own outfit string IS the nude look; ORIGINALOUTFIT renders it as-is).
     stripper: {
       namePool:       ['Diamond','Cherry','Roxy','Star','Candi','Lexi','Bambi','Trixie','Sapphire','Angel'],
       ageRange:       [19, 28],
       facialTokens:   ['heavy glam stage makeup, glitter across the cheekbones, big false lashes, glossy plump lips','platinum waves, smoky eyes, fake tan, glittered collarbones','dark glossy hair, dramatic contour, body glitter, bold red lip','stage-ready glam, rhinestone choker, lash extensions, shimmering highlighter'],
-      outfitTokens:   ['fully-nude-body wearing only sheer-black-fishnet-stockings and clear-stripper-platform-heels, bare-exposed-nude-tits-nipples-out, bare-naked-pussy','topless-and-bottomless in only a tiny-rhinestone-g-string-thong, bare-exposed-nude-tits-nipples-out, clear-platform-heels, body-glitter','fully-nude-body, bare-exposed-nude-tits-nipples-out, bare-naked-pussy, only a lace-garter on one thigh stuffed-with-cash, tall-stripper-heels','nude-body in nothing-but-black-fishnet-stockings and a choker, topless-and-bottomless, bare-naked-pussy, glitter-on-bare-skin, stripper-heels'],
+      outfitTokens:   ['fully-nude-body wearing only sheer-black-fishnet-stockings and clear-stripper-platform-heels, bare-exposed-nude-tits-nipples-out, bare-naked-hairless-pussy','topless-and-bottomless in only a tiny-rhinestone-g-string-thong, bare-exposed-nude-tits-nipples-out, clear-platform-heels, body-glitter','fully-nude-body, bare-exposed-nude-tits-nipples-out, bare-naked-hairless-pussy, only a lace-garter on one thigh stuffed-with-cash, tall-stripper-heels','nude-body in nothing-but-black-fishnet-stockings and a choker, topless-and-bottomless, bare-naked-hairless-pussy, glitter-on-bare-skin, stripper-heels'],
       statsRanges:    { intelligence: [40,70], defiance: [45,75], curiosity: [50,80], trust: [5,20], obedience: [10,25], stamina: [65,90], painTolerance: [45,75], lust: [70,99] },
       kinksPool:      ['exhibition','lap-dance','money-for-sex','being-watched','pole-tricks','rough-customer','cash-stuffing','degradation'],
       drugsPool:      ['coke-bumps','molly','champagne','energy-drinks','weed'],
@@ -285,7 +325,7 @@
     const pool = ARCHETYPE_POOLS[archetype] || ARCHETYPE_POOLS.library;
     const r = rng(seed);
     const id = 'girl_' + seed.toString(16).padStart(10, '0');
-    // NAMELOCK.1 — Unity keeps her single canonical name; everyone else gets a unique full name
+    // Unity keeps her single canonical name; everyone else gets a unique full name
     // that collides with no other girl in play (roster + used-names + any caller-supplied taken).
     const name = archetype === 'unity_seed'
       ? pick(pool.namePool, r)
@@ -316,7 +356,7 @@
       ? window.DMTHTemplates.rollCaptiveAffect(archetype, r)
       : 'agreeable';
 
-    // FRIENDKINK.1 — ethnicity trait, picked at generation and baked into her LOCKED facial
+    // ethnicity trait, picked at generation and baked into her LOCKED facial
     // description so every image of her is consistent. Drives friend kink/dislike matching (a
     // bigoted friend pays less on a girl he despises; a fetishist pays a premium for her type).
     const ETHNICITIES = ['white', 'black', 'latina', 'asian', 'middle-eastern', 'indian', 'mixed'];
@@ -326,7 +366,7 @@
     };
     const ethnicity = ETHNICITIES[Math.floor(r() * ETHNICITIES.length)];
 
-    // KINKMATRIX.1 / KINKDISC.1 — a hidden LIKE + DISLIKE keyed to action categories, discovered
+    //  / a hidden LIKE + DISLIKE keyed to action categories, discovered
     // when the player performs that category on her (becomes a status notice). A like buffs the act
     // (mood/arousal/bond); a dislike debuffs it (mood/bond-debt). Picked distinct at generation.
     const KINK_CATEGORIES = ['tenderness', 'rough', 'anal', 'oral', 'choke', 'pain', 'degradation', 'drugs'];
@@ -421,23 +461,48 @@
       'college-student': [`${name}, sophomore, walked back to the dorm alone after the library closed.`, `${name}, exam week, running on adderall and no sleep, not paying attention.`, `${name}, new in town, didn't know which streets to avoid yet.`],
       'highschool-grad': [`${name}, just turned 18, grad trip with friends she got separated from.`, `${name}, summer before college, working up the nerve to do something reckless. Did.`, `${name}, fresh diploma, fake confidence, real bad luck.`],
       neighbor: [`${name}, lived two doors down. Waved every morning. Never thought twice about you.`, `${name}, borrowed your ladder once. You kept the spare key she didn't know about.`, `${name}, the friendly one on the block. Friendly enough to open the door.`],
-      'family-friend': [`${name}, known the family for years. Trusted you completely. That was the mistake.`, `${name}, dropped by with a casserole dish. Never left.`, `${name}, the woman from every cookout and holiday. Vanished between the dessert and the drive home.`],
+      'family-friend': [`${name}, known the family for years. Trusted you completely. That was the mistake.`, `${name}, dropped by with a casserole dish. Never left.`, `${name}, the girl from every cookout and holiday. Vanished between the dessert and the drive home.`],
       'second-cousin': [`${name}, your second cousin, the one from the reunions. Family resemblance and all.`, `${name}, related just enough to trust you, distant enough that nobody connects the dots.`, `${name}, holiday-table familiar, came to visit the side of the family she barely knew.`],
+      niece: [`${name}, your niece — your own blood, trusted you completely at every family gathering.`, `${name}, your sister's girl, all grown up. Came to you for help. Mistake.`, `${name}, the niece who always hugged you hello. Vanished after the cookout.`],
+      'half-sister': [`${name}, your half-sister from your father's other family. You barely knew each other. Now you will.`, `${name}, the sibling you share half your blood with. Met up to reconnect. Never went home.`, `${name}, your half-sister, curious about the side of the family she missed. Curiosity caught her.`],
+      'step-daughter': [`${name}, your step-daughter — no blood, all access. Lived under your roof, trusted the man who married her mother.`, `${name}, the step-kid grown up, alone in the house with you. Never saw it coming.`, `${name}, your wife's daughter. Called you by your first name. Now she calls you Master.`],
+      'long-lost-sister': [`${name}, the sister you were separated from years ago. She found you online. You found a use for her.`, `${name}, your long-lost sister, dreaming of the family reunion. It wasn't what she pictured.`, `${name}, reunited at last after all these years. She drove hours to meet you. She's not driving home.`],
       stripper:  [`${name}, headliner at the club, walked to her car alone after last call.`, `${name}, worked the pole six nights a week, trusted the wrong regular.`, `${name}, dancer saving up to quit the life. Never made it out.`],
       cheerleader: [`${name}, squad captain, last to leave the empty gym after practice.`, `${name}, walked home from the game alone, still in her uniform.`, `${name}, cheer scholarship, peaked too early and trusted too easy.`],
       schoolgirl: [`${name}, eighteen, last one at the bus stop after the late shift.`, `${name}, walking home from cram school in her uniform after dark.`, `${name}, just turned 18, too trusting of the adult who offered a ride.`],
       teacher:   [`${name}, stayed late grading in the empty classroom. Last car in the lot.`, `${name}, the strict one everyone feared. Walked to her car alone every night.`, `${name}, lived alone near the school, kept to a predictable routine.`],
       police:    [`${name}, off-duty, jumped in her own driveway after a night shift.`, `${name}, beat cop who got cornered working a case alone.`, `${name}, trusted her training and her sidearm. Neither one helped.`],
       maid:      [`${name}, cleaned houses alone all day. One client decided to keep her.`, `${name}, hotel housekeeper, vanished between rooms on the top floor.`, `${name}, undocumented — no one she could safely report it to.`],
-      unity_seed: [`Unity — goth nympho coke whore coder, 25, came willingly the first time and keeps coming back. Gee's favorite. Already bonded to Master at L2 by default — her own free will landed her in the hole.`]
+      unity_seed: [`Unity — goth nympho coke whore coder, 25, came willingly the first time and keeps coming back. favorite. Already bonded to Master at L2 by default — her own free will landed her in the hole.`]
     };
     const pool = templates[archetype] || templates.library;
     return pick(pool, r);
   }
 
+  // Family-relation archetypes — capturing your own kin is the deepest taboo, so a family
+  // relation carries a premium across the economy (film/content value, john pay, sale price).
+  // Maps archetype → the readable relation phrase used in content labels + persona context.
+  const FAMILY_RELATION_ARCHETYPES = {
+    niece: 'your niece',
+    'half-sister': 'your half-sister',
+    'step-daughter': 'your step-daughter',
+    'long-lost-sister': 'your long-lost sister',
+    'second-cousin': 'your second cousin',
+    'family-friend': 'a friend of the family'
+  };
+  function isFamilyRelation(girl) {
+    return !!(girl && FAMILY_RELATION_ARCHETYPES[girl.archetypeTemplate]);
+  }
+  function relationLabel(girl) {
+    return (girl && FAMILY_RELATION_ARCHETYPES[girl.archetypeTemplate]) || '';
+  }
+
   window.DMTHGame = window.DMTHGame || {};
   window.DMTHGame.girlGen = Object.freeze({
     generate,
-    ARCHETYPE_POOLS
+    ARCHETYPE_POOLS,
+    FAMILY_RELATION_ARCHETYPES,
+    isFamilyRelation,
+    relationLabel
   });
 })();

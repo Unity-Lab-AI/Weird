@@ -10,7 +10,7 @@
 (function () {
   'use strict';
 
-  // Per-archetype base trophy (TROPHYLOOT.1) — a CONCRETE keepsake taken off her body, themed
+  // Per-archetype base trophy  — a CONCRETE keepsake taken off her body, themed
   // to her type (panties, bra, driver license, library card, sorority flag, prescription pad,
   // jewelry, etc.). perk = { key, value, target? } — the stacking bonus the keepsake grants.
   const ARCHETYPE_TROPHY = {
@@ -48,7 +48,7 @@
     return { tier: 'common', emoji: '·', mult: 1.0 };
   }
 
-  // ── Personal keepsakes (TROPHYLOOT.1) ──────────────────────────────────────────────
+  // ── Personal keepsakes  ──────────────────────────────────────────────
   // Beyond her archetype keepsake, each girl has items ON her person at disposal — a 1-3 option
   // set you pick ONE from. Most are clothing / jewelry; some are FUCKED body-part trophies (a
   // nipple, a finger, a tooth, her tongue). Each grants a small PERMANENT stacking buff. The
@@ -66,13 +66,13 @@
     { id: 'skirt',     name: 'Her Skirt',          emoji: '👗', flavor: 'The skirt she was taken in.',          perk: 'johnCadenceBonus' },
     { id: 'choker',    name: 'Her Choker',         emoji: '🖤', flavor: 'The collar she wore for you.',         perk: 'escapeContainmentBonus' },
     { id: 'lipstick',  name: 'Her Lipstick',       emoji: '💄', flavor: 'Worn down to a nub on your cock.',     perk: 'filmPriceMul' },
-    // fucked body-part trophies — rarer, gorier, premium film-value buff (Gee).
+    // fucked body-part trophies — rarer, gorier, premium film-value buff .
     { id: 'finger',    name: 'Her Severed Finger', emoji: '🦴', flavor: 'Bone, the nail polish still on it.',   perk: 'filmPriceMul', gore: true },
     { id: 'nipple',    name: 'Her Nipple',         emoji: '🌸', flavor: 'Bitten off and kept in a little jar.', perk: 'filmPriceMul', gore: true },
     { id: 'tooth',     name: 'Her Tooth',          emoji: '🦷', flavor: 'Knocked loose, strung on a chain.',    perk: 'escapeContainmentBonus', gore: true },
     { id: 'tongue',    name: 'Her Tongue',         emoji: '👅', flavor: 'It never talked back again.',          perk: 'healBonus', gore: true },
     { id: 'hair-lock', name: 'A Lock of Her Hair', emoji: '✂️', flavor: 'Cut close to the scalp.',             perk: 'wantedDecayBonus' },
-    // TROPHYVAR.1 — wide variety, simple → gore. More clothing / jewelry / personal effects…
+    // wide variety, simple → gore. More clothing / jewelry / personal effects…
     { id: 'stockings', name: 'Her Stockings',      emoji: '🧦', flavor: 'Laddered, peeled off her legs.',       perk: 'johnCadenceBonus' },
     { id: 'garter',    name: 'Her Garter Belt',    emoji: '🎀', flavor: 'Snapped off her thigh.',               perk: 'filmPriceMul' },
     { id: 'heels',     name: 'Her Heels',          emoji: '👠', flavor: 'The shoes she couldn\'t run in.',       perk: 'shopDiscount' },
@@ -136,7 +136,7 @@
     return out;
   }
 
-  // Finalize a chosen keepsake into a persisted trophy, carrying her death dossier (TROPHYSTATS.1).
+  // Finalize a chosen keepsake into a persisted trophy, carrying her death dossier .
   function finalizeTrophy(girl, method, keepsake) {
     const bondAtEnd = girl.bond?.bondLevel || 0;
     const daysHeld = girl.captureDate ? Math.max(0, Math.round((Date.now() - girl.captureDate) / 86400000)) : 0;

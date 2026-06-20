@@ -89,7 +89,7 @@
     modelId: pick('dmth_kokoro_model', 'KOKORO_MODEL', 'onnx-community/Kokoro-82M-v1.0-ONNX'),
     // kokoro-js is loaded from a CDN; version pinned for stability.
     cdnUrl: 'https://cdn.jsdelivr.net/npm/kokoro-js@1.2.0/dist/kokoro.web.js',
-    dtype: 'q8',                 // q8 ~80MB, fp32 ~330MB — q8 plenty for game TTS
+    dtype: pick('dmth_kokoro_dtype', 'KOKORO_DTYPE', 'q8'),   // q8 ~80MB (default) · q4 ~40MB loads faster · fp32 ~330MB. Override via dmth_kokoro_dtype localStorage.
     defaultFemaleVoice: 'af_nova',
     defaultSpeed: 1.0
   };
@@ -143,7 +143,7 @@
     // zimage / flux / gptimage / gptimage-large / seedream / seedream-pro / kontext / nanobanana variants / grok-imagine / klein / qwen-image / wan-image / nova-canvas
     imageModel: 'flux',
     // Default to portrait tall for character images — full body needs vertical room
-    // so the model doesn't compose a portrait/mugshot crop. Per Gee 2026-05-14:
+    // so the model doesn't compose a portrait/mugshot crop. Per 2026-05-14:
     // "we need the images to do more fullbody style not mugshots and portrate images".
     // Environment renders (town/dungeon) override to 1792×1024 landscape in renderEnvironment().
     width: 1024,
@@ -196,6 +196,6 @@
   });
 
   if (DEV.mode) {
-    console.log('[config] loaded', window.DMTHConfig);
+    void 0;
   }
 })();

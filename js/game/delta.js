@@ -30,8 +30,9 @@
     const body = { ...girl.body };
     body.arousal = clamp(body.arousal + safeDelta.arousal, 0, 100);
     body.wetness = clamp(body.wetness + safeDelta.wetness, 0, 100);
-    // CUMCAP.1 — cumLoad is clamped to her trained storage capacity (default 10, raised by tools).
-    body.cumLoad = Math.max(0, Math.min(body.cumLoadCap ?? 10, body.cumLoad + safeDelta.cumLoad));
+    // cumLoad is clamped to her storage capacity (trained cap + any temporary modifier bonus, default 10).
+    const _cumCap = (window.DMTHGame.cumtool && window.DMTHGame.cumtool.effectiveCap) ? window.DMTHGame.cumtool.effectiveCap(body) : (body.cumLoadCap ?? 10);
+    body.cumLoad = Math.max(0, Math.min(_cumCap, body.cumLoad + safeDelta.cumLoad));
     body.bruises = Math.max(0, Math.min(99, body.bruises + safeDelta.bruises));
     body.high = clamp(body.high + safeDelta.high, 0, 100);
     delta = safeDelta;   // use the clamped version for everything below
@@ -47,7 +48,7 @@
     if (typeof delta.bondXP === 'number')   bond.bondXP   = Math.max(0, bond.bondXP + delta.bondXP);
     if (typeof delta.bondDebt === 'number') bond.bondDebt = Math.max(0, bond.bondDebt + delta.bondDebt);
 
-    // STOCK-BUILD.1 — recompute level from cumulative XP, UP (normal climb) AND DOWN. Bond never
+    // recompute level from cumulative XP, UP (normal climb) AND DOWN. Bond never
     // degrades from normal use (XP only ever rises there); ONLY the most extreme acts subtract XP
     // (action-effects STOCKHOLM_SETBACK), so a drop only happens after real brutality.
     const prevLevel = bond.bondLevel;
@@ -87,7 +88,7 @@
     if (window.DMTHGame.pregnancy?.addVaginalCum && delta.cumLoad >= 1.0) {
       const tags = Array.isArray(delta.tags) ? delta.tags.map(t => String(t).toLowerCase()) : [];
       const isVaginalCum = tags.some(t => VAGINAL_CUM_TAGS.has(t));
-      // CUMFILL.1 — a vaginal creampie raises her vaginal cum-fill; the sustained-fill timer
+      // a vaginal creampie raises her vaginal cum-fill; the sustained-fill timer
       // (pregnancy.tickCumFill) conceives. Gated on no condom equipped.
       if (isVaginalCum && !(window.DMTHGame.condoms ? window.DMTHGame.condoms.blocks(girl) : girl.currentOutfit === 'condom-on')) {
         try {

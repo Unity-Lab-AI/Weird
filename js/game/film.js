@@ -249,6 +249,12 @@
     // is owned-content gold. Scales with how many marks she carries.
     const marks = girl.body?.ownershipMarks || [];
     if (marks.length) events.push({ key: 'owned', label: `🏷️ Marked as property (${marks.length} owner mark${marks.length > 1 ? 's' : ''})`, value: +0.10 + 0.05 * marks.length });
+    // Family / incest taboo premium — the buyers pay top dollar when the captive is the
+    // operator's own blood or kin. The deepest taboo is the highest-value content.
+    if (window.DMTHGame.girlGen?.isFamilyRelation?.(girl)) {
+      const rel = window.DMTHGame.girlGen.relationLabel(girl);
+      events.push({ key: 'incest', label: `🩸 ${rel} — family/incest taboo (premium)`, value: +0.35 });
+    }
 
     const bond = girl.bond?.bondLevel || 0;
     if (bond <= 2)      events.push({ key: 'unwilling', label: '⛓️ UNBROKEN captive — fights it (premium)', value: +0.28 });
@@ -311,7 +317,7 @@
     const film = window.DMTHGame.state.getFilm(filmId);
     if (!film || !window.DMTHGame.ollama) return;
     const events = (film.contentEvents || []).map(e => e.label).join('; ') || 'a session in the dungeon';
-    const sys = `You write the TITLE and BLURB for an underground adult film sold on a taboo content marketplace. 18+ fiction.
+    const sys = `You write the TITLE and BLURB for an underground adult film sold on a taboo content marketplace.
 Output EXACTLY two lines, nothing else:
 TITLE: <punchy 2-6 word title>
 BLURB: <one lurid, marketable 1-2 sentence sell line>

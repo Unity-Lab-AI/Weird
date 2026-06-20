@@ -1,4 +1,4 @@
-// DUNGEON MASTER: THE HUNT — two-tier supply pool (POOL-SUPPLY.1).
+// DUNGEON MASTER: THE HUNT — two-tier supply pool.
 // Supplies live in TWO places: a per-HOLD reserve (targeted to one girl) and a per-DUNGEON
 // POOL that every hold in that dungeon shares. A girl draws from her own hold reserve FIRST,
 // then falls back to the dungeon pool — so stocking the pool feeds every captive evenly with
@@ -12,7 +12,7 @@
 (function () {
   'use strict';
 
-  const KINDS = ['food', 'water', 'condoms'];   // simple scalar pooled kinds
+  const KINDS = ['food', 'water', 'condoms', 'birthControl'];   // simple scalar pooled kinds
 
   function getDungeonOfGirl(girl) {
     return girl ? window.DMTHGame.state.getDungeon(girl.assignedDungeonId) : null;
@@ -24,7 +24,7 @@
 
   function ensurePool(dungeon) {
     const p = dungeon.pool || {};
-    return { food: p.food || 0, water: p.water || 0, condoms: p.condoms || 0, drugs: { ...(p.drugs || {}) } };
+    return { food: p.food || 0, water: p.water || 0, condoms: p.condoms || 0, birthControl: p.birthControl || 0, drugs: { ...(p.drugs || {}) } };
   }
 
   // ── Stocking ────────────────────────────────────────────────────────────────
@@ -141,21 +141,22 @@
 
   function poolOf(dungeonId) {
     const d = window.DMTHGame.state.getDungeon(dungeonId);
-    return d ? ensurePool(d) : { food: 0, water: 0, condoms: 0, drugs: {} };
+    return d ? ensurePool(d) : { food: 0, water: 0, condoms: 0, birthControl: 0, drugs: {} };
   }
 
-  // ── AUTOLOGISTICS.1 (Gee) — a bought UPGRADE that auto-distributes supplies from your universal
+  // ── A bought UPGRADE that auto-distributes supplies from your universal
   // inventory into every dungeon's shared pool each tick, up to per-kind slider TARGETS — so you set
   // it once and stop hand-stocking. Consumes the matching inventory items (best-value source first).
   const LOGISTICS_UNLOCK_COST = 4000;
   const LOGISTICS_SOURCES = {
     food:    [{ id: 'gourmet-meal', units: 7 }, { id: 'basic-meal', units: 3 }],
     water:   [{ id: 'filtered-water', units: 12 }, { id: 'bottled-water', units: 6 }],
-    condoms: [{ id: 'condom-standard', units: 3 }, { id: 'condom', units: 1 }]
+    condoms: [{ id: 'condom-standard', units: 3 }, { id: 'condom', units: 1 }],
+    birthControl: [{ id: 'birth-control-pill', units: 5 }]
   };
   function logisticsConfig() {
     const s = window.DMTHGame.state.current;
-    return (s && s.logistics) || { unlocked: false, enabled: false, targets: { food: 20, water: 20, condoms: 10 } };
+    return (s && s.logistics) || { unlocked: false, enabled: false, targets: { food: 20, water: 20, condoms: 10, birthControl: 10 } };
   }
   function unlockLogistics() {
     if (logisticsConfig().unlocked) return { ok: false, reason: 'already installed' };
@@ -171,7 +172,7 @@
     if (!cfg.unlocked || !cfg.enabled) return;
     const s = window.DMTHGame.state.current;
     if (!s || !Array.isArray(s.dungeons)) return;
-    const targets = cfg.targets || { food: 20, water: 20, condoms: 10 };
+    const targets = cfg.targets || { food: 20, water: 20, condoms: 10, birthControl: 10 };
     for (const d of s.dungeons) {
       const pool = ensurePool(d);
       let dirty = false;

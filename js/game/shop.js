@@ -1,6 +1,6 @@
-// DUNGEON MASTER: THE HUNT — "The Back Alley" (SHOPNAME.1) purchasing + daily stock (SHOPREWORK.1).
+// DUNGEON MASTER: THE HUNT — "The Back Alley" purchasing + daily stock.
 //
-// SHOPREWORK.1 — the back alley does NOT carry unlimited everything. Cheap STAPLES (condoms, food,
+// The back alley does NOT carry unlimited everything. Cheap STAPLES (condoms, food,
 // water, anything ≤ $30) are endless. High-tier tools / equipment / toys / chems are LEVEL-LOCKED
 // (your DEPRAVITY level) and only a HANDFUL appear in stock each game-day, with the variety + amounts
 // refreshing daily. Not so scarce you wait weeks — roughly half the high-tier catalog shows each day.
@@ -18,14 +18,39 @@
     return (item.cost || 0) <= 30 || item.subcategory === 'contraception' || item.subcategory === 'food';
   }
 
+  // Mundane, legal goods that NEVER draw law heat when bought — food, water, and
+  // contraception/medical. (Clothing isn't sold here; outfits buy through the wardrobe.)
+  // Everything else in the back alley — chems, restraints, duct tape, saws, toys, dungeon
+  // gear — is a SUSPICIOUS purchase that nudges the heat a hair per unit.
+  const NON_SUSPICIOUS_SUBCATS = { food: 1, contraception: 1, 'reproductive-medical': 1 };
+  const NON_SUSPICIOUS_IDS = { 'bottled-water': 1, 'filtered-water': 1 };
+  function isSuspicious(item) {
+    if (!item) return false;
+    if (NON_SUSPICIOUS_IDS[item.id]) return false;
+    if (NON_SUSPICIOUS_SUBCATS[item.subcategory]) return false;
+    return true;
+  }
+
   // Tier the player is allowed to buy at his DEPRAVITY level (cheat/sandbox bypasses).
+  // (Kept for back-compat; the real gate is the multi-dimension requirement engine below.)
   function allowedTier() {
     const p = window.DMTHGame.progression;
     if (!p) return 99;
     if (p.isCheatUnlocked && p.isCheatUnlocked()) return 99;
     return 1 + Math.floor((p.getLevel ? p.getLevel() : 0) / 2);   // L0→t1, L2→t2, L4→t3 … L8→t5
   }
-  function isLevelLocked(item) { return !isCheat() && (item.tier || 0) > allowedTier(); }
+  // An item is locked unless its multi-dimension requirement (player level + girls
+  // held + dungeons owned + stockpile prereq, derived from tier by the progression ladder) is met.
+  function isLevelLocked(item) {
+    const p = window.DMTHGame.progression;
+    if (p && p.isItemLocked) return p.isItemLocked(item);
+    return !isCheat() && (item.tier || 0) > allowedTier();   // fallback if progression missing
+  }
+  // The unmet requirement text for a locked item, e.g. "DEPRAVITY L3 + 2 girls held".
+  function lockReason(item) {
+    const p = window.DMTHGame.progression;
+    return (p && p.itemGateText) ? p.itemGateText(item) : 'raise your DEPRAVITY level';
+  }
 
   // Per-day stock map. Staples aren't tracked (always ∞). High-tier items: ~half appear each day
   // with a small quantity (1-3). Persisted so it's stable within the day, fresh across days.
@@ -77,7 +102,9 @@
       notes: item.notes || '',
       prompt: item.prompt,
       staple: isStaple(item),
+      suspicious: isSuspicious(item),
       locked: isLevelLocked(item),
+      lockReason: lockReason(item),
       available: availableOf(item.id)
     }));
   }
@@ -86,15 +113,40 @@
     return listings().filter(l => l.subcategory === subcat);
   }
 
-  function buy(itemId, qty = 1) {
+  // the pay-for-things selector. opts.pay picks how it's paid:
+  //   'pocket'    → cash in pocket (spendPocket)
+  //   'vault-trip'→ run home, crack the vault, come back (spend from vault + a game-time round trip)
+  //   'credit'    → charge that shit (chargeCredit — debt, grows the limit)
+  //   (unset)     → legacy instant vault spend (spendMoney), back-compat for non-PAYSELECT callers.
+  function buy(itemId, qty = 1, opts = {}) {
     const item = window.DMTHAssets.getById('item', itemId);
     if (!item) throw new Error(`unknown item: ${itemId}`);
-    if (isLevelLocked(item)) throw new Error('locked — raise your DEPRAVITY level to buy this tier');
+    if (isLevelLocked(item)) throw new Error('locked — needs ' + lockReason(item));
     const avail = availableOf(itemId);
     if (avail < qty) throw new Error(avail <= 0 ? 'the fence is out of these today — check back tomorrow' : `the fence only has ${avail} today`);
     const total = (item.cost || 0) * qty;
-    const ok = window.DMTHGame.state.spendMoney(total, `buy:${itemId}x${qty}`);
-    if (!ok) throw new Error('insufficient funds');
+    const S = window.DMTHGame.state;
+    const broke = (suffix) => (S.brokeLine ? S.brokeLine() : 'insufficient funds') + (suffix || '');
+    const pay = opts.pay || 'legacy';
+    let paid = false;
+    if (pay === 'pocket') {
+      paid = S.spendPocket ? S.spendPocket(total, `buy:${itemId}x${qty}`) : S.spendMoney(total, `buy:${itemId}x${qty}`);
+      if (!paid) throw new Error(broke(' — not enough cash in your pocket; run home to the vault or charge it'));
+    } else if (pay === 'credit') {
+      paid = S.chargeCredit ? S.chargeCredit(total, `credit-buy:${itemId}x${qty}`) : false;
+      if (!paid) throw new Error('over your credit limit — pay the card down first');
+    } else if (pay === 'vault-trip') {
+      paid = S.spendMoney(total, `buy:${itemId}x${qty}`);   // straight from the home vault
+      if (!paid) throw new Error(broke(' — the vault can\'t cover that'));
+      // the run-home round trip burns game time + reconciles the world while you're gone.
+      if (window.DMTHGame.gameClock && window.DMTHGame.gameClock.advanceBy) {
+        window.DMTHGame.gameClock.advanceBy(60);
+        if (window.DMTHGame.tick && window.DMTHGame.tick.reconcileSpan) window.DMTHGame.tick.reconcileSpan(60);
+      }
+    } else {
+      paid = S.spendMoney(total, `buy:${itemId}x${qty}`);   // legacy instant
+      if (!paid) throw new Error(broke());
+    }
     window.DMTHGame.state.addItem(itemId, qty);
     // Decrement limited (non-staple) stock for the day.
     if (avail !== Infinity) {
@@ -104,7 +156,15 @@
         try { window.DMTHGame.state.save(); } catch (e) { /* non-fatal */ }
       }
     }
-    return { ok: true, itemId, qty, paid: total };
+    // A suspicious purchase (anything but food/water/contraception) leaves a paper trail —
+    // a hair of heat per unit, scaled up by tier (a bone saw raises more eyebrows than duct
+    // tape) and capped so a bulk haul can't spike it. Mundane goods never trip it.
+    let wantedBump = 0;
+    if (isSuspicious(item) && window.DMTHGame.wanted) {
+      const mult = Math.min((1 + (item.tier || 0) * 0.5) * qty, 7.5);   // amount = 0.4 × mult, capped ≈ 3 / purchase
+      wantedBump = window.DMTHGame.wanted.accrue('suspicious-purchase', mult);
+    }
+    return { ok: true, itemId, qty, paid: total, pay, wantedBump };
   }
 
   function use(itemId, context) {
@@ -119,6 +179,6 @@
   window.DMTHGame = window.DMTHGame || {};
   window.DMTHGame.shop = Object.freeze({
     listings, listingsBySubcategory, buy, use,
-    dailyStock, availableOf, isStaple, isLevelLocked, allowedTier
+    dailyStock, availableOf, isStaple, isSuspicious, isLevelLocked, lockReason, allowedTier
   });
 })();

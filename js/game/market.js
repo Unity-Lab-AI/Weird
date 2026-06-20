@@ -131,7 +131,7 @@
     return g?.archetypeTemplate || 'library';
   }
 
-  // --- Body-part market (DEP-EXP.3) ---
+  // --- Body-part market  ---
   // Harvested organs + limbs sit listed; each market tick a listed part has a chance to find a
   // black-market buyer and sell for its value (then it's gone). Moving body parts is hot — each
   // sale bumps WANTED a touch. The player can also fence a part instantly via sellBodyPartNow.

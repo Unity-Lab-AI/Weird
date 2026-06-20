@@ -1,9 +1,9 @@
-// DUNGEON MASTER: THE HUNT — player sexual-drive NEED (SEXDRIVE.1).
+// DUNGEON MASTER: THE HUNT — player sexual-drive NEED.
 // A need meter (state.wallet.sexDrive) fed by sex acts and decaying over time. When it's
 // MAXED the player gets stat boosts (hunting + cash); when DEPRIVED he takes debuffs. The
 // CAP scales with roster size + DEPRAVITY level, so you literally cannot reach the maxed
 // boost band until you have multiple girls across multiple holds — one girl can't satisfy a
-// growing appetite. Spreads use across the collection (interlocks with XTOL.1: a single girl
+// growing appetite. Spreads use across the collection (a single girl
 // only takes ~10 extreme acts before she's spent, so you NEED more bodies to stay maxed).
 
 (function () {
@@ -30,7 +30,7 @@
 
   function get() { return window.DMTHGame.state.getSexDrive ? window.DMTHGame.state.getSexDrive() : 0; }
 
-  // ── SEXDRIVE.2 — fill scaling ───────────────────────────────────────────────────────────
+  // ── Fill scaling ───────────────────────────────────────────────────────────
   // Maxing the drive is a MID-GAME thing across MULTIPLE girls, not something you grind on one.
   //   • variety: each distinct girl you use in a game-day raises the fill multiplier;
   //   • anti-spam: repeating the SAME act on the SAME girl pays diminishing fill fast;
@@ -90,7 +90,7 @@
     return { value: Math.round(val), max, pct, maxed: pct >= MAXED_PCT, deprived: val <= DEPRIVED_AT };
   }
 
-  // SEXDRIVE.2 — GRADED capture/hunt bonus by drive band (was binary). Different bonus at
+  // GRADED capture/hunt bonus by drive band (was binary). Different bonus at
   // different levels: deprived hurts, then it climbs warming → high → maxed.
   function huntBonus() {
     const s = status();

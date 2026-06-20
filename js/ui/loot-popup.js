@@ -1,4 +1,4 @@
-// DUNGEON MASTER: THE HUNT — loot-gain popup (Gee: all loot gains get a popup you can just
+// DUNGEON MASTER: THE HUNT — loot-gain popup (all loot gains get a popup you can just
 // click away from — no close button). A centered card; ANY click anywhere on the screen
 // dismisses it. Rapid multiple gains stack their lines into the one open card.
 
@@ -25,7 +25,7 @@
 
   function show(message) {
     if (!message) return;
-    // LOOTPOP-TOGGLE (Gee) — the player can silence loot pop-ups (Settings → Interface). The loot
+    // LOOTPOP-TOGGLE  — the player can silence loot pop-ups (Settings → Interface). The loot
     // itself is already added to inventory BEFORE this call, so silencing just skips the popup —
     // "better to just let it go to inventory without the annoying popups" in end-game.
     try { if (localStorage.getItem('dmth_lootpops_off') === '1') return; } catch (e) { /* storage blocked — show anyway */ }

@@ -25,8 +25,8 @@
                 <div class="girl-name">${g.name}</div>
                 <div class="girl-meta">
                   <span>${g.archetypeTemplate}</span>
-                  <span>L${g.bond.bondLevel}</span>
-                  <span class="warn">${remainingMin}min left</span>
+                  <span data-tooltip="Stockholm bond level 0-9.">Stockholm Level ${g.bond.bondLevel}</span>
+                  <span class="warn">${remainingMin} minutes left</span>
                 </div>
                 <div class="small muted">${g.backstoryFragment}</div>
                 <div class="stat-row small"><span>Defiance (+20 alert)</span><b>${g.stats.defiance + 20}</b></div>

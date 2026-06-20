@@ -44,16 +44,40 @@
       // computed from this xp — never stored separately.
       depravityXp: 0,
 
-      // SEXDRIVE.1 — player sexual-drive NEED (0..scaling cap). Fed by sex acts, decays over
+      // player sexual-drive NEED (0..scaling cap). Fed by sex acts, decays over
       // time. Maxed = stat boosts (hunting/cash); deprived = debuffs. The CAP scales with
       // roster size + DEPRAVITY level (js/game/sexdrive.js) so it can't be maxed early.
       sexDrive: 0,
 
-      // PLAYERSTAM.1 — "💦 Nut Reserve" (0-100). The player's spend-it-to-use-them resource:
+      // "💦 Nut Reserve" (0-100). The player's spend-it-to-use-them resource:
       // every act on a girl drains it (heavy/extreme acts cost more), it regenerates each tick
       // (js/game/playerstamina.js), and it's instantly refilled by viagra / girl's-milk / etc.
-      // Empty = "running on fumes" debuff. Depraved-named per Gee, NOT "stamina".
-      nutReserve: 100
+      // Empty = "running on fumes" debuff. Depraved-named , NOT "stamina".
+      nutReserve: 100,
+
+      // a revolving credit line the player charges when cash-short. `balance` is the
+      // current debt owed; `limit` is the ceiling and GROWS the more you pay it off (big) + use
+      // it (small), capped. Card PAYMENTS flow through spendMoney (cash ledger); charges live
+      // here as debt (not cash), surfaced in the finance tab. Interest on a carried balance =
+      //  (wired into tick later).
+      credit: { limit: 500, balance: 0, chargedLifetime: 0, paidLifetime: 0, openedAt: null },
+
+      //  / VAULT money model . `money`
+      // IS the home VAULT — all income + at-home spends flow through it unchanged. `pocket` is the
+      // cash you CARRY out into the world; field purchases (the back alley, town) spend from pocket.
+      // Short out there? Run home to the vault to withdraw more (a game-time round trip) or charge
+      // the card. `vaultTier` = store-bought bigger-vault upgrades (capacity) — bought, never added
+      // directly. (UI + checkout wiring =  next phase; this is the state foundation.)
+      pocket: 0,
+      vaultTier: 0,
+
+      // open shark loans: [{ id, sharkId, principal, owed, vigPerDay, takenMin, dueMin }].
+      // Cash borrowed at a brutal compounding daily vig on a deadline; overdue bleeds WANTED.
+      loans: [],
+
+      // Dirty-Cop Payroll tier (0-3). Pay the badges off → far fewer raids + faster
+      // WANTED cooling, so a high-heat mid/end-game empire isn't stopped + jailed every day.
+      copPayrollTier: 0
     },
 
     inventory: {},                 // { [itemId]: qty }
@@ -61,10 +85,12 @@
     dungeons: [],                  // [{ id, templateId, holds:[{id, captiveGirlId|null, upgrades}], purchasedAt }]
 
     properties: [],                // [{ locationId, owned, passiveIncomePerTick }]
-    unlockedLocations: [],         // [locationId] hunting grounds with bought private access (PLVL.2)
-    ownedLocations: [],            // [locationId] locations BOUGHT OUT — you own the turf, grants perks (BUYLOCATION.1)
-    logistics: { unlocked: false, enabled: false, targets: { food: 20, water: 20, condoms: 10 } },   // AUTOLOGISTICS.1 — auto-distribute supplies to dungeon pools
-    purchasedUnlocks: [],          // [unlockKey] gated action tiers bought early with cash (PAYUNLOCK.1)
+    unlockedLocations: [],         // [locationId] hunting grounds with bought private access 
+    ownedLocations: [],            // [locationId] locations BOUGHT OUT — you own the turf, grants perks 
+    logistics: { unlocked: false, enabled: false, targets: { food: 20, water: 20, condoms: 10 } },   // auto-distribute supplies to dungeon pools
+    ledger: [],                    // 📒 every money in/out: { at, gameMin, delta, reason, balance }
+    purchasedUnlocks: [],          // [unlockKey] gated action tiers bought early with cash 
+    gigQueue: [],                  // queued shady jobs [gigId,...]; run together, time passes per job
 
     roster: [],                    // [GirlProfile+state]  id-keyed; see girl-gen.js
 
@@ -86,20 +112,20 @@
     },
 
     turns: {},                     // { girlId: [{role, text, ts}] }  per-girl chat log (bounded)
-    activity: {},                  // GIRLHIST.1 — { girlId: [{ts, gameMin, kind, label, detail}] } per-girl activity history (bounded)
-    friendCreep: {},               // FRIENDCREEP.1 — { friendArchetypeId: {level 0-10, into} } per-friend creep progression
+    activity: {},                  // { girlId: [{ts, gameMin, kind, label, detail}] } per-girl activity history (bounded)
+    friendCreep: {},               // { friendArchetypeId: {level 0-10, into} } per-friend creep progression
 
-    // REQUEST.1 — pre-capture item-request cooldown log. Keyed by `${locationId}|${archetype}`,
+    // pre-capture item-request cooldown log. Keyed by `${locationId}|${archetype}`,
     // value = the game-day number the last request was made. Enforces "once a day per girl-type
     // per location" so pre-capture item asks are a trickle, never an endless faucet.
     itemRequestLog: {},
 
-    // NAMELOCK.1 — lowercased full names already in play this game. girl-gen consults this to
+    // lowercased full names already in play this game. girl-gen consults this to
     // avoid generating two girls with the same name; capture + persistent location spawns
     // register here so names never collide within a single playthrough.
     usedNames: [],
 
-    // LOCPERSIST.1 — persistent per-location spawn sets. Keyed by locationId →
+    // persistent per-location spawn sets. Keyed by locationId →
     // { girls:[GirlProfile], rolledDay, expiresDay, taken:{ [girlId]: 'captured'|'walked' } }.
     // Same location, same day = same girls; the set refreshes after a randomized 2-4 day window.
     locationSpawns: {},
@@ -110,8 +136,29 @@
       activeDungeonId: null,
       // What the girls call the player — set at new-game. Default 'Master'. Injected into
       // every system prompt so captives address the player by his chosen name, not just "Master".
-      playerName: 'Master'
+      playerName: 'Master',
+      // the player's own avatar, chosen in the new-game character creator.
+      // Threaded into image prompts (so HE renders into the scenes with the girls) + his clothing
+      // store. Defaulted to a generic captor so pre-creator saves / skipped setup still render him.
+      playerCharacter: {
+        sex: 'male', age: 35, race: 'white', build: 'average',
+        hair: 'short dark hair', startClothing: 'a plain dark t-shirt and jeans', custom: '',
+        // owned player outfit ids + the currently-worn one.
+        wardrobe: [], clothingId: null
+      },
+      // the whole set of player/scene image toggles ("{playername} in shot,
+      // pov, watch her visitors, and the gangbang mechanics, ect ect"). Honored by the auto-render
+      // paths (roomScene) + the scene wiring. Default OFF — opt-in.
+      sceneToggles: { playerInShot: false, pov: false, watchVisitors: false }
     }
+  };
+
+  // canonical default avatar, reused by the migration backfill + the
+  // getter/setter so every read returns a complete shape even on the oldest save.
+  const DEFAULT_PLAYER_CHARACTER = {
+    sex: 'male', age: 35, race: 'white', build: 'average',
+    hair: 'short dark hair', startClothing: 'a plain dark t-shirt and jeans', custom: '',
+    wardrobe: [], clothingId: null
   };
 
   const listeners = new Set();
@@ -145,30 +192,52 @@
       if (typeof s.wallet.sexDrive !== 'number') s.wallet.sexDrive = 0;
       if (typeof s.wallet.nutReserve !== 'number') s.wallet.nutReserve = 100;
       if (!s.wallet.suspicionByLocation) s.wallet.suspicionByLocation = {};
+      // backfill the revolving credit line on pre-feature saves.
+      if (!s.wallet.credit || typeof s.wallet.credit !== 'object') {
+        s.wallet.credit = { limit: 500, balance: 0, chargedLifetime: 0, paidLifetime: 0, openedAt: null };
+      } else {
+        const c = s.wallet.credit;
+        if (typeof c.limit !== 'number') c.limit = 500;
+        if (typeof c.balance !== 'number') c.balance = 0;
+        if (typeof c.chargedLifetime !== 'number') c.chargedLifetime = 0;
+        if (typeof c.paidLifetime !== 'number') c.paidLifetime = 0;
+        if (c.openedAt === undefined) c.openedAt = null;
+      }
+      // backfill the carried-pocket + vault-tier on pre-feature saves.
+      if (typeof s.wallet.pocket !== 'number') s.wallet.pocket = 0;
+      if (typeof s.wallet.vaultTier !== 'number') s.wallet.vaultTier = 0;
+      if (!Array.isArray(s.wallet.loans)) s.wallet.loans = [];   // 
+      if (typeof s.wallet.copPayrollTier !== 'number') s.wallet.copPayrollTier = 0;   // 
     }
     // Nested-container backfill — the shallow load-merge can drop sub-shapes added after an
-    // old save was written. Guard every container the engine assumes exists (IMG.7).
+    // old save was written. Guard every container the engine assumes exists .
     if (!s.trophies) s.trophies = [];
     if (!s.bodyParts) s.bodyParts = [];
     if (!s.unlockedLocations) s.unlockedLocations = [];
     if (!s.ownedLocations) s.ownedLocations = [];
     if (!s.logistics) s.logistics = { unlocked: false, enabled: false, targets: { food: 20, water: 20, condoms: 10 } };
+    if (!s.ledger) s.ledger = [];
     if (!s.purchasedUnlocks) s.purchasedUnlocks = [];
+    if (!Array.isArray(s.gigQueue)) s.gigQueue = [];   // 
     if (!s.settings) s.settings = {};
     if (!s.settings.playerName) s.settings.playerName = 'Master';
+    // backfill the avatar + any fields added after an old save was written.
+    s.settings.playerCharacter = Object.assign({}, DEFAULT_PLAYER_CHARACTER, s.settings.playerCharacter || {});
+    // backfill the player/scene image toggles on pre-feature saves.
+    s.settings.sceneToggles = Object.assign({ playerInShot: false, pov: false, watchVisitors: false }, s.settings.sceneToggles || {});
     if (!s.slaveMarket) s.slaveMarket = { listed: [], available: [], recentSales: [] };
     else { s.slaveMarket.listed ||= []; s.slaveMarket.available ||= []; s.slaveMarket.recentSales ||= []; }
     if (!s.propositioners) s.propositioners = { inbox: [], active: [], completed: [], repeatClients: {} };
     else { s.propositioners.inbox ||= []; s.propositioners.active ||= []; s.propositioners.completed ||= []; s.propositioners.repeatClients ||= {}; }
     if (!s.disposals) s.disposals = [];
     if (!s.turns) s.turns = {};
-    if (!s.activity) s.activity = {};   // GIRLHIST.1 — backfill the activity log for pre-feature saves
-    if (!s.friendCreep) s.friendCreep = {};   // FRIENDCREEP.1 — backfill the creep-level store
+    if (!s.activity) s.activity = {};   // backfill the activity log for pre-feature saves
+    if (!s.friendCreep) s.friendCreep = {};   // backfill the creep-level store
     if (!s.itemRequestLog || typeof s.itemRequestLog !== 'object') s.itemRequestLog = {};
     if (!Array.isArray(s.usedNames)) s.usedNames = [];
     if (!s.locationSpawns || typeof s.locationSpawns !== 'object') s.locationSpawns = {};
-    // Dungeon-level backfill — the shared supply POOL (POOL-SUPPLY.1) + per-hold toy mounts
-    // (TOY-HOLD.1) + condom/drug reserves. Defense-in-depth so any future unguarded read on an
+    // Dungeon-level backfill — the shared supply POOL  + per-hold toy mounts
+    //  + condom/drug reserves. Defense-in-depth so any future unguarded read on an
     // old save can't hit undefined.
     for (const d of s.dungeons || []) {
       if (!d.pool || typeof d.pool !== 'object') d.pool = { food: 0, water: 0, condoms: 0, drugs: {} };
@@ -177,11 +246,11 @@
         if (h && !Array.isArray(h.toys)) h.toys = [];
         if (h && typeof h.condomReserve !== 'number') h.condomReserve = 0;
         if (h && (!h.drugReserve || typeof h.drugReserve !== 'object')) h.drugReserve = {};
-        // TITSUCKER.1 — one Tit Sucker can be attached per hold; it bottles the held girl's milk.
+        // one Tit Sucker can be attached per hold; it bottles the held girl's milk.
         if (h && typeof h.titSucker !== 'boolean') h.titSucker = false;
       }
     }
-    // TITSUCKER.1 — legacy conversion. The old single global 'milk-sucker' rig is replaced by
+    // legacy conversion. The old single global 'milk-sucker' rig is replaced by
     // per-hold 'tit-sucker' machines. Carry any owned legacy rig over as an unattached Tit
     // Sucker the player re-attaches to a hold. Idempotent (only fires while the old key exists).
     if (s.inventory && s.inventory['milk-sucker']) {
@@ -226,19 +295,19 @@
         arousal: 0, wetness: 0, cumLoad: 0, bruises: 0, high: 0,
         stamina: 70, health: 100,
         activeDrugs: [], outfitState: 'intact',
-        // CUMFILL.1 — vaginal cum-fill meter (preggo-relevant; distinct from generic cumLoad)
+        // vaginal cum-fill meter (preggo-relevant; distinct from generic cumLoad)
         // + the sustained-fill maintain counter that the preggo timer reads.
         vaginalCum: 0, preggoFillMaintained: 0,
-        // XTOL.1 — running count of extreme acts since her last recovery (heal/care/rest).
+        // running count of extreme acts since her last recovery (heal/care/rest).
         extremeStreak: 0,
-        // CUMCAP.1 — per-girl cum-load STORAGE capacity (trained up by vaginal-weight tools).
+        // per-girl cum-load STORAGE capacity (trained up by vaginal-weight tools).
         // cumLoad is clamped to this; near-cap = pay premium, sustained high = mood/health/escape cost.
         cumLoadCap: 10,
-        // MILKBAL.1 — per-girl breast-milk fill (liters). Refills slowly over time ONLY while
+        // per-girl breast-milk fill (liters). Refills slowly over time ONLY while
         // she's lactating (preggo 2nd-trimester+ OR inside the postpartum window). A direct
         // suck empties her; a Tit Sucker bottles it. Bounded by breastCap → no endless milk.
         breastMilk: 0,
-        // MILKBAL.1 — postpartum lactation window expiry (real-ms timestamp). Set on delivery;
+        // postpartum lactation window expiry (real-ms timestamp). Set on delivery;
         // while now < this she keeps lactating "a few days after birth". 0 = not in window.
         lactatingUntil: 0,
         // Trophy-history — running count of PLAYER acts committed against her (johns/friends are
@@ -246,10 +315,10 @@
         actsCommitted: 0,
         // Trophy-history — total liters of milk she produced for you (bottled + sucked).
         milkProducedTotal: 0,
-        // CUMTOOL.1 — an insertable hold-in plug left in over time. { itemId, startTick } | null;
+        // an insertable hold-in plug left in over time. { itemId, startTick } | null;
         // when the timer elapses her cumLoadCap upgrades. Gapes/stretches her image while in.
         cumImplant: null,
-        // PERIOD.1 — menstrual cycle. She bleeds for ~1 game day every ~5 game days. `onPeriod`
+        // menstrual cycle. She bleeds for ~1 game day every ~5 game days. `onPeriod`
         // is the live flag; `periodStartedAt` stamps the current bleed's start (game-minutes);
         // `lastPeriodAt` stamps the last cycle start so the 5-day cadence measures from it.
         // period.tick() drives all three; a pregnant girl doesn't cycle.
@@ -260,12 +329,12 @@
       for (const [k, v] of Object.entries(BODY_DEFAULTS)) {
         if (g.body[k] == null) g.body[k] = v;
       }
-      // Permanent ownership marks (DEP-EXP.1) — own array per girl (never the shared default
+      // Permanent ownership marks  — own array per girl (never the shared default
       // ref) so marks can't alias across captives. Lazy-init for saves predating the feature.
       if (!Array.isArray(g.body.ownershipMarks)) g.body.ownershipMarks = [];
-      // Forced-addiction map (DEP-EXP.2) — own object per girl. { [drugKey]: 0-100 }.
+      // Forced-addiction map  — own object per girl. { [drugKey]: 0-100 }.
       if (!g.body.addiction || typeof g.body.addiction !== 'object') g.body.addiction = {};
-      // KINKMATRIX.1 / KINKDISC.1 — backfill a hidden like/dislike on pre-feature captives.
+      //  / backfill a hidden like/dislike on pre-feature captives.
       if (!g.kink || typeof g.kink !== 'object') {
         const KC = ['tenderness', 'rough', 'anal', 'oral', 'choke', 'pain', 'degradation', 'drugs'];
         const li = Math.floor(Math.random() * KC.length);
@@ -281,10 +350,10 @@
       if (g.mood.mood == null) g.mood.mood = 'neutral';
       if (g.mood.moodEmoji == null) g.mood.moodEmoji = '🙂';
       g.escape = g.escape || { currentRisk: 0.1, factors: {}, lastAttempt: null };
-      // New per-girl array fields (MULTIGIRL.3 scene roster + DEATHSTATS.1 dungeon history).
+      // New per-girl array fields ( scene roster +  dungeon history).
       if (!Array.isArray(g.dungeonHistory)) g.dungeonHistory = [];
       if (!Array.isArray(g.sceneGirlIds)) g.sceneGirlIds = [];
-      // SPECIALIZE.1 — per-girl specialization upgrades (e.g. big-tits = 2× milk). Ids only;
+      // per-girl specialization upgrades (e.g. big-tits = 2× milk). Ids only;
       // effects resolved live by js/game/specialize.js.
       if (!Array.isArray(g.specializations)) g.specializations = [];
     }
@@ -305,6 +374,9 @@
     state.mode = opts.mode || 'normal';
     if (state.mode === 'sandbox') {
       state.wallet.money = window.DMTHConfig.GAME.sandboxMoney;
+      // Cheat / sandbox start = MAX DEPRAVITY out of the gate (everything unlocked, top level).
+      // A huge XP grant — levelForXp clamps to MAX_LEVEL regardless of the exact threshold.
+      state.wallet.depravityXp = 9999999;
     } else {
       state.wallet.money = window.DMTHConfig.GAME.startingMoney;
     }
@@ -321,10 +393,49 @@
   }
 
   // wallet
+  // The LEDGER (📒) — EVERY money in/out is recorded with a signed delta + reason + CATEGORY +
+  // running balance so the wallet tab can show the full, sortable, filterable books. Bounded to
+  // the last 800 entries.
+  // Classify a raw spend/earn reason string into a player-facing category for the filterable ledger.
+  function categorizeLedger(reason) {
+    const r = String(reason || '').toLowerCase();
+    if (r.startsWith('credit')) return 'Credit';   // credit-card payments (charges aren't cash → not ledgered)
+    if (r.startsWith('loanshark') || r.startsWith('loan')) return 'Loan sharks';
+    if (r.startsWith('toy:')) return 'Toys';
+    if (r.startsWith('wardrobe')) return 'Wardrobe';
+    if (r.includes('film') || r.startsWith('sell-negatives') || r.startsWith('market:')) return 'Films';
+    if (r.startsWith('bodypart') || r.includes('organ')) return 'Organs';
+    if (r.startsWith('buy-out-location') || r.startsWith('location-access')) return 'Property — purchase';
+    if (r.includes('skim') || r.startsWith('location-income') || r.startsWith('passive')) return 'Property — income';
+    if (r.startsWith('logistics') || r.includes('upgrade') || r.includes('capacity') || r.startsWith('dungeon') || r.startsWith('hold')) return 'Dungeon / Holds';
+    if (r.startsWith('unlock')) return 'Unlocks';
+    if (r.startsWith('bribe') || r.includes('fine') || r.includes('wanted')) return 'Bribes / Heat';
+    if (r.startsWith('friend')) return 'Friends';
+    if (r.startsWith('john') || r.startsWith('whore') || r.startsWith('proposition') || r.startsWith('gangbang')) return 'Johns';
+    if (r.includes('milk')) return 'Milk';
+    if (r.startsWith('slave') || r.includes('sell-girl') || r.includes('buy-girl')) return 'Slave market';
+    if (r.startsWith('loot') || r.startsWith('grant')) return 'Loot';
+    if (r.startsWith('buy:')) return 'Supplies'; // shop-item buys (drugs / tools / food / restraints)
+    if (r.startsWith('odd-job') || r.startsWith('side') || r.startsWith('hustle')) return 'Odd jobs';
+    return 'Other';
+  }
+  function recordLedger(s, delta, reason) {
+    if (!s.ledger) s.ledger = [];
+    s.ledger.push({
+      at: Date.now(),
+      gameMin: window.DMTHGame.gameClock ? window.DMTHGame.gameClock.now() : null,
+      delta,
+      reason: reason || 'misc',
+      category: categorizeLedger(reason),
+      balance: s.wallet.money
+    });
+    if (s.ledger.length > 800) s.ledger = s.ledger.slice(-800);
+  }
   function addMoney(amount, reason) {
     mutate(s => {
       s.wallet.money += amount;
       s._lastTxn = { amount, reason, at: Date.now() };
+      recordLedger(s, amount, reason);
     });
   }
   function spendMoney(amount, reason) {
@@ -332,6 +443,7 @@
     mutate(s => {
       s.wallet.money -= amount;
       s._lastTxn = { amount: -amount, reason, at: Date.now() };
+      recordLedger(s, -amount, reason);
     });
     return true;
   }
@@ -370,12 +482,144 @@
   function getDepravityXp() { return typeof state?.wallet?.depravityXp === 'number' ? state.wallet.depravityXp : 0; }
   function setSexDrive(v) { mutate(s => { s.wallet.sexDrive = Math.max(0, v); }); }
   function getSexDrive() { return typeof state?.wallet?.sexDrive === 'number' ? state.wallet.sexDrive : 0; }
-  // PLAYERSTAM.1 — Nut Reserve (0-100).
+  // Nut Reserve (0-100).
   function setNutReserve(v) { mutate(s => { s.wallet.nutReserve = Math.max(0, Math.min(100, v)); }); }
   function getNutReserve() { return typeof state?.wallet?.nutReserve === 'number' ? state.wallet.nutReserve : 100; }
 
+  // revolving credit line. Charge it when cash is short; pay it down with cash; the
+  // limit GROWS the more you pay it off (big) + use it (small), capped. A charge is DEBT (it does
+  // not move cash, so it isn't cash-ledgered); a payment spends cash through spendMoney so it
+  // lands in the cash ledger under the 'Credit' category. Interest on a carried balance is
+  //  (a tick hook to be added).
+  const CREDIT_LIMIT_MAX = 20000;
+  function getCredit() {
+    const c = (state && state.wallet && state.wallet.credit) || {};
+    return {
+      limit: typeof c.limit === 'number' ? c.limit : 500,
+      balance: typeof c.balance === 'number' ? c.balance : 0,
+      chargedLifetime: typeof c.chargedLifetime === 'number' ? c.chargedLifetime : 0,
+      paidLifetime: typeof c.paidLifetime === 'number' ? c.paidLifetime : 0,
+      openedAt: c.openedAt ?? null
+    };
+  }
+  function creditAvailable() { const c = getCredit(); return Math.max(0, c.limit - c.balance); }
+  // Charge the card. Returns false if the amount exceeds available credit. Grows the limit a hair.
+  function chargeCredit(amount, reason) {
+    amount = Math.round(amount || 0);
+    if (!state || amount <= 0 || amount > creditAvailable()) return false;
+    mutate(s => {
+      const c = s.wallet.credit;
+      c.balance += amount;
+      c.chargedLifetime += amount;
+      if (c.openedAt == null) c.openedAt = window.DMTHGame.gameClock ? window.DMTHGame.gameClock.now() : 0;
+      c.limit = Math.min(CREDIT_LIMIT_MAX, c.limit + Math.round(amount * 0.05));   // using it nudges the limit up
+      s.wallet._lastCreditEvent = { kind: 'charge', amount, reason: reason || 'credit-charge', at: Date.now() };
+    });
+    return true;
+  }
+  // Pay the card down with cash. Pays min(amount, balance, cash). Paying it off is what grows the
+  // limit the most. Returns { ok, paid?, balance?, limit?, reason? }.
+  function payCredit(amount) {
+    if (!state) return { ok: false, reason: 'no game' };
+    const c = getCredit();
+    amount = Math.min(Math.round(amount || 0), c.balance, state.wallet.money);
+    if (amount <= 0) return { ok: false, reason: c.balance <= 0 ? 'no balance to pay' : 'no cash to pay with' };
+    if (!spendMoney(amount, 'credit-payment')) return { ok: false, reason: (window.DMTHGame.state.brokeLine ? window.DMTHGame.state.brokeLine() : 'broke') };
+    mutate(s => {
+      const cc = s.wallet.credit;
+      cc.balance = Math.max(0, cc.balance - amount);
+      cc.paidLifetime += amount;
+      cc.limit = Math.min(CREDIT_LIMIT_MAX, cc.limit + Math.round(amount * 0.5));   // paying off grows it most
+      s.wallet._lastCreditEvent = { kind: 'payment', amount, at: Date.now() };
+    });
+    const now = getCredit();
+    return { ok: true, paid: amount, balance: now.balance, limit: now.limit };
+  }
+  // credit is NOT free money: interest claws onto any carried balance over game-time,
+  // so an unpaid balance SPIRALS (it can climb past your limit — the debt is the risk woven through
+  // the whole financial system). Called from the tick + reconcileSpan with the elapsed game-day
+  // fraction. Sub-dollar interest accumulates in a drift so slow ticks still compound correctly.
+  const CREDIT_INTEREST_PER_DAY = 0.03;   // 3% per game-day on the carried balance
+  function accrueCreditInterest(dayFraction) {
+    if (!state || !(dayFraction > 0)) return 0;
+    const c = state.wallet && state.wallet.credit;
+    if (!c || !(c.balance > 0)) return 0;
+    state._creditInterestDrift = (state._creditInterestDrift || 0) + c.balance * CREDIT_INTEREST_PER_DAY * dayFraction;
+    const add = Math.floor(state._creditInterestDrift);
+    if (add < 1) return 0;
+    state._creditInterestDrift -= add;
+    mutate(s => { s.wallet.credit.balance += add; s.wallet._lastCreditEvent = { kind: 'interest', amount: add, at: Date.now() }; });
+    return add;
+  }
+
+  // Dirty-Cop Payroll tier (arrest.js owns the tier table + raid/decay effects).
+  function getCopPayrollTier() { return (state && state.wallet && typeof state.wallet.copPayrollTier === 'number') ? state.wallet.copPayrollTier : 0; }
+  function setCopPayrollTier(n) { mutate(s => { s.wallet.copPayrollTier = Math.max(0, Math.round(n || 0)); }); }
+
+  // the queued-jobs list. gigs.js owns the catalog/resolution; state owns the queue.
+  function pushGig(id) { mutate(s => { if (!Array.isArray(s.gigQueue)) s.gigQueue = []; s.gigQueue.push(id); }); }
+  function removeGigAt(idx) { mutate(s => { if (Array.isArray(s.gigQueue) && idx >= 0 && idx < s.gigQueue.length) s.gigQueue.splice(idx, 1); }); }
+  function clearGigs() { mutate(s => { s.gigQueue = []; }); }
+
+  // the shark loan ledger. loanshark.js owns the terms/interest; state owns the records.
+  function addLoan(loan) {
+    mutate(s => { if (!Array.isArray(s.wallet.loans)) s.wallet.loans = []; s.wallet.loans.push(loan); });
+  }
+  // Pay `amount` toward this shark's loans, oldest first; drop any loan paid to zero.
+  function payDownLoans(sharkId, amount) {
+    mutate(s => {
+      let rem = Math.round(amount || 0);
+      const mine = (s.wallet.loans || []).filter(l => l.sharkId === sharkId).sort((a, b) => (a.takenMin || 0) - (b.takenMin || 0));
+      for (const l of mine) { if (rem <= 0) break; const cut = Math.min(rem, l.owed || 0); l.owed = (l.owed || 0) - cut; rem -= cut; }
+      s.wallet.loans = (s.wallet.loans || []).filter(l => (l.owed || 0) > 0.5);
+    });
+  }
+
+  // VAULT (= wallet.money: all income + at-home spends) vs POCKET (cash carried for
+  // field buys). withdrawFromVault runs home to crack the vault (a game-time round trip when
+  // opts.travel); depositToVault stashes pocket cash back; spendPocket spends carried cash (cash-
+  // ledgered). Internal vault↔pocket moves aren't ledgered (relocating your own cash, not income/
+  // expense). vaultTier (store-bought bigger-vault upgrades) is read by the finance tab.
+  const VAULT_RUNHOME_GAME_MIN = 60;   // a round trip home to get into the vault
+  // Player-sex-aware "you're broke" line — filthy + in-character, NEVER the limp "insufficient
+  // funds" / "vault is empty". Reads the player's chosen sex from his avatar.
+  function brokeLine() {
+    const sex = (state && state.settings && state.settings.playerCharacter && state.settings.playerCharacter.sex) || 'male';
+    return sex === 'female' ? "you're a broke bitch — not a dollar to your name" : "you're a broke motherfucker — not a dollar to your name";
+  }
+  // the SHORT form for tight button labels (was "Too poor" / "Insufficient funds").
+  function brokeShort() {
+    const sex = (state && state.settings && state.settings.playerCharacter && state.settings.playerCharacter.sex) || 'male';
+    return sex === 'female' ? 'broke bitch' : 'broke motherfucker';
+  }
+  function getVault() { return (state && state.wallet && typeof state.wallet.money === 'number') ? state.wallet.money : 0; }
+  function getPocket() { return (state && state.wallet && typeof state.wallet.pocket === 'number') ? state.wallet.pocket : 0; }
+  function depositToVault(amount) {
+    amount = Math.min(Math.round(amount || 0), getPocket());
+    if (amount <= 0) return { ok: false, reason: 'no pocket cash to stash' };
+    mutate(s => { s.wallet.pocket -= amount; s.wallet.money += amount; });
+    return { ok: true, amount, pocket: getPocket(), vault: getVault() };
+  }
+  function withdrawFromVault(amount, opts = {}) {
+    amount = Math.min(Math.round(amount || 0), getVault());
+    if (amount <= 0) return { ok: false, reason: brokeLine() };
+    mutate(s => { s.wallet.money -= amount; s.wallet.pocket += amount; });
+    // "run home, access vault, come back" — the trip burns game time + reconciles the world.
+    if (opts.travel && window.DMTHGame.gameClock && window.DMTHGame.gameClock.advanceBy) {
+      window.DMTHGame.gameClock.advanceBy(VAULT_RUNHOME_GAME_MIN);
+      if (window.DMTHGame.tick && window.DMTHGame.tick.reconcileSpan) window.DMTHGame.tick.reconcileSpan(VAULT_RUNHOME_GAME_MIN);
+    }
+    return { ok: true, amount, pocket: getPocket(), vault: getVault() };
+  }
+  function spendPocket(amount, reason) {
+    amount = Math.round(amount || 0);
+    if (!state || getPocket() < amount) return false;
+    mutate(s => { s.wallet.pocket -= amount; s._lastTxn = { amount: -amount, reason, at: Date.now() }; recordLedger(s, -amount, reason); });
+    return true;
+  }
+
   // inventory
-  // Per-item max is basically-unlimited (ITEMCAP.1) — 9999 of each. The sandbox / everything-
+  // Per-item max is basically-unlimited  — 9999 of each. The sandbox / everything-
   // unlocked start seeds 99 of each (bootstrap.js), which is fine; this clamp guarantees the
   // player can keep GAINING well past the starting amount (buy / loot) up to 9999, while
   // preventing a runaway/overflow count.
@@ -425,7 +669,7 @@
   }
 
   // turns
-  // `speaker` is optional — used by the multi-girl scene (MULTIGIRL.2) to mirror a partner
+  // `speaker` is optional — used by the multi-girl scene  to mirror a partner
   // captive's reply into the HOST girl's shared log with HER name, while each girl's OWN log
   // stays speaker-less (so each girl's Ollama context only ever sees her own lines — the
   // context builder filters out speaker-tagged turns).
@@ -448,7 +692,7 @@
     });
   }
 
-  // GIRLHIST.1 — per-girl ACTIVITY history (distinct from the chat `turns` log). A running list of
+  // per-girl ACTIVITY history (distinct from the chat `turns` log). A running list of
   // everything DONE to/by her — player acts (+ the buff/debuff each caused), johns/friends, milk
   // bottled, cash made, captures, births. Surfaced LIVE in the room (no waiting for a trophy) AND
   // in her trophy/dossier via a shared renderer. Bounded; stamps both real-ms ts + game-minutes.
@@ -475,8 +719,8 @@
     mutate(s => { if (s.activity && s.activity[girlId]) delete s.activity[girlId]; });
   }
 
-  // FRIENDCREEP.1 — per-friend-archetype CREEP level 0-10. A friend levels up on successful visits
-  // with a TRIANGULAR cost (Gee: "first fuck success 1 levle up next level 2 fucks next level 3
+  // per-friend-archetype CREEP level 0-10. A friend levels up on successful visits
+  // with a TRIANGULAR cost ("first fuck success 1 levle up next level 2 fucks next level 3
   // fuckes ... to levle 10"): reaching L1 takes 1 success, L1→L2 takes 2 more, L2→L3 takes 3 more,
   // … L9→L10 takes 10 more. Higher creep = he returns + hits harder + pays more + better loot.
   function getFriendCreep(archetypeId) {
@@ -518,18 +762,18 @@
   function addTrophy(trophy) { mutate(s => { if (!s.trophies) s.trophies = []; s.trophies.push(trophy); }); }
   function getTrophies() { return (state && state.trophies) || []; }
 
-  // body parts — harvested via the dismember disposal path (DEP-EXP.3); sold in the body-part market.
+  // body parts — harvested via the dismember disposal path ; sold in the body-part market.
   function addBodyPart(part) { mutate(s => { if (!s.bodyParts) s.bodyParts = []; s.bodyParts.push(part); }); }
   function getBodyParts() { return (state && state.bodyParts) || []; }
   function removeBodyPart(id) { mutate(s => { if (s.bodyParts) s.bodyParts = s.bodyParts.filter(p => p.id !== id); }); }
 
-  // unlocked hunting grounds — bought private access (PLVL.2). Never removed.
+  // unlocked hunting grounds — bought private access . Never removed.
   function addUnlockedLocation(locId) { mutate(s => { if (!s.unlockedLocations) s.unlockedLocations = []; if (!s.unlockedLocations.includes(locId)) s.unlockedLocations.push(locId); }); }
-  // BUYLOCATION.1 — locations BOUGHT OUT (you own the turf → perks). Never removed.
+  // locations BOUGHT OUT (you own the turf → perks). Never removed.
   function addOwnedLocation(locId) { mutate(s => { if (!s.ownedLocations) s.ownedLocations = []; if (!s.ownedLocations.includes(locId)) s.ownedLocations.push(locId); }); }
-  // AUTOLOGISTICS.1 — merge a patch into the logistics config (unlock / enable / target sliders).
+  // merge a patch into the logistics config (unlock / enable / target sliders).
   function setLogistics(patch) { mutate(s => { s.logistics = { ...(s.logistics || { unlocked: false, enabled: false, targets: { food: 20, water: 20, condoms: 10 } }), ...patch }; }); }
-  // purchased early-access action unlocks (PAYUNLOCK.1). Never removed.
+  // purchased early-access action unlocks . Never removed.
   function addPurchasedUnlock(key) { mutate(s => { if (!s.purchasedUnlocks) s.purchasedUnlocks = []; if (!s.purchasedUnlocks.includes(key)) s.purchasedUnlocks.push(key); }); }
 
   // propositioners
@@ -604,11 +848,78 @@
   }
   function getPlayerName() { return (state && state.settings && state.settings.playerName) || 'Master'; }
 
-  // REQUEST.1 — pre-capture item-request daily cooldown. `key` = `${locationId}|${archetype}`.
+  // the player's own avatar (sex / age / race / build / hair / start-clothing /
+  // one custom write-in), chosen in the new-game character creator. Merged onto the current value so
+  // a partial patch (e.g. just new clothing from the player clothing store) keeps the other fields.
+  function setPlayerCharacter(patch) {
+    mutate(s => {
+      if (!s.settings) s.settings = {};
+      s.settings.playerCharacter = Object.assign({}, DEFAULT_PLAYER_CHARACTER, s.settings.playerCharacter || {}, patch || {});
+    });
+  }
+  function getPlayerCharacter() {
+    return Object.assign({}, DEFAULT_PLAYER_CHARACTER, (state && state.settings && state.settings.playerCharacter) || {});
+  }
+
+  // player/scene image toggles ({playerInShot, pov, watchVisitors}). Merge-patch.
+  function getSceneToggles() {
+    return Object.assign({ playerInShot: false, pov: false, watchVisitors: false },
+      (state && state.settings && state.settings.sceneToggles) || {});
+  }
+  function setSceneToggles(patch) {
+    mutate(s => {
+      if (!s.settings) s.settings = {};
+      s.settings.sceneToggles = Object.assign({ playerInShot: false, pov: false, watchVisitors: false }, s.settings.sceneToggles || {}, patch || {});
+    });
+  }
+
+  //   — every
+  // PLAYTHROUGH names its hunting grounds differently. Each location keeps its THEME (a club is
+  // still a club) but draws a fresh filthy name from a per-id pool, picked deterministically from a
+  // one-time per-save seed — so two playthroughs prowl "Neon Cunt Lounge" vs "The Wet Hole" for the
+  // same club. Names match the game's extreme register . Pure read (the seed is
+  // assigned once, directly, so it never triggers a render cascade); persists on the next save.
+  // Locations with no pool fall back to the catalog displayName.
+  const LOCATION_NAME_POOLS = {
+    street:           ['Cunt Alley', 'The Meat Strip', 'Slit Street', 'Dead-Hooker Boulevard', 'The Gash Mile'],
+    club:             ['The Pink Slit', 'Neon Cunt Lounge', 'The Wet Hole', 'Throatfuck Lounge', 'Velvet Gash'],
+    'strip-club':     ['The Spread Eagle', 'Wetworks', 'The Cum Dungeon', 'Pole & Hole', 'The Glory Pit'],
+    library:          ['The Quiet Hole', 'Stacks & Cracks', 'The Hush Cunt', 'Dewey Decimal Hole', 'The Reading Pit'],
+    park:             ['The Bushes', 'Rape Meadow', 'Snatch Park', 'The Tree-Line', 'The Dog-Run'],
+    gym:              ['Sweat & Holes', 'The Meat Locker', 'Iron & Cunt', 'The Squat Rack', 'Flesh Gym'],
+    mall:             ['The Flesh Mall', 'Dead-Mall Holes', 'Food-Court Cunt', 'Retail Meat', 'The Atrium Pit'],
+    'coffee-shop':    ['Cream & Sugar', 'The Wet Cup', 'Grind & Hole', 'The Foam Slit', 'Bean & Gash'],
+    sorority:         ['Greek Holes', 'The Pledge Pit', 'Sigma Slut House', 'The Hazing Hole', 'Coed Meat Row'],
+    remote:           ['The Kill Roads', 'Nowhere Holes', 'Shallow-Grave Lane', 'The Backwoods Pit', 'The Sticks'],
+    'hotel-lobby':    ['The Velvet Vacancy', 'Room 69', 'The Checkout Hole', 'Lobby Meat', 'The Suite Pit'],
+    'private-party':  ['The After-Hours Hole', 'VIP Meat', 'The Back-Room Pit', 'Bottle & Cunt', 'The Lock-In'],
+    'school-campus':  ['The Quad Holes', 'Freshman Meat', 'The Lecture Pit', 'Coed Cunt Row', 'The Dorm Run'],
+    'family-reunion': ['The Kin Pit', 'Bloodline Holes', 'The Backyard Snatch', 'Reunion Meat', 'The Cul-de-sac Cunt'],
+    'prenatal-clinic':['The Brood Ward', 'The Swollen Hole', 'Womb & Co.', 'The Breeding Wing', 'Maternity Meat']
+  };
+  function rollLocationName(locId, seed) {
+    const pool = LOCATION_NAME_POOLS[locId];
+    if (!pool || !pool.length) return null;
+    let h = (seed >>> 0) || 1;
+    for (let i = 0; i < locId.length; i++) h = (h * 31 + locId.charCodeAt(i)) >>> 0;
+    return pool[h % pool.length];
+  }
+  function locationName(locId) {
+    if (!locId) return '';
+    const loc = (window.DMTHAssets && window.DMTHAssets.getById) ? window.DMTHAssets.getById('location', locId) : null;
+    const fallback = loc ? loc.displayName : locId;
+    if (!state || !state.settings) return fallback;
+    // one-time per-save seed — direct assign (NOT mutate) so reading a name never triggers a render
+    // cascade; the scalar rides along on the next regular save.
+    if (state.settings.locationSeed == null) state.settings.locationSeed = Math.floor(Math.random() * 1e9) + 1;
+    return rollLocationName(locId, state.settings.locationSeed) || fallback;
+  }
+
+  // pre-capture item-request daily cooldown. `key` = `${locationId}|${archetype}`.
   function noteItemRequest(key, day) { mutate(s => { if (!s.itemRequestLog) s.itemRequestLog = {}; s.itemRequestLog[key] = day; }); }
   function lastItemRequestDay(key) { return (state && state.itemRequestLog && state.itemRequestLog[key]) || null; }
 
-  // NAMELOCK.1 — register a full name as used so no future girl reuses it this game.
+  // register a full name as used so no future girl reuses it this game.
   function noteUsedName(name) {
     if (!name) return;
     mutate(s => {
@@ -618,7 +929,7 @@
     });
   }
 
-  // LOCPERSIST.1 — persistent per-location spawn sets. read/write the whole record for a location.
+  // persistent per-location spawn sets. read/write the whole record for a location.
   function getLocationSpawns(locId) { return (state && state.locationSpawns && state.locationSpawns[locId]) || null; }
   function setLocationSpawns(locId, record) { mutate(s => { if (!s.locationSpawns) s.locationSpawns = {}; s.locationSpawns[locId] = record; }); }
   function updateLocationSpawns(locId, patch) {
@@ -640,6 +951,11 @@
     addDepravityXp, getDepravityXp,
     setSexDrive, getSexDrive,
     setNutReserve, getNutReserve,
+    getCredit, creditAvailable, chargeCredit, payCredit, CREDIT_LIMIT_MAX, accrueCreditInterest,
+    addLoan, payDownLoans,
+    pushGig, removeGigAt, clearGigs,
+    getCopPayrollTier, setCopPayrollTier,
+    getVault, getPocket, withdrawFromVault, depositToVault, spendPocket, VAULT_RUNHOME_GAME_MIN, brokeLine, brokeShort,
     addItem, consumeItem,
     addDungeon, updateDungeon, getDungeon,
     addGirl, updateGirl, getGirl, removeGirl,
@@ -651,11 +967,16 @@
     addTrophy, getTrophies,
     addBodyPart, getBodyParts, removeBodyPart,
     addUnlockedLocation, addOwnedLocation, setLogistics, addPurchasedUnlock,
+    getLedger: () => (state && state.ledger) || [],
+    categorizeLedger,
     enqueuePropositioner, acceptPropositioner, completePropositioner, rejectPropositioner,
     listGirlForSale, unlistGirl,
     bumpTick,
     setGameOver, isGameOver,
     setPlayerName, getPlayerName,
+    setPlayerCharacter, getPlayerCharacter,
+    getSceneToggles, setSceneToggles,
+    locationName,
     noteItemRequest, lastItemRequestDay,
     noteUsedName,
     getLocationSpawns, setLocationSpawns, updateLocationSpawns

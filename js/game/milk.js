@@ -1,6 +1,6 @@
-// DUNGEON MASTER: THE HUNT — milk / lactation economy (MILKBAL.1 + TITSUCKER.1 + SPECIALIZE.1).
+// DUNGEON MASTER: THE HUNT — milk / lactation economy ( +  + ).
 //
-// Lactation model (Gee 2026-06-18 — "dont make it so ill have littearly 1000000 liters of milk"):
+// Lactation model :
 //   • Every LACTATING captive (preggo 2nd-trimester+ OR inside her postpartum window) slowly
 //     refills a PER-GIRL breast-fill (`body.breastMilk`, liters) over game-time, bounded by her
 //     breast capacity. No fill = no milk → no endless supply. Real abundance only kicks in once
@@ -9,12 +9,12 @@
 //     and grants ONE TIMED player buff (warm-milk high: Nut Reserve regen + satisfaction trickle).
 //     The buff runs SHORTER than the time her breasts take to refill enough to suck again, so a
 //     single girl can't keep it up — stagger sucks across multiple preggos for continuous uptime.
-//   • The TIT SUCKER (TITSUCKER.1) — a machine, lootable + buyable, attachable ONE PER HOLD. A
+//   • The TIT SUCKER  — a machine, lootable + buyable, attachable ONE PER HOLD. A
 //     rigged hold passively BOTTLES whole liters of her fill into the `girl-milk` inventory over
 //     time (slow, capped by what she actually produces — never a flood). Bottled milk sells at
 //     the market or auto-sells a little each tick to black-market / john buyers, gets drunk by a
 //     girl (soothing drug) or by the player (Nut Reserve + satisfaction).
-//   • SPECIALIZE.1 — a 🍈 Cow Tits (big-tits) girl produces + stores DOUBLE the milk and lactates
+//   • a 🍈 Cow Tits (big-tits) girl produces + stores DOUBLE the milk and lactates
 //     a few extra days postpartum (read live from js/game/specialize.js).
 //
 // girl-milk + tit-sucker live as plain inventory keys (NOT catalog ITEMS) so they never pollute
@@ -26,7 +26,8 @@
   const MILK_ITEM = 'girl-milk';
   const TIT_SUCKER_ITEM = 'tit-sucker';
   const TIT_SUCKER_NAME = 'Tit Sucker';
-  const TIT_SUCKER_COST = 600;
+  const TIT_SUCKER_COST = 1500;            // passive milk-printer — priced to be a real investment, not a cheap auto-income (was 600)
+  const MAX_SUCKERS_PER_HOLD = 2;          // two tits → up to two suckers per hold for double output
   const MILK_PRICE = 18;                   // $ per liter at instant market sale
   const MILK_PASSIVE_SELL_CHANCE = 0.30;   // chance/tick a john / black-market buyer takes some
   const LACTATION_MIN_DAY = 94;            // 2nd trimester+ = her body is producing milk
@@ -42,6 +43,8 @@
   const MILK_BUFF_TICKS = 20;              // < the ~36 ticks it takes to refill back to suckable
   const MILK_BUFF_REGEN = 3;               // Nut Reserve regen/tick while the warm-milk high runs
   const TIT_SUCKER_DRAW_WHOLE = 1;         // whole liters the machine bottles per tick (capped by fill)
+  const DEFAULT_MILK_CAP = 5;              // L a hold stores before bottling pauses (collect to empty it)
+  const MILK_AUTO_COST = 800;              // 🥛 auto-supply upgrade per hold: overflow past cap auto-flows to inventory
   const POSTPARTUM_TICKS = 144;            // ~3 game days of postpartum lactation (big-tits extends)
 
   function st() { return window.DMTHGame.state.current; }
@@ -56,11 +59,18 @@
     const d = window.DMTHGame.state.getDungeon(girl?.assignedDungeonId);
     return d && d.holds ? d.holds[girl.assignedHoldIdx ?? 0] : null;
   }
-  function holdHasTitSucker(girl) { return !!holdOf(girl)?.titSucker; }
+  // Count of Tit Suckers rigged on her hold (0-2). Reads the new count field, falling back to the
+  // legacy boolean for old saves.
+  function holdSuckerCount(girl) {
+    const h = holdOf(girl);
+    if (!h) return 0;
+    return (typeof h.titSuckerCount === 'number') ? h.titSuckerCount : (h.titSucker ? 1 : 0);
+  }
+  function holdHasTitSucker(girl) { return holdSuckerCount(girl) > 0; }
 
   function buyTitSucker() {
     const ok = window.DMTHGame.state.spendMoney(TIT_SUCKER_COST, 'buy:tit-sucker');
-    if (!ok) return { ok: false, reason: 'insufficient funds' };
+    if (!ok) return { ok: false, reason: (window.DMTHGame.state.brokeLine ? window.DMTHGame.state.brokeLine() : 'broke') };
     window.DMTHGame.state.addItem(TIT_SUCKER_ITEM, 1);
     if (window.DMTHNotify) window.DMTHNotify.show(`🍼 Bought a ${TIT_SUCKER_NAME} — attach it to a hold to bottle that girl's milk over time.`, { type: 'success', durationMs: 5000 });
     return { ok: true };
@@ -74,13 +84,15 @@
     const idx = girl.assignedHoldIdx ?? 0;
     const hold = dungeon?.holds?.[idx];
     if (!hold) return { ok: false, reason: 'she has no hold' };
-    if (hold.titSucker) return { ok: false, reason: 'this hold already has a Tit Sucker' };
+    const cur = (typeof hold.titSuckerCount === 'number') ? hold.titSuckerCount : (hold.titSucker ? 1 : 0);
+    if (cur >= MAX_SUCKERS_PER_HOLD) return { ok: false, reason: `this hold already has ${MAX_SUCKERS_PER_HOLD} Tit Suckers (one per tit)` };
     if (ownedTitSuckers() < 1) return { ok: false, reason: 'no Tit Sucker in inventory — buy or loot one first' };
     window.DMTHGame.state.consumeItem(TIT_SUCKER_ITEM, 1);
-    const holds = dungeon.holds.map((h, i) => i === idx ? { ...h, titSucker: true } : h);
+    const next = cur + 1;
+    const holds = dungeon.holds.map((h, i) => i === idx ? { ...h, titSuckerCount: next, titSucker: true } : h);
     window.DMTHGame.state.updateDungeon(dungeon.id, { holds });
-    if (window.DMTHNotify) window.DMTHNotify.show(`🍼 ${TIT_SUCKER_NAME} rigged to ${girl.name}'s hold — it'll bottle her milk while she lactates.`, { type: 'success', durationMs: 4500 });
-    return { ok: true };
+    if (window.DMTHNotify) window.DMTHNotify.show(`🍼 ${TIT_SUCKER_NAME} rigged to ${girl.name}'s hold (${next}/${MAX_SUCKERS_PER_HOLD}) — ${next === 2 ? 'both tits bottling now, double output' : "it'll bottle her milk while she lactates"}.`, { type: 'success', durationMs: 4500 });
+    return { ok: true, count: next };
   }
 
   // Pull the Tit Sucker off a girl's hold — returns it to inventory.
@@ -90,11 +102,13 @@
     const dungeon = window.DMTHGame.state.getDungeon(girl.assignedDungeonId);
     const idx = girl.assignedHoldIdx ?? 0;
     const hold = dungeon?.holds?.[idx];
-    if (!hold || !hold.titSucker) return { ok: false, reason: 'no Tit Sucker on this hold' };
-    const holds = dungeon.holds.map((h, i) => i === idx ? { ...h, titSucker: false } : h);
+    const cur = hold ? ((typeof hold.titSuckerCount === 'number') ? hold.titSuckerCount : (hold.titSucker ? 1 : 0)) : 0;
+    if (!hold || cur < 1) return { ok: false, reason: 'no Tit Sucker on this hold' };
+    const next = cur - 1;
+    const holds = dungeon.holds.map((h, i) => i === idx ? { ...h, titSuckerCount: next, titSucker: next > 0 } : h);
     window.DMTHGame.state.updateDungeon(dungeon.id, { holds });
     window.DMTHGame.state.addItem(TIT_SUCKER_ITEM, 1);
-    return { ok: true };
+    return { ok: true, count: next };
   }
 
   // --- Lactation + breast-fill ----------------------------------------------
@@ -114,7 +128,7 @@
   }
 
   // Her breast capacity (game-units) — scaled by AGE so a barely-legal 18yo (still maturing)
-  // holds noticeably less than a fully-developed woman; doubled by the 🍈 big-tits (surgical)
+  // holds noticeably less than a fully-developed girl; doubled by the 🍈 big-tits (surgical)
   // specialization. ageFactor: 0.55 at 18 → 1.0 by ~28 → caps at 1.15. No 18yo "12-lb melons".
   function ageFactor(girl) {
     const age = girl?.age || 22;
@@ -157,14 +171,29 @@
         // Tit Sucker on her hold bottles WHOLE liters — bounded by what she's actually holding,
         // so it can never exceed her production (no flood; ~4 L/game-day base, 8 with big-tits).
         if (holdHasTitSucker(g)) {
-          const draw = Math.min(Math.floor(bm), TIT_SUCKER_DRAW_WHOLE);
-          if (draw >= 1) {
-            bm -= draw; produced += draw; patch.body.breastMilk = bm;
-            // Trophy-history — running total of milk she's produced for you.
+          const d = window.DMTHGame.state.getDungeon(g.assignedDungeonId);
+          const hidx = g.assignedHoldIdx ?? 0;
+          const hold = d?.holds?.[hidx];
+          const milkCap = (hold && typeof hold.milkCap === 'number') ? hold.milkCap : DEFAULT_MILK_CAP;
+          const auto = !!(hold && hold.milkAuto);
+          const cur = (hold && hold.milkStore) || 0;
+          const suckers = (hold && typeof hold.titSuckerCount === 'number') ? hold.titSuckerCount : (hold && hold.titSucker ? 1 : 0);
+          const draw = Math.min(Math.floor(bm), TIT_SUCKER_DRAW_WHOLE * Math.max(1, suckers));
+          const holdHasRoom = cur < milkCap;
+          // the sucker bottles into HER hold's store, capped by the hold's milk cap.
+          // No auto-supply upgrade → bottling PAUSES at the cap until you collect it (her milk just
+          // pools in the hold). With the upgrade → overflow past the cap auto-flows to your inventory.
+          if (draw >= 1 && (holdHasRoom || auto)) {
+            bm -= draw; patch.body.breastMilk = bm;
             patch.body.milkProducedTotal = (g.body?.milkProducedTotal || 0) + draw;
-            // GIRLHIST.2 — itemize milk made into her LIVE activity history.
+            if (holdHasRoom && d && hold) {
+              const newHolds = d.holds.map((h, i) => i === hidx ? { ...h, milkStore: ((h.milkStore || 0) + draw) } : h);
+              window.DMTHGame.state.updateDungeon(d.id, { holds: newHolds });
+            } else {
+              produced += draw;   // hold full + auto-supply on → overflow to your inventory
+            }
             if (window.DMTHGame.state.appendActivity) {
-              window.DMTHGame.state.appendActivity(g.id, { kind: 'milk', label: `bottled ${draw}L milk`, detail: `total ${Math.round(patch.body.milkProducedTotal)}L produced` });
+              window.DMTHGame.state.appendActivity(g.id, { kind: 'milk', label: `bottled ${draw}L milk`, detail: holdHasRoom ? `into her hold store` : `overflow to inventory` });
             }
           }
           // Being machine-milked is a small ongoing degradation for a non-indoctrinated girl
@@ -172,6 +201,15 @@
           if ((g.bond?.bondLevel || 0) <= 3) {
             patch.bond = { ...g.bond, bondDebt: (g.bond?.bondDebt || 0) + 0.5 };
           }
+        }
+        // A lactating captive nurses on her OWN milk to keep her stamina up when she's running
+        // low — she can't bottle it herself but she can drink straight from the breast, so a
+        // preggo doesn't starve out. (Drinking hold-stocked milk too lands with the per-hold store.)
+        const selfStam = g.body?.stamina ?? 70;
+        if (selfStam < 35 && bm >= 1) {
+          bm -= 1;
+          patch.body.breastMilk = bm;
+          patch.body.stamina = Math.min(g.body?.health ?? 100, selfStam + 8);
         }
         window.DMTHGame.state.updateGirl(g.id, patch);
       } else if (bm > 0) {
@@ -232,7 +270,7 @@
     return { ok: true };
   }
 
-  // Suck milk DIRECTLY from her breast (MILKBAL.1) — needs FULL breasts (≥75%), empties her dry,
+  // Suck milk DIRECTLY from her breast  — needs FULL breasts (≥75%), empties her dry,
   // and grants the timed warm-milk player buff. Refused if she isn't lactating or isn't full
   // enough yet (her tits need time to fill back up between sucks).
   function suckFromBreast(girlId) {
@@ -278,12 +316,68 @@
     window.DMTHGame.state.updateGirl(girlId, { body: { ...girl.body, lactatingUntil: until } });
   }
 
+  // --- per-hold milk store, cap, collect, auto-supply upgrade ------------------
+  function holdRef(girl) {
+    const d = window.DMTHGame.state.getDungeon(girl?.assignedDungeonId);
+    const idx = girl?.assignedHoldIdx ?? 0;
+    return { d, idx, hold: d && d.holds ? d.holds[idx] : null };
+  }
+  function holdMilk(girl) { return holdRef(girl).hold?.milkStore || 0; }
+  function holdMilkCap(girl) { const h = holdRef(girl).hold; return (h && typeof h.milkCap === 'number') ? h.milkCap : DEFAULT_MILK_CAP; }
+  function holdMilkAuto(girl) { return !!holdRef(girl).hold?.milkAuto; }
+  function patchHold(girl, patch) {
+    const { d, idx, hold } = holdRef(girl);
+    if (!d || !hold) return false;
+    const holds = d.holds.map((h, i) => i === idx ? { ...h, ...patch } : h);
+    window.DMTHGame.state.updateDungeon(d.id, { holds });
+    return true;
+  }
+  // Collect a hold's pooled milk into your inventory (empties the hold store).
+  function collectHoldMilk(girlId) {
+    const girl = window.DMTHGame.state.getGirl(girlId);
+    if (!girl) return { ok: false, reason: 'no such girl' };
+    const store = holdMilk(girl);
+    if (store < 1) return { ok: false, reason: 'no milk pooled in this hold yet' };
+    const qty = Math.floor(store);
+    patchHold(girl, { milkStore: store - qty });
+    window.DMTHGame.state.addItem(MILK_ITEM, qty);
+    return { ok: true, qty };
+  }
+  //  / a john/friend drinks 1L during a visit (her hold store first, else
+  // your global bottled stock) to extend his stamina. Returns true if a liter was consumed. Callers
+  // call this AT MOST ONCE per visit, so each NPC drinks only one milk per visit.
+  function npcDrinkMilk(girl) {
+    const store = holdMilk(girl);
+    if (store >= 1) { patchHold(girl, { milkStore: store - 1 }); return true; }
+    if (milkStock() >= 1) { window.DMTHGame.state.consumeItem(MILK_ITEM, 1); return true; }
+    return false;
+  }
+  // Set the hold's milk cap — how much it pools before bottling pauses (no upgrade) / overflows (upgrade).
+  function setMilkCap(girlId, n) {
+    const girl = window.DMTHGame.state.getGirl(girlId);
+    if (!girl) return { ok: false, reason: 'no such girl' };
+    const cap = Math.max(1, Math.min(50, Math.round(n || DEFAULT_MILK_CAP)));
+    patchHold(girl, { milkCap: cap });
+    return { ok: true, cap };
+  }
+  // Buy the per-hold auto-supply upgrade — overflow past the cap auto-flows to your inventory.
+  function buyMilkAuto(girlId) {
+    const girl = window.DMTHGame.state.getGirl(girlId);
+    if (!girl) return { ok: false, reason: 'no such girl' };
+    if (holdMilkAuto(girl)) return { ok: false, reason: 'this hold already has auto-supply' };
+    if (!window.DMTHGame.state.spendMoney(MILK_AUTO_COST, `milk-auto:${girlId}`)) return { ok: false, reason: (window.DMTHGame.state.brokeLine ? window.DMTHGame.state.brokeLine() : 'broke') };
+    patchHold(girl, { milkAuto: true });
+    return { ok: true };
+  }
+
   window.DMTHGame = window.DMTHGame || {};
   window.DMTHGame.milk = Object.freeze({
     MILK_ITEM, TIT_SUCKER_ITEM, TIT_SUCKER_NAME, TIT_SUCKER_COST, MILK_PRICE, LACTATION_MIN_DAY,
-    milkStock, ownedTitSuckers, buyTitSucker, attachTitSucker, detachTitSucker, holdHasTitSucker,
+    DEFAULT_MILK_CAP, MILK_AUTO_COST, MAX_SUCKERS_PER_HOLD,
+    milkStock, ownedTitSuckers, buyTitSucker, attachTitSucker, detachTitSucker, holdHasTitSucker, holdSuckerCount,
     isLactating, lactatingCount, breastCapFor, breastFill, canSuck,
     buffActive, buffTicksLeft, MILK_BUFF_TICKS,
+    holdMilk, holdMilkCap, holdMilkAuto, collectHoldMilk, setMilkCap, buyMilkAuto, npcDrinkMilk,
     tickMilk, sellMilk, drinkGirl, drinkPlayer, suckFromBreast, startPostpartum
   });
 })();

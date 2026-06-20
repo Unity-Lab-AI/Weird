@@ -19,7 +19,9 @@
     'private-party':[{ arche: 'sorority', w: 0.3 }, { arche: 'club', w: 0.22 }, { arche: 'college-student', w: 0.18 }, { arche: 'second-cousin', w: 0.12 }, { arche: 'model', w: 0.1 }, { arche: 'street', w: 0.08 }],
     'school-campus':[{ arche: 'college-student', w: 0.24 }, { arche: 'sorority', w: 0.16 }, { arche: 'cheerleader', w: 0.14 }, { arche: 'schoolgirl', w: 0.12 }, { arche: 'teacher', w: 0.12 }, { arche: 'highschool-grad', w: 0.12 }, { arche: 'library', w: 0.1 }],
     'neighborhood': [{ arche: 'neighbor', w: 0.45 }, { arche: 'family-friend', w: 0.25 }, { arche: 'second-cousin', w: 0.15 }, { arche: 'college-student', w: 0.15 }],
-    // PREGGOCAP.1 — the only place to catch an already-pregnant girl. Spawns "normal women"
+    // The family gathering — your own relations within reach. Each is its own relation type.
+    'family-reunion': [{ arche: 'niece', w: 0.22 }, { arche: 'second-cousin', w: 0.2 }, { arche: 'half-sister', w: 0.18 }, { arche: 'step-daughter', w: 0.16 }, { arche: 'long-lost-sister', w: 0.14 }, { arche: 'family-friend', w: 0.1 }],
+    // the only place to catch an already-pregnant girl. Spawns "normal girls"
     // archetypes; rollFreshSet flags every girl here PREGNANT after generation.
     'prenatal-clinic': [{ arche: 'neighbor', w: 0.28 }, { arche: 'family-friend', w: 0.22 }, { arche: 'office', w: 0.18 }, { arche: 'college-student', w: 0.16 }, { arche: 'sorority', w: 0.16 }]
   };
@@ -32,7 +34,7 @@
     model:    ['club', 'hotel-lobby', 'private-party', 'mall']
   };
 
-  // LOCPERSIST.1 — the girls at a location PERSIST. The same set stays put for a randomized
+  // the girls at a location PERSIST. The same set stays put for a randomized
   // 2-4 game-day window so you can return and work the same girl across days (lott farming /
   // mood-building) without capturing her. Captured girls drop out of the set; the window expires
   // and a fresh set rolls in. Falls back to a one-off roll if state isn't ready.
@@ -51,7 +53,7 @@
       taken.add(String(girl.name).toLowerCase());
       girl.encounterState = 'encountered';
       girl.encounteredAt = { locationId, ts: Date.now() };
-      // PREGGOCAP.1 — girls at the prenatal clinic are ALREADY PREGNANT: stamp a real pregnancy
+      // girls at the prenatal clinic are ALREADY PREGNANT: stamp a real pregnancy
       // (random gestation day → trimester) so she arrives breeding, captured belly-and-all.
       if (locationId === 'prenatal-clinic') {
         const gd = 40 + Math.floor(Math.random() * 200);   // ~day 40-240
@@ -83,7 +85,7 @@
     return girls;
   }
 
-  // LOCPERSIST.1 — mark an encountered girl as captured so she stops appearing at that location.
+  // mark an encountered girl as captured so she stops appearing at that location.
   function markEncounterCaptured(locationId, girlId) {
     const st = window.DMTHGame.state;
     if (!st || !st.getLocationSpawns) return;
@@ -141,6 +143,10 @@
     teacher:  'tries to take control with a stern command voice, then the composure shatters into panic',
     police:   'goes for her training — strikes, reaches for a weapon that isn\'t there, barks orders that mean nothing now',
     maid:     'drops what she\'s holding, backs into a corner pleading in a low frightened voice, doesn\'t fight much',
+    niece:    'freezes in family-trust shock — "you\'re my UNCLE" — disbelief before the fear, small betrayed sounds',
+    'half-sister': 'recoils in blood-disbelief — "we\'re half-RELATED, you can\'t" — wary fight, betrayed and confused',
+    'step-daughter': 'frozen betrayal — "you\'re married to my MOM" — disbelief then panic, backs away',
+    'long-lost-sister': 'heartbroken shock — "I just FOUND you" — the reunion curdling to horror, emotional collapse then fight',
     unity_seed: 'laughs — she came here on purpose'
   };
 
@@ -159,7 +165,8 @@
     'private-party': 'upstairs in a bedroom while the party thumps downstairs',
     'school-campus': 'behind the science building where the security cameras don\'t reach',
     'strip-club':  'in the back hallway past the dressing rooms, mirror bulbs and discarded heels, bass thudding through the wall from the main floor',
-    'prenatal-clinic': 'in the clinic parking lot at dusk as she waddles to her car after an appointment, nobody else around, one hand on her swollen belly'
+    'prenatal-clinic': 'in the clinic parking lot at dusk as she waddles to her car after an appointment, nobody else around, one hand on her swollen belly',
+    'family-reunion': 'slipping away from the backyard reunion into the quiet of the house, the rest of the family still out by the potluck tables, just the two of you alone for a moment'
   };
 
   // --- Destination hideout flavor ---
@@ -199,10 +206,14 @@
     teacher:  { approach: 20, engage: 25, subdue: 20, secure: 20 },
     police:   { approach: 30, engage: 35, subdue: 45, secure: 35 },   // trained + fights hard
     maid:     { approach: 15, engage: 15, subdue: 20, secure: 20 },   // isolated + compliant
+    niece:    { approach: 12, engage: 12, subdue: 18, secure: 18 },   // trusts family — won't alert
+    'half-sister': { approach: 15, engage: 18, subdue: 22, secure: 20 },
+    'step-daughter': { approach: 12, engage: 12, subdue: 16, secure: 16 }, // trusts him, lives close
+    'long-lost-sister': { approach: 15, engage: 15, subdue: 20, secure: 20 },
     unity_seed: { approach: 5, engage: 5, subdue: 5, secure: 5 }
   };
 
-  // --- Archetype difficulty (WOMAN TYPE factor) — 0=easy, 1=very hard ---
+  // --- Archetype difficulty (GIRL TYPE factor) — 0=easy, 1=very hard ---
   const ARCHETYPE_DIFFICULTY = {
     barista: 0.25,
     library: 0.30,
@@ -228,6 +239,11 @@
     teacher:  0.55,
     police:   0.78,      // trained, armed, connected — the hardest grab
     maid:     0.35,      // isolated + compliant
+    niece:    0.35,      // trusting blood, but family will notice
+    'half-sister': 0.40,
+    'step-daughter': 0.30, // lives under his roof, trusts him
+    'long-lost-sister': 0.40,
+    'family-reunion': 0.55,    // the gathering — kin within reach, but everyone knows you
     'prenatal-clinic': 0.55,   // pregnant girls — slower, but the clinic's watched
     unity_seed: 0.10     // Unity wants it
   };
@@ -260,7 +276,7 @@
     const suspicion = (window.DMTHGame.state.current.wallet.suspicionByLocation[locationId] || 0);
     const suspicionPenalty = Math.min(0.45, suspicion * 0.08);
     let exposure = LOCATION_EXPOSURE[locationId] || 0;
-    // BUYLOCATION.1 — OWNING the turf means the witnesses look away (lower exposure) and prey
+    // OWNING the turf means the witnesses look away (lower exposure) and prey
     // can't run far (home-turf capture boost). Perks come from progression.ownedLocationPerks.
     const ownPerks = window.DMTHGame.progression?.ownedLocationPerks ? window.DMTHGame.progression.ownedLocationPerks(locationId) : null;
     if (ownPerks) exposure = exposure * (1 - (ownPerks.witnessReduction || 0));
@@ -277,7 +293,7 @@
     const wantedPenalty = window.DMTHGame.wanted ? window.DMTHGame.wanted.huntPenalty() : 0;
     // Trophy perks — disposal trophies grant stacking hunt bonuses (some archetype-targeted).
     const trophyBonus = window.DMTHGame.trophies ? window.DMTHGame.trophies.huntBonusFor(girl.archetypeTemplate) : 0;
-    // SEXDRIVE.1 — a maxed sexual drive sharpens the hunt; a deprived one dulls it.
+    // a maxed sexual drive sharpens the hunt; a deprived one dulls it.
     const sexDriveBonus = window.DMTHGame.sexdrive ? window.DMTHGame.sexdrive.huntBonus() : 0;
 
     const breakdown = {
@@ -363,26 +379,47 @@
     }
   }
 
-  // Escort a captured girl to an open hold in the active dungeon.
-  function escortToHold(girl, dungeonId) {
+  // Every empty hold across EVERY dungeon you own — [{ dungeonId, dungeonName, holdIdx, holdLabel }].
+  // Powers the no-empty-hold capture lockout and the on-capture "which cell does she wake up in" picker.
+  function openHolds() {
+    const s = window.DMTHGame.state && window.DMTHGame.state.current;
+    if (!s || !Array.isArray(s.dungeons)) return [];
+    const out = [];
+    for (const d of s.dungeons) {
+      const tpl = window.DMTHAssets && window.DMTHAssets.getById ? window.DMTHAssets.getById('dungeon', d.templateId) : null;
+      const dName = (tpl && tpl.displayName) || d.id;
+      (d.holds || []).forEach((h, idx) => {
+        if (!h.captiveGirlId) out.push({ dungeonId: d.id, dungeonName: dName, holdIdx: idx, holdLabel: `Cell ${idx + 1}` });
+      });
+    }
+    return out;
+  }
+  // True if there's at least one empty hold anywhere — the gate for starting a new grab.
+  function hasOpenHold() { return openHolds().length > 0; }
+
+  // Escort a captured girl to an open hold. Targets a specific dungeon + hold when given
+  // (the on-capture cell picker); otherwise falls back to the first empty hold in the active dungeon.
+  function escortToHold(girl, dungeonId, holdIdx) {
     const dungeon = window.DMTHGame.state.getDungeon(dungeonId || window.DMTHGame.state.current.settings.activeDungeonId);
     if (!dungeon) throw new Error('no dungeon to escort to');
-    const openIdx = dungeon.holds.findIndex(h => !h.captiveGirlId);
+    const wantsIdx = (typeof holdIdx === 'number' && holdIdx >= 0
+      && dungeon.holds[holdIdx] && !dungeon.holds[holdIdx].captiveGirlId);
+    const openIdx = wantsIdx ? holdIdx : dungeon.holds.findIndex(h => !h.captiveGirlId);
     if (openIdx < 0) throw new Error('no open holds in dungeon');
     girl.encounterState = 'captive';
     girl.assignedDungeonId = dungeon.id;
     girl.assignedHoldIdx = openIdx;
     girl.captureDate = Date.now();
-    // Seed dungeon-occupancy history for the death dossier's "held longest at" stat (DEATHSTATS.1).
+    // Seed dungeon-occupancy history for the death dossier's "held longest at" stat .
     girl.dungeonHistory = [...(girl.dungeonHistory || []), { dungeonId: dungeon.id, at: Date.now() }];
-    // GIRLHIST.2 — log the capture as the first entry in her LIVE activity history.
+    // log the capture as the first entry in her LIVE activity history.
     if (window.DMTHGame.state.appendActivity) {
       const loc = (girl.encounteredAt && girl.encounteredAt.locationId) || 'the streets';
       window.DMTHGame.state.appendActivity(girl.id, { kind: 'capture', label: `⛓️ captured at ${loc}`, detail: `dragged into the dungeon` });
     }
     girl.mood.mood = 'terrified';
     girl.mood.moodEmoji = '😱';
-    // STOCK-START.1 — new captives start at Stockholm 1-3 (internal bond 0-2) depending on the
+    // new captives start at Stockholm 1-3 (internal bond 0-2) depending on the
     // location they came from (easy grounds = more pliable) + the operator's DEPRAVITY level (a
     // seasoned hunter breaks them in faster). Never overrides a higher seeded bond (e.g. Unity).
     const EASY_START_LOCS = new Set(['street', 'library', 'park', 'coffee-shop', 'mall', 'gym', 'neighborhood']);
@@ -399,12 +436,12 @@
       }
     }
     window.DMTHGame.state.addGirl(girl);
-    // NAMELOCK.1 — lock her full name out of future generation now that she's in the collection.
+    // lock her full name out of future generation now that she's in the collection.
     if (window.DMTHGame.state.noteUsedName) window.DMTHGame.state.noteUsedName(girl.name);
     const newHolds = dungeon.holds.slice();
     newHolds[openIdx] = { ...newHolds[openIdx], captiveGirlId: girl.id };
     window.DMTHGame.state.updateDungeon(dungeon.id, { holds: newHolds });
-    // OUTFITLOOT.1 (Gee) — RARE: she comes with her own slutty special outfit stashed (type-matched
+    //   — RARE: she comes with her own slutty special outfit stashed (type-matched
     // when possible, else any skimpy). The special outfits are also buyable in the Carcass Closet;
     // this is the rare-loot-find path. ~10% on capture.
     if (window.DMTHGame.wardrobe?.grantOutfit && Math.random() < 0.10) {
@@ -424,7 +461,7 @@
     return { dungeonId: dungeon.id, holdIdx: openIdx };
   }
 
-  // --- Compose scene-vars for a capture beat based on tool × woman × location × hideout ---
+  // --- Compose scene-vars for a capture beat based on tool × girl × location × hideout ---
   function composeSceneVars({ girl, toolId, locationId, dungeonId, beat }) {
     const tool = TOOL_FLAVOR[toolId] || { verb: toolId, action: 'uses the tool on her', aftermath: 'she goes down' };
     const loc  = window.DMTHAssets.getById('location', locationId);
@@ -452,6 +489,8 @@
     attemptCapture,
     previewCaptureOdds,
     escortToHold,
+    openHolds,
+    hasOpenHold,
     composeSceneVars,
     LOCATION_SPAWNS,
     TOOL_POWER,

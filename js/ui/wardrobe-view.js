@@ -32,52 +32,40 @@
       </div>
 
       <div class="panel">
-        <h2>Owned</h2>
+        <h2>👗 Dress her <span class="small muted">— everything you can put on her right now: her own wardrobe + any outfits sitting in your inventory</span></h2>
         <div class="girl-grid">
           ${(girl.wardrobe || []).map(w => `
             <div class="model-card ${w.id === girl.currentOutfit ? 'active' : ''}">
               <div class="model-name">${w.displayName}</div>
-              <div class="model-notes small">${w.description}</div>
+              <div class="model-notes small">${w.description || ''}</div>
               ${w.id === girl.currentOutfit
                 ? `<div class="small gold">EQUIPPED</div>`
-                : `<button class="btn-small" data-equip="${w.id}">Equip</button>`
+                : `<button class="btn-small" data-equip="${w.id}">Wear it</button>`
               }
             </div>
           `).join('')}
+          ${window.DMTHGame.wardrobe.catalog()
+              .filter(o => window.DMTHGame.wardrobe.ownedQty(o.id) > 0 && !owned.has(o.id))
+              .map(o => `
+            <div class="model-card">
+              <div class="model-name">${o.emoji} ${o.displayName} <span class="small muted">· in your inventory ×${window.DMTHGame.wardrobe.ownedQty(o.id)}</span></div>
+              <div class="model-notes small">${o.description || ''}</div>
+              <button class="btn-small btn-primary" data-apply="${o.id}" data-tooltip="Pull one out of your inventory and put it on ${girl.name} (consumes 1, equips it).">Apply to her</button>
+            </div>
+          `).join('') || ''}
         </div>
       </div>
 
       <div class="panel">
-        <h2>🧵 The Carcass Closet <span class="small muted">— dress your meat up (these layer ON TOP of her own clothes; her captured-at outfit is hers forever)</span></h2>
-        <div class="girl-grid">
-          ${window.DMTHGame.wardrobe.catalog().map(o => {
-            const isOwned = owned.has(o.id);
-            const cardTip = (o.description || '').replace(/"/g, '&quot;');
-            return `<div class="model-card" data-tooltip="${cardTip}">
-              <div class="model-name">${o.emoji} ${o.displayName}</div>
-              <div class="model-notes small">${o.description}</div>
-              <div class="model-meta">
-                <span data-tooltip="Purchase cost in dollars">$${o.price}</span>
-                <span data-tooltip="Outfit tier — higher tier = more elaborate, costlier, bigger film-value multiplier">tier ${o.tier}</span>
-                <span data-tooltip="Multiplies film sale price when she's wearing this outfit during recording">×${o.multiplier} film value</span>
-                <span class="muted" data-tooltip="Roleplay flavor — informs Ollama scene composition">${o.roleplay}</span>
-              </div>
-              ${isOwned
-                ? `<div class="small gold" data-tooltip="She owns this. Equip via the card in 'Owned' section above.">Already owns</div>`
-                : `<button class="btn-small ${money >= o.price ? 'btn-primary' : ''}" data-buy="${o.id}" ${money >= o.price ? '' : 'disabled'} data-tooltip="Buy this outfit + add it to her wardrobe. Then equip via the 'Owned' card.">
-                     ${money >= o.price ? 'Buy + add to wardrobe' : 'Too poor'}
-                   </button>`
-              }
-            </div>`;
-          }).join('')}
-        </div>
+        <p class="small muted">🧵 Out of outfits? Buy more at <a href="#clothing-store">The Carcass Closet</a> (Stores hub) — everything stockpiles in your inventory, then comes back here to dress her. <span class="muted">(: buying lives at the storefront now; this page is for dressing her from what you own.)</span></p>
       </div>
     `;
 
-    el.querySelectorAll('[data-buy]').forEach(b => {
+    el.querySelectorAll('[data-apply]').forEach(b => {
       b.onclick = () => {
-        try { window.DMTHGame.wardrobe.buyForGirl(girl.id, b.dataset.buy); window.DMTHRouter.handle(); }
-        catch (e) { alert(e.message); }
+        const r = window.DMTHGame.wardrobe.applyToGirl(girl.id, b.dataset.apply);
+        if (!r.ok) { alert(r.reason); return; }
+        window.DMTHRouter.handle();
       };
     });
     el.querySelectorAll('[data-equip]').forEach(b => {
