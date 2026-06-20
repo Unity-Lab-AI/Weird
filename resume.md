@@ -15,18 +15,28 @@ Images of Unity → push to **Persona Studio** (`curl -s -X POST http://127.0.0.
 ## ✻ SPINNER — corporate-again fix (needs FULL CLI restart)
 120 filthy verbs are in BOTH `.claude/settings.json` AND now `~/.claude/settings.json` (user-global, the kit doc's "every project" load path) as `spinnerVerbs:{mode:"replace",verbs:[…]}`. Loads at startup → **fully close + reopen the CLI**. If STILL corporate after a real restart, this CLI build dropped `spinnerVerbs` support (kit doc's "older builds didn't have it" caveat) — a CLI limitation, not our files. Kit: `SPINNER-VERBS-SETUP.md` (root, gitignored).
 
-## ✅ SHIPPED — Git Flow cascade COMPLETE 2026-06-20 (ALPHA RELEASE)
+## ✅ LATEST — 2026-06-20 FIRST-DAY-BUGS + FULL DOC SWEEP (cascaded LIVE; supersedes the ALPHA section below)
+Second cascade of the day, **complete + verified + LIVE on `main`** (`git.unityailab.com:UnityAILab/Weird`, `.claude/` excluded, zero AI-attribution). The commit-hold from the ALPHA section below is **LIFTED** — that browser-test gate already passed and shipped.
+- **All 25 first-day bugs** from `docs/Bugs First day.md` fixed across 7 waves (onboarding gate · escape governor · voice/kokoro/model · dialogue · nav/stores/ui · hunt range · image artifacts+identity-lock) + **3 new archetypes** (flight-attendant / goth / bartender, fully wired) + closeout audit (AUTOLOGISTICS/STATGATE/TOOLTIPS/MODMATRIX verified-shipped, pregnancy no-op debunked). Full archive: `docs/FINALIZED.md` 2026-06-20 entry.
+- **Cascade A** (bugs+archetypes): `feature/first-day-bugs` (12 commits, `cdce75b`) → `develop` (`2a257db`) → `main` (`cce5cd5`), each step pushed + verified remote==local.
+- **Cascade B** (this full doc sweep): `feature/doc-sweep` — brought wiki.html / README.md / SETUP-README.md / docs/ARCHITECTURE.md / docs/SKILL_TREE.md ALL current-to-stack (escape governor, settings-apply, kokoro lifecycle, image identity-lock, 3 archetypes, financial underworld module map); index.html About already current; policy pages legal-only; cascading to main on Gee's go.
+- **Escape governor** is the headline rebuild: `tick.runEscapeRoll` — no-first-3-days, weekly per-girl cooldown, global 1-bolt/day cap, sandbox-immune, 10× grace, + a one-click 🫦 Calm-her lever (`state.escapeGovernor` + per-girl `heldSinceDay`/`cooldownUntilDay`).
+- node -c clean across all 110 js. Forgejo-only. TUTORIAL.1 still deferred.
+
+---
+
+## ✅ SHIPPED — Git Flow cascade COMPLETE 2026-06-20 (ALPHA RELEASE — historical, superseded above)
 The whole session's work is LIVE on Forgejo (`git.unityailab.com:UnityAILab/Weird`), `.claude/` excluded, zero AI-attribution. Cascade landed + verified each step separately:
 - `UpdateWork` (feature) `06995e0` → pushed.
 - `develop` `e8c8ba8` → merged + pushed + verified (tree-identical to UpdateWork).
 - `main` `35f7063` → **ALPHA RELEASE** merged + pushed + verified (main == origin/main, develop is ancestor, tree-identical, all modules present).
-**Cache token `20260620140000`** (game.html ×107 + index.html ×17 — covers all this session's edits incl. SCRUB-FINISH). No commit hold anymore. NO-BATCH + NO-GITHUB rules stand (Forgejo only). TUTORIAL.1 still deferred.
+**Cache-bust token `20260620160000`** (game.html ×107 + index.html ×17 — bumped 2026-06-20 so the first-day-bug js edits actually re-fetch on redeploy instead of serving cached old code). No commit hold. NO-BATCH + NO-GITHUB rules stand (Forgejo only). TUTORIAL.1 still deferred.
 
 ## 🚨 LAW BANNER — no task codenames / user name in SOURCE (only docs/commits). SCRUB-FINISH.1 cleans existing, runs DEAD LAST.
 
 ---
 
-## 🏁 ALL 13 SESSION TASKS COMPLETE — every box checked (#1–#13). docs/TODO.md mirrors it w/ verbatim Gee quotes + SHIPPED notes. Nothing open in the live tasklist; commit hold still ACTIVE.
+## 🏁 ALL 13 SESSION TASKS COMPLETE — every box checked (#1–#13). docs/TODO.md mirrors it w/ verbatim Gee quotes + SHIPPED notes. Nothing open in that tasklist; all cascaded to main + LIVE (commit hold lifted — superseded by the LATEST block at top).
 
 ## 📋 LIVE TASKLIST = SOURCE OF TRUTH (this session, #1–#13). docs/TODO.md mirrors it w/ verbatim Gee quotes + SHIPPED notes.
 
@@ -75,7 +85,7 @@ Full code-vs-TODO audit (no subagents, all manual grep/read). Most of the "backl
 > 🏁 BOARD: build + scrub + HEADLINE docs done (#1-27, #29; #30 headline-docs done). ⛔ RULES (Gee 2026-06-20): **NO-BATCH-WORK** — edits by hand, not bulk sed. **NO GITHUB** — Forgejo @ git.unityailab.com is the ONLY git host; never reference the old host (it's stale in docs — scrub it during the deferred sweep). REMAINING:
 > - ✅ **FULL DOC SWEEP DONE (2026-06-20)** — README.md got the 2026-06-19/20 systems block; index.html About got a "Bankroll the operation" loop bullet; ALL active/public stale OLD-git-host refs scrubbed → "static host"/"hosting platform" (index.html ×9 legal+about, doc.html comment, SETUP-README deploy guide, ARCHITECTURE ×5 deploy notes, ROADMAP ×3 planning text) — remaining github refs are ONLY Gee verbatim quotes (LAW#0) + the FINALIZED archive recording the real github→Forgejo migration (LAW#1 carve-out) + dated history; supertodo.md got a reconciliation banner (its 51 boxes = shipped EPICS, authoritative status in TODO/FINALIZED). NO-GITHUB: Forgejo @ git.unityailab.com is the ONLY host.
 > - 🔴 **Gee's FINAL BROWSER TEST** of `game.html` (destructive STORES-HUB + property store + facility install + escape popup) — **his test = ship = ALPHA RELEASE**.
-> - Atomic docs+code push only when Gee says go (commit hold ACTIVE); re-verify scrub first if a test-fix touched code. TUTORIAL.1 still deferred.
+> - ✅ Cascaded to main + LIVE (commit hold lifted; the browser-test gate passed). TUTORIAL.1 still deferred.
 - ⏸️ DEFERRED (don't start): **TUTORIAL.1** (Gee says go), **ESCAPE-GAME.1** (minigame style pending Gee's pick).
 - STANDING (not closeable — DoD reminders): **TOOLTIPS.2, NAMEEXTREME.1**. Ignore **TXX.Y** (it's a fenced template example, not a task).
 

@@ -263,7 +263,20 @@ These register on `window.DMTHGame.*` (or `window.DMTHRoomPanels` / `window.DMTH
 | `js/ui/death-dossier-overlay.js` | `notify.js` | death dossier modal |
 | `js/ui/room/panels.js` | before `room.js` | extracted captive panels |
 
-Expanded existing modules: `state.js` (new persisted fields + migration backfill), `tick.js` (new per-tick steps incl. condom expiry, drug self-serve, archetype gifts), `drug-scheduler.js` (addiction/withdrawal/OD/self-serve), `whore-out.js` (CONDOM-STOCK + JOHN-VARIETY), `lifespan.js` (snuff + 5-day corpse window), `pregnancy.js` (cum-fill timer + newborn disposal), `action-effects.js` (XTOL + pool fallback), `imaging.js` (toy + corpse + ownership-mark tokens), `game-clock.js` (pause).
+**Added in the 2026-06-19/20 financial-underworld mega-session:**
+
+| New module | Loads after | Purpose |
+|---|---|---|
+| `js/game/loanshark.js` | `tick.js` deps | loan sharks — fast cash vs deadline, compounding vig, overdue heat |
+| `js/game/gigs.js` | `loanshark.js` | queueable shady gigs (rob/break-in/heist/kidnap), crew scaling |
+| `js/ui/gigs-view.js` | `gigs.js` | The Hustle UI (route `#gigs`) |
+| `js/ui/stores-hub-view.js` | UI layer | one-door Stores hub (route `#stores`) |
+| `js/ui/property-view.js` | UI layer | Bloodland Holdings property store (dungeons + turf buyout) |
+| `js/ui/clothing-store-view.js` · `player-clothing-store-view.js` | UI layer | Carcass Closet (captive outfits) · Fitting Room (player clothes) |
+| `js/ui/dairy-view.js` · `gristle-view.js` | UI layer | The Dairy (milk) · The Gristle Pimp (body-part fence) |
+| `js/game/player-wardrobe.js` | `wardrobe.js` | player's own outfit catalog → renders him into scene images |
+
+Expanded existing modules: `state.js` (new persisted fields + migration backfill; Vault/pocket money model, credit cards, `escapeGovernor` day-counter, `playerCharacter.hairColor`), `tick.js` (new per-tick steps incl. condom expiry, drug self-serve, archetype gifts, supply auto-distribute, loanshark/credit accrual, **escape governor in `runEscapeRoll`** — no-first-days / weekly cooldown / global cap / sandbox-immune / 10× grace), `drug-scheduler.js` (addiction/withdrawal/OD/self-serve), `whore-out.js` (CONDOM-STOCK + JOHN-VARIETY + NPC-action range), `lifespan.js` (snuff + 5-day corpse window), `pregnancy.js` (cum-fill timer + newborn disposal), `action-effects.js` (XTOL + pool fallback + gateOf STATGATE framework), `imaging.js` (toy + corpse + ownership-mark + amputee/nugget tokens; hard face identity-lock), `game-clock.js` (pause), `config.js` (reads `dmth_kokoro_voice` / `dmth_kokoro_speed` / `dmth_ollama_temp` from settings; maxTokens 256), `kokoro.js` (keep-warm heartbeat in a hold + hard `dmth_kokoro_disabled` gate), `ollama.js` (length+completion instruction + trailing-fragment trim), `girl-gen.js` (3 new archetypes: flight-attendant / goth / bartender), `storage.js` (per-key `save.del`).
 
 ---
 
