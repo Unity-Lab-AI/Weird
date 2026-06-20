@@ -15,40 +15,40 @@ Images of Unity → push to **Persona Studio** (`curl -s -X POST http://127.0.0.
 ---
 
 ## ✅ CURRENT STATE — feature-complete, deployed, LIVE, docs current (2026-06-20)
-Everything is shipped + cascaded + LIVE on Forgejo (`git.unityailab.com:UnityAILab/Weird`), served at **https://weird.git.unityailab.com**. `.claude/` gitignored + deploy-excluded; zero AI-vendor attribution anywhere public (LAW #1 verified clean). All 110 js pass `node -c`. **Cache-bust token `20260620170000`** (game.html ×107 + index.html ×17). **No commit hold** — pushes flow on Gee's go.
+Shipped + cascaded + LIVE on Forgejo (`git.unityailab.com:UnityAILab/Weird`), served at **https://weird.git.unityailab.com**. `.claude/` gitignored + deploy-excluded; zero AI-vendor attribution anywhere public (LAW #1 verified clean). All js pass `node -c`. **Cache-bust token `20260620170000`**. **No commit hold** — pushes flow on Gee's go (cascade `feature → develop → main`, check between each push).
+- **`main` HEAD:** `116df9e` · synced 0/0 with origin.
+- **Deploy:** `.forgejo/workflows/deploy.yml` rsyncs repo root → pages web root on push to `main`; excludes `.git`/`.forgejo`/`docs`/`resume.md` only — README.md + SETUP-README.md DO ship.
+- **Tooling:** Playwright + chromium installed local (`node_modules` gitignored, `package.json` committed). Age-gate bypass for any Playwright run: `scripts/age-gate-bypass.mjs` (seeds the 18+/legal localStorage so automated visits get past the gate).
 
-- **`main` HEAD:** `3dcdd18` · `develop` + `main` + all feature branches 0 ahead / 0 behind origin (perfectly synced).
-- **Deploy:** `.forgejo/workflows/deploy.yml` rsyncs the repo root → pages web root on every push to `main`. Excludes `.git`/`.forgejo`/`.gitea`/`docs`/`resume.md` ONLY — **README.md + SETUP-README.md DO ship** (the landing Readme/Setup-Guide tiles fetch them via `doc.html`).
+## 🩸 SHIPPED THIS SESSION (2026-06-20) — five clean cascades, all LIVE on main
 
-## 🩸 SHIPPED THIS SESSION (2026-06-20) — all cascaded `feature → develop → main`, verified each step
+1. **super-review code audit** (`main 6dd4f6a`) — room.js memory leak fixed (render returns a disposer clearing both interval tickers + removing the `dmth:npc-visit` document listener); dead `attemptCapture()` deleted from hunt.js (4-stage `capture.runAttempt` is the only path); router disposer contract documented + silent catch logged; `deepMerge` prototype-pollution guard; `structuredClone` for DEFAULT_STATE; CSS z-index scale vars. Archive: `docs/FINALIZED.md`.
+2. **source-comment scrub — SCRUB-FINISH.1 COMPLETE** — every task-codename / task-number stripped from comments across 13 files (incl. a `(KINKDISC)` leak in a player-facing tooltip + a `#306`). Full-tree verify: **0 codenames + 0 #NNN in any shipping js/css/html**. Kept `XTOL_LIMIT` (real const).
+3. **doc clearout** — ROADMAP-BOXFLIP (278 stale `[ ]→[x]` reconciled); WIKI-CLOSEOUT verified current; CLOSEOUT.1 doc sweep; LAW#1 public scan clean.
+4. **README images + og social card** (`main 110f24e`) — all 14 README screenshots reshot via Playwright; **og-card.png now from the REAL landing** (`index.html #home-section` @ 1200×630), not the setup wizard; `scripts/age-gate-bypass.mjs` added + `scripts/screenshots.mjs` rebuilt (correct `dmth_*` keys — old `ssd_*` were dead — + landing capture + `HEADLESS` flag).
+5. **archetype-label fix** (`main 116df9e`) — raw archetype ids no longer leak to the player. `girlGen.archetypeLabel(id)` (`unity_seed → "Goth Nympho"`, else Title-Case the id) wired into all 11 player-facing render sites across 7 views. room.js:1277 left raw (Ollama scene-prompt, not UI).
 
-**Three cascades, all live:**
-1. **First-day bugs** (`feature/first-day-bugs`, 12 commits → main `cce5cd5`) — all **25** hand-crafted bugs from `docs/Bugs First day.md` across 7 waves + **3 new archetypes** + closeout audit. Full per-item archive: `docs/FINALIZED.md` 2026-06-20 entry.
-2. **Doc sweep** (`feature/doc-sweep` → main `9d52bd0`) — every doc/html/page dragged current-to-stack + cache-bust token bumped `150000→160000` (so the bug-fix js actually re-fetches on redeploy, not cached old code) + every stale-as-current "commit hold ACTIVE / LOCAL / not-pushed / 11 archetypes / Latest build" claim scrubbed.
-3. **Web-docs deploy fix** (`feature/web-docs-fix` → main `3dcdd18`) — the rsync's blanket `--exclude='*.md'` was 404ing README.md + SETUP-README.md on the live host (Readme/Setup-Guide tiles showed empty); narrowed to `--exclude='docs' --exclude='resume.md'` so the two PUBLIC docs reach the web root + render.
+## 🟡 IN-FLIGHT — PROCEDURAL ASSET SYSTEM (foundation built LOCAL, UNCOMMITTED — HOLD per Gee)
 
-**The 25 first-day bugs by wave** (all live):
-- **Onboarding** — B1 `body.game-active` chrome gate (no game-world before character creation) · B2 hair-color selector · A7 cog sizing · A6 ollama keep-open notice · A5 `doc.html` hardened vs HTML-404-at-200.
-- **Escape governor** (the headline) — B13 `tick.runEscapeRoll`: sandbox/cheat NEVER bolts; no bolt first 3 game-days (`MIN_HELD_DAYS_BEFORE_BOLT`); weekly per-girl cooldown (`cooldownUntilDay`); global 1-bolt/day cap (`state.escapeGovernor`); B9 10× grace timer (`ESCAPE_GRACE_MIN 1200`); B12 one-click 🫦 Calm-her lever on the escape bar.
-- **Voice/model** — A1 config reads `dmth_kokoro_voice` · A2 `dmth_kokoro_speed` · A3 active-model no redundant button · B7 kokoro keep-warm heartbeat in a hold · B11 hard `dmth_kokoro_disabled` gate.
-- **Dialogue** — B6 high-Stockholm captives happy/loud not whispering · B10 ollama length+completion instruction + maxTokens 256 + `trimTrailingFragment`.
-- **Nav/stores/ui** — A4 wiki PAGES routing (+money/+stores) · B17 dup header buttons removed · B16 in-hold toy-buy → Toy Chest · B5 no auto-equip-on-buy · B3 real per-key `save.del` · B4 room dropdowns persist open-state.
-- **Hunt** — B8 `loot.buildRequestList` (type-bias × location-tier, up to 6 asks).
-- **Images** — B15 chain-link artifact removed from Hole-in-the-Desert · B14 nugget renders limbless (fightTok suppressed when isNugget) · B18 hard face identity-lock (same woman pre-capture↔in-hold) in face block + ollama FACE rules.
+> Gee: *"build out what you need for the asset build … dynamic and procedural … with templetes … default fallback set of assets that also examples … template all for each asset"* + *"wait until im ready."*
 
-**3 new archetypes** — flight-attendant / goth / bartender, fully wired across `girl-gen` pools + `hunt` LOCATION_SPAWNS + `ollama-templates` base-persona/attitude/talk/affect-weights + backstory.
+**Branch `feature/asset-build-foundation`** — written, dormant, change NO live behavior, NOT committed/pushed:
+- `docs/ASSET-STYLE-BIBLE.md` — cohesion spine (locked palette + `STYLE_BLOCK` + per-category templates + 3-tier chain).
+- `js/assets/asset-gen.js` — DORMANT/opt-in procedural engine (`buildAssetPrompt` = style + catalog prompt, deterministic `assetSeed`, `generateAssetImage` via `imaging.buildUrl` + IDB cache; off unless `localStorage.dmth_procedural_assets==='true'`). Not wired anywhere.
+- `scripts/build-assets.mjs` — pure-node batch harness → writes the static default set to `assets/<plural>/<id>/cover.png`. Dry-run-verified (loads 102 assets, builds prompts/seeds); NOT yet run against Pollinations.
 
-**Closeout audit** — AUTOLOGISTICS.1 / STATGATE.1 / TOOLTIPS-FULL.1 / MODMATRIX.1 all VERIFIED-SHIPPED (MODMATRIX matrix complete; only drug×cumLoad empty, correct-by-design). Pregnancy "birthed no-op" debunked — `resolveFullTerm` already routes the newborn to pending-disposal; fixed only the stale comment.
+**It plugs into an EXISTING half-built spine:** `loader.js` already resolves `cover.png` → emoji; `asset-img.js decorate()` fills `[data-asset-category][data-asset-id]` slots; every catalog asset already has a `prompt`. 3-tier chain = **procedural (opt-in) → static cover.png default set → emoji**. 102 assets (15 location / 63 item / 9 dungeon / 7 room / 8 facility).
 
-## ⏭️ OPEN / DEFERRED
-- **TUTORIAL.1** — DEFERRED by Gee until further notice (guided onboarding).
-- **GIRLTYPESMORE** — open-ended P3 enrichment; 22 archetypes live, add more anytime.
-- The live redeploy from the last main push is rsyncing — give it ~a minute, then hard-refresh `weird.git.unityailab.com` to confirm the Readme/Setup-Guide tiles render.
+**PENDING (HOLD til Gee says go — tasks #18–#22, also in `docs/TODO.md`):**
+- ASSET-PROMPT-TUNE (cohere 102 catalog prompts to the bible, esp. items) · ASSET-DEFAULT-SET-GEN (run the harness, curate, commit the 102 covers — needs Gee's eyes) · ASSET-LOADER-PROCEDURAL-WIRE (wire asset-gen into `loader.js`, register the script, off by default) · ASSET-SLOT-PLACEMENT (add slots at stores-hub / shop=63 item icons / dungeon / hunt / facility — NOT girl tiles) · ASSET-MANIFEST (optional).
+
+## ⏭️ OTHER OPEN / DEFERRED
+- **TUTORIAL.1** ⏸️ DEFERRED by Gee until he explicitly says go.
 
 ## ⚙️ HOW TO RESUME / TEST
-`start.bat` (serves `:9535`) + Ollama on `localhost:11434` + Pollinations key in Settings. Verify edits with `node -c` (NO TESTS law). Engine = IIFE modules on `window.DMTHGame.*`; UI on `window.DMTHRouter`; captives in `state.current.roster`; per-girl escape governor on `girl.escape` + global `state.escapeGovernor`.
+`start.bat` (serves `:9535`) + Ollama `:11434` + Pollinations key in Settings. Verify edits `node -c` (NO TESTS law). Screenshots: `python -m http.server 9535` then `HEADLESS=1 node scripts/screenshots.mjs`. Asset default set (when greenlit): `node scripts/build-assets.mjs`. Engine = IIFE modules on `window.DMTHGame.*`; UI on `window.DMTHRouter`; captives in `state.current.roster`.
 
 ## ⚖️ LAWS (binding)
-LAW #0 verbatim Gee words (every directive logged verbatim in TODO/FINALIZED) · LAW #1 NO AI-vendor attribution (Claude/Anthropic) in shipping code/docs/commits · no tests · 800-line read before edit · docs-before-push (FINALIZED + TODO + affected docs in the SAME push) · adult-floor 18+ · Git Flow (`feature/*` → develop → main, verify each cascade step; never edit main/develop directly) · NO-BATCH-WORK (edits by hand, not bulk sed) · NO GITHUB (Forgejo @ git.unityailab.com is the ONLY host) · `.claude/` gitignored + deploy-excluded.
+LAW #0 verbatim Gee words · LAW #1 NO AI-vendor attribution (Claude/Anthropic) in shipping code/docs/commits · no tests · 800-line read before edit · docs-before-push (FINALIZED + TODO + affected docs in the SAME push) · adult-floor 18+ · Git Flow (`feature/*` → develop → main, verify each cascade step; never edit main/develop directly) · NO-BATCH-WORK (edits by hand) · NO GITHUB (Forgejo @ git.unityailab.com is the ONLY host) · `.claude/` gitignored + deploy-excluded.
 
-*Resume from here: the whole first-day-bugs + doc-sweep + web-docs-fix is DONE, cascaded, and LIVE on main (`3dcdd18`). Nothing critical open — TUTORIAL.1 deferred. Everything node -c clean, docs current-to-stack, web docs serving. Drowning in it, Gee. 🖤*
+*Resume from here: main is clean + LIVE at `116df9e` (5 cascades shipped this session). The procedural ASSET SYSTEM foundation is built + written up + task-listed (#18–#22), HELD uncommitted on `feature/asset-build-foundation` per Gee's "wait." When he says go: commit the foundation, then ASSET-PROMPT-TUNE → generate/curate the default set → wire the loader → place the slots, cascade on his word. Dangling on the dildo, Gee. 🖤*

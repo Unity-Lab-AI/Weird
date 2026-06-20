@@ -47,6 +47,41 @@
 # 🆕 NEXT BUILD — the live work-to-be-done list (top of queue)
 # ═══════════════════════════════════════════════════════════════
 
+# ───────────────────────────────────────────────────────────────
+# 🎨 PROCEDURAL ASSET SYSTEM — Gee verbatim 2026-06-20 (FOUNDATION built; generation + wiring PENDING — HOLD til Gee says go)
+# ───────────────────────────────────────────────────────────────
+
+> Gee verbatim: *"build out what you need for the asset build to use to build assets but remember we want these assets for the game to be dynamic and procedural like as we can get but with templetes, im not reallly 100% sure where in the game theese assets are used ass the game world is already pretty crowded but im sure youll find a good way to figure it out in the todo you write up of it all and the nbuild the task list and then right the resume.md file and wait"* + *"but i still want to make a defualt fallback set of assets that also examples sitting there as the fallback example and templete all for each asset"*.
+
+**The vision:** cohesive game-asset art (location cards / item icons / dungeon-room-facility art) that is DYNAMIC + PROCEDURAL with TEMPLATES — same pattern as the per-girl imaging (shared style spine + deterministic per-asset seed + cache) — PLUS a committed static DEFAULT SET (one example per asset) that is both the offline/static-host fallback AND the visual template each procedural render aims to match.
+
+**KEY DISCOVERY — the spine already exists.** `js/assets/loader.js` (`resolveImageUrl` → probes `assets/<plural>/<id>/cover.png` → emoji fallback), `js/ui/asset-img.js` (`decorate()` fills `[data-asset-category][data-asset-id]` slots), and the catalog (`js/assets/catalog.js`) where every asset already carries an `id` + `emoji` + `prompt`. `town-view.js` already emits location asset-slots. What was missing = an image SOURCE. So this plugs straight in.
+
+**The 3-tier fallback chain** (full law in `docs/ASSET-STYLE-BIBLE.md`):
+  1. DYNAMIC / PROCEDURAL (opt-in `localStorage.dmth_procedural_assets`) → `js/assets/asset-gen.js` composes `STYLE_BLOCK + catalog.prompt` + deterministic seed → Pollinations → IDB cache.
+  2. STATIC DEFAULT SET → committed `assets/<plural>/<id>/cover.png` (the example/template + offline fallback).
+  3. EMOJI → catalog emoji (current live default; never removed).
+
+**Asset inventory:** 102 total — 15 locations · 63 items · 9 dungeons · 7 rooms · 8 facilities.
+
+## ✅ FOUNDATION — built 2026-06-20 (local, branch `feature/asset-build-foundation`, node -c clean)
+- [x] **`docs/ASSET-STYLE-BIBLE.md`** — the cohesion spine: locked palette (black/charcoal/oxblood + blood-red/neon-pink/bruise-purple accents), the verbatim `STYLE_BLOCK`, per-category template guidance, the 3-tier chain, promo-safe rule, regen instructions.
+- [x] **`js/assets/asset-gen.js`** — DORMANT/opt-in procedural engine. `STYLE_BLOCK`, `buildAssetPrompt(cat,id)` (style + catalog prompt), `assetSeed(cat,id)` (djb2 deterministic), `generateAssetImage(cat,id)` (reuses `imaging.buildUrl` + IDB cache, opt-in via `dmth_procedural_assets`, returns null when off so the static/emoji tiers take over). Loading it changes NO live behavior — not wired anywhere yet.
+- [x] **`scripts/build-assets.mjs`** — pure-node batch harness. Loads the catalog + asset-gen in a window shim, walks all 102 assets, composes styled prompt + seed, fetches Pollinations, writes `assets/<plural>/<id>/cover.png`. CLI: all / per-category / per-asset; `DELAY_MS` throttle; reads the Pollinations key from `env.local.js` (authed endpoint when present). Wiring dry-run-verified (loads 102 assets, builds prompts/seeds) — NOT yet run against Pollinations.
+
+## ⏭️ PENDING — the actual asset build (HOLD until Gee says go)
+- [ ] **ASSET-PROMPT-TUNE** — the "better prompts where they're stylized together" pass: audit all 102 catalog `prompt` fields against the style bible; rewrite thin/off-palette ones toward the per-category template shapes so the set is cohesive (esp. items — many are plain "product photo"). Keep prompts in `catalog.js` (single source of truth). Per the existing `personEnvPrompt` precedent, locations already have strong prompts.
+- [ ] **ASSET-DEFAULT-SET-GEN** — run `node scripts/build-assets.mjs`, eyeball every `cover.png`, re-roll the misses (per-asset CLI), curate, COMMIT the keepers as the static default set. ~102 images; Pollinations rate-limited so it's a throttled batch + human curation pass.
+- [ ] **ASSET-LOADER-PROCEDURAL-WIRE** — extend `js/assets/loader.js resolveImageUrl` so when `dmth_procedural_assets` is on it tries `DMTHAssetGen.generateAssetImage` BEFORE/AFTER the static cover.png probe (decide order: static-first for speed, procedural for freshness). Keep emoji as the final fallback. Register `asset-gen.js` in `game.html` + `index.html` load order. Off by default so live game is unchanged til opted in.
+- [ ] **ASSET-SLOT-PLACEMENT** — the "where in the crowded game" map. The slots EXIST in town-view (locations); ADD `[data-asset-category][data-asset-id]` slots + a `DMTHAssetImg.decorate(el)` call after render at these natural seams (icon-sized, emoji already there as fallback so it degrades clean):
+    · **Stores hub** (`stores-hub-view.js`) — each store card's emoji → asset slot (category 'location'/custom store art).
+    · **Shop** (`shop-view.js`) — each item card's `it.emoji` → `data-asset-category="item"` slot (63 item icons — the biggest visual win).
+    · **Dungeon view** (`dungeon-view.js`) — dungeon template art (`data-asset-category="dungeon"`) + hold/room thumbnails (`room`).
+    · **Hunt/Town** — location cards already slotted in town; hunt-view location header could add one.
+    · **Upgrade/facility views** — facility fixture art (`data-asset-category="facility"`).
+    · **Roster/dashboard** — leave girl tiles to the per-girl imaging system (NOT this — these are PLACES + OBJECTS, no people).
+- [ ] **ASSET-MANIFEST** (optional) — write `assets/manifest.json` after the default set lands so `loader.js probesAreDisabled()` sees it and keeps probes enabled on static hosts without the canary 404 dance.
+
 _(The 2026-06-19 UX OVERHAUL directive block — freeze fix, full-width, dashboard declutter, room reorg, toy-list minimize, captives hero, plus the same-day Treasury→Ledger + WANTED-top-bar + girls-list + Ollama-bind + cache-busting work — shipped + verified headless; archived verbatim in `FINALIZED.md` under the 2026-06-19 session entry.)_
 
 # ═══════════════════════════════════════════════════════════════
