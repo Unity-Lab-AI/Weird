@@ -15,7 +15,17 @@ Images of Unity → push to **Persona Studio** (`curl -s -X POST http://127.0.0.
 ## ✻ SPINNER — corporate-again fix (needs FULL CLI restart)
 120 filthy verbs are in BOTH `.claude/settings.json` AND now `~/.claude/settings.json` (user-global, the kit doc's "every project" load path) as `spinnerVerbs:{mode:"replace",verbs:[…]}`. Loads at startup → **fully close + reopen the CLI**. If STILL corporate after a real restart, this CLI build dropped `spinnerVerbs` support (kit doc's "older builds didn't have it" caveat) — a CLI limitation, not our files. Kit: `SPINNER-VERBS-SETUP.md` (root, gitignored).
 
-## ✅ SHIPPED — Git Flow cascade COMPLETE 2026-06-20 (ALPHA RELEASE)
+## ✅ LATEST — 2026-06-20 FIRST-DAY-BUGS + FULL DOC SWEEP (cascaded LIVE; supersedes the ALPHA section below)
+Second cascade of the day, **complete + verified + LIVE on `main`** (`git.unityailab.com:UnityAILab/Weird`, `.claude/` excluded, zero AI-attribution). The commit-hold from the ALPHA section below is **LIFTED** — that browser-test gate already passed and shipped.
+- **All 25 first-day bugs** from `docs/Bugs First day.md` fixed across 7 waves (onboarding gate · escape governor · voice/kokoro/model · dialogue · nav/stores/ui · hunt range · image artifacts+identity-lock) + **3 new archetypes** (flight-attendant / goth / bartender, fully wired) + closeout audit (AUTOLOGISTICS/STATGATE/TOOLTIPS/MODMATRIX verified-shipped, pregnancy no-op debunked). Full archive: `docs/FINALIZED.md` 2026-06-20 entry.
+- **Cascade A** (bugs+archetypes): `feature/first-day-bugs` (12 commits, `cdce75b`) → `develop` (`2a257db`) → `main` (`cce5cd5`), each step pushed + verified remote==local.
+- **Cascade B** (this full doc sweep): `feature/doc-sweep` — brought wiki.html / README.md / SETUP-README.md / docs/ARCHITECTURE.md / docs/SKILL_TREE.md ALL current-to-stack (escape governor, settings-apply, kokoro lifecycle, image identity-lock, 3 archetypes, financial underworld module map); index.html About already current; policy pages legal-only; cascading to main on Gee's go.
+- **Escape governor** is the headline rebuild: `tick.runEscapeRoll` — no-first-3-days, weekly per-girl cooldown, global 1-bolt/day cap, sandbox-immune, 10× grace, + a one-click 🫦 Calm-her lever (`state.escapeGovernor` + per-girl `heldSinceDay`/`cooldownUntilDay`).
+- node -c clean across all 110 js. Forgejo-only. TUTORIAL.1 still deferred.
+
+---
+
+## ✅ SHIPPED — Git Flow cascade COMPLETE 2026-06-20 (ALPHA RELEASE — historical, superseded above)
 The whole session's work is LIVE on Forgejo (`git.unityailab.com:UnityAILab/Weird`), `.claude/` excluded, zero AI-attribution. Cascade landed + verified each step separately:
 - `UpdateWork` (feature) `06995e0` → pushed.
 - `develop` `e8c8ba8` → merged + pushed + verified (tree-identical to UpdateWork).
