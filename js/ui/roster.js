@@ -85,7 +85,7 @@
           <div class="girl-name">${g.name}${pregBadge}</div>
           <div class="girl-meta">
             <span data-tooltip="Stockholm rating Level ${g.bond.bondLevel}/9 — captivity bond level. Higher = lower escape risk + bigger pay multiplier when whoring out.">⛓ Stockholm Level ${g.bond.bondLevel}</span>
-            <span>${g.archetypeTemplate}</span>
+            <span>${window.DMTHGame.girlGen.archetypeLabel(g.archetypeTemplate)}</span>
             <span data-tooltip="Bruise count.">🩸${g.body.bruises}</span>
             ${ls ? `<span>${ls.daysCaptive} days held</span>` : ''}
             ${pregMeta}

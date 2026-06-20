@@ -119,7 +119,7 @@
           <label class="field small"><span>Assign girl</span>
             <select data-pick-girl-for="${p.id}" data-tooltip="Match % = how well her archetype + kinks + stats fit this client. Higher match = more satisfaction + bigger payout.">
               <option value="">— choose —</option>
-              ${matchScores.map(m => `<option value="${m.g.id}">${m.g.name} (${m.g.archetypeTemplate}) — match ${Math.round(m.s*100)}%</option>`).join('')}
+              ${matchScores.map(m => `<option value="${m.g.id}">${m.g.name} (${window.DMTHGame.girlGen.archetypeLabel(m.g.archetypeTemplate)}) — match ${Math.round(m.s*100)}%</option>`).join('')}
             </select>
           </label>
           <div class="btn-row">
