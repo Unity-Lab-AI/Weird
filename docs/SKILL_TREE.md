@@ -1,6 +1,6 @@
 # SKILL_TREE — weird project
 
-**Generated:** 2026-04-21 · **Last revised:** 2026-06-18 (DEPRAVITY-spine mega-build; pushed to branch `UpdateWork`)
+**Generated:** 2026-04-21 · **Last revised:** 2026-06-20 (first-day-bugs session: escape governor, settings-apply, kokoro lifecycle, image identity-lock, 3 new archetypes — cascaded to main + live)
 
 Capability matrix for the weird build. Organized by domain, complexity, dependency, and priority. As of 2026-06-18 every named capability is shipped and live (the 2026-06-18 mega-build capabilities are catalogued in the first domain block below); see `docs/FINALIZED.md` + `docs/resume.md` for per-session implementation detail.
 
@@ -40,6 +40,17 @@ Capability matrix for the weird build. Organized by domain, complexity, dependen
 - **Procedural location naming** (per-save seed) · **disposal labor-time** (world reconciles per dump) · **unified loot picker** (all drops through one tier+rarity spine)
 - **Whole-game balance audit** — every balance-bearing number mapped + verified-tuned (no blind retuning)
 - **TIP-FILTH** — depraved tooltip/name rewrite across item notes + room/action/dungeon/market UI (safe-scoped off prompt-fed names)
+
+### Game Systems (2026-06-20 first-day-bugs session — all shipped + `node -c` validated; cascaded to main + live)
+- **Escape governor** — `tick.runEscapeRoll` rails: no bolt in a captive's first MIN_HELD_DAYS_BEFORE_BOLT (3) game-days, weekly per-girl cooldown (cooldownUntilDay), global GLOBAL_BOLTS_PER_DAY (1) cap via `state.escapeGovernor`, sandbox/cheat never bolts, 10× grace timer (ESCAPE_GRACE_MIN 1200), + one-click 🫦 Calm-her lever on the escape bar
+- **Settings actually apply** — `config.js` reads `dmth_kokoro_voice` / `dmth_kokoro_speed` / `dmth_ollama_temp` from localStorage (were hardcoded); active-model card stops offering redundant set-active
+- **Kokoro lifecycle** — keep-warm heartbeat while in a girl's hold (no cold-start lag per line) + hard `dmth_kokoro_disabled` gate distinct from the mute toggle
+- **Dialogue shape** — high-Stockholm captives render happy/loud not whispering; ollama length+completion instruction + maxTokens 256 + `trimTrailingFragment` so no chopped half-sentences
+- **Onboarding gate** — `body.game-active` hides the game-world chrome until a character is created; hair-color selector threaded into player image tokens
+- **Image persistence** — hard face identity-lock (same woman pre-capture↔in-hold), nugget limb-token suppression, chain-link artifact removed from the starting dungeon
+- **Hunt ask range** — `loot.buildRequestList` spans girl-type carry × location tier (up to 6 options)
+- **Nav/stores/save** — wiki section routing, dup-header-button removal, in-hold-toy-buy → Toy Chest (inventory-first), no auto-equip-on-buy, real per-key `save.del`, room dropdowns persist open-state
+- **3 new archetypes** — flight-attendant / goth / bartender, fully wired across pools / spawns / persona / attitude / talk / affect-weights / backstory
 
 ### Frontend
 - HTML5 structure (multi-page layout, body zones, toy panel, state bars, log pane, voice controls, page views)
