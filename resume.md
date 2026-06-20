@@ -15,8 +15,12 @@ Images of Unity → push to **Persona Studio** (`curl -s -X POST http://127.0.0.
 ## ✻ SPINNER — corporate-again fix (needs FULL CLI restart)
 120 filthy verbs are in BOTH `.claude/settings.json` AND now `~/.claude/settings.json` (user-global, the kit doc's "every project" load path) as `spinnerVerbs:{mode:"replace",verbs:[…]}`. Loads at startup → **fully close + reopen the CLI**. If STILL corporate after a real restart, this CLI build dropped `spinnerVerbs` support (kit doc's "older builds didn't have it" caveat) — a CLI limitation, not our files. Kit: `SPINNER-VERBS-SETUP.md` (root, gitignored).
 
-## ⛔ COMMIT HOLD — LIFTED 2026-06-20
-The whole session's work committed (`f40c501`) + PUSHED to `origin/UpdateWork` (Forgejo `git.unityailab.com:UnityAILab/Weird`). `.claude/` excluded, zero AI-attribution. ⏳ NEXT (Git Flow cascade, each step GATED by Gee + separate): (1) feature `UpdateWork` → `develop` (push + check), THEN (2) `develop` → `main` (push + check). Awaiting Gee's go on step 1. **Cache token now `20260620140000`** (game.html ×107 + index.html ×17, bumped every JS-edit batch — covers ALL this session's edits incl. the SCRUB-FINISH pass on reload).
+## ✅ SHIPPED — Git Flow cascade COMPLETE 2026-06-20 (ALPHA RELEASE)
+The whole session's work is LIVE on Forgejo (`git.unityailab.com:UnityAILab/Weird`), `.claude/` excluded, zero AI-attribution. Cascade landed + verified each step separately:
+- `UpdateWork` (feature) `06995e0` → pushed.
+- `develop` `e8c8ba8` → merged + pushed + verified (tree-identical to UpdateWork).
+- `main` `35f7063` → **ALPHA RELEASE** merged + pushed + verified (main == origin/main, develop is ancestor, tree-identical, all modules present).
+**Cache token `20260620140000`** (game.html ×107 + index.html ×17 — covers all this session's edits incl. SCRUB-FINISH). No commit hold anymore. NO-BATCH + NO-GITHUB rules stand (Forgejo only). TUTORIAL.1 still deferred.
 
 ## 🚨 LAW BANNER — no task codenames / user name in SOURCE (only docs/commits). SCRUB-FINISH.1 cleans existing, runs DEAD LAST.
 

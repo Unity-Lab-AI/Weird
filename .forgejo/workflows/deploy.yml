@@ -1,0 +1,43 @@
+# DUNGEON MASTER: THE HUNT — pre-alpha auto-deploy.
+# Mirrors the lab-wide pages mechanism (see UnityAILab/Website build.yml "Deploy to nginx"):
+# every push to main rsyncs the static site over SSH to the pages web root, served live at
+# https://weird.git.unityailab.com (the box's wildcard cert + wildcard nginx vhost already match).
+#
+# This repo is PURE STATIC (vanilla HTML/JS/CSS, no bundler) — so there's no build/test/dist
+# step; we deploy the repo root directly, in-run on main (Forgejo can suppress runs triggered by
+# the automatic token, so we never rely on a second pages-branch push).
+#
+# Requires the org/repo Actions secrets the lab already uses for pages:
+#   PAGES_DEPLOY_KEY (base64-encoded SSH private key) · PAGES_DEPLOY_HOST · PAGES_DEPLOY_USER
+name: deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Deploy static site to the pages web root (SSH rsync)
+        env:
+          KEY: ${{ secrets.PAGES_DEPLOY_KEY }}
+          HOST: ${{ secrets.PAGES_DEPLOY_HOST }}
+          USER: ${{ secrets.PAGES_DEPLOY_USER }}
+        run: |
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          # KEY is base64-encoded in the secret to survive newline mangling through CI.
+          printf '%s' "$KEY" | base64 -d > ~/.ssh/deploy && chmod 600 ~/.ssh/deploy
+          # Repo name lowercased → the per-repo pages subdomain (hostnames are case-insensitive).
+          REPO="$(echo "${{ github.event.repository.name }}" | tr 'A-Z' 'a-z')"
+          # Pure static repo → no ./dist; rsync the repo root. Exclude VCS/CI + internal docs so
+          # only the live site (HTML/JS/CSS/assets) reaches the web root.
+          rsync -az --delete \
+            --exclude='.git' --exclude='.forgejo' --exclude='.gitea' \
+            --exclude='docs' --exclude='*.md' \
+            -e "ssh -i ~/.ssh/deploy -o StrictHostKeyChecking=accept-new" \
+            ./ "${USER}@${HOST}:${REPO}/"

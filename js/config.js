@@ -131,7 +131,12 @@
     return h === 'unityailab.com' || h === 'www.unityailab.com';
   }
   const POLLINATIONS = {
-    apiKey: pick('dmth_pollinations_key', 'POLLINATIONS_API_KEY', ''),
+    // PRE-ALPHA COMMUNAL KEY — supplied so visitors don't need their own Pollinations token.
+    // This is a throwaway, internally-rate-limited, REVOCABLE key (rotate any time). It is the
+    // fallback ONLY: a user's own key (localStorage 'dmth_pollinations_key') or a dev-env key
+    // still overrides it. Yes it ships in the public JS — that's the accepted tradeoff for a
+    // zero-setup pre-alpha; rotate it the moment it's abused.
+    apiKey: pick('dmth_pollinations_key', 'POLLINATIONS_API_KEY', 'sk_cVKTWfmo9wF7S5bOiFHZPhN2LjpW4SZ3'),
     imageEndpoint: 'https://image.pollinations.ai/prompt/',   // legacy free — used as fallback
     imageEndpointAuth: 'https://gen.pollinations.ai/image/',  // current authed endpoint
     // Unity AI Lab Worker proxy URL. When detectUnityLabWorker() returns true, buildUrl
