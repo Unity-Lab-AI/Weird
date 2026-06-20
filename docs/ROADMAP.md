@@ -111,6 +111,9 @@ Layered on the 2026-06-18 base. All `node -c` validated; batched LOCAL under a c
 
 ---
 
+> ## ⚠️ MILESTONE-BOX STATUS NOTICE (corrected 2026-06-20)
+> **The per-task `[ ]` checkboxes in the Phase 1–21 milestones below are HISTORICAL PLANNING, NOT a live build-state.** The game is **feature-complete + deployed** (alpha cascaded `UpdateWork → develop → main` + pre-alpha LIVE deploy). These boxes were authored when the expansion was first scoped and were never flipped as features actually landed — Ollama, state deltas, multi-girl roster, hunting, shop/items, dungeon rooms, all upgrade tracks, economy, capture, escape, Stockholm bond, multi-page UI etc. all SHIPPED. **Source of truth = the Current Status table above + `FINALIZED.md`, NOT the boxes below.** Genuinely-open work lives in `TODO.md` (currently: wiki public-facing closeout + TUTORIAL.1 deferred). Don't trust an unchecked box here over the live code.
+
 ## Phase 1 — Foundation: Node + Ollama (P1)
 
 > First real-inference response wired end-to-end. This is the phase that proves the expansion works.
