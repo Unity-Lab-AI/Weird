@@ -78,7 +78,7 @@
     temperature: (() => { const v = parseFloat(pick('dmth_ollama_temp', 'OLLAMA_TEMP', '0.85')); return Number.isFinite(v) ? v : 0.85; })(),
     topP: 0.92,
     repeatPenalty: 1.25,           // higher = less likely to repeat the same response
-    maxTokens: 200,
+    maxTokens: 256,                // headroom so a SHORT complete reply + the full <delta> block both finish before the cap (was 200 → chopped mid-sentence)
     streamResponse: true,
     // Aggressive stop sequences — first blank line ends the response
     stopSequences: ['\n\n\n', 'Master:', 'Scene:', 'SCENE:', '[END]', 'You:', 'User:', '<|end|>', '### ', '<sentence']

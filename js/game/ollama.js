@@ -10,7 +10,26 @@
   // NPC-speaker block (friend_scene / gangbang_scene). Without this pass-through the FRIENDTEMPL
   // npcBlock injection is dead code, so the men in a voiced scene never get distinct voices.
   function buildSystemPrompt(girl, mode, sceneKey, sceneVars, opts) {
-    return window.DMTHTemplates.buildSystemPrompt(girl, mode, sceneKey, sceneVars, opts);
+    const base = window.DMTHTemplates.buildSystemPrompt(girl, mode, sceneKey, sceneVars, opts);
+    // LENGTH + COMPLETION RULE — keep replies short enough that the LAST sentence always finishes
+    // before the token cap, so nothing gets chopped off and left dangling in the chat.
+    return base + `
+
+## LENGTH + COMPLETION RULE (HARD)
+Keep every reply SHORT — 1 to 2 COMPLETE spoken sentences plus at most one short *action*. ALWAYS finish your sentence; NEVER stop mid-word or mid-thought. Stay well under the length limit so your final sentence and the <delta> block both complete — a short finished reply is REQUIRED; a long one that gets cut off is a failure.`;
+  }
+
+  // Defensive trailing-fragment trim — if the model overran the token cap and ended mid-sentence
+  // (no terminal punctuation, no closed *action*), drop the dangling fragment so a half-sentence is
+  // never left in the chat. Only trims when a prior COMPLETE sentence exists; a short unpunctuated
+  // reply ("fuck yes Master") is left intact rather than nuked.
+  function trimTrailingFragment(text) {
+    if (!text) return text;
+    const t = String(text).trim();
+    if (/[.!?…)\]"']$/.test(t) || /\*$/.test(t)) return t;   // already ends clean
+    const lastTerm = Math.max(t.lastIndexOf('.'), t.lastIndexOf('!'), t.lastIndexOf('?'), t.lastIndexOf('…'), t.lastIndexOf('*'));
+    if (lastTerm > 0) return t.slice(0, lastTerm + 1).trim();
+    return t;   // no prior complete sentence — keep the whole short reply
   }
 
   function buildContextBlock(girl, girlState, room, recentTurns, memory) {
@@ -96,6 +115,7 @@
     // Non-stream path trusts num_predict + stop sequences; no post-truncation.
     const raw = data.message?.content || '';
     const parsed = window.DMTHTemplates.extractDelta(raw);
+    if (parsed && parsed.cleanText) parsed.cleanText = trimTrailingFragment(parsed.cleanText);
     return { raw, parsed };
   }
 
@@ -156,6 +176,7 @@
     // strip system-prompt leakage + third-person Master narration, but never trim
     // for length.
     const parsed = window.DMTHTemplates.extractDelta(raw);
+    if (parsed && parsed.cleanText) parsed.cleanText = trimTrailingFragment(parsed.cleanText);
     return { raw, parsed };
   }
 
