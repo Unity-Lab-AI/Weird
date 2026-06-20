@@ -314,6 +314,7 @@
     (async () => {
       const btn = document.getElementById('chrome-voice');
       if (!window.DMTHKokoro) return;
+      if (window.DMTHKokoro.isDisabled && window.DMTHKokoro.isDisabled()) return;   // hard-disabled — never load
       if (window.DMTHKokoro.isReady()) return;
       if (!voiceOn()) return;
       btn.textContent = '⏳';

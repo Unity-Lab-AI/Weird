@@ -86,6 +86,10 @@
         <label class="field" data-tooltip="Playback speed 0.5–2× for the spoken voice. 1.0 = natural. Reloads on change."><span>Speed</span>
           <input type="number" id="s-speed" step="0.05" min="0.5" max="2" value="${cfg.KOKORO.defaultSpeed}" />
         </label>
+        <label class="field" style="flex-direction:row;align-items:center;gap:8px;cursor:pointer" data-tooltip="DISABLE Kokoro entirely — the model never loads, never warms, never speaks (saves memory + CPU). Different from the header 🔊 MUTE, which only silences playback while keeping the engine resident + warm. Reloads on change.">
+          <input type="checkbox" id="s-kokoro-off" ${localStorage.getItem('dmth_kokoro_disabled') === '1' ? 'checked' : ''} />
+          <span>🔇 Disable Kokoro entirely — don't load the voice model at all (vs. the header 🔊 button which just mutes playback).</span>
+        </label>
       </div>
 
       <div class="panel">
@@ -223,6 +227,13 @@
     }
     el.querySelector('#s-voice').onchange = e => { localStorage.setItem('dmth_kokoro_voice', e.target.value); location.reload(); };
     el.querySelector('#s-speed').onchange = e => { localStorage.setItem('dmth_kokoro_speed', e.target.value); location.reload(); };
+    // Hard-disable Kokoro (vs the header mute). Reload so boot honors it (skips the model load).
+    const kokoroOff = el.querySelector('#s-kokoro-off');
+    if (kokoroOff) kokoroOff.onchange = e => {
+      if (e.target.checked) { localStorage.setItem('dmth_kokoro_disabled', '1'); try { window.DMTHKokoro?.releaseKeepWarm?.(); } catch {} }
+      else localStorage.removeItem('dmth_kokoro_disabled');
+      location.reload();
+    };
     const pollyInput = el.querySelector('#s-polly');
     // Wipe the dot-mask on first focus/keypress so the user can paste a clean replacement.
     if (pollyInput && pollyInput.dataset.masked === '1') {

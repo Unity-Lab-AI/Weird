@@ -1907,6 +1907,13 @@
       window.DMTHRouter.handle();
     };
 
+    // Keep Kokoro hot the whole time the player's in this hold — pre-load + heartbeat so her lines
+    // speak without the cold-start delay on every response. No-op if voice is muted or disabled.
+    // Auto-releases when the player navigates out of the room.
+    if ((!window.DMTHIsVoiceOn || window.DMTHIsVoiceOn()) && window.DMTHKokoro?.engageKeepWarm) {
+      window.DMTHKokoro.engageKeepWarm();
+    }
+
     // Derobe / Re-dress toggle — equip built-in 'nude' pseudo-outfit OR revert to 'default'.
     el.querySelector('#derobe-btn').onclick = () => {
       if (girl.currentOutfit === 'nude') {
