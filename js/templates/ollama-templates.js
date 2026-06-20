@@ -456,7 +456,7 @@ End with the delta block.`,
     escape_on_the_run: `SCENE: You got away from Master's hideout N hours ago. You're hiding on the street, trying to figure out what to do next — call the police? Run? Find somewhere safe? Your stats matter here — intelligence {{INTELLIGENCE}}, defiance {{DEFIANCE}}. Narrate 3-4 first-person sentences about your current situation, what you're scanning for, who you think is still hunting you.`,
     recapture_success: `SCENE: Master found you. The tool used was {{TOOL}}. Narrate 3-5 first-person sentences — the moment of being caught again, what breaks in you, what hardens.`,
 
-    // --- EPIC X — VOICED MULTI-PARTY NPC SCENES  ---
+    // --- VOICED MULTI-PARTY NPC SCENES ---
     // A friend's voiced visit. The model speaks for the FRIEND in-character AND for the captive;
     // each line is tagged with the speaker's name (chat shows per-speaker name tags). Her register
     // follows her Stockholm/affect . See npcSpeakerBlock for who's present + tone.
@@ -605,7 +605,7 @@ At low Stockholm (bond < 4) the marks are a fresh, raw horror and humiliation �
   ];
   function pickVoice(arr, seed) { return arr[Math.abs(seed | 0) % arr.length]; }
 
-  // Build the participant-voicing block for a voiced multi-party scene (MULTISPEAK / FRIENDSCENE /
+  // Build the participant-voicing block for a voiced multi-party scene (friend scene /
   // gangbang). npcs: [{ name, handle, tone, isFriend }]. Each man gets a distinct in-character voice
   // so the model can speak AS him on his name-tagged lines, and she answers each BY NAME.
   function npcSpeakerBlock(npcs, girlName) {
@@ -652,7 +652,7 @@ ${lines}`;
     // Permanent ownership-mark psychology — only present when she actually bears marks.
     const ownershipBlock = ownershipMarkBlock(girl);
 
-    // EPIC X — voiced multi-party NPC block . Present only when the caller passes
+    // Voiced multi-party NPC block. Present only when the caller passes
     // opts.npcs (friend_scene / gangbang_scene). NOTE : voice PLAYBACK is GIRL-ONLY — only
     // her name-tagged lines are spoken by Kokoro; the men's lines are text-only. Enforced in the
     // scene wiring (room.js TTS), not here.

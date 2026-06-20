@@ -86,7 +86,7 @@
       if (newDecay >= POSTMORTEM_DECAY_LIMIT && (girl.body.decayedMinutes || 0) < POSTMORTEM_DECAY_LIMIT) {
         if (window.DMTHNotify) {
           // The body is NOT "past usability" — it rots all the way down to a skeleton and the most
-          // depraved (masochist) friends will still use it (CORPSE-TRAIT-ECON). But a rotting body
+          // depraved (masochist) friends will still use it. But a rotting body
           // reeks and draws heat — dispose it, or keep cashing in the rot at rising WANTED risk.
           window.DMTHNotify.show(`☠️ ${girl.name}'s body is rotting badly — the stench draws heat. Dispose it, or keep it: only the sickest friends will still touch it as it goes to the bone.`, { type: 'error', durationMs: 8000 });
         }
@@ -297,7 +297,7 @@
     if (window.DMTHGame.wanted) window.DMTHGame.wanted.accrue('captive-death');
     if (window.DMTHGame.progression) window.DMTHGame.progression.grantXp(14, 'act-death');
     //   — NO corpse-loot: a captured girl is only lootable ON CAPTURE, not by killing
-    // her later. NPC kills still pay the SNUFF BONUS + the friend's KILLWIN gift (grantNpcGift), which
+    // her later. NPC kills still pay the snuff bonus + the friend's kill-reward gift (grantNpcGift), which
     // is the friend rewarding you — not looting her corpse.
     if (window.DMTHNotify) {
       window.DMTHNotify.show(`☠️ ${girl.name} died ${opts.byLabel ? 'under ' + opts.byLabel : 'mid-act'} — snuff content sells for +$${snuffBonus.toLocaleString()}. Her body stays in the hold for postmortem use until you dispose of it.`, { type: 'error', durationMs: 8000 });

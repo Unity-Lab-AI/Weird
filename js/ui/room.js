@@ -8,7 +8,7 @@
   // image were both wiped every time the 30-second tick fired and triggered a re-render.
   const customPoseDrafts = new Map();    // girlId → draft text
   const customPoseResults = new Map();   // girlId → { url, staging, ts }
-  // EPIC X — the named men from the last voiced gangbang/scene for this girl, so the NPC-DIRECT box
+  // The named men from the last voiced gangbang/scene for this girl, so the direct-an-NPC box
   // can target the SAME men (each carries {name, handle, tone, isFriend, archetype}). Persists across
   // state.onChange re-renders of the room template (module-scoped, like the pose caches).
   const lastSceneNpcs = new Map();       // girlId → [{name, handle, tone, isFriend, archetype}]
@@ -195,7 +195,7 @@
           </div>
           <div class="stat-row"><span>Mood</span><b>${girl.mood.mood}</b></div>
           ${girl.captiveAffect ? `<div class="stat-row"><span>Captive-affect</span><b>${girl.captiveAffect}</b></div>` : ''}
-          ${girl.kink && (girl.kink.likeFound || girl.kink.dislikeFound) ? `<div class="stat-row small" data-tooltip="Her discovered kink (KINKDISC). A LIKE buffs that category of act (mood/arousal/bond); a DISLIKE debuffs it (mood + bond-debt). Found by performing the act on her."><span>Kinks</span><b>${girl.kink.likeFound ? `💖 loves ${girl.kink.like}` : ''}${girl.kink.likeFound && girl.kink.dislikeFound ? ' · ' : ''}${girl.kink.dislikeFound ? `💢 hates ${girl.kink.dislike}` : ''}</b></div>` : ''}
+          ${girl.kink && (girl.kink.likeFound || girl.kink.dislikeFound) ? `<div class="stat-row small" data-tooltip="Her discovered kink. A LIKE buffs that category of act (mood/arousal/bond); a DISLIKE debuffs it (mood + bond-debt). Found by performing the act on her."><span>Kinks</span><b>${girl.kink.likeFound ? `💖 loves ${girl.kink.like}` : ''}${girl.kink.likeFound && girl.kink.dislikeFound ? ' · ' : ''}${girl.kink.dislikeFound ? `💢 hates ${girl.kink.dislike}` : ''}</b></div>` : ''}
           <div class="stat-row"><span>Stockholm rating</span><b>${(girl.bond.bondLevel || 0) + 1}/10</b> <span class="muted small">(${['terrified','wary','acclimating','curious','ambivalent','reciprocated','dependent','partner','devoted','fully-bonded'][girl.bond.bondLevel]} · xp ${girl.bond.bondXP}, debt ${girl.bond.bondDebt})</span></div>
           ${(() => {
             const er = Math.round((girl.escape?.currentRisk || 0) * 100);
@@ -662,9 +662,9 @@
           })()}
 
           ${(() => {
-            // EPIC X — voiced gangbang + NPC-DIRECT (GANGSEL / MULTISPEAK / GANGVOICE / NPC-DIRECT).
+            // Voiced gangbang + direct-an-NPC controls.
             // Only for an alive, whored-out captive. The crowd selector + run button live here; the
-            // NPC-DIRECT box is populated by renderNpcDirect() after a scene runs. The scene itself
+            // direct-an-NPC box is populated by renderNpcDirect() after a scene runs. The scene itself
             // plays out in the main chat log (per-speaker name-tagged), girl-only TTS.
             if (!window.DMTHGame.whoreOut) return '';
             const wo = window.DMTHGame.whoreOut.getWhoreOut(girl);
@@ -1300,9 +1300,9 @@
       if (statusEl) { statusEl.textContent = 'done'; setTimeout(() => { if (statusEl) statusEl.textContent = ''; }, 2000); }
     }
 
-    // ---- EPIC X — voiced multi-party scene engine (gangbang + NPC-DIRECT) ----
+    // ---- voiced multi-party scene engine (gangbang + direct-an-NPC) ----
 
-    // MULTISPEAK — parse a `Name: line` multi-speaker transcript into ordered {speaker, text}.
+    // Parse a `Name: line` multi-speaker transcript into ordered {speaker, text}.
     // Strips the delta block + code-fence scaffolding first; a line with no `Name:` prefix is
     // appended to the previous speaker's text as a continuation.
     function parseSpeakerLines(raw) {
@@ -1409,7 +1409,7 @@
       }
     }
 
-    // GANGSEL / MULTIFRIENDGANG — throw a voiced gangbang: resolve the REAL mechanics (pay/health/
+    // Throw a voiced gangbang: resolve the REAL mechanics (pay/health/
     // cum-fill/bukkake via resolveGangbang) for the johns, then add `friendCount` FRIENDS resolved
     // SEQUENTIALLY — each re-reads her freshly-lowered health, so their damage STACKS and 2+ friends
     // can finish her by chance + stat rolls (a single one stays ≤50%/visit). Then play it out voiced.
@@ -1451,7 +1451,7 @@
       } finally { setInFlight(false); }
     }
 
-    // NPC-DIRECT — render the "direct a man" box from the last scene's men. Re-callable after a
+    // Render the "direct a man" box from the last scene's men. Re-callable after a
     // re-render (men persist in lastSceneNpcs). Empties itself when there's no remembered crowd.
     function renderNpcDirect() {
       const panel = el.querySelector('#npc-direct-panel');
@@ -1509,7 +1509,7 @@
       } finally { setInFlight(false); }
     }
 
-    // Wire the voiced-gangbang run button + restore the NPC-DIRECT box if a scene's men persist.
+    // Wire the voiced-gangbang run button + restore the direct-an-NPC box if a scene's men persist.
     const vgangBtn = el.querySelector('#vgang-run');
     if (vgangBtn) {
       vgangBtn.onclick = () => {
