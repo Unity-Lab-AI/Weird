@@ -434,7 +434,9 @@
     const bits = [
       `a ${pc.age || 35}-year-old ${pc.race || 'white'} ${playerSexNoun(pc)}`,
       `${pc.build || 'average'} build`,
-      pc.hair || 'short dark hair'
+      // color + style fused into one hair descriptor (e.g. "brown short cropped") so the
+      // captor renders with the hair the player actually picked, not a generic default.
+      ([pc.hairColor, pc.hair].filter(Boolean).join(' ') || 'short dark hair') + ' hair'
     ];
     if (pc.startClothing) bits.push('wearing ' + pc.startClothing);
     if (pc.custom) bits.push(pc.custom);

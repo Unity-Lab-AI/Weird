@@ -18,6 +18,28 @@
 }
 .chrome-nav a.active { border-color: var(--accent); color: var(--accent); }
 
+/* Gate the game-WORLD chrome (nav / money / clock / heat / pause / voice / new-game) until a
+   character is created AND the game has actually started. Before that — on the new-game creator —
+   only the brand, the settings cog, and the back-to-landing icon stay reachable. JS in game.html
+   toggles body.game-active. */
+body:not(.game-active) .chrome-nav,
+body:not(.game-active) .chrome-clock,
+body:not(.game-active) .chrome-satisfaction,
+body:not(.game-active) .chrome-buzz,
+body:not(.game-active) .chrome-money,
+body:not(.game-active) .chrome-wanted,
+body:not(.game-active) #chrome-pause,
+body:not(.game-active) #chrome-voice,
+body:not(.game-active) #chrome-new-game { display: none !important; }
+/* with the game-world bits hidden, shove the surviving meta controls to the right edge. */
+body:not(.game-active) .chrome-brand { margin-right: auto; }
+
+/* Chrome icon-anchors (settings cog, back-to-landing) — center the glyph + render it at a
+   readable size instead of tiny + jammed top-left off the header line. */
+.app-chrome a.btn-small { display: inline-flex; align-items: center; justify-content: center; }
+.app-chrome a[href="#settings"],
+.app-chrome a[href="./index.html"] { font-size: 1.3rem; line-height: 1; padding-top: 0; padding-bottom: 0; }
+
 /* TRUE full-width — no centered cap, use the whole screen (ultrawide included). */
 .app-main { width: 100%; max-width: none; margin: 0; padding: 16px clamp(12px, 2vw, 32px); display: grid; gap: 16px; }
 .grid-2   { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); }
