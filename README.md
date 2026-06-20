@@ -130,7 +130,7 @@ There is no win state. The game is the ever-growing collection and the ever-upgr
 
 ---
 
-## Latest build — major systems (2026-06-18)
+## Major build — DEPRAVITY spine + systems (2026-06-18)
 
 The sections below this one document the original feature set in depth. The 2026-06-18 mega-build layered a full progression spine + depravity/economy/logistics systems on top. Each is covered fully in the [Game Wiki](./wiki.html); here's the map:
 
@@ -167,10 +167,21 @@ Layered on the 2026-06-18 build. Full player-facing detail in the [Game Wiki](./
 - **🚨 Heat management** — a **dirty-cop payroll** (Beat-Cop Envelope → Precinct Captain → City Hall's Pocket) that multiplies your raid chance DOWN + speeds WANTED cooling, so a flush operation isn't stopped + jailed every day.
 - **🏬 Stores hub + 🏚️ Bloodland Holdings** — every storefront behind one door; everything buys into your **inventory** first, then you install/apply/use it. NEW property den (Bloodland Holdings) to buy hideouts (dungeons) + buy access to and BUY OUT the hunting grounds (own the turf → fewer witnesses, less heat, a passive skim). Dungeon facilities now buy-to-inventory at the shop → install from the dungeon page.
 - **👥 NPCs do your filthy range** — johns + friends perform nearly any act you can, gated by their nature: a gentle john might just bathe or kiss her; a sadist runs the extreme tier; friends climb into snuff/torture as their creep level grows.
-- **🏃 Escape, reworked** — when a captive works toward bolting you get a warning pop-up naming exactly WHY (mood, bond-debt, a bleak hold, pain, neglect) with a jump to her hold; if the bar maxes a grace **timer** ticks down — rush in and calm her or she's gone, and slipping loose while you're MOST WANTED brings the law down hard.
+- **🏃 Escape, reworked** — when a captive works toward bolting you get a warning pop-up naming exactly WHY (mood, bond-debt, a bleak hold, pain, neglect) with a jump to her hold + a one-click **🫦 Calm her down** button on her risk bar; if the bar maxes a long grace **timer** ticks down — rush in and calm her or she's gone, and slipping loose while you're MOST WANTED brings the law down hard. Escapes are **governed** so they stay rare: no bolt in her first few days held, a ~weekly per-girl cooldown after any attempt, a global cap on bolts-per-day, and on cheat/sandbox she never breaks at all.
 - **⏱️ John timing forecast** — per-cadence (off → trickle → sparse → casual → steady → brisk → rapid → relentless) projection of the in-game clock time each girl's stamina hits 0% — and, with friends on, when she'd become a fresh corpse.
 - **🪦 Corpse economy + ⚱️ deeper disposal** — a rotting corpse repels everyone but rare masochist/necrophile clients who pay high dollar for the rot; disposing a body now burns real game-time (dig / boat / burn / butcher) while the world moves on.
 - **🎲 Per-playthrough flavor** — every run names its hunting grounds differently; one unified loot system behind every drop; a whole-game balance audit; and a top-to-bottom depravity rewrite of the tooltips + descriptions.
+
+## First-day polish + new girl-types (2026-06-20)
+
+A 25-bug first-day pass + 3 new archetypes. Full per-item detail in `docs/FINALIZED.md`.
+
+- **🧬 3 new girl-types** — **flight-attendant** (polished traveler, far from anyone who'd miss her), **goth** (pierced, bored-mask defiance melting into dark possessive devotion), **bartender** (streetwise, reads men, mouthy turning ride-or-die) — each fully wired (looks, stats, kinks, persona, break-arc, talk, spawns, loot).
+- **🏃 Escape governor** — escapes are now a rare managed event: no bolt in a captive's first few days, a ~weekly per-girl cooldown after any attempt, a global per-day bolt cap, sandbox/cheat never breaks, the grace timer is 10× longer, and a one-click 🫦 Calm-her lever sits on the escape bar.
+- **🎙️ Voice fixes** — the Kokoro voice + speed pickers actually take now (config reads your saved choice), Kokoro stays warmed inside a girl's hold (no cold-start lag every line), and you can hard-disable Kokoro entirely (not just mute).
+- **💬 Dialogue fixes** — high-Stockholm captives sound happy + loud (no more whispering when devoted); responses finish their sentences instead of getting chopped off mid-thought.
+- **🎯 Hunt + nav + image fixes** — the "ask her for something" spread spans her type AND the location tier (up to 6 options); the game-world chrome stays hidden until you've made a character; the in-hold toy-buy moved to the Toy Chest (inventory-first); the chain-link artifact is gone from starting-hold images; a hard identity-lock keeps a girl looking like the SAME woman from hunt to hold; nuggets render limbless.
+- **🚚 Auto-Logistics** — a buyable upgrade that auto-distributes supplies from your inventory into every dungeon pool each tick up to per-kind slider targets, so you stop hand-stocking.
 
 ---
 
@@ -222,7 +233,7 @@ Multi-use tools (pipe / handcuffs / shackles / harness) survive an attempt. Sing
 
 ### Archetype resistance
 
-11 archetypes spawn at different locations, each with per-stage resistance:
+The core archetypes spawn at different locations, each with tuned per-stage resistance (table below). Additional types — flight-attendant, goth, bartender, schoolgirl, cheerleader, teacher, police, maid, stripper, college-student, and the family-relation types — spawn at their fitting grounds and resolve capture against comparable per-stage resistance:
 
 | Archetype | Approach | Engage | Subdue | Secure | Notes |
 |---|---|---|---|---|---|
