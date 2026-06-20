@@ -5,17 +5,17 @@
 
   // Location archetype affinity — which girl archetypes spawn where, weighted.
   const LOCATION_SPAWNS = {
-    street:        [{ arche: 'street', w: 0.55 }, { arche: 'barista', w: 0.2 }, { arche: 'club', w: 0.25 }],
-    club:          [{ arche: 'club', w: 0.45 }, { arche: 'sorority', w: 0.2 }, { arche: 'stripper', w: 0.15 }, { arche: 'street', w: 0.2 }],
-    'strip-club':  [{ arche: 'stripper', w: 0.62 }, { arche: 'club', w: 0.18 }, { arche: 'street', w: 0.1 }, { arche: 'model', w: 0.1 }],
+    street:        [{ arche: 'street', w: 0.48 }, { arche: 'goth', w: 0.12 }, { arche: 'bartender', w: 0.1 }, { arche: 'barista', w: 0.15 }, { arche: 'club', w: 0.15 }],
+    club:          [{ arche: 'club', w: 0.34 }, { arche: 'goth', w: 0.15 }, { arche: 'bartender', w: 0.12 }, { arche: 'sorority', w: 0.16 }, { arche: 'stripper', w: 0.1 }, { arche: 'street', w: 0.13 }],
+    'strip-club':  [{ arche: 'stripper', w: 0.55 }, { arche: 'bartender', w: 0.15 }, { arche: 'club', w: 0.15 }, { arche: 'street', w: 0.08 }, { arche: 'model', w: 0.07 }],
     library:       [{ arche: 'library', w: 0.6 }, { arche: 'barista', w: 0.25 }, { arche: 'sorority', w: 0.15 }],
     park:          [{ arche: 'gym', w: 0.25 }, { arche: 'barista', w: 0.2 }, { arche: 'college-student', w: 0.2 }, { arche: 'neighbor', w: 0.15 }, { arche: 'library', w: 0.12 }, { arche: 'street', w: 0.08 }],
     gym:           [{ arche: 'gym', w: 0.7 }, { arche: 'sorority', w: 0.15 }, { arche: 'street', w: 0.15 }],
-    mall:          [{ arche: 'sorority', w: 0.22 }, { arche: 'college-student', w: 0.2 }, { arche: 'family-friend', w: 0.16 }, { arche: 'club', w: 0.16 }, { arche: 'barista', w: 0.16 }, { arche: 'library', w: 0.1 }],
+    mall:          [{ arche: 'sorority', w: 0.2 }, { arche: 'goth', w: 0.14 }, { arche: 'college-student', w: 0.18 }, { arche: 'family-friend', w: 0.12 }, { arche: 'club', w: 0.14 }, { arche: 'barista', w: 0.12 }, { arche: 'library', w: 0.1 }],
     'coffee-shop': [{ arche: 'barista', w: 0.4 }, { arche: 'college-student', w: 0.22 }, { arche: 'highschool-grad', w: 0.18 }, { arche: 'library', w: 0.12 }, { arche: 'club', w: 0.08 }],
     sorority:      [{ arche: 'sorority', w: 0.55 }, { arche: 'cheerleader', w: 0.2 }, { arche: 'club', w: 0.12 }, { arche: 'model', w: 0.08 }, { arche: 'gym', w: 0.05 }],
     remote:        [{ arche: 'street', w: 0.4 }, { arche: 'waitress', w: 0.25 }, { arche: 'gym', w: 0.2 }, { arche: 'library', w: 0.15 }],
-    'hotel-lobby': [{ arche: 'sorority', w: 0.3 }, { arche: 'model', w: 0.25 }, { arche: 'office', w: 0.2 }, { arche: 'club', w: 0.15 }, { arche: 'library', w: 0.1 }],
+    'hotel-lobby': [{ arche: 'flight-attendant', w: 0.28 }, { arche: 'sorority', w: 0.2 }, { arche: 'model', w: 0.2 }, { arche: 'office', w: 0.15 }, { arche: 'club', w: 0.1 }, { arche: 'library', w: 0.07 }],
     'private-party':[{ arche: 'sorority', w: 0.3 }, { arche: 'club', w: 0.22 }, { arche: 'college-student', w: 0.18 }, { arche: 'second-cousin', w: 0.12 }, { arche: 'model', w: 0.1 }, { arche: 'street', w: 0.08 }],
     'school-campus':[{ arche: 'college-student', w: 0.24 }, { arche: 'sorority', w: 0.16 }, { arche: 'cheerleader', w: 0.14 }, { arche: 'schoolgirl', w: 0.12 }, { arche: 'teacher', w: 0.12 }, { arche: 'highschool-grad', w: 0.12 }, { arche: 'library', w: 0.1 }],
     'neighborhood': [{ arche: 'neighbor', w: 0.45 }, { arche: 'family-friend', w: 0.25 }, { arche: 'second-cousin', w: 0.15 }, { arche: 'college-student', w: 0.15 }],

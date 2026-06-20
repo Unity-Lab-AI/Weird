@@ -665,9 +665,9 @@
       prompt: 'documentary landscape photograph at dusk of a remote desert clearing with a rectangular pit dug into the earth, edges reinforced with weathered plywood and tarps, rope ladder coiled at the rim, a single heavy iron ring embedded in the pit floor with a length of chain attached, scrub brush and tumbleweeds scattered around, distant mountains on the horizon, empty bare wasteland stretching to every horizon, desolate isolation, muted golden-hour light, 35mm film aesthetic',
       cost: 0, tier: 0, roomSlots: 1, contentValueMultiplier: 0.65,
       isolation: 0.95, concealment: 0.7,
-      plotTokens: 'buried desert pit, plywood-reinforced walls, rope ladder, iron floor ring, chain, remote, dusty',
+      plotTokens: 'buried desert pit, plywood-reinforced walls, rope ladder, iron floor ring, remote, dusty',
       holdType: 'floor-ring-chain',
-      holdPrompt: 'heavy forged iron ring set in the pit floor, attached chain with a steel cuff',
+      holdPrompt: 'a bare earthen pit with weathered plywood-reinforced walls and a single iron ring set into the dirt floor, dim and empty',
       capacityUpgrades: [
         { atSlots: 2, cost: 400,  addsHold: 'floor-ring-chain', describedAs: 'widened pit with a second floor ring at the opposite corner' },
         { atSlots: 3, cost: 900,  addsHold: 'floor-ring-chain', describedAs: 'dug deeper, three-ring layout around the central ladder' }

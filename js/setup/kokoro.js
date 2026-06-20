@@ -23,6 +23,15 @@
   let mainTts = null;
   let mainLoading = false;
   let warmedUp = false;
+  let keepWarmTimer = null;
+
+  // Hard DISABLE (distinct from the transient mute toggle): when set, Kokoro never loads, never
+  // warms, never speaks. The chrome 🔊 button is a MUTE (silences playback but the engine stays
+  // resident + warm); this flag is the real OFF switch for users who don't want the model at all.
+  function isDisabled() {
+    try { return window.localStorage && window.localStorage.getItem('dmth_kokoro_disabled') === '1'; }
+    catch { return false; }
+  }
 
   // Fire ONE tiny throwaway synth the instant the model is ready so the FIRST real line skips the
   // cold-inference penalty (WASM kernel compile + default-voice load) that otherwise stacks on top
@@ -107,6 +116,7 @@
   const WORKER_INIT_TIMEOUT_MS = 60_000;
 
   async function ensureLoaded(onProgress) {
+    if (isDisabled()) return;   // hard-disabled — never load the model at all
     if (ready) return;
     if (loading) {
       // Already loading — wait until ready or errored.
@@ -276,6 +286,42 @@
     return new Blob([buffer], { type: 'audio/wav' });
   }
 
+  // Public warm ping — fire a tiny throwaway synth to keep the worker's inference HOT so the next
+  // real line skips the cold-start penalty. Safe to spam; no-op when disabled or not yet ready.
+  function warmPing() {
+    if (isDisabled() || !ready) return;
+    try {
+      const voice = cfg().KOKORO.defaultFemaleVoice;
+      if (worker && !mainTts) {
+        const id = ++nextReqId;
+        pending.set(id, { resolve: () => {}, reject: () => {} });
+        worker.postMessage({ type: 'speak', id, text: 'mm', voice, speed: 1.0 });
+      } else if (mainTts) {
+        mainTts.generate('mm', { voice, speed: 1.0 }).catch(() => {});
+      }
+    } catch (e) { /* warmup is best-effort */ }
+  }
+
+  // Keep Kokoro engaged + hot while the player is inside a girl's hold: pre-load it up front (so the
+  // first response doesn't eat the multi-minute model load) then heartbeat a tiny warm ping so the
+  // worker never goes cold between the player's actions — every line then speaks without the
+  // cold-start delay. Auto-releases when the player navigates out of any room.
+  const KEEP_WARM_INTERVAL_MS = 45_000;
+  function engageKeepWarm() {
+    if (isDisabled()) return;
+    ensureLoaded().then(() => warmPing()).catch(() => {});
+    if (keepWarmTimer) return;
+    keepWarmTimer = setInterval(warmPing, KEEP_WARM_INTERVAL_MS);
+    const onNav = () => {
+      const h = (location.hash || '').replace(/^#/, '');
+      if (!h.startsWith('room')) { releaseKeepWarm(); window.removeEventListener('hashchange', onNav); }
+    };
+    window.addEventListener('hashchange', onNav);
+  }
+  function releaseKeepWarm() {
+    if (keepWarmTimer) { clearInterval(keepWarmTimer); keepWarmTimer = null; }
+  }
+
   function isReady() { return ready; }
   function isLoading() { return loading; }
   function getProgress() { return progress; }
@@ -289,6 +335,10 @@
     isLoading,
     getProgress,
     getError,
-    onStateChange
+    onStateChange,
+    warmPing,
+    engageKeepWarm,
+    releaseKeepWarm,
+    isDisabled
   });
 })();

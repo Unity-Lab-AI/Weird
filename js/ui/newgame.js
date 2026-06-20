@@ -11,6 +11,10 @@
   // Applies to every player-attribute selection built going forward (clothing store etc.).
   const SEX   = [['male', 'Male'], ['female', 'Female']];
   const HAIR  = ['shaved bald', 'buzzcut', 'crew cut', 'short cropped', 'short messy', 'slicked back', 'undercut', 'medium tousled', 'shoulder-length', 'long hair', 'man-bun', 'top knot', 'ponytail', 'braided', 'dreadlocks', 'cornrows', 'mohawk', 'mullet', 'balding', 'receding hairline', 'grey / silver', 'salt-and-pepper', 'bald with full beard', 'curly afro'];
+  // Hair COLOR is its own selector (style above is shape, this is shade) — full menagerie
+  // per the standing dropdown rule. Woven into the player's image tokens alongside style so
+  // he renders with the right hair, and the custom-detail field still lets him add anything exotic.
+  const HAIRCOLOR = ['black', 'jet black', 'dark brown', 'brown', 'light brown', 'dirty blonde', 'blonde', 'platinum blonde', 'strawberry blonde', 'auburn', 'red', 'ginger', 'copper', 'chestnut', 'grey', 'silver', 'white', 'salt-and-pepper', 'dyed pink', 'dyed blue', 'dyed purple', 'dyed green', 'dyed teal', 'bleached', 'highlighted', 'ombre', 'two-tone'];
   const BUILD = ['skinny', 'lean', 'slim', 'wiry', 'lanky', 'average', 'stocky', 'dad-bod', 'soft / pudgy', 'athletic', 'toned', 'muscular', 'heavily muscled', 'bodybuilder', 'hulking', 'broad-shouldered', 'barrel-chested', 'heavyset', 'big beer gut', 'fat', 'obese', 'gaunt', 'short and squat', 'tall and rangy'];
   const RACE  = ['white', 'black', 'latino / hispanic', 'east asian', 'southeast asian', 'south asian / indian', 'middle-eastern', 'north african', 'native american', 'pacific islander', 'mixed'];
   // ALL the ages — every adult age 18 through 80 .
@@ -48,6 +52,7 @@
           <label class="field"><span>Race</span><select id="pc-race">${optsFrom(RACE, 'white')}</select></label>
           <label class="field"><span>Body build</span><select id="pc-build">${optsFrom(BUILD, 'average')}</select></label>
           <label class="field"><span>Hair style</span><select id="pc-hair">${optsFrom(HAIR, 'short cropped')}</select></label>
+          <label class="field"><span>Hair color</span><select id="pc-haircolor">${optsFrom(HAIRCOLOR, 'brown')}</select></label>
           <label class="field"><span>Starting clothing</span>
             <input type="text" id="pc-clothing" maxlength="80" placeholder="dirty white tank top and jeans" value="plain dark t-shirt and jeans" />
             <span class="small muted">Keep it short — a few words (max 80 chars). Long write-ups get cut off.</span>
@@ -94,6 +99,7 @@
         race:  el.querySelector('#pc-race').value,
         build: el.querySelector('#pc-build').value,
         hair:  el.querySelector('#pc-hair').value,
+        hairColor: el.querySelector('#pc-haircolor').value,
         startClothing: (el.querySelector('#pc-clothing').value || '').trim().slice(0, 80) || 'a plain dark t-shirt and jeans',
         custom:        (el.querySelector('#pc-custom').value || '').trim().slice(0, 80)
       };

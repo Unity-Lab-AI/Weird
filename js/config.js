@@ -73,12 +73,12 @@
       }
     ],
 
-    // Generation params — overridable via settings.
+    // Generation params — overridable via settings (Settings panel writes dmth_ollama_temp).
     // 200 tokens leaves room for: 1-2 short sentences + 1 asterisk-action + the delta block.
-    temperature: 0.85,
+    temperature: (() => { const v = parseFloat(pick('dmth_ollama_temp', 'OLLAMA_TEMP', '0.85')); return Number.isFinite(v) ? v : 0.85; })(),
     topP: 0.92,
     repeatPenalty: 1.25,           // higher = less likely to repeat the same response
-    maxTokens: 200,
+    maxTokens: 256,                // headroom so a SHORT complete reply + the full <delta> block both finish before the cap (was 200 → chopped mid-sentence)
     streamResponse: true,
     // Aggressive stop sequences — first blank line ends the response
     stopSequences: ['\n\n\n', 'Master:', 'Scene:', 'SCENE:', '[END]', 'You:', 'User:', '<|end|>', '### ', '<sentence']
@@ -90,8 +90,10 @@
     // kokoro-js is loaded from a CDN; version pinned for stability.
     cdnUrl: 'https://cdn.jsdelivr.net/npm/kokoro-js@1.2.0/dist/kokoro.web.js',
     dtype: pick('dmth_kokoro_dtype', 'KOKORO_DTYPE', 'q8'),   // q8 ~80MB (default) · q4 ~40MB loads faster · fp32 ~330MB. Override via dmth_kokoro_dtype localStorage.
-    defaultFemaleVoice: 'af_nova',
-    defaultSpeed: 1.0
+    // Default voice + speed are USER-OVERRIDABLE — the Settings panel writes dmth_kokoro_voice /
+    // dmth_kokoro_speed then reloads; read them back here or the picker silently reverts to Nova/1.0.
+    defaultFemaleVoice: pick('dmth_kokoro_voice', 'KOKORO_VOICE', 'af_nova'),
+    defaultSpeed: (() => { const v = parseFloat(pick('dmth_kokoro_speed', 'KOKORO_SPEED', '1.0')); return Number.isFinite(v) && v > 0 ? v : 1.0; })()
   };
 
   // --- Pollinations ----------------------------------------------------------

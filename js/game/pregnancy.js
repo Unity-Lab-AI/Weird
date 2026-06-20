@@ -27,10 +27,11 @@
 //   - surgical-kit-back-alley $200 — works in days 94-186 (2nd trimester, RISK of complication)
 //   - obgyn-referral-clean $600    — works any time before day 200 (clean, no risk, lower notoriety)
 //
-// Full-term outcome (day 280): roll one of three branches —
-//   - birthed (40%) — flag set; child NOT yet added to roster (multi-girl spawning deferred)
-//   - sold-to-market (35%) — notoriety bump; cash from black-market broker
-//   - lost-to-authorities (25%) — notoriety spike; girl gains 'lost-to-authorities' permanent tag
+// Full-term outcome (day 280): resolveFullTerm() delivers her — status → 'delivered' with
+// pendingNewbornDisposal set. The newborn CANNOT join the harem, so it is NOT a silent no-op:
+// the player gets a notify + chooses a disposal method from the newborn-disposal catalog
+// (disposeNewborn) in her room's pregnancy panel; ignored too long, it auto-dumpsters via the
+// tick. Delivery also opens her postpartum lactation window (milk.startPostpartum).
 //
 // Tick advancement: pregnancy.js exposes tickPregnancies(state) — tick.js calls it once per
 // engine tick. One in-game gestation day per tick (~5 min full-term at 1-sec ticks — game
