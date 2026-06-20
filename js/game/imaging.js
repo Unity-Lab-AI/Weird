@@ -434,7 +434,9 @@
     const bits = [
       `a ${pc.age || 35}-year-old ${pc.race || 'white'} ${playerSexNoun(pc)}`,
       `${pc.build || 'average'} build`,
-      pc.hair || 'short dark hair'
+      // color + style fused into one hair descriptor (e.g. "brown short cropped") so the
+      // captor renders with the hair the player actually picked, not a generic default.
+      ([pc.hairColor, pc.hair].filter(Boolean).join(' ') || 'short dark hair') + ' hair'
     ];
     if (pc.startClothing) bits.push('wearing ' + pc.startClothing);
     if (pc.custom) bits.push(pc.custom);
@@ -834,7 +836,11 @@
       : additionalTokens;
 
     const vi = girl.visualIdentity || {};
-    const faceBlock   = vi.facialDescription || 'natural face, soft features';
+    // IDENTITY LOCK — the SAME woman in every image of her, from the pre-capture hunt thumb through
+    // her in-hold captive shots. Lead the face block with a hard consistency cue (paired with her
+    // persistent visualIdentity.seed) so flux holds her identity across the big prompt change
+    // (location→hold, clothed→nude) instead of drifting into a different-looking girl.
+    const faceBlock   = `THE EXACT SAME WOMAN in every image, identical unchanging facial identity: ${vi.facialDescription || 'natural face, soft features'}`;
     // her captured-at, type-unique outfit (defaultOutfitDescription) is the
     // baseline; the fallback is explicitly FULLY DRESSED so a girl lacking outfit data is never
     // rendered in underwear .
@@ -864,7 +870,7 @@
     const exprTok     = isPostmortem ? '' : expressionTokens(girl);   // face by Stockholm/affect
     const bodyLangTok = isPostmortem ? '' : bodyLanguageTokens(girl); // posture by Stockholm (nude renders only)
     const emotionLead = isPostmortem ? '' : emotionLeadTokens(girl);  // front-loaded emotion (beats flux's smile bias)
-    const fightTok    = isPostmortem ? '' : fightActionTokens(girl, withPlayer || pov); // low-bond fighter limbs in action
+    const fightTok    = (isPostmortem || girl.body?.isNugget) ? '' : fightActionTokens(girl, withPlayer || pov); // low-bond fighter limbs in action — suppressed for a limbless nugget (no limbs to thrash, would fight the amputee block)
     const toyTok      = isPostmortem ? '' : toyTokens(girl.body);   // implement in use on her (gag/clamps/machine…)
     const pregTokens  = isPostmortem ? '' : pregnancyTokens(girl.pregnancy);
     const bondTokens  = bondageTokens(girl.body);
@@ -1167,11 +1173,11 @@
     // SUPPRESS the outfit rule entirely.  When clothed, keep the original face → outfit order.
     const rulesNude = `1. Start every prompt with this EXACT NUDITY BLOCK verbatim, BEFORE the face description, so the image generator front-loads the nudity instruction and cannot interpret it as a single tail word:
    NUDITY: "${nudeBlock}"
-2. Then include this EXACT FACIAL DESCRIPTION verbatim so the same face persists across every image of this girl:
+2. Then include this EXACT FACIAL DESCRIPTION verbatim — this is THE SAME WOMAN in every image of her, from the pre-capture hunt thumb through her in-hold captive shots; her face must be IDENTICAL + unchanging across all contexts, never a different-looking girl:
    FACE: "${vi.facialDescription || 'natural features'}"
 3. Render her completely nude — describe only bare exposed skin, every surface bare.${accessories ? ` The only items on her body are: "${accessories}".` : ''}`;
 
-    const rulesClothed = `1. Start every prompt with this EXACT FACIAL DESCRIPTION verbatim so the same face persists across every image of this girl:
+    const rulesClothed = `1. Start every prompt with this EXACT FACIAL DESCRIPTION verbatim — this is THE SAME WOMAN in every image of her, from the pre-capture hunt thumb through her in-hold captive shots; IDENTICAL unchanging face across all contexts, never a different-looking girl:
    FACE: "${vi.facialDescription || 'natural features'}"
 2. Then include this outfit baseline (may be layered/modified but never replaced):
    OUTFIT: "${outfitDesc}"`;

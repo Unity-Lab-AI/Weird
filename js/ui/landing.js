@@ -208,9 +208,11 @@
               </div>
               <div class="model-notes">${escapeHtml(m.notes)}</div>
               <div class="model-actions">
-                ${isInstalled
-                  ? `<button class="btn-small" data-set-active="${m.id}">${isActive ? 'Active ✓' : 'Set active'}</button>`
-                  : `<button class="btn-small btn-primary" data-pull="${m.id}">Pull</button>`
+                ${isActive
+                  ? `<button class="btn-small" disabled data-tooltip="Already the active model — nothing to do here.">Active ✓</button>`
+                  : isInstalled
+                    ? `<button class="btn-small" data-set-active="${m.id}">Set active</button>`
+                    : `<button class="btn-small btn-primary" data-pull="${m.id}">Pull</button>`
                 }
               </div>
               <div class="model-progress" id="mp-${cssId(m.id)}"></div>

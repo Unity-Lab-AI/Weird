@@ -211,6 +211,26 @@
   };
 
   function requestTemplateFor(arch) { return REQUEST_TEMPLATES[arch] || REQUEST_TEMPLATES._default; }
+
+  // Build the FULL ask list: the type template (themed cheap→prize) PLUS extra items this girl-type
+  // plausibly carries (ARCHETYPE_LOOT_BIAS), tiered by how hard the LOCATION is — a starter spot
+  // only coughs up basics, an end-game location gives prize-grade gear. Deduped + capped at 6 +
+  // stable order so the once-a-day index stays consistent between requestOptions + requestItem.
+  function buildRequestList(girl, locationId) {
+    const arch = girl && girl.archetypeTemplate;
+    const list = requestTemplateFor(arch).slice();          // 3 themed base items
+    const seen = new Set(list.map(o => o.id));
+    const locDiff = LOCATION_REQ_DIFF[locationId] || 0;
+    const extraTier = locDiff >= 0.10 ? 'prize' : locDiff >= 0.05 ? 'mid' : 'cheap';
+    const bias = ARCHETYPE_LOOT_BIAS[arch] || [];
+    for (const id of bias) {
+      if (seen.has(id)) continue;
+      list.push({ id, tier: extraTier });
+      seen.add(id);
+      if (list.length >= 6) break;
+    }
+    return list;
+  }
   function currentGameDay() {
     const gc = window.DMTHGame.gameClock;
     return gc ? Math.floor(gc.now() / (gc.MIN_PER_DAY || 1440)) + 1 : 1;
@@ -238,7 +258,7 @@
 
   // The three options for this girl + their live odds + whether today's ask is already spent.
   function requestOptions(girl, locationId) {
-    const tpl = requestTemplateFor(girl && girl.archetypeTemplate);
+    const tpl = buildRequestList(girl, locationId);
     const usedToday = window.DMTHGame.state.lastItemRequestDay(requestKey(locationId, girl && (girl.id || girl.archetypeTemplate))) === currentGameDay();
     return {
       usedToday,
@@ -252,7 +272,7 @@
   // Make the request for option `index`. Burns the daily attempt up front (success OR fail) per
   // (location, girl-type) so you can't re-roll by leaving and coming back. Grants 1× on success.
   function requestItem(girl, locationId, index) {
-    const tpl = requestTemplateFor(girl && girl.archetypeTemplate);
+    const tpl = buildRequestList(girl, locationId);
     const opt = tpl[index];
     if (!opt) return { ok: false, reason: 'no such option' };
     const key = requestKey(locationId, girl && (girl.id || girl.archetypeTemplate));

@@ -151,6 +151,8 @@
             <li><b>Drugs</b> — stock the pool and addicted captives <b>self-dose</b> to stave off withdrawal (they never self-OD; only you can OD her).</li>
           </ul>
           <p>Stock the pool from the room's 🏪 Dungeon Pool panel (convert inventory items into shared units), or drop straight into a hold's reserve.</p>
+          <h3>🚚 Auto-Logistics (upgrade)</h3>
+          <p>Sick of hand-stocking every pool? Buy the <b>Auto-Logistics</b> upgrade and it auto-distributes supplies from your universal inventory into every dungeon's shared pool each tick — up to per-kind <b>slider targets</b> you set once in the Dungeons page. It pulls the best-value source first and tops every pool to your set level so you stop babysitting the stock. Set it and forget it; your meat stays fed, watered, gloved, and dosed on its own.</p>
         </section>
 
         <!-- CARE -->
@@ -451,7 +453,7 @@
   <script>
   (function () {
     'use strict';
-    const PAGES = ['overview','howtoplay','loop','hunting','dungeon','supply','care','depravity','acts','toys','drugs','breeding','milk','films','johns','market','transport','death','trophies','player','keep','jail','index','glossary'];
+    const PAGES = ['overview','howtoplay','loop','hunting','dungeon','supply','care','depravity','acts','toys','drugs','breeding','milk','films','johns','market','money','stores','transport','death','trophies','player','keep','jail','index','glossary'];
     function route() {
       const h = (location.hash || '#loop').replace('#', '');
       const target = PAGES.includes(h) ? h : 'loop';

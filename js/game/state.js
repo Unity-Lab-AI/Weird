@@ -142,7 +142,7 @@
       // store. Defaulted to a generic captor so pre-creator saves / skipped setup still render him.
       playerCharacter: {
         sex: 'male', age: 35, race: 'white', build: 'average',
-        hair: 'short dark hair', startClothing: 'a plain dark t-shirt and jeans', custom: '',
+        hair: 'short dark hair', hairColor: 'brown', startClothing: 'a plain dark t-shirt and jeans', custom: '',
         // owned player outfit ids + the currently-worn one.
         wardrobe: [], clothingId: null
       },
@@ -157,7 +157,7 @@
   // getter/setter so every read returns a complete shape even on the oldest save.
   const DEFAULT_PLAYER_CHARACTER = {
     sex: 'male', age: 35, race: 'white', build: 'average',
-    hair: 'short dark hair', startClothing: 'a plain dark t-shirt and jeans', custom: '',
+    hair: 'short dark hair', hairColor: 'brown', startClothing: 'a plain dark t-shirt and jeans', custom: '',
     wardrobe: [], clothingId: null
   };
 

@@ -17,6 +17,30 @@
   }
   function stop() { if (timer) { clearInterval(timer); timer = null; } }
 
+  // ── ESCAPE GOVERNOR — escapes are a RARE, managed event, NEVER a daily one ──────────────
+  // Without these rails a fresh fully-neglected captive (or 50 of them) could all work the bar up
+  // and bolt the same day — exactly the "unity escaped first day wtf" cheat-mode break. The rails:
+  //   - no bolt in her first few game-days held (no first-day / daily escapes)
+  //   - a weekly per-girl cooldown after any attempt (even low Stockholm = weekly at worst)
+  //   - a GLOBAL cap on how many captives can bolt per game-day (can't have the whole roster run)
+  //   - sandbox / cheat mode: she seethes at the bar but NEVER breaks.
+  const ESCAPE_GRACE_MIN              = 1200;  // B9: 10× the old 120 — plenty of time to rush in + calm her
+  const MIN_HELD_DAYS_BEFORE_BOLT     = 3;     // no first-day / daily escape — she must be held a few days first
+  const PER_GIRL_ESCAPE_COOLDOWN_DAYS = 7;     // after any attempt, ~weekly before she can try to bolt again
+  const GLOBAL_BOLTS_PER_DAY          = 1;     // at most ~1 bolt per game-day across the WHOLE roster
+
+  function currentGameDay() {
+    const m = window.DMTHGame.gameClock ? window.DMTHGame.gameClock.now() : 0;
+    return Math.floor(m / (window.DMTHGame.gameClock?.MIN_PER_DAY || 1440));
+  }
+  // Global per-game-day bolt counter, reset when the day rolls over. Lives on state so it persists.
+  function escapeGovernor() {
+    const s = window.DMTHGame.state.current;
+    const d = currentGameDay();
+    if (!s.escapeGovernor || s.escapeGovernor.day !== d) s.escapeGovernor = { day: d, boltsToday: 0 };
+    return s.escapeGovernor;
+  }
+
   function runTick() {
     const s = window.DMTHGame.state.current;
     if (!s || !s.createdAt) return;
@@ -450,6 +474,14 @@
     let risk = Math.max(0, Math.min(1, prevRisk + rise));
     const escapeBase = { ...girl.escape, currentRisk: risk, containment };
 
+    const day = currentGameDay();
+    // First time we ever evaluate her, stamp the game-day she entered the hold so the
+    // "no escape in the first few days" rule has an anchor. No bolt on this stamping pass.
+    if (girl.escape.heldSinceDay == null) {
+      window.DMTHGame.state.updateGirl(girl.id, { escape: { ...escapeBase, heldSinceDay: day } });
+      return;
+    }
+
     const now = window.DMTHGame.gameClock ? window.DMTHGame.gameClock.now() : 0;
     const fmtDur = (m) => (window.DMTHGame.gameClock && window.DMTHGame.gameClock.formatDuration) ? window.DMTHGame.gameClock.formatDuration(m) : `${m} min`;
 
@@ -476,10 +508,27 @@
       return;
     }
 
-    // BAR MAXED. she doesn't vanish instantly: a grace TIMER runs while she pries at
-    // the hold. A sticky popup shows the countdown + the hold link; rush there and drop her risk
-    // below the danger band (care acts) and the bolt is cancelled. Let it run out → she breaks for it.
-    const ESCAPE_GRACE_MIN = 120;   // ~4 ticks (~2 real-min) to intervene
+    // ── BAR MAXED — but the GOVERNOR decides whether she's even allowed to bolt ──────────────
+    // Cheat/sandbox: she seethes at the cap but NEVER breaks (you came here to play god, not babysit).
+    if (window.DMTHGame.state.current.mode === 'sandbox') {
+      window.DMTHGame.state.updateGirl(girl.id, { escape: { ...escapeBase, currentRisk: 0.9, pendingEscapeUntil: null } });
+      return;
+    }
+    const gov = escapeGovernor();
+    const heldDays   = day - (girl.escape.heldSinceDay ?? day);
+    const onCooldown = girl.escape.cooldownUntilDay != null && day < girl.escape.cooldownUntilDay;
+    const globalFull = gov.boltsToday >= GLOBAL_BOLTS_PER_DAY;
+    // No first-day/daily escape, weekly per-girl cooldown, global daily cap. When a rule blocks her,
+    // she SEETHES pinned at the cap (0.97) — the player still got the danger popup to go calm her, and
+    // care acts can still push the bar back down — but she physically can't break the hold right now.
+    if (heldDays < MIN_HELD_DAYS_BEFORE_BOLT || onCooldown || globalFull) {
+      window.DMTHGame.state.updateGirl(girl.id, { escape: { ...escapeBase, currentRisk: 0.97, pendingEscapeUntil: null } });
+      return;
+    }
+
+    // She doesn't vanish instantly: a grace TIMER runs while she pries at the hold. A sticky popup
+    // shows the countdown + the hold link; rush there and drop her risk below the danger band (care
+    // acts) and the bolt is cancelled. Let it run out → she breaks for it.
     if (!girl.escape.pendingEscapeUntil) {
       const until = now + ESCAPE_GRACE_MIN;
       window.DMTHGame.state.updateGirl(girl.id, { escape: { ...escapeBase, currentRisk: 1, pendingEscapeUntil: until } });
@@ -499,6 +548,9 @@
     }
 
     // Grace expired + still maxed → she breaks for it. Containment decides caught vs gone.
+    // Count this bolt against the global daily cap + start her weekly cooldown either way.
+    gov.boltsToday += 1;
+    const cooldownUntilDay = day + PER_GIRL_ESCAPE_COOLDOWN_DAYS;
     const caught = Math.random() < Math.max(0.4, 0.4 + containment * 0.58);
     if (caught) {
       const newBody = { ...girl.body, bruises: (girl.body.bruises || 0) + 2 };
@@ -507,7 +559,8 @@
       window.DMTHGame.state.updateGirl(girl.id, {
         body: newBody, bond: newBond, mood: newMood,
         // Contained — bar drops back but not to zero; she'll build again unless calmed/secured.
-        escape: { ...escapeBase, currentRisk: 0.45, pendingEscapeUntil: null, lastAttempt: { outcome: 'caught', ts: Date.now() } }
+        // Weekly cooldown: she just tried + got slammed back, she won't try again for days.
+        escape: { ...escapeBase, currentRisk: 0.45, pendingEscapeUntil: null, cooldownUntilDay, lastAttempt: { outcome: 'caught', ts: Date.now() } }
       });
       if (window.DMTHNotify) {
         window.DMTHNotify.show(`🔒 ${girl.name} tried to run — contained${containment >= 0.8 ? ' (security held)' : ''}.`, { type: 'info', durationMs: 5000 });
@@ -515,7 +568,7 @@
     } else {
       window.DMTHGame.state.updateGirl(girl.id, {
         encounterState: 'escaped',
-        escape: { ...escapeBase, currentRisk: 1, pendingEscapeUntil: null, lastAttempt: { outcome: 'escaped', ts: Date.now() } }
+        escape: { ...escapeBase, currentRisk: 1, pendingEscapeUntil: null, cooldownUntilDay, lastAttempt: { outcome: 'escaped', ts: Date.now() } }
       });
       window.DMTHGame.state.addNotoriety(4);
       // A captive loose in public is heat. The big spike comes later if she's never recaptured
