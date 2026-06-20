@@ -127,7 +127,7 @@
     importAll,
     wipeAll,
     // Namespaced helpers
-    save:     { get: k => get(stores.save, k),     put: (k, v) => put(stores.save, k, v),     getAll: () => getAll(stores.save),     clear: () => clear(stores.save) },
+    save:     { get: k => get(stores.save, k),     put: (k, v) => put(stores.save, k, v),     del: k => del(stores.save, k),               getAll: () => getAll(stores.save),     clear: () => clear(stores.save) },
     girls:    { get: k => get(stores.girls, k),    put: (k, v) => put(stores.girls, k, v),    getAll: () => getAll(stores.girls),    clear: () => clear(stores.girls) },
     episodes: { get: k => get(stores.episodes, k), put: (k, v) => put(stores.episodes, k, v), getAll: () => getAll(stores.episodes), clear: () => clear(stores.episodes) },
     cache:    { get: k => get(stores.cache, k),    put: (k, v) => put(stores.cache, k, v),    getAll: () => getAll(stores.cache),    clear: () => clear(stores.cache) },

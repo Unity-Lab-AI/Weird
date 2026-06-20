@@ -95,17 +95,14 @@
     const entries = Object.entries(T.TOYS);
     // Mounted + already-owned toys are shown directly; the full BUY catalog is tucked behind a
     // collapsed toggle so it's not a permanent wall on the screen.
+    // Inventory-first: the hold only MOUNTS toys you already own (or looted). Buying lives at the
+    // Toy Chest store — no buy catalog festering in her hold.
     const ownedRows = entries.filter(([id]) => attached.includes(id) || (inv[id] || 0) > 0).map(([id, t]) => rowFor(id, t)).join('');
-    const buyRows = entries.filter(([id]) => !attached.includes(id) && !(inv[id] || 0)).map(([id, t]) => rowFor(id, t)).join('');
     return `<div class="panel" style="margin-top:8px">
       <h3>🧰 Toys &amp; Implements <span class="sub small">(${attached.length}/${cap} mounted in this hold)</span></h3>
-      ${ownedRows || '<p class="sect-stub">No toys owned yet — open the shop below to buy one.</p>'}
-      <details class="sect"><summary>🛒 Shop toys (${buyRows ? entries.filter(([id]) => !attached.includes(id) && !(inv[id] || 0)).length : 0})</summary>
-        <div class="sect-body">
-          <p class="small muted">Buy here, or loot / find them in the world. MOUNT a toy in this hold (up to ${cap}) to use it on her — it only works on this hold's girl and shows on her image while in use. The gorier ones unlock with DEPRAVITY level.</p>
-          ${buyRows}
-        </div>
-      </details>
+      ${ownedRows || '<p class="sect-stub">No toys owned yet — buy some at the 🧰 Toy Chest, then mount them here.</p>'}
+      <p class="small muted" style="margin-top:8px">MOUNT a toy in this hold (up to ${cap}) to use it on her — it only works on this hold's girl + shows on her image while in use. Toys are bought at the 🧰 Toy Chest (or looted in the world); they land in your inventory, then you mount them here. Inventory-first.</p>
+      <a class="btn-small" href="#shop?sub=toys" data-tooltip="Buy toys at the Toy Chest — they go to your inventory, then you mount them in a hold.">🧰 Buy at the Toy Chest →</a>
     </div>`;
   }
 

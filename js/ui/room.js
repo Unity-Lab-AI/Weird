@@ -1914,6 +1914,20 @@
       window.DMTHKokoro.engageKeepWarm();
     }
 
+    // Keep purchase/section dropdowns OPEN across the room's full re-renders. Buy/feed/drug/stock
+    // actions call router.handle() which rebuilds the DOM and would otherwise snap every <details>
+    // shut after each purchase. Persist open-state for the session keyed by the section's summary
+    // text (trailing "(N)" count stripped so the key stays stable as counts change).
+    window.__roomOpenSects = window.__roomOpenSects || new Set();
+    el.querySelectorAll('details.sect').forEach(d => {
+      const key = (d.querySelector('summary')?.textContent || '').replace(/\s*\(\d+\)\s*$/, '').trim().slice(0, 48);
+      if (!key) return;
+      if (window.__roomOpenSects.has(key)) d.open = true;
+      d.addEventListener('toggle', () => {
+        if (d.open) window.__roomOpenSects.add(key); else window.__roomOpenSects.delete(key);
+      });
+    });
+
     // Derobe / Re-dress toggle — equip built-in 'nude' pseudo-outfit OR revert to 'default'.
     el.querySelector('#derobe-btn').onclick = () => {
       if (girl.currentOutfit === 'nude') {

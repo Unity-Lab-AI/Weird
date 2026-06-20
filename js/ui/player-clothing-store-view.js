@@ -57,8 +57,9 @@
       b.onclick = () => {
         const r = pw.buy(b.dataset.buyOutfit);
         if (!r || !r.ok) { alert((r && r.reason) || 'could not buy'); return; }
-        // Auto-wear on first buy so the purchase is immediately visible on him.
-        pw.wear(b.dataset.buyOutfit);
+        // Buying adds it to your wardrobe — it does NOT auto-equip. Put it on deliberately with the
+        // "Wear it" button (the use-point action), per the no-equip-on-purchase rule.
+        if (window.DMTHNotify) window.DMTHNotify.show('🧥 Added to your wardrobe — hit "Wear it" to put it on.', { type: 'success', durationMs: 3500 });
         window.DMTHRouter.handle();
       };
     });

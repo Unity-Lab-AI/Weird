@@ -56,7 +56,12 @@
   }
 
   async function wipeSlot(slotId) {
-    await window.DMTHStorage.save.put(slotId, null);
+    // Hard-delete the record (not a null tombstone) so the slot is genuinely gone + reads empty.
+    if (window.DMTHStorage.save.del) await window.DMTHStorage.save.del(slotId);
+    else await window.DMTHStorage.save.put(slotId, null);   // fallback for older storage builds
+    // If we just wiped the active pointer, fall back to 'main' so nothing dangles.
+    if (activeSlot() === slotId) setActiveSlot('main');
+    return { ok: true };
   }
 
   window.DMTHGame = window.DMTHGame || {};
