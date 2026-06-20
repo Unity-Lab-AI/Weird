@@ -22,6 +22,14 @@ const PROJECT_DIR = resolve(import.meta.dirname, '..');
 const DELAY_MS = parseInt(process.env.DELAY_MS || '1200', 10);
 const [catFilter, idFilter] = process.argv.slice(2);
 
+// Curation re-roll knobs (the static default set is one-time-curated, so determinism doesn't
+// matter for it — only getting a good frame does):
+//   SEED_SALT=<n>  offsets the deterministic per-asset seed so a miss re-rolls to a fresh frame.
+//   EXTRA="..."    appends extra prompt text (e.g. a lighting boost) to rescue too-dark misses
+//                  whose small object got swallowed by the low-key STYLE_BLOCK shadows.
+const SEED_SALT = parseInt(process.env.SEED_SALT || '0', 10);
+const EXTRA = (process.env.EXTRA || '').trim();
+
 // --- Load the browser catalog + asset-gen into a window shim so we reuse the SAME prompt/seed logic. ---
 globalThis.window = globalThis.window || globalThis;
 function evalBrowserModule(relPath) {
@@ -73,8 +81,9 @@ const sleep = (ms) => new Promise(r => setTimeout(r, ms));
     const all = DMTHAssets.getAll(category) || [];
     const list = idFilter ? all.filter(a => a.id === idFilter) : all;
     for (const entry of list) {
-      const prompt = DMTHAssetGen.buildAssetPrompt(category, entry.id);
-      const seed = DMTHAssetGen.assetSeed(category, entry.id);
+      const basePrompt = DMTHAssetGen.buildAssetPrompt(category, entry.id);
+      const prompt = EXTRA ? `${basePrompt}, ${EXTRA}` : basePrompt;
+      const seed = (DMTHAssetGen.assetSeed(category, entry.id) + SEED_SALT * 7919) >>> 0 & 0x7FFFFFFF;
       const url = buildUrl(prompt, seed);
       const dir = folderFor(category, entry.id);
       const out = join(dir, 'cover.png');

@@ -310,14 +310,14 @@
     {
       id: 'ben-wa-balls', displayName: 'Ben Wa Balls (kegel trainer)', emoji: '⚪',
       category: 'item', subcategory: 'consumables',
-      prompt: 'product photograph of a pair of small linked metallic weighted balls on a plain backdrop, intimate-wellness commerce style, soft lighting',
+      prompt: 'product photograph of a pair of small polished metal weighted balls joined by a short cord with a retrieval loop, on a dark surface, intimate-wellness commerce style, soft lighting',
       cost: 90, tier: 1, cumTrainer: 2,
       notes: 'Reusable — make her hold these to train her muscles. Each session raises her cum-load STORAGE capacity +2 (more load = more money, but a full girl gets moody + restless). Buy once, use repeatedly.'
     },
     {
       id: 'vaginal-plug', displayName: 'Weighted Vaginal Plug', emoji: '🟪',
       category: 'item', subcategory: 'consumables',
-      prompt: 'product photograph of a smooth weighted silicone plug with a flared base on a plain backdrop, intimate-wellness commerce style',
+      prompt: 'product photograph of a small smooth teardrop-shaped weighted silicone insert with a tapered rounded tip and a wide flat base, glossy, on a dark surface, intimate-wellness commerce style',
       cost: 130, tier: 1, cumTrainer: 2,
       notes: 'Reusable plug — worn to train + stretch her. Each session raises her cum-load storage capacity +2. Stronger held-in versions come with the insertable tools later.'
     },
@@ -331,7 +331,7 @@
     {
       id: 'pussy-wrecker', displayName: 'Pussy Wrecker (massive hold-in plug)', emoji: '🥒',
       category: 'item', subcategory: 'consumables',
-      prompt: 'product photograph of an enormous girthy silicone plug with a flared base on a plain backdrop, intimate-wellness commerce style, intimidating size',
+      prompt: 'product photograph of an oversized extra-thick smooth silicone insert with a bulbous tapered tip and a wide flat base, intimidating girth, glossy, on a dark surface, intimate-wellness commerce style',
       cost: 480, tier: 3, cumImplant: { days: 1.5, capGain: 8 },
       notes: 'INSERTABLE — left in over time, not a quick session. Plug her with it and leave it ~1.5 game days while a timer runs; when it completes her cum-load CAPACITY jumps +8 (pushable past the kegel cap, toward a 60 ceiling) and she earns a bigger cum premium. Stretches + gapes her — visible in her images while it\'s in.'
     },
@@ -420,13 +420,13 @@
     {
       id: 'ballgag', displayName: 'Silicone Gag', emoji: '👄',
       category: 'item', subcategory: 'containment',
-      prompt: 'product photograph of a silicone-and-leather mouth gag on a plain dark backdrop, product-catalog composition',
+      prompt: 'product photograph of a round red rubber ball drilled through the center and threaded onto a thin black leather strap with a metal buckle, lying flat on a dark surface, product-catalog composition',
       cost: 40, tier: 2
     },
     {
       id: 'hood', displayName: 'Canvas Hood', emoji: '🎭',
       category: 'item', subcategory: 'containment',
-      prompt: 'product photograph of a plain canvas hood on a dark backdrop, utilitarian product-catalog composition',
+      prompt: 'product photograph of an empty soft canvas head hood with eye and mouth openings and a drawstring neck, deflated and lying flat on a dark surface, no person, no head inside, utilitarian product-catalog composition',
       cost: 60, tier: 2
     },
     {
@@ -446,13 +446,13 @@
     {
       id: 'dildo', displayName: 'Silicone Sculpture', emoji: '🔵',
       category: 'item', subcategory: 'toys',
-      prompt: 'product photograph of an abstract blue silicone sculpture on a plain dark backdrop, artful design-product catalog composition',
+      prompt: 'product photograph of a smooth upright silicone adult toy with a rounded bulbous tip, a gently curved elongated shaft and a wide flat circular suction base, glossy deep blue, standing upright on a dark surface, intimate-wellness catalog composition',
       cost: 60, tier: 2
     },
     {
       id: 'plug', displayName: 'Training Plug', emoji: '🟣',
       category: 'item', subcategory: 'toys',
-      prompt: 'product photograph of a smooth purple silicone object on a plain dark backdrop, adult-product catalog composition',
+      prompt: 'product photograph of a small smooth teardrop-shaped silicone insert toy with a tapered rounded tip, a slim neck and a wide flat circular base, glossy purple, on a dark surface, intimate-wellness catalog composition',
       cost: 40, tier: 2
     },
     {
@@ -505,7 +505,7 @@
     {
       id: 'weed', displayName: 'Shotgun Joints (pack)', emoji: '🌿',
       category: 'item', subcategory: 'drugs',
-      prompt: 'close-up product photograph of hand-rolled herbal cigarettes in a small tin on a plain dark backdrop, lifestyle-catalog photography',
+      prompt: 'close-up product photograph of several hand-rolled cannabis joints in a small open tin with loose green herb scattered beside it on a dark surface, lifestyle-catalog photography',
       cost: 15, tier: 1,
       notes: 'Cannabis. Slow onset, 2hr duration. Mellowing.'
     },
@@ -591,7 +591,7 @@
     {
       id: 'lube', displayName: 'Lubricant (bulk)', emoji: '💧',
       category: 'item', subcategory: 'consumables',
-      prompt: 'product photograph of a plain-label pump bottle on a dark backdrop, pharmacy-catalog style composition',
+      prompt: 'product photograph of a clear plastic pump bottle of glossy personal lubricant gel with a plain label, on a dark surface, pharmacy-catalog style composition',
       cost: 12, tier: 1
     },
     {
@@ -611,7 +611,7 @@
     {
       id: 'fake-id', displayName: 'Fake ID', emoji: '🪪',
       category: 'item', subcategory: 'utility',
-      prompt: 'close-up product photograph of a generic wallet-sized plastic card on a dark mirrored surface, minimal design, muted product-photography style',
+      prompt: 'close-up product photograph of a wallet-sized plastic photo identification card / driver\'s license showing a small portrait photo and printed detail lines (text illegible), on a dark mirrored surface, muted product-photography style',
       cost: 250, tier: 3
     },
     {

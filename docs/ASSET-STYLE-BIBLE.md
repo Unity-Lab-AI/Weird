@@ -14,20 +14,28 @@ This is the cohesion spine. Every asset prompt = **the shared STYLE BLOCK + the 
 
 ## THE THREE-TIER FALLBACK CHAIN
 
-Every asset slot (`[data-asset-category][data-asset-id]` in the UI) resolves in this order:
+Every asset slot (`[data-asset-category][data-asset-id]` in the UI) shows the emoji as a clickable
+placeholder, and the image resolves in this order:
 
-1. **DYNAMIC / PROCEDURAL** *(opt-in, `localStorage.dmth_procedural_assets === 'true'`)* — `asset-gen.js`
-   composes `STYLE_BLOCK + catalog.prompt` with the asset's deterministic seed, fires Pollinations, caches
-   the blob in IDB. Same logical asset → same seed → consistent render every time. This is the live,
-   no-static-files-needed path.
-2. **STATIC DEFAULT SET** — a committed `assets/<plural>/<id>/cover.png` per asset. `loader.js` already
-   resolves `cover.png` first. This set is generated ONCE (via `build-assets.mjs`), hand-curated, and
-   committed. It is BOTH the guaranteed-present fallback (works offline / Pollinations-down / GitHub Pages)
-   AND the visual **template/example** for what each asset should look like.
-3. **EMOJI** — the catalog `emoji` field. The current live default. Never removed — the ultimate safety net.
+1. **DYNAMIC / PROCEDURAL — the DEFAULT (on)** — each asset generates its OWN image **per playthrough**.
+   It's warmed in the background **when the asset is first acquired** (`asset-gen.prewarm`, called from
+   `state.addItem` / `addDungeon` / `addOwnedLocation`) and/or generated **on the first click** of its
+   emoji. `asset-gen.js` composes `STYLE_BLOCK + catalog.prompt` with the asset's seed, fires Pollinations,
+   caches the blob in IDB, and **stacks every fresh generation into the playthrough asset gallery**
+   (`state.assetGallery` → the `#asset-gallery` view). Default ON; disable with
+   `localStorage.dmth_procedural_assets === 'false'`.
+2. **STATIC DEFAULT SET — the FALLBACK** — a committed `assets/<plural>/<id>/cover.png` per asset,
+   generated once via `build-assets.mjs` and hand-curated. Shown **only when a live generation fails**
+   (Pollinations down / offline / blocked). It is also the visual **template/example** every procedural
+   render aims to match. Guaranteed-present so a static host is never bare.
+3. **EMOJI** — the catalog `emoji` field. The clickable placeholder shown until an image exists, and the
+   ultimate safety net. Never removed.
 
-The static default set (tier 2) is the example/reference; the procedural engine (tier 1) generates fresh
-in-style variants on demand; emoji (tier 3) guarantees the game is never bare.
+**Interaction:** clicking any asset slot opens a **click-away popup** (`asset-popup.js`, modeled on the
+loot-popup — *any* click dismisses) that shows the image big, generating it live on the spot if it isn't
+generated yet. The inline slot swaps to the cached render on the next decorate pass (`loader.resolveImageUrl`
+is cache-only / no-network; live generation happens in the popup + on-acquire prewarm). Resolve helpers:
+`asset-gen.getCached` (no-network cache lookup) + `loader.invalidate` (drop the memo after a fresh gen).
 
 ---
 
@@ -49,6 +57,40 @@ accents. Never bright, never clean, never cheerful, never daylight-flat.
 **Framing (locked):** square (1:1), subject centered, generous shadow margins. Icons/items = product-on-dark
 framing; locations/dungeons/rooms = establishing-shot framing. No people in the static asset set (people are
 the per-girl imaging system's job) — these are PLACES and OBJECTS.
+
+---
+
+## PROMPT-AUTHORING LAW — DESCRIBE THE REAL OBJECT: COY BUT CONCRETE
+
+**The single most important rule, and the one that wrecked the first generation pass.** A catalog
+`prompt` is fed verbatim to the image generator. It must describe the **actual physical object/place**
+by its real form — never the deranged in-game `displayName`, never abstract filler.
+
+Three hard rules:
+
+1. **NEVER echo the crazy in-game name.** The `displayName` can be as taboo/obtuse as we want — that's
+   the game label. But if its wording lands in the prompt, the generator paints the literal words: a
+   "Pear of Agony" prompted as *"pear of agony"* renders a piece of **fruit**, not the hinged iron
+   torture device. Describe the device, not the name.
+2. **NEVER use abstract/vague filler.** *"abstract silicone sculpture"*, *"smooth purple object"*,
+   *"a plain card"* → the generator renders a featureless blob. Name the concrete form: shape, parts,
+   material, proportions, base, strap, tip, etc.
+3. **COY VOCABULARY ONLY — but coy ≠ vague.** Use clean, non-explicit words (no porn slang) so the
+   prompt clears the generator's filter — yet still pin the real form precisely enough that the correct
+   object renders. The art is describing the *shape and function* in clean words.
+
+Worked examples (the fix that turned blobs into accurate renders):
+
+| Asset | ❌ Abstract/name-echo (renders wrong) | ✅ Coy + concrete (renders the real thing) |
+|---|---|---|
+| dildo | "abstract blue silicone sculpture" | "smooth upright silicone adult toy, rounded bulbous tip, gently curved elongated shaft, wide flat circular base, glossy blue" |
+| plug | "smooth purple silicone object" | "small teardrop-shaped silicone insert, tapered rounded tip, slim neck, wide flat base, glossy purple" |
+| ballgag | "silicone-and-leather mouth gag" | "round red rubber ball drilled through the center, threaded on a thin black leather strap with a metal buckle" |
+| hood | "plain canvas hood" (rendered a person) | "empty soft canvas head hood, eye + mouth openings, drawstring neck, deflated, lying flat, no person, no head inside" |
+| weed | "hand-rolled herbal cigarettes" | "several hand-rolled cannabis joints in a small open tin, loose green herb scattered beside it" |
+
+If you add or rename an asset, write its prompt to THIS standard, then regenerate it. The
+STYLE BLOCK supplies the mood; the prompt supplies the accurate subject.
 
 ---
 
