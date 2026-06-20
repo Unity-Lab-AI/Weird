@@ -200,7 +200,9 @@
           ${(() => {
             const er = Math.round((girl.escape?.currentRisk || 0) * 100);
             const col = er >= 80 ? '#c0392b' : er >= 50 ? '#e67e22' : er >= 25 ? '#f1c40f' : '#27ae60';
-            return `<div class="bar-row" data-tooltip="Escape-risk bar. Rises over time — faster when she's defiant/terrified/carrying bond-debt, slower with high Stockholm + containment. LOWER it with care/love acts (they heal her + break her fighting spirit + indoctrinate) or tighten containment (locks / guard dog / sedation collar). At 100% she breaks for it — containment decides caught vs gone."><label>🏃 Escape risk</label><div class="bar"><div class="bar-fill" style="width:${er}%;background:${col}"></div></div><b>${er}%</b></div>`;
+            const erHint = er >= 80 ? '🚨 about to RUN — calm her NOW' : er >= 50 ? '⚠️ restless' : er >= 25 ? 'unsettled' : 'settled';
+            return `<div class="bar-row" data-tooltip="Escape-risk bar. Rises over time — faster when she's defiant/terrified/carrying bond-debt, slower with high Stockholm + containment. LOWER it the easy way with the 🫦 Calm her down button right here, or with any care/love act (they heal her + break her fighting spirit + indoctrinate), or tighten containment (locks / guard dog / sedation collar). At 100% she works up to a bolt on a long grace timer — rush in and calm her and the bolt cancels; containment decides caught vs gone."><label>🏃 Escape risk</label><div class="bar"><div class="bar-fill" style="width:${er}%;background:${col}"></div></div><b>${er}%</b></div>
+          <div class="stat-row small" style="justify-content:flex-end;gap:8px"><span class="muted">${erHint}</span><button id="calm-btn" class="btn-small" data-tooltip="One-click talk-down — hold her, soothe her, and visibly DROP her escape risk (and cancel any bolt in progress). The clear, easy lever to keep her from running. Repeatable; care/love acts + tighter containment also lower it over time.">🫦 Calm her down</button></div>`;
           })()}
           ${window.DMTHGame.lifespan ? (() => {
             const ls = window.DMTHGame.lifespan.describeLifespan(girl);
@@ -1883,6 +1885,26 @@
         window.DMTHGame.damage.heal(girl.id);
         window.DMTHRouter.handle();
       }
+    };
+
+    // Calm-her lever — the CLEAR, EASY one-click way to drop escape risk (and cancel a bolt
+    // in progress). Soothes via the hold-her care act for the bond/mood/heal payoff, then applies
+    // an explicit, balanced escape-risk cut so the player has an unmistakable counter to a rising
+    // bar instead of having to dig through the Love tab.
+    const calmBtn = el.querySelector('#calm-btn');
+    if (calmBtn) calmBtn.onclick = () => {
+      if (window.DMTHGame.actionEffects?.applyAction) {
+        try { window.DMTHGame.actionEffects.applyAction(girl.id, 'love-hold-her'); } catch (e) { console.warn('[calm] applyAction failed:', e); }
+      }
+      const g0 = window.DMTHGame.state.getGirl(girl.id);
+      if (g0) {
+        const escape = { ...(g0.escape || { currentRisk: 0.1 }) };
+        escape.currentRisk = Math.max(0, (escape.currentRisk ?? 0.1) - 0.3);
+        escape.pendingEscapeUntil = null;   // talking her down cancels any bolt in progress
+        window.DMTHGame.state.updateGirl(girl.id, { escape });
+      }
+      if (window.DMTHNotify) window.DMTHNotify.show(`🫦 You held ${girl.name} and talked her down — her escape risk drops.`, { type: 'success', durationMs: 4000 });
+      window.DMTHRouter.handle();
     };
 
     // Derobe / Re-dress toggle — equip built-in 'nude' pseudo-outfit OR revert to 'default'.
