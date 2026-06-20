@@ -866,7 +866,7 @@
     const exprTok     = isPostmortem ? '' : expressionTokens(girl);   // face by Stockholm/affect
     const bodyLangTok = isPostmortem ? '' : bodyLanguageTokens(girl); // posture by Stockholm (nude renders only)
     const emotionLead = isPostmortem ? '' : emotionLeadTokens(girl);  // front-loaded emotion (beats flux's smile bias)
-    const fightTok    = isPostmortem ? '' : fightActionTokens(girl, withPlayer || pov); // low-bond fighter limbs in action
+    const fightTok    = (isPostmortem || girl.body?.isNugget) ? '' : fightActionTokens(girl, withPlayer || pov); // low-bond fighter limbs in action — suppressed for a limbless nugget (no limbs to thrash, would fight the amputee block)
     const toyTok      = isPostmortem ? '' : toyTokens(girl.body);   // implement in use on her (gag/clamps/machine…)
     const pregTokens  = isPostmortem ? '' : pregnancyTokens(girl.pregnancy);
     const bondTokens  = bondageTokens(girl.body);
