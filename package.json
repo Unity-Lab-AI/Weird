@@ -1,0 +1,23 @@
+{
+  "name": "weird-v2",
+  "version": "1.0.0",
+  "description": "> *persistent city-builder — dungeon harem evil taboo — hunt your prey with the purchased tools and items*",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@git.unityailab.com:UnityAILab/Weird.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "playwright": "^1.61.0"
+  }
+}
