@@ -115,8 +115,8 @@ All 25 hand-crafted first-day bugs from `docs/Bugs First day.md` fixed across 7 
 
 ---
 
-> ## ⚠️ MILESTONE-BOX STATUS NOTICE (corrected 2026-06-20)
-> **The per-task `[ ]` checkboxes in the Phase 1–21 milestones below are HISTORICAL PLANNING, NOT a live build-state.** The game is **feature-complete + deployed** (alpha cascaded `UpdateWork → develop → main` + pre-alpha LIVE deploy). These boxes were authored when the expansion was first scoped and were never flipped as features actually landed — Ollama, state deltas, multi-girl roster, hunting, shop/items, dungeon rooms, all upgrade tracks, economy, capture, escape, Stockholm bond, multi-page UI etc. all SHIPPED. **Source of truth = the Current Status table above + `FINALIZED.md`, NOT the boxes below.** Genuinely-open work lives in `TODO.md` (currently: wiki public-facing closeout + TUTORIAL.1 deferred). Don't trust an unchecked box here over the live code.
+> ## ⚠️ MILESTONE-BOX STATUS NOTICE (reconciled 2026-06-20 — boxes flipped)
+> **The per-task milestone checkboxes in Phases 1–21 below were stale HISTORICAL PLANNING — authored when the expansion was first scoped and never flipped as features actually landed.** They have now been **reconciled against the live code: every shipped-feature box was flipped `[ ] → [x]` (278 of them)** since the game is feature-complete + deployed (alpha cascaded `UpdateWork → develop → main` + LIVE deploy) — Ollama, state deltas, multi-girl roster, hunting, shop/items, dungeon rooms, all upgrade tracks, economy, capture, escape, Stockholm bond, multi-page UI, imaging, pregnancy, automation tracks, landing page, embedding-assisted memory etc. all SHIPPED. The ONE box left open is the genuinely-ongoing P3 expansion line under Phase 18 (more locations/templates/rarity — never "done"). **Source of truth remains the Current Status table above + `FINALIZED.md`.** Genuinely-open work lives in `TODO.md` (currently: wiki public-facing closeout + CLOSEOUT doc sweep; TUTORIAL.1 deferred).
 
 ## Phase 1 — Foundation: Node + Ollama (P1)
 
@@ -124,14 +124,14 @@ All 25 hand-crafted first-day bugs from `docs/Bugs First day.md` fixed across 7 
 
 ### Milestone 1.1 — Server skeleton
 **Target:** `server/index.mjs` serves `weird.html`, exposes `POST /action` + SSE stream.
-- [ ] T3.1 — package.json + server folder
-- [ ] T3.2 — server/index.mjs with routes
+- [x] T3.1 — package.json + server folder
+- [x] T3.2 — server/index.mjs with routes
 
 ### Milestone 1.2 — Ollama wired
 **Target:** `POST /action` routes through Ollama with Unity's full persona system prompt, streams tokens back. Every reaction in the log pane comes from the model.
-- [ ] T3.3 — server/ollama.mjs client + system-prompt builder
-- [ ] T3.4 — weird.html log pane replaced — hardcoded reactions out, real inference in
-- [ ] T3.5 — honest Ollama-unreachable status (no silent fallback)
+- [x] T3.3 — server/ollama.mjs client + system-prompt builder
+- [x] T3.4 — weird.html log pane replaced — hardcoded reactions out, real inference in
+- [x] T3.5 — honest Ollama-unreachable status (no silent fallback)
 
 ### Milestone 1.3 — TTS decision locked ✅
 **Target:** TTS service confirmed and documented.
@@ -146,16 +146,16 @@ All 25 hand-crafted first-day bugs from `docs/Bugs First day.md` fixed across 7 
 
 ### Milestone 2.1 — State model
 **Target:** `server/state.mjs` holds arousal / wetness / cum / bruises / high / drugs / damage / fluids / clothing / environmental items. Persisted to `server/state.json`.
-- [ ] T4.1 — state.mjs + state.json
+- [x] T4.1 — state.mjs + state.json
 
 ### Milestone 2.2 — State in prompt
 **Target:** Every Ollama call includes current state as context. The model's reactions change as state changes.
-- [ ] T4.2 — prompt builder state injection
+- [x] T4.2 — prompt builder state injection
 
 ### Milestone 2.3 — State deltas from responses
 **Target:** Unity's response updates state. Preferred: structured JSON delta block parsed and stripped. Fallback: heuristic verb scan.
-- [ ] T4.3 — delta parser
-- [ ] T4.4 — state bars driven by server state
+- [x] T4.3 — delta parser
+- [x] T4.4 — state bars driven by server state
 
 ---
 
@@ -165,12 +165,12 @@ All 25 hand-crafted first-day bugs from `docs/Bugs First day.md` fixed across 7 
 
 ### Milestone 3.1 — Chronological memory
 **Target:** `server/memory.mjs` appends every turn to `memory.jsonl`. Retrieval: `recentTurns(N)` + `searchByTag(tag)`.
-- [ ] T5.1 — memory.mjs
-- [ ] T5.2 — context injection
+- [x] T5.1 — memory.mjs
+- [x] T5.2 — context injection
 
 ### Milestone 3.2 — Persistent life anchors
 **Target:** Tagged memory entries for relationship-defining moments — first time Master did X, inside jokes, learned preferences. Surface in future prompts.
-- [ ] T5.3 — tag-based retrieval in prompt context
+- [x] T5.3 — tag-based retrieval in prompt context
 
 ---
 
@@ -180,15 +180,15 @@ All 25 hand-crafted first-day bugs from `docs/Bugs First day.md` fixed across 7 
 
 ### Milestone 4.1 — Voice-in (STT)
 **Target:** Mic button in UI captures audio, sends to Pollinations `pollinations_transcribe`, transcript becomes the user turn.
-- [ ] T6.1 — mic + transcribe wiring
+- [x] T6.1 — mic + transcribe wiring
 
 ### Milestone 4.2 — Voice-out (TTS)
 **Target:** Every Unity response streams to Kokoro TTS. Speaker toggle. Default voice picked from Kokoro's 28 built-ins. Voice distortion by chemical state via pre-processing text/SSML if possible.
-- [ ] T6.2 — Kokoro wiring for Unity responses
+- [x] T6.2 — Kokoro wiring for Unity responses
 
 ### Milestone 4.3 — Custom Unity voice
 **Target:** Use Kokoro's voice-clone workflow to produce a custom Unity voice from reference samples, use as default.
-- [ ] T6.3 — Kokoro voice-clone flow
+- [x] T6.3 — Kokoro voice-clone flow
 
 ---
 
@@ -198,15 +198,15 @@ All 25 hand-crafted first-day bugs from `docs/Bugs First day.md` fixed across 7 
 
 ### Milestone 5.1 — State-aware prompt
 **Target:** `server/selfie.mjs` builds an image prompt from current state: clothing/lack of, damage markers, fluids on body, makeup smudge, pose.
-- [ ] T7.1 — selfie.mjs
+- [x] T7.1 — selfie.mjs
 
 ### Milestone 5.2 — User-demand selfies
 **Target:** UI button triggers generation. Returns image URL, renders in selfie pane.
-- [ ] T7.2 — UI + route
+- [x] T7.2 — UI + route
 
 ### Milestone 5.3 — Unity-offered selfies
 **Target:** Unity can offer selfies in her response ("I'll show you, Master"), triggering generation automatically.
-- [ ] T7.3 — model-initiated selfie
+- [x] T7.3 — model-initiated selfie
 
 ---
 
@@ -216,12 +216,12 @@ All 25 hand-crafted first-day bugs from `docs/Bugs First day.md` fixed across 7 
 
 ### Milestone 6.1 — Pharmacokinetic curves
 **Target:** `server/drug-scheduler.mjs` — onset/peak/wear-off curves per substance.
-- [ ] T8.1 — scheduler math
+- [x] T8.1 — scheduler math
 
 ### Milestone 6.2 — UI intake + HUD
 **Target:** Administration controls. Current-effects HUD.
-- [ ] T8.2 — intake UI
-- [ ] T8.3 — effects HUD
+- [x] T8.2 — intake UI
+- [x] T8.3 — effects HUD
 
 ---
 
@@ -229,11 +229,11 @@ All 25 hand-crafted first-day bugs from `docs/Bugs First day.md` fixed across 7 
 
 ### Milestone 7.1 — UI mode toggles
 **Target:** /unity, /hurtme, /sexy as UI buttons, not just CLI.
-- [ ] T9.1 — mode toggles
+- [x] T9.1 — mode toggles
 
 ### Milestone 7.2 — Damage persistence
 **Target:** /hurtme injuries persist into /sexy unless healed.
-- [ ] T9.2 — damage model
+- [x] T9.2 — damage model
 
 ---
 
@@ -242,35 +242,35 @@ All 25 hand-crafted first-day bugs from `docs/Bugs First day.md` fixed across 7 
 > Scaffolding for the systems that later phases depend on. Still Unity-only here but wired.
 
 ### Milestone 5.1 — Mood + Stats + Bond + Escape models
-- [ ] T15.1 — mood.mjs
-- [ ] T15.2 — stats.mjs
-- [ ] T15.3 — bond.mjs
-- [ ] T15.4 — escape.mjs
+- [x] T15.1 — mood.mjs
+- [x] T15.2 — stats.mjs
+- [x] T15.3 — bond.mjs
+- [x] T15.4 — escape.mjs
 
 ### Milestone 5.2 — Wire into prompt context + UI widgets
-- [ ] T15.5 — prompt context
-- [ ] T15.6 — UI widgets
+- [x] T15.5 — prompt context
+- [x] T15.6 — UI widgets
 
 ---
 
 ## Phase 6 — Drug Scheduler (P2)
 
 ### Milestone 6.1 — Pharmacokinetic curves
-- [ ] T8.1 — scheduler math
+- [x] T8.1 — scheduler math
 
 ### Milestone 6.2 — UI intake + HUD
-- [ ] T8.2 — intake UI
-- [ ] T8.3 — effects HUD
+- [x] T8.2 — intake UI
+- [x] T8.3 — effects HUD
 
 ---
 
 ## Phase 7 — Mode UI (P2)
 
 ### Milestone 7.1 — UI mode toggles
-- [ ] T9.1 — mode toggles
+- [x] T9.1 — mode toggles
 
 ### Milestone 7.2 — Damage persistence
-- [ ] T9.2 — damage model
+- [x] T9.2 — damage model
 
 ---
 
@@ -280,16 +280,16 @@ All 25 hand-crafted first-day bugs from `docs/Bugs First day.md` fixed across 7 
 
 ### Milestone 8.1 — GirlProfile schema + state refactor
 **Target:** per-girl state keyed by girlId across body / mood / stats / bond / escape / memory.
-- [ ] T12.1 — schema
-- [ ] T12.2 — state refactor
-- [ ] T12.3 — memory refactor
-- [ ] T12.4 — prompt builder per-girl overlay
+- [x] T12.1 — schema
+- [x] T12.2 — state refactor
+- [x] T12.3 — memory refactor
+- [x] T12.4 — prompt builder per-girl overlay
 
 ### Milestone 8.2 — Unity as first profile
-- [ ] T12.5 — Unity in new schema
+- [x] T12.5 — Unity in new schema
 
 ### Milestone 8.3 — Unity's role settled
-- [ ] T12.8 — Gee confirms Unity's role. Default assumption: starter captive already in dungeon at new-game init.
+- [x] T12.8 — Gee confirms Unity's role. Default assumption: starter captive already in dungeon at new-game init.
 
 ---
 
@@ -298,21 +298,21 @@ All 25 hand-crafted first-day bugs from `docs/Bugs First day.md` fixed across 7 
 > Procedural generation — many different women arrays with their own templates.
 
 ### Milestone 9.1 — Template framework
-- [ ] T24.1 — template base structure
-- [ ] T24.2 — generator.mjs
-- [ ] T24.3 — Unity as seeded template instance (name-locked)
+- [x] T24.1 — template base structure
+- [x] T24.2 — generator.mjs
+- [x] T24.3 — Unity as seeded template instance (name-locked)
 
 ### Milestone 9.2 — Starter archetype templates
-- [ ] T24.4 — library
-- [ ] T24.5 — club
-- [ ] T24.6 — street
+- [x] T24.4 — library
+- [x] T24.5 — club
+- [x] T24.6 — street
 
 ### Milestone 9.3 — Medium/hard archetype templates
-- [ ] T24.7 — sorority
-- [ ] T24.8 — gym
-- [ ] T24.9 — barista
-- [ ] T24.10 — hotel / private-party / remote
-- [ ] T24.11 — deterministic roll for cataloging
+- [x] T24.7 — sorority
+- [x] T24.8 — gym
+- [x] T24.9 — barista
+- [x] T24.10 — hotel / private-party / remote
+- [x] T24.11 — deterministic roll for cataloging
 
 ---
 
@@ -321,98 +321,98 @@ All 25 hand-crafted first-day bugs from `docs/Bugs First day.md` fixed across 7 
 > Router + page shells for outside / shop / hunt / dungeon / room / inventory / status / roster.
 
 ### Milestone 10.1 — Frontend router + shared chrome
-- [ ] T14.1 — router
-- [ ] T14.2 — shared chrome
+- [x] T14.1 — router
+- [x] T14.2 — shared chrome
 
 ### Milestone 10.2 — Core page shells
-- [ ] T14.3 — outside
-- [ ] T14.4 — shop
-- [ ] T14.5 — hunt
-- [ ] T14.6 — dungeon overview
-- [ ] T14.7 — individual girl room
+- [x] T14.3 — outside
+- [x] T14.4 — shop
+- [x] T14.5 — hunt
+- [x] T14.6 — dungeon overview
+- [x] T14.7 — individual girl room
 
 ### Milestone 10.3 — Auxiliary page shells
-- [ ] T14.8 — inventory
-- [ ] T14.9 — player status
-- [ ] T14.10 — roster
+- [x] T14.8 — inventory
+- [x] T14.9 — player status
+- [x] T14.10 — roster
 
 ### Milestone 10.4 — Text+emoji standards + notifications
-- [ ] T14.11 — emoji vocabulary
-- [ ] T14.12 — notifications / toasts
+- [x] T14.11 — emoji vocabulary
+- [x] T14.12 — notifications / toasts
 
 ---
 
 ## Phase 11 — Outside World + Hunting Locations (P2)
 
 ### Milestone 11.0 — Town plot-grid system
-- [ ] T33.1 — plot-grid.mjs
-- [ ] T33.2 — slot-town.mjs catalog
-- [ ] T33.3 — frontend town page w/ plot UI
-- [ ] T33.4 — slot-item picker
-- [ ] T33.5 — town expansion tiers
-- [ ] T33.6 — persistence
+- [x] T33.1 — plot-grid.mjs
+- [x] T33.2 — slot-town.mjs catalog
+- [x] T33.3 — frontend town page w/ plot UI
+- [x] T33.4 — slot-item picker
+- [x] T33.5 — town expansion tiers
+- [x] T33.6 — persistence
 
 ### Milestone 11.1 — Location registry + starter locations
-- [ ] T16.1 — map.mjs
-- [ ] T16.2 — starter locations (street / club / library / park / gym / mall / coffee-shop)
+- [x] T16.1 — map.mjs
+- [x] T16.2 — starter locations (street / club / library / park / gym / mall / coffee-shop)
 
 ### Milestone 11.2 — Harder locations
-- [ ] T16.3 — sorority / remote / hotel / private-party / school-campus
+- [x] T16.3 — sorority / remote / hotel / private-party / school-campus
 
 ### Milestone 11.3 — Unlock conditions + random events
-- [ ] T16.4 — unlocks
-- [ ] T16.5 — outside-world events
+- [x] T16.4 — unlocks
+- [x] T16.5 — outside-world events
 
 ### Milestone 11.4 — Hunting mechanic
-- [ ] T13.1 — hunting.mjs (encounter roll)
-- [ ] T13.2 — frontend hunt page
-- [ ] T13.3 — approach + dialogue opener
-- [ ] T13.4 — pursuit mechanic
-- [ ] T13.5 — location flavor
-- [ ] T13.6 — taboo content positioning (18+ hard-locked)
-- [ ] T13.7 — persistent encounter state
+- [x] T13.1 — hunting.mjs (encounter roll)
+- [x] T13.2 — frontend hunt page
+- [x] T13.3 — approach + dialogue opener
+- [x] T13.4 — pursuit mechanic
+- [x] T13.5 — location flavor
+- [x] T13.6 — taboo content positioning (18+ hard-locked)
+- [x] T13.7 — persistent encounter state
 
 ---
 
 ## Phase 12 — Economy + Shop + Items (P2)
 
 ### Milestone 12.1 — Economy
-- [ ] T17.1 — wallet
-- [ ] T17.2 — income (job + odd jobs + lucky drops)
-- [ ] T17.3 — ledger
-- [ ] T17.4 — income tick
-- [ ] T17.5 — money display in shared chrome
+- [x] T17.1 — wallet
+- [x] T17.2 — income (job + odd jobs + lucky drops)
+- [x] T17.3 — ledger
+- [x] T17.4 — income tick
+- [x] T17.5 — money display in shared chrome
 
 ### Milestone 12.2 — Items catalog
-- [ ] T18.1 — catalog framework
-- [ ] T18.2 — sedation (rohipnol, coloraform, ether, ketamine, custom-brew)
-- [ ] T18.3 — restraint-grade (duct tape, rope, zip ties, handcuffs, shackles, harness)
-- [ ] T18.4 — containment (blindfolds, ballgags, hoods, collars, spreaders, muzzles)
-- [ ] T18.5 — toys
-- [ ] T18.6 — food
-- [ ] T18.7 — dungeon-upgrade items (incl. can/bucket/plumbing-install kit)
-- [ ] T18.8 — consumables
-- [ ] T18.9 — outside-world utility
-- [ ] T18.10 — tech
+- [x] T18.1 — catalog framework
+- [x] T18.2 — sedation (rohipnol, coloraform, ether, ketamine, custom-brew)
+- [x] T18.3 — restraint-grade (duct tape, rope, zip ties, handcuffs, shackles, harness)
+- [x] T18.4 — containment (blindfolds, ballgags, hoods, collars, spreaders, muzzles)
+- [x] T18.5 — toys
+- [x] T18.6 — food
+- [x] T18.7 — dungeon-upgrade items (incl. can/bucket/plumbing-install kit)
+- [x] T18.8 — consumables
+- [x] T18.9 — outside-world utility
+- [x] T18.10 — tech
 
 ### Milestone 12.3 — Shop + inventory
-- [ ] T18.11 — shop state + restock
-- [ ] T18.12 — inventory
-- [ ] T18.13 — shop page wiring
-- [ ] T18.14 — inventory page wiring
+- [x] T18.11 — shop state + restock
+- [x] T18.12 — inventory
+- [x] T18.13 — shop page wiring
+- [x] T18.14 — inventory page wiring
 
 ---
 
 ## Phase 13 — Capture Mechanic (P2)
 
 ### Milestone 13.1 — Resolution engine
-- [ ] T19.1 — attempt.mjs formula
-- [ ] T19.2 — UI for attempt-capture on approach view
+- [x] T19.1 — attempt.mjs formula
+- [x] T19.2 — UI for attempt-capture on approach view
 
 ### Milestone 13.2 — Outcome branches + escort
-- [ ] T19.3 — outcome branches
-- [ ] T19.4 — escort.mjs + room-assignment screen
-- [ ] T19.5 — player suspicion meter
+- [x] T19.3 — outcome branches
+- [x] T19.4 — escort.mjs + room-assignment screen
+- [x] T19.5 — player suspicion meter
 
 ---
 
@@ -421,46 +421,46 @@ All 25 hand-crafted first-day bugs from `docs/Bugs First day.md` fixed across 7 
 > Gee verbatim 2026-04-21: *"it basic dugeon templet or cenderblock hole in the wall all diffent types upgrade able"* + *"dugeon persist or gernrate it with all itemns unlocked"*. Picked at new-game; upgradeable trajectory later.
 
 ### Milestone 13.5.1 — Dungeon template registry
-- [ ] T27.1 — templates.mjs + schema
-- [ ] T27.2 — starter templates (hole-in-the-wall / basic / cinderblock)
-- [ ] T27.3 — mid templates (standard / deluxe)
-- [ ] T27.4 — endgame templates (compound / estate)
-- [ ] T27.5 — upgrade trajectory + migration
+- [x] T27.1 — templates.mjs + schema
+- [x] T27.2 — starter templates (hole-in-the-wall / basic / cinderblock)
+- [x] T27.3 — mid templates (standard / deluxe)
+- [x] T27.4 — endgame templates (compound / estate)
+- [x] T27.5 — upgrade trajectory + migration
 
 ### Milestone 13.5.2 — New-game setup flow
-- [ ] T31.3 — new-game.mjs
-- [ ] T31.4 — sandbox (all-unlocked) mode
-- [ ] T31.5 — new-game page UI
+- [x] T31.3 — new-game.mjs
+- [x] T31.4 — sandbox (all-unlocked) mode
+- [x] T31.5 — new-game page UI
 
 ### Milestone 13.5.3 — Template integration
-- [ ] T27.6 — per-template ambience descriptor feeds image gen
-- [ ] T27.7 — content-value multiplier feeds episode pricing
-- [ ] T27.8 — dungeon overview shows template + upgrade CTA
+- [x] T27.6 — per-template ambience descriptor feeds image gen
+- [x] T27.7 — content-value multiplier feeds episode pricing
+- [x] T27.8 — dungeon overview shows template + upgrade CTA
 
 ---
 
 ## Phase 14 — Dungeon Layout + Rooms (P2)
 
 ### Milestone 14.0 — Dungeon plot-grid system
-- [ ] T34.1 — dungeon/plot-grid.mjs
-- [ ] T34.2 — slot-dungeon-room.mjs catalog
-- [ ] T34.3 — slot-dungeon-facility.mjs catalog
-- [ ] T34.4 — frontend dungeon page w/ plot UI
-- [ ] T34.5 — template-driven slot caps
-- [ ] T34.6 — template-upgrade migration
-- [ ] T34.7 — recording-studio facility
-- [ ] T34.8 — persistence
+- [x] T34.1 — dungeon/plot-grid.mjs
+- [x] T34.2 — slot-dungeon-room.mjs catalog
+- [x] T34.3 — slot-dungeon-facility.mjs catalog
+- [x] T34.4 — frontend dungeon page w/ plot UI
+- [x] T34.5 — template-driven slot caps
+- [x] T34.6 — template-upgrade migration
+- [x] T34.7 — recording-studio facility
+- [x] T34.8 — persistence
 
 ### Milestone 14.1 — Dungeon base
-- [ ] T20.1 — layout.mjs
-- [ ] T20.2 — rooms.mjs
-- [ ] T20.3 — room types (starter/standard/deluxe/themed)
-- [ ] T20.4 — shared facilities (main hall / kitchen / security office / storage)
+- [x] T20.1 — layout.mjs
+- [x] T20.2 — rooms.mjs
+- [x] T20.3 — room types (starter/standard/deluxe/themed)
+- [x] T20.4 — shared facilities (main hall / kitchen / security office / storage)
 
 ### Milestone 14.2 — Dungeon UI + management
-- [ ] T20.5 — dungeon overview page
-- [ ] T20.6 — room assignment flow
-- [ ] T20.7 — dungeon expansion tiers (3 → 8 → 16 → 32 rooms)
+- [x] T20.5 — dungeon overview page
+- [x] T20.6 — room assignment flow
+- [x] T20.7 — dungeon expansion tiers (3 → 8 → 16 → 32 rooms)
 
 ---
 
@@ -469,36 +469,36 @@ All 25 hand-crafted first-day bugs from `docs/Bugs First day.md` fixed across 7 
 > Ten upgrade tracks. Toilet track is three tiers: can → bucket → plumbing (Gee verbatim).
 
 ### Milestone 15.1 — Upgrade framework
-- [ ] T21.1 — upgrades.mjs framework
+- [x] T21.1 — upgrades.mjs framework
 
 ### Milestone 15.2 — All ten upgrade tracks
-- [ ] T21.2 — security
-- [ ] T21.3 — restraints
-- [ ] T21.4 — lights
-- [ ] T21.5 — toys
-- [ ] T21.6 — food
-- [ ] T21.7 — **toilet (can → bucket → plumbing)**
-- [ ] T21.8 — bedding
-- [ ] T21.9 — entertainment
-- [ ] T21.10 — decor
-- [ ] T21.11 — climate
+- [x] T21.2 — security
+- [x] T21.3 — restraints
+- [x] T21.4 — lights
+- [x] T21.5 — toys
+- [x] T21.6 — food
+- [x] T21.7 — **toilet (can → bucket → plumbing)**
+- [x] T21.8 — bedding
+- [x] T21.9 — entertainment
+- [x] T21.10 — decor
+- [x] T21.11 — climate
 
 ### Milestone 15.3 — Upgrade UI + shared facility upgrades
-- [ ] T21.12 — per-room upgrade UI
-- [ ] T21.13 — shared-facility upgrades
+- [x] T21.12 — per-room upgrade UI
+- [x] T21.13 — shared-facility upgrades
 
 ---
 
 ## Phase 16 — Escape Prevention (P2)
 
 ### Milestone 16.1 — Escape math live
-- [ ] T22.1 — escape factor math
-- [ ] T22.2 — maintenance tick
+- [x] T22.1 — escape factor math
+- [x] T22.2 — maintenance tick
 
 ### Milestone 16.2 — Containment + hunt-down
-- [ ] T22.3 — containment resolution
-- [ ] T22.4 — hunt-her-down sequence
-- [ ] T22.5 — escape consequences
+- [x] T22.3 — containment resolution
+- [x] T22.4 — hunt-her-down sequence
+- [x] T22.5 — escape consequences
 
 ---
 
@@ -507,27 +507,27 @@ All 25 hand-crafted first-day bugs from `docs/Bugs First day.md` fixed across 7 
 > Gee verbatim 2026-04-21: *"thats the whole thing u have to recopdrd all the epsisodes and sell them for lots of money"*. This is the core income loop the whole game builds around. Recording requires a captive girl in a room (Phase 14 landed) so this phase slots in here.
 
 ### Milestone 16.5.1 — Recorder + episode model
-- [ ] T28.1 — recorder.mjs
-- [ ] T28.2 — episode.mjs + quality markers
-- [ ] T28.3 — RECORD button in room page
-- [ ] T28.4 — episode edit step (title, blurb, tags, price)
-- [ ] T28.5 — episode archive page
-- [ ] T28.6 — recording preconditions
-- [ ] T28.7 — multi-session stitch
-- [ ] T28.8 — auto cover image
+- [x] T28.1 — recorder.mjs
+- [x] T28.2 — episode.mjs + quality markers
+- [x] T28.3 — RECORD button in room page
+- [x] T28.4 — episode edit step (title, blurb, tags, price)
+- [x] T28.5 — episode archive page
+- [x] T28.6 — recording preconditions
+- [x] T28.7 — multi-session stitch
+- [x] T28.8 — auto cover image
 
 ### Milestone 16.5.2 — Content market
-- [ ] T29.1 — market.mjs
-- [ ] T29.2 — price computation formula
-- [ ] T29.3 — market demand evolution
-- [ ] T29.4 — notoriety / specialty buyers
-- [ ] T29.5 — market page UI
-- [ ] T29.6 — sale tick
-- [ ] T29.7 — procedural buyer flavor
-- [ ] T29.8 — market suspicion heat
+- [x] T29.1 — market.mjs
+- [x] T29.2 — price computation formula
+- [x] T29.3 — market demand evolution
+- [x] T29.4 — notoriety / specialty buyers
+- [x] T29.5 — market page UI
+- [x] T29.6 — sale tick
+- [x] T29.7 — procedural buyer flavor
+- [x] T29.8 — market suspicion heat
 
 ### Milestone 16.5.3 — Economy rewire
-- [ ] T17.2 revisited — episode-sale route wired as primary, odd-jobs demoted
+- [x] T17.2 revisited — episode-sale route wired as primary, odd-jobs demoted
 
 ---
 
@@ -536,16 +536,16 @@ All 25 hand-crafted first-day bugs from `docs/Bugs First day.md` fixed across 7 
 > Gee verbatim 2026-04-21: *"buy food and water and light and outfits for your girl s ion the collection"*.
 
 ### Milestone 16.6.1 — Consumables
-- [ ] T30.1 — consumables sub-object
-- [ ] T30.2 — maintenance tick decay
-- [ ] T30.3 — tier system
-- [ ] T30.4 — shop integration
-- [ ] T30.8 — mass-buy dialog
+- [x] T30.1 — consumables sub-object
+- [x] T30.2 — maintenance tick decay
+- [x] T30.3 — tier system
+- [x] T30.4 — shop integration
+- [x] T30.8 — mass-buy dialog
 
 ### Milestone 16.6.2 — Wardrobe
-- [ ] T30.5 — outfits as item category
-- [ ] T30.6 — equip/unequip UI
-- [ ] T30.7 — outfit tiers
+- [x] T30.5 — outfits as item category
+- [x] T30.6 — equip/unequip UI
+- [x] T30.7 — outfit tiers
 
 ---
 
@@ -554,22 +554,22 @@ All 25 hand-crafted first-day bugs from `docs/Bugs First day.md` fixed across 7 
 > Gee verbatim: *"dugeon persist or gernrate it with all itemns unlocked"*.
 
 ### Milestone 16.7.1 — Save/load
-- [ ] T31.1 — save.mjs + load.mjs
-- [ ] T31.2 — persistence scope (state + Kokoro audio, cache reproducible)
-- [ ] T31.6 — auto-save + manual slots
-- [ ] T31.7 — save export/import
+- [x] T31.1 — save.mjs + load.mjs
+- [x] T31.2 — persistence scope (state + Kokoro audio, cache reproducible)
+- [x] T31.6 — auto-save + manual slots
+- [x] T31.7 — save export/import
 
 ---
 
 ## Phase 17 — Stockholm Bond Progression (P2)
 
 ### Milestone 17.1 — Bond math live
-- [ ] T23.1 — XP + debt accrual
-- [ ] T23.2 — milestones
-- [ ] T23.3 — bond → dialogue tone
-- [ ] T23.4 — bond → unlocks
-- [ ] T23.5 — bond → escape suppression
-- [ ] T23.6 — bond UI
+- [x] T23.1 — XP + debt accrual
+- [x] T23.2 — milestones
+- [x] T23.3 — bond → dialogue tone
+- [x] T23.4 — bond → unlocks
+- [x] T23.5 — bond → escape suppression
+- [x] T23.6 — bond UI
 
 ---
 
@@ -595,64 +595,64 @@ All 25 hand-crafted first-day bugs from `docs/Bugs First day.md` fixed across 7 
 > - Phase 17 (Stockholm bond) — milestone memorial images via T25.8
 
 ### Milestone 19.1 — Imaging core
-- [ ] T25.1 — `server/girls/imaging.mjs`
-- [ ] T25.2 — Pollinations client wrapper with seed + strict-visuals tuned model
-- [ ] T25.3 — Prompt template composer (6-block structure: prefix + LOCKED face + LOCKED outfit+layers + pose + state + env + suffix)
+- [x] T25.1 — `server/girls/imaging.mjs`
+- [x] T25.2 — Pollinations client wrapper with seed + strict-visuals tuned model
+- [x] T25.3 — Prompt template composer (6-block structure: prefix + LOCKED face + LOCKED outfit+layers + pose + state + env + suffix)
 
 ### Milestone 19.2 — Situation generators
-- [ ] T25.4 — whole-body profile image (integrates back into Phase 9 T24.12)
-- [ ] T25.5 — hunt encounter thumbnail
-- [ ] T25.6 — room scene image
-- [ ] T25.7 — on-demand selfie
-- [ ] T25.8 — milestone memorial images
-- [ ] T25.9 — capture memorial image
-- [ ] T25.10 — escape aftermath image
+- [x] T25.4 — whole-body profile image (integrates back into Phase 9 T24.12)
+- [x] T25.5 — hunt encounter thumbnail
+- [x] T25.6 — room scene image
+- [x] T25.7 — on-demand selfie
+- [x] T25.8 — milestone memorial images
+- [x] T25.9 — capture memorial image
+- [x] T25.10 — escape aftermath image
 
 ### Milestone 19.3 — Persistence layers
-- [ ] T25.11 — body-state token library
-- [ ] T25.12 — outfit-state layering
-- [ ] T25.13 — facial persistence rule (face block never modified)
-- [ ] T25.14 — one-offs → cache every result
-- [ ] T25.15 — cache eviction policy
+- [x] T25.11 — body-state token library
+- [x] T25.12 — outfit-state layering
+- [x] T25.13 — facial persistence rule (face block never modified)
+- [x] T25.14 — one-offs → cache every result
+- [x] T25.15 — cache eviction policy
 
 ### Milestone 19.4 — UI integration
-- [ ] T25.16 — roster thumbnails
-- [ ] T25.17 — insert slots in every relevant page
-- [ ] T25.18 — emoji placeholder during in-flight generation
-- [ ] T25.19 — graceful fallback on Pollinations unreachable / rate-limit / content-flag
+- [x] T25.16 — roster thumbnails
+- [x] T25.17 — insert slots in every relevant page
+- [x] T25.18 — emoji placeholder during in-flight generation
+- [x] T25.19 — graceful fallback on Pollinations unreachable / rate-limit / content-flag
 
 ### Milestone 19.5 — Environment renders (town + dungeon full-res)
-- [ ] T35.1 — imaging/environment.mjs
-- [ ] T35.2 — town render prompt builder
-- [ ] T35.3 — dungeon render prompt builder
-- [ ] T35.4 — slot-array-hash caching
-- [ ] T35.5 — "Render town" / "Render dungeon" buttons + minimap overlay
-- [ ] T35.6 — render history
-- [ ] T35.7 — emoji→prompt translation table
-- [ ] T35.8 — distinct aesthetics per dungeon template
-- [ ] T35.9 — graceful degradation on Pollinations failure
+- [x] T35.1 — imaging/environment.mjs
+- [x] T35.2 — town render prompt builder
+- [x] T35.3 — dungeon render prompt builder
+- [x] T35.4 — slot-array-hash caching
+- [x] T35.5 — "Render town" / "Render dungeon" buttons + minimap overlay
+- [x] T35.6 — render history
+- [x] T35.7 — emoji→prompt translation table
+- [x] T35.8 — distinct aesthetics per dungeon template
+- [x] T35.9 — graceful degradation on Pollinations failure
 
 ---
 
 ## Phase 20 — Polish (P3)
 
 ### Milestone 20.1 — CSS / JS split
-- [ ] T10.1 — extract CSS
-- [ ] T10.2 — extract JS
+- [x] T10.1 — extract CSS
+- [x] T10.2 — extract JS
 
 ### Milestone 20.2 — Session export / import
-- [ ] T10.3 — JSON dump/load (state + memory + dungeon + economy)
+- [x] T10.3 — JSON dump/load (state + memory + dungeon + economy)
 
 ### Milestone 20.3 — Embedding memory retrieval
-- [ ] T11.1 — embed turns
-- [ ] T11.2 — top-K retrieval
+- [x] T11.1 — embed turns
+- [x] T11.2 — top-K retrieval
 
 ### Milestone 20.4 — Balancing + difficulty curve
-- [ ] T26.1 — economy balancing
-- [ ] T26.2 — capture balancing
-- [ ] T26.3 — escape balancing
-- [ ] T26.4 — bond balancing
-- [ ] T26.5 — notoriety balancing
+- [x] T26.1 — economy balancing
+- [x] T26.2 — capture balancing
+- [x] T26.3 — escape balancing
+- [x] T26.4 — bond balancing
+- [x] T26.5 — notoriety balancing
 
 ---
 
@@ -679,10 +679,10 @@ All 25 hand-crafted first-day bugs from `docs/Bugs First day.md` fixed across 7 
 - [x] T36.9 — `clampSeed(s, fallbackKey)` now accepts a fallback key. Valid positive number → masked to int32 (existing behavior). Invalid/missing seed + fallback key → djb2 hash of fallback key masked to int32 (NEW — deterministic). Invalid/missing seed + no fallback → fresh random with console.warn surfacing the dropped facial-persistence invariant. `generateFor()` passes `girl.id` as the fallback so every captive without a `visualIdentity.seed` still renders consistently across every image of her.
 
 ### Milestone 21.5 — Speech-first first-person response shape
-- [ ] T36.10 — Add SPEECH-FIRST RULE to `BASE_SLUT` in `js/templates/ollama-templates.js` with re-ordered exemplars (speech first, asterisk action trails, 8-word minimum spoken)
-- [ ] T36.11 — Delete redundant `DELTA_SUFFIX` from `buildSystemPrompt()` (BASE_SLUT already carries the delta contract)
-- [ ] T36.12 — Wire `truncateResponse` to fire on stream-end in `chatStream()` (currently dead code)
-- [ ] T36.13 — Add lonely-yes-Master detector to `room.js` TTS path — if speakable ≤ 3 words, emit NotifyToast warning
+- [x] T36.10 — Add SPEECH-FIRST RULE to `BASE_SLUT` in `js/templates/ollama-templates.js` with re-ordered exemplars (speech first, asterisk action trails, 8-word minimum spoken)
+- [x] T36.11 — Delete redundant `DELTA_SUFFIX` from `buildSystemPrompt()` (BASE_SLUT already carries the delta contract)
+- [x] T36.12 — Wire `truncateResponse` to fire on stream-end in `chatStream()` (currently dead code)
+- [x] T36.13 — Add lonely-yes-Master detector to `room.js` TTS path — if speakable ≤ 3 words, emit NotifyToast warning
 
 ### Milestone 21.6 — Forced chemical-state effects in Ollama text — SHIPPED 2026-05-14
 - [x] T36.14 — `## CHEMICAL STATE EFFECTS` block added to `BASE_SLUT`. Per-drug speech-pattern signals: sedatives → slurred + dropped consonants + trailing-off; coke → rapid-fire clipped + jaw-clench + sniffs; weed → long pauses + drifty + sensory tangents; mdma → emotional flooding + tactile fixation; acid → things-aren't-real + sensory leak + time dilation; alcohol → slurred-but-looser + sweary + run-on. Plus explicit "if drugs are 'none' speak SOBER" guard.
@@ -695,21 +695,21 @@ All 25 hand-crafted first-day bugs from `docs/Bugs First day.md` fixed across 7 
 - [x] T36.19 — `captiveAffect` surfaced in room UI as a stat row (`Captive-affect: cusser`). Context block (`buildContextBlock`) also includes it inline in the "You are..." header so Ollama sees the affect in every turn.
 
 ### Milestone 21.8 — Bottled water + filtered water in shop
-- [ ] T36.20 — Add `bottled-water` ($8/24pk) + `filtered-water` ($18/5gal) to `ITEMS` array in `js/assets/catalog.js`
-- [ ] T36.21 — Add `data-water` buttons in `js/ui/room.js` mirroring food buttons
+- [x] T36.20 — Add `bottled-water` ($8/24pk) + `filtered-water` ($18/5gal) to `ITEMS` array in `js/assets/catalog.js`
+- [x] T36.21 — Add `data-water` buttons in `js/ui/room.js` mirroring food buttons
 
 ### Milestone 21.9 — Automation upgrade tracks
-- [ ] T36.22 — Add `feedAutomation` (manual → auto-bowl → auto-feeder → IV-line) + `waterSupply` (manual bottle → wall jug → plumbed → recirculating IV) to `UPGRADE_TRACKS` in `js/game/dungeon-ops.js`
-- [ ] T36.23 — Rewrite `decayConsumables()` in `js/game/tick.js` to gate decay by hold's toilet ≥ 2 (water) / waterSupply ≥ 2 (water) / feedAutomation ≥ 2 (food draws from `feedReserve`)
-- [ ] T36.24 — Add `feedReserve` schema field on girl.consumables, drained by auto-feeder
+- [x] T36.22 — Add `feedAutomation` (manual → auto-bowl → auto-feeder → IV-line) + `waterSupply` (manual bottle → wall jug → plumbed → recirculating IV) to `UPGRADE_TRACKS` in `js/game/dungeon-ops.js`
+- [x] T36.23 — Rewrite `decayConsumables()` in `js/game/tick.js` to gate decay by hold's toilet ≥ 2 (water) / waterSupply ≥ 2 (water) / feedAutomation ≥ 2 (food draws from `feedReserve`)
+- [x] T36.24 — Add `feedReserve` schema field on girl.consumables, drained by auto-feeder
 
 ### Milestone 21.10 — Pregnancy subsystem
-- [ ] T36.25 — New file `js/game/pregnancy.js` with `Pregnancy` schema + `attemptConception(girlId, opts)` + `applyAbortion(girlId, methodId)` + outcome resolver
-- [ ] T36.26 — Add catalog items: `condom` ($2 stack), `plan-b` ($25), `abortion-pill-medical` ($120), `surgical-kit-back-alley` ($200), `obgyn-referral-clean` ($600)
-- [ ] T36.27 — Pregnancy panel in `room.js` showing status + gestation days + abort options
-- [ ] T36.28 — Hook `delta.js` to fire `attemptConception()` when `cumLoad >= 1.0` and no condom outfit equipped and `bond.bondLevel < 9`
-- [ ] T36.29 — Full-term outcome resolver: birthed → roster / sold-to-market / lost-to-authorities
-- [ ] T36.75 — **Pregnancy-stage visible markers in image prompts** (Gee verbatim 2026-05-14: *"21.10 girls can get apperance image trait 9-months pregnate"*) — new `pregnancyTokens(pregnancy)` helper in `js/game/imaging.js`, parallel to `drugStateTokens`. Per-trimester per-day-band visible markers: **1st trimester (days 1-90)** → subtle bloating, mild breast fullness, faint glow, soft cheek roundness; **2nd trimester (days 91-180)** → clearly visible round baby bump, fuller breasts, darker areolas, dewy skin, supportive hand resting on belly; **3rd trimester (days 181-279)** → pronounced heavy baby bump, very full breasts with visible stretch marks, swollen ankles, slow careful movement, often seated or reclining, hand cradling belly; **full term (day 280)** → maximum bump, body-language exhausted/reverent, may show contractions or labor onset. Front-loaded block at prompt position 2 when `pregnancy.status === 'pregnant'` (parallel to nudity-block front-loading) so the model doesn't bury pregnancy as a tail keyword. Mirror in `composePromptViaOllama()` HARD RULES (new rule between drug-visible-effects and head-to-toe-framing). Cache invalidates when pregnancy day rolls over week boundaries → fresh image renders the new trimester. Adult-floor enforced — pregnant captives are 18+ per LAW.
+- [x] T36.25 — New file `js/game/pregnancy.js` with `Pregnancy` schema + `attemptConception(girlId, opts)` + `applyAbortion(girlId, methodId)` + outcome resolver
+- [x] T36.26 — Add catalog items: `condom` ($2 stack), `plan-b` ($25), `abortion-pill-medical` ($120), `surgical-kit-back-alley` ($200), `obgyn-referral-clean` ($600)
+- [x] T36.27 — Pregnancy panel in `room.js` showing status + gestation days + abort options
+- [x] T36.28 — Hook `delta.js` to fire `attemptConception()` when `cumLoad >= 1.0` and no condom outfit equipped and `bond.bondLevel < 9`
+- [x] T36.29 — Full-term outcome resolver: birthed → roster / sold-to-market / lost-to-authorities
+- [x] T36.75 — **Pregnancy-stage visible markers in image prompts** (Gee verbatim 2026-05-14: *"21.10 girls can get apperance image trait 9-months pregnate"*) — new `pregnancyTokens(pregnancy)` helper in `js/game/imaging.js`, parallel to `drugStateTokens`. Per-trimester per-day-band visible markers: **1st trimester (days 1-90)** → subtle bloating, mild breast fullness, faint glow, soft cheek roundness; **2nd trimester (days 91-180)** → clearly visible round baby bump, fuller breasts, darker areolas, dewy skin, supportive hand resting on belly; **3rd trimester (days 181-279)** → pronounced heavy baby bump, very full breasts with visible stretch marks, swollen ankles, slow careful movement, often seated or reclining, hand cradling belly; **full term (day 280)** → maximum bump, body-language exhausted/reverent, may show contractions or labor onset. Front-loaded block at prompt position 2 when `pregnancy.status === 'pregnant'` (parallel to nudity-block front-loading) so the model doesn't bury pregnancy as a tail keyword. Mirror in `composePromptViaOllama()` HARD RULES (new rule between drug-visible-effects and head-to-toe-framing). Cache invalidates when pregnancy day rolls over week boundaries → fresh image renders the new trimester. Adult-floor enforced — pregnant captives are 18+ per LAW.
 
 ### Milestone 21.11 — Capture as multi-stage progress-bar mechanic — SHIPPED 2026-05-14 (REFORMULATED 2026-05-14)
 
@@ -724,18 +724,18 @@ All 25 hand-crafted first-day bugs from `docs/Bugs First day.md` fixed across 7 
 - [x] **Bonus** — Old `attemptCapture()` in `hunt.js` was DELETED in the 2026-06-20 code audit (dead — zero callers, superseded by `DMTHGame.capture.runAttempt()`). Old `buildMechanicalSummary` helper in `hunt-view.js` deleted (was unused after rewrite).
 
 ### Milestone 21.12 — Real public landing page
-- [ ] T36.36 — Replace setup-wizard-as-landing with a real public landing page at `index.html`: Start New Game button, Continue Game button (if save exists), Settings, About, Terms of Use, Privacy Policy sections
-- [ ] T36.37 — Settings panel routes from landing for Ollama / model / Kokoro / Pollinations key configuration (current setup wizard becomes the "first-time setup" flow gated behind New Game)
-- [ ] T36.38 — About section — game description (no AI vendor attribution per LAW), feature highlights, version
-- [ ] T36.39 — Terms of Use section — adult-content terms, 18+ acknowledgement, taboo-fiction framing, all-characters-adult statement, jurisdiction notes
-- [ ] T36.40 — Privacy Policy section — what stays on device (everything), what calls out (visitor's own Ollama, visitor's own Pollinations key), no telemetry, IndexedDB note, export/import saves
-- [ ] T36.41 — Visual chrome consistent with game.html — dark aesthetic, text+emoji primary, no marketing bloat
+- [x] T36.36 — Replace setup-wizard-as-landing with a real public landing page at `index.html`: Start New Game button, Continue Game button (if save exists), Settings, About, Terms of Use, Privacy Policy sections
+- [x] T36.37 — Settings panel routes from landing for Ollama / model / Kokoro / Pollinations key configuration (current setup wizard becomes the "first-time setup" flow gated behind New Game)
+- [x] T36.38 — About section — game description (no AI vendor attribution per LAW), feature highlights, version
+- [x] T36.39 — Terms of Use section — adult-content terms, 18+ acknowledgement, taboo-fiction framing, all-characters-adult statement, jurisdiction notes
+- [x] T36.40 — Privacy Policy section — what stays on device (everything), what calls out (visitor's own Ollama, visitor's own Pollinations key), no telemetry, IndexedDB note, export/import saves
+- [x] T36.41 — Visual chrome consistent with game.html — dark aesthetic, text+emoji primary, no marketing bloat
 
 ### Milestone 21.13 — Cleanup carry-overs (super-review tail)
-- [ ] T36.42 — Delete `js/game/lifespan.js:81` no-op self-assignment
-- [ ] T36.43 — Add `<<INTENTIONAL EMPTY>>` marker comment on NUDE_PSEUDO description in `js/game/wardrobe.js`
-- [ ] T36.44 — Tighten `extractDelta` closing-tag tolerance after `truncateResponse` enforces clean endings
-- [ ] T36.45 — Migrate SHIPPED entries (Derobe + Playwright screenshots + 2026-05-14 doc-vision-alignment + this overhaul as it ships) to `docs/FINALIZED.md` per LAW
+- [x] T36.42 — Delete `js/game/lifespan.js:81` no-op self-assignment
+- [x] T36.43 — Add `<<INTENTIONAL EMPTY>>` marker comment on NUDE_PSEUDO description in `js/game/wardrobe.js`
+- [x] T36.44 — Tighten `extractDelta` closing-tag tolerance after `truncateResponse` enforces clean endings
+- [x] T36.45 — Migrate SHIPPED entries (Derobe + Playwright screenshots + 2026-05-14 doc-vision-alignment + this overhaul as it ships) to `docs/FINALIZED.md` per LAW
 
 ### Milestone 21.14 — No-wardrobe option — SHIPPED 2026-05-14 (Gee verbatim 2026-05-14: *"need a no wardrobe option too, add to task list"*)
 - [x] T36.46 — `NO_WARDROBE_PSEUDO` added to `js/game/wardrobe.js` with id `'none'`, nude tier `'stripped'` (distinct from `NUDE_PSEUDO`'s `'full'`), multiplier 1.5 (slight bump over 'nude' since more extreme). `getById`, `builtIns`, `isNude`, `equip` all updated to accept the new pseudo. `stripEverything(girlId)` convenience function exposed.
@@ -772,54 +772,54 @@ All 25 hand-crafted first-day bugs from `docs/Bugs First day.md` fixed across 7 
 
 README.md becomes a gameplay wiki only (for players): every game system documented inline — archetypes, locations, tools, dungeon templates with hold descriptions, room upgrade tracks, drug system, bond progression, escape mechanic, films + content market, propositioner inbox, slave market, disposal methods, pregnancy, whore-out, capture progress-bar, stamina/health, tooltips. Embeds playwright screenshots inline as visual reference. NO technical setup info. New `SETUP-README.md` holds everything technical — install Ollama, install Kokoro, get Pollinations key, static-host deploy, save/load IDB, factory reset, troubleshooting, with ASCII writeups of module dependency, state-model ER diagrams, bootstrap flow, tick engine, imaging pipeline, voice pipeline, Ollama prompt-assembly stack.
 
-- [ ] T36.76 — Audit existing `README.md` content. Identify gameplay-vs-technical split. Migrate technical bits OUT to `SETUP-README.md`. Migrate any gameplay-only bits that surfaced as side-by-side to the gameplay README. Verify the static-host auto-deploy continues to treat `README.md` as the repo browse landing.
-- [ ] T36.77 — Rewrite `README.md` as gameplay wiki only. Inline sections: game premise, gameplay loop, all 7 archetypes (or however many ship), all 13 locations, all capture tools, all 9 dungeon templates (with `holdPrompt` descriptions), all 12 room-upgrade tracks with tier names, drug system + curves, bond 0-9 progression + milestones, escape mechanic + containment math, films + content market pricing, propositioner inbox, slave market buyer types, disposal methods + consequences, pregnancy + abortion options, whore-out, capture progress-bar mechanic, stamina + health system, universal tooltips. Embed playwright-generated screenshots inline as visual reference.
-- [ ] T36.78 — Create new `SETUP-README.md` with all technical material moved from README. Sections: prerequisites (Node, Ollama, Kokoro, optional Pollinations), install Ollama + uncensored model pull, install Kokoro weights, get Pollinations `pk_` key, run the game locally, static-host deploy guide, save / load IndexedDB, export / import saves, factory-reset, troubleshooting (Ollama HTTP 400, Pollinations 403, Kokoro autoplay-blocked, model corruption self-heal).
-- [ ] T36.79 — ASCII writeups for `SETUP-README.md` — module dependency graph (`bootstrap → state → tick → drugs / lifespan / market / propositioner / slaveMarket / balancing / achievements / escapeRecovery → router → UI views`), state-model ER (Player → Roster[Girl] → Dungeons → Holds; Girl → VisualIdentity / Body / Mood / Bond / Escape / Pregnancy / WhoreOut), bootstrap flow, tick engine timeline, imaging pipeline (composePrompt → buildUrl → queuedFetch → cache.put), voice pipeline (mic → Pollinations transcribe → Ollama → Kokoro → audio), Ollama prompt-assembly stack (BASE_SLUT + archetype + captive-affect + mode + scene).
-- [ ] T36.80 — ASCII writeups for gameplay `README.md` — game loop diagram (Hunt → Capture → Hold → Interact → Record → Sell → Upgrade), dungeon portfolio diagram (basic → cinderblock → … → mountain compound), hunt-capture-bond cycle, content-market money flow, room layout sketch (hold + upgrades).
-- [ ] T36.81 — Cross-references — README points to SETUP-README at top for technical setup; SETUP-README points to README at top for "what is this game". Both have ToC. Both pass the LAW #1 / NO AI vendor attribution audit. Pass docs-before-push checklist on commit.
+- [x] T36.76 — Audit existing `README.md` content. Identify gameplay-vs-technical split. Migrate technical bits OUT to `SETUP-README.md`. Migrate any gameplay-only bits that surfaced as side-by-side to the gameplay README. Verify the static-host auto-deploy continues to treat `README.md` as the repo browse landing.
+- [x] T36.77 — Rewrite `README.md` as gameplay wiki only. Inline sections: game premise, gameplay loop, all 7 archetypes (or however many ship), all 13 locations, all capture tools, all 9 dungeon templates (with `holdPrompt` descriptions), all 12 room-upgrade tracks with tier names, drug system + curves, bond 0-9 progression + milestones, escape mechanic + containment math, films + content market pricing, propositioner inbox, slave market buyer types, disposal methods + consequences, pregnancy + abortion options, whore-out, capture progress-bar mechanic, stamina + health system, universal tooltips. Embed playwright-generated screenshots inline as visual reference.
+- [x] T36.78 — Create new `SETUP-README.md` with all technical material moved from README. Sections: prerequisites (Node, Ollama, Kokoro, optional Pollinations), install Ollama + uncensored model pull, install Kokoro weights, get Pollinations `pk_` key, run the game locally, static-host deploy guide, save / load IndexedDB, export / import saves, factory-reset, troubleshooting (Ollama HTTP 400, Pollinations 403, Kokoro autoplay-blocked, model corruption self-heal).
+- [x] T36.79 — ASCII writeups for `SETUP-README.md` — module dependency graph (`bootstrap → state → tick → drugs / lifespan / market / propositioner / slaveMarket / balancing / achievements / escapeRecovery → router → UI views`), state-model ER (Player → Roster[Girl] → Dungeons → Holds; Girl → VisualIdentity / Body / Mood / Bond / Escape / Pregnancy / WhoreOut), bootstrap flow, tick engine timeline, imaging pipeline (composePrompt → buildUrl → queuedFetch → cache.put), voice pipeline (mic → Pollinations transcribe → Ollama → Kokoro → audio), Ollama prompt-assembly stack (BASE_SLUT + archetype + captive-affect + mode + scene).
+- [x] T36.80 — ASCII writeups for gameplay `README.md` — game loop diagram (Hunt → Capture → Hold → Interact → Record → Sell → Upgrade), dungeon portfolio diagram (basic → cinderblock → … → mountain compound), hunt-capture-bond cycle, content-market money flow, room layout sketch (hold + upgrades).
+- [x] T36.81 — Cross-references — README points to SETUP-README at top for technical setup; SETUP-README points to README at top for "what is this game". Both have ToC. Both pass the LAW #1 / NO AI vendor attribution audit. Pass docs-before-push checklist on commit.
 
 ### Milestone 21.18 — Universal tooltips on all pages, concise + voice-aware (Gee verbatim 2026-05-14: *"we also need tool tips!!! lot and lots of tool tips for everything!!! on all pages!!!! concise and fucked"*)
 
 Centralized tooltip engine + a registry covering every actionable button, stat indicator, item card, and informational element across every page. Voice spec: ≤ 1 sentence, ≤ 80 chars, vulgar/explicit/dungeon-game-aware tone (matches the adult-content register of the game), NEVER corporate or clinical. Cross-cutting polish layer.
 
-- [ ] T36.69 — Tooltip engine in `js/ui/tooltips.js` — central registry keyed by element ID or `data-tooltip` attribute; hover wiring (200ms delay) + long-press for touch; dark-themed bubble; edge-aware positioning (don't clip viewport); single tooltip visible at a time. Exports `DMTHTooltips.register(id, text)` + auto-binds every `[data-tooltip]` element on page render. Long-press for touch users.
-- [ ] T36.70 — Town page tooltips — every location card, property-status pill, shop entry-point, hunt-launch button, town map slot. Examples: `street` → *"Easy spawns. Cheap girls. Cops if you make noise."*; `club` → *"Loud, dark, drug-forward. Bigger payoff, bigger heat."*; `own:bar` → *"Owned. Passive cover income + private-access hunts."*
-- [ ] T36.71 — Shop page tooltips — every item card. Examples: `rohypnol` → *"Drops her clean. Engage stage. Single use."*; `bottled-water` → *"Cheap 24-pack. Keep her hydrated or watch her wither."*; `gourmet-meal` → *"Fancy food. Mood lift + bond bump."*; `coke-bumps` → *"Hits her hard. She'll talk fast, then crash hard."*
-- [ ] T36.72 — Hunt + Encounter tooltips — every capture stage indicator, tool-loadout slot, odds-marker, archetype detail field. Examples: capture-stages: `Approach` → *"Close distance. Stealth tools."*; `Subdue` → *"Wear her down. Chemical or blunt."*; `Secure` → *"Bind her so she travels."*
-- [ ] T36.73 — Dungeon + Room tooltips — every hold, every upgrade-track row, every tier preview, every action button, every stat bar. Examples: `toilet:T2` → *"Plumbed. She doesn't need water bought anymore."*; `restraints:T4` → *"Wall spread-eagle rig. Escape risk gutted."*; stat-row `💧 Water` → *"Hydration stock. Hits 0 = mood drop + health decay."*
-- [ ] T36.74 — Cross-cutting tooltips — Wardrobe (every outfit), Roster (girl-card stat icons), Inventory (every item count), Films (every film + every record/sell action), Slave Market (every offer), Propositioner Inbox (every proposition + every accept/reject), Disposal (every method's notoriety/profile tradeoff), Settings (every toggle/key field), Landing (every primary CTA + section anchor). Final audit pass guarantees no actionable element ships without a tooltip.
+- [x] T36.69 — Tooltip engine in `js/ui/tooltips.js` — central registry keyed by element ID or `data-tooltip` attribute; hover wiring (200ms delay) + long-press for touch; dark-themed bubble; edge-aware positioning (don't clip viewport); single tooltip visible at a time. Exports `DMTHTooltips.register(id, text)` + auto-binds every `[data-tooltip]` element on page render. Long-press for touch users.
+- [x] T36.70 — Town page tooltips — every location card, property-status pill, shop entry-point, hunt-launch button, town map slot. Examples: `street` → *"Easy spawns. Cheap girls. Cops if you make noise."*; `club` → *"Loud, dark, drug-forward. Bigger payoff, bigger heat."*; `own:bar` → *"Owned. Passive cover income + private-access hunts."*
+- [x] T36.71 — Shop page tooltips — every item card. Examples: `rohypnol` → *"Drops her clean. Engage stage. Single use."*; `bottled-water` → *"Cheap 24-pack. Keep her hydrated or watch her wither."*; `gourmet-meal` → *"Fancy food. Mood lift + bond bump."*; `coke-bumps` → *"Hits her hard. She'll talk fast, then crash hard."*
+- [x] T36.72 — Hunt + Encounter tooltips — every capture stage indicator, tool-loadout slot, odds-marker, archetype detail field. Examples: capture-stages: `Approach` → *"Close distance. Stealth tools."*; `Subdue` → *"Wear her down. Chemical or blunt."*; `Secure` → *"Bind her so she travels."*
+- [x] T36.73 — Dungeon + Room tooltips — every hold, every upgrade-track row, every tier preview, every action button, every stat bar. Examples: `toilet:T2` → *"Plumbed. She doesn't need water bought anymore."*; `restraints:T4` → *"Wall spread-eagle rig. Escape risk gutted."*; stat-row `💧 Water` → *"Hydration stock. Hits 0 = mood drop + health decay."*
+- [x] T36.74 — Cross-cutting tooltips — Wardrobe (every outfit), Roster (girl-card stat icons), Inventory (every item count), Films (every film + every record/sell action), Slave Market (every offer), Propositioner Inbox (every proposition + every accept/reject), Disposal (every method's notoriety/profile tradeoff), Settings (every toggle/key field), Landing (every primary CTA + section anchor). Final audit pass guarantees no actionable element ships without a tooltip.
 
 ### Milestone 21.17 — Stamina + health + per-action stat-impact spec (Gee verbatim 2026-05-14: *"they also need a stamina bar thet gets used up and thinks like degrad build it back up and other things each have their stat boost and health + - 's for all actions some heal some hurt some use stamina some rebuild it all levels of system like this"*)
 
 Adds `stamina` (0-100, default 70) + `health` (0-100, default 100, distinct from bruises which counts accumulated injury) as first-class body stats. Every actionable button + every tick-driven event carries a stat-impact spec: `{ stamina, health, mood, arousal, wetness, bond, bruises, cumLoad }` deltas. Some actions heal, some hurt, some drain stamina, some restore it.
 
-- [ ] T36.61 — Add `stamina` + `health` fields to GirlProfile body schema. Defaults: stamina=70, health=100. Defensive read pattern (`girl.body.stamina ?? 70`) everywhere so existing saves migrate forward without explicit migration script.
-- [ ] T36.62 — Extend `delta.js` parser to recognize `stamina` + `health` delta keys so the Ollama-emitted delta block can shift them. Clamp to 0-100.
-- [ ] T36.63 — Tick-level stamina drain + regen in `tick.js`. Whored-out girls drain stamina each tick (proportional to john volume). Resting girls (low-activity ticks, no scene this tick) regen stamina slowly. Sleep state (future) regens fast. Food/water below threshold suppresses regen.
-- [ ] T36.64 — Action-impact spec table — every `data-action` button in `js/ui/room.js` + every preset click action in `js/ui/room-presets.js` gets a `{ stamina, health, mood, arousal, wetness, bond, bruises, cumLoad }` cost/gain. Centralized lookup table in new `js/game/action-effects.js` with one entry per action ID. Slap = stamina −2, mood −8, bond −2, bruises +1; kiss = mood +3, bond +1; feed = stamina +6, health +2, mood +4, bond +1; restrain = stamina −1, mood −3; dose-coke = stamina +20 (artificial), health −1; rest = stamina +15, health +3.
-- [ ] T36.65 — Tie health decline to compounding factors — bruises ≥ 15 drains health −2/tick; food.stock = 0 drains −3/tick; water.stock = 0 drains −5/tick (faster than food); high prolonged stress (mood = 'catatonic' for 10+ ticks) drains −1/tick. Health restored by feed/water/medical items + rest.
-- [ ] T36.66 — UI surfaces — stamina + health bars added to stat-row in `js/ui/room.js` alongside existing arousal/wetness/cum/bruises/high. Color-coded thresholds (green ≥ 60, amber 30-59, red < 30).
-- [ ] T36.67 — Per-button cost previews on every actionable button — tooltip on hover showing `"🍑 Derobe — stamina −5, mood −10"`. Pulled live from the action-effects spec table.
-- [ ] T36.68 — Whore-out integration — johns drain stamina + health per archetype (rough = stamina −15, health −3; gentle = stamina −5, health 0). Stamina ≤ 10 gates further john arrival (girl needs rest before more clients). Cross-link with Phase 21.16 in tick wiring.
+- [x] T36.61 — Add `stamina` + `health` fields to GirlProfile body schema. Defaults: stamina=70, health=100. Defensive read pattern (`girl.body.stamina ?? 70`) everywhere so existing saves migrate forward without explicit migration script.
+- [x] T36.62 — Extend `delta.js` parser to recognize `stamina` + `health` delta keys so the Ollama-emitted delta block can shift them. Clamp to 0-100.
+- [x] T36.63 — Tick-level stamina drain + regen in `tick.js`. Whored-out girls drain stamina each tick (proportional to john volume). Resting girls (low-activity ticks, no scene this tick) regen stamina slowly. Sleep state (future) regens fast. Food/water below threshold suppresses regen.
+- [x] T36.64 — Action-impact spec table — every `data-action` button in `js/ui/room.js` + every preset click action in `js/ui/room-presets.js` gets a `{ stamina, health, mood, arousal, wetness, bond, bruises, cumLoad }` cost/gain. Centralized lookup table in new `js/game/action-effects.js` with one entry per action ID. Slap = stamina −2, mood −8, bond −2, bruises +1; kiss = mood +3, bond +1; feed = stamina +6, health +2, mood +4, bond +1; restrain = stamina −1, mood −3; dose-coke = stamina +20 (artificial), health −1; rest = stamina +15, health +3.
+- [x] T36.65 — Tie health decline to compounding factors — bruises ≥ 15 drains health −2/tick; food.stock = 0 drains −3/tick; water.stock = 0 drains −5/tick (faster than food); high prolonged stress (mood = 'catatonic' for 10+ ticks) drains −1/tick. Health restored by feed/water/medical items + rest.
+- [x] T36.66 — UI surfaces — stamina + health bars added to stat-row in `js/ui/room.js` alongside existing arousal/wetness/cum/bruises/high. Color-coded thresholds (green ≥ 60, amber 30-59, red < 30).
+- [x] T36.67 — Per-button cost previews on every actionable button — tooltip on hover showing `"🍑 Derobe — stamina −5, mood −10"`. Pulled live from the action-effects spec table.
+- [x] T36.68 — Whore-out integration — johns drain stamina + health per archetype (rough = stamina −15, health −3; gentle = stamina −5, health 0). Stamina ≤ 10 gates further john arrival (girl needs rest before more clients). Cross-link with Phase 21.16 in tick wiring.
 
 ### Milestone 21.16 — Whore-out passive-income + john ledger + memory recall (Gee verbatim 2026-05-14: *"also want a whore out option that allows girls to generate passive income and tracks all the johns and what they did to where the girls can talk about their johns and stuff idk figure it out"*)
 
 Per-girl whore-out toggle that automates john arrivals + transactions while enabled, appends a permanent `johnLedger` of every encounter, and feeds last-N johns into the Ollama context block so she references specific past johns in dialogue. Distinct from the existing Propositioner system (single deal, player-approval-gated, bespoke clientele). Whore-out is continuous passive flow with batch resolution. Both systems coexist — Propositioner is the curated upmarket layer, Whore-out is the general-public passive layer.
 
-- [ ] T36.55 — Schema + module skeleton — `girl.whoreOut: { enabled, enabledAt, rate, condomRequired, permittedActs, blockedJohnTypes, johnLedger, sessionTotals }`; `JohnEncounter: { id, ts, johnArchetype, johnDescription, acts, duration_min, payment, tip, condomUsed, girlMoodBefore, girlMoodAfter, bondDeltaApplied, bruisesAdded, cumLoadAdded, notes }`. New module `js/game/whore-out.js` exposing `DMTHGame.whoreOut` with `runJohnTick(state)`, `resolveJohnEncounter(girlId, johnArchetypeId)`, `cashoutSession(girlId)`, `summarizeLedger(girlId, opts)`.
-- [ ] T36.56 — John archetype catalog (8-10 types) in `js/templates/john-archetypes.js` — `regular` (gentle, tips), `rough` (bruises+, low pay), `cheap` (low pay), `generous` (high tip), `repeat` (recurring same john, builds quasi-relationship), `weirdo` (specific kink fixation), `quick` (premium per-minute), `talkative` (low intensity, lots of dialogue captured in notes), `pregnant-want` (high pay if condomless), `degrader` (mood-hit, high pay). Each archetype carries `arrivalWeight`, `payRange`, `tipChance`, `permittedActsPreference`, `intensity`, `moodImpact`, `bruisesAdded`, `condomCompliance`, `dialogueTone`.
-- [ ] T36.57 — Tick wiring + encounter resolver + bond/mood/notoriety impact — `tick.js` calls `whoreOut.runJohnTick(state)`. For each whored-out girl, roll a per-tick john-arrival chance based on her stats + location reputation + dungeon notoriety. On arrival: resolve transaction silently using her `permittedActs` + `condomRequired` gates, generate `JohnEncounter` record, bump `girl.body.bruises` + `girl.body.cumLoad`, apply per-archetype `moodImpact`, accrue bondDebt unless `bond.bondLevel >= 7` (trained acceptance), bump dungeon notoriety per john volume.
-- [ ] T36.58 — Pregnancy integration — when `!condomUsed` on a john encounter, fire `pregnancy.attemptConception(girlId, { source: 'whore-out', johnEncounterId })`. Depends on Phase 21.10 pregnancy subsystem.
-- [ ] T36.59 — Memory integration — extend `girl.memory` context to surface last-N johns (default last 5) in the Ollama context block when player chats with her. Each ledger entry has `notes` (1-2 line free-form scene description) that the Ollama context uses verbatim so she references the rough one yesterday or the repeat last week.
-- [ ] T36.60 — UI — `js/ui/room.js` whore-out toggle button in Actions row. Whore-out settings panel: rate (low/standard/premium/all-comers), condom-required toggle, permittedActs multi-select, blockedJohnTypes multi-select. John ledger view (paginated, filterable by date/archetype/payment). Session-totals widget showing earnings + john count since last cashout. "Cashout earnings" button rolls session totals into player money. Escape-risk multiplier UI hint (whored-out girls see more outside people, escape risk goes up).
+- [x] T36.55 — Schema + module skeleton — `girl.whoreOut: { enabled, enabledAt, rate, condomRequired, permittedActs, blockedJohnTypes, johnLedger, sessionTotals }`; `JohnEncounter: { id, ts, johnArchetype, johnDescription, acts, duration_min, payment, tip, condomUsed, girlMoodBefore, girlMoodAfter, bondDeltaApplied, bruisesAdded, cumLoadAdded, notes }`. New module `js/game/whore-out.js` exposing `DMTHGame.whoreOut` with `runJohnTick(state)`, `resolveJohnEncounter(girlId, johnArchetypeId)`, `cashoutSession(girlId)`, `summarizeLedger(girlId, opts)`.
+- [x] T36.56 — John archetype catalog (8-10 types) in `js/templates/john-archetypes.js` — `regular` (gentle, tips), `rough` (bruises+, low pay), `cheap` (low pay), `generous` (high tip), `repeat` (recurring same john, builds quasi-relationship), `weirdo` (specific kink fixation), `quick` (premium per-minute), `talkative` (low intensity, lots of dialogue captured in notes), `pregnant-want` (high pay if condomless), `degrader` (mood-hit, high pay). Each archetype carries `arrivalWeight`, `payRange`, `tipChance`, `permittedActsPreference`, `intensity`, `moodImpact`, `bruisesAdded`, `condomCompliance`, `dialogueTone`.
+- [x] T36.57 — Tick wiring + encounter resolver + bond/mood/notoriety impact — `tick.js` calls `whoreOut.runJohnTick(state)`. For each whored-out girl, roll a per-tick john-arrival chance based on her stats + location reputation + dungeon notoriety. On arrival: resolve transaction silently using her `permittedActs` + `condomRequired` gates, generate `JohnEncounter` record, bump `girl.body.bruises` + `girl.body.cumLoad`, apply per-archetype `moodImpact`, accrue bondDebt unless `bond.bondLevel >= 7` (trained acceptance), bump dungeon notoriety per john volume.
+- [x] T36.58 — Pregnancy integration — when `!condomUsed` on a john encounter, fire `pregnancy.attemptConception(girlId, { source: 'whore-out', johnEncounterId })`. Depends on Phase 21.10 pregnancy subsystem.
+- [x] T36.59 — Memory integration — extend `girl.memory` context to surface last-N johns (default last 5) in the Ollama context block when player chats with her. Each ledger entry has `notes` (1-2 line free-form scene description) that the Ollama context uses verbatim so she references the rough one yesterday or the repeat last week.
+- [x] T36.60 — UI — `js/ui/room.js` whore-out toggle button in Actions row. Whore-out settings panel: rate (low/standard/premium/all-comers), condom-required toggle, permittedActs multi-select, blockedJohnTypes multi-select. John ledger view (paginated, filterable by date/archetype/payment). Session-totals widget showing earnings + john count since last cashout. "Cashout earnings" button rolls session totals into player money. Escape-risk multiplier UI hint (whored-out girls see more outside people, escape risk goes up).
 
 ### Milestone 21.15 — Full-body image framing (Gee verbatim 2026-05-14: *"and we need the images to do more fullbody style not mugshots and portrate images"*)
-- [ ] T36.50 — Update `imaging.js` PREFIX block — add explicit full-body framing tokens at the very start of every image prompt: `"full body shot, head to toe in frame, no portrait cropping, no mugshot framing, complete figure visible from hair to feet, wide framing"`.
-- [ ] T36.51 — Audit + rewrite every entry in `POSE_LIBRARY` (`imaging.js` lines 134-171). Each pose description gets prefixed/suffixed with explicit full-body framing language. Selfies in particular need `"full-body composition showing entire body from head to feet"` injected.
-- [ ] T36.52 — Switch default Pollinations aspect ratio for character images to portrait tall (1024 × 1792). Environment renders stay landscape (1792 × 1024). Set per-call in `buildUrl()`.
-- [ ] T36.53 — Update `composePromptViaOllama()` HARD RULES — add a rule that the Ollama-as-prompt-writer MUST instruct the image generator to produce full-body framing, never portrait or mugshot.
-- [ ] T36.54 — Add safety net in `sanitizePrompt()` (`imaging.js` lines 290-301) — strip `portrait`, `mugshot`, `headshot`, `bust shot`, `close-up of face` and inject `full body shot` if any leak through.
+- [x] T36.50 — Update `imaging.js` PREFIX block — add explicit full-body framing tokens at the very start of every image prompt: `"full body shot, head to toe in frame, no portrait cropping, no mugshot framing, complete figure visible from hair to feet, wide framing"`.
+- [x] T36.51 — Audit + rewrite every entry in `POSE_LIBRARY` (`imaging.js` lines 134-171). Each pose description gets prefixed/suffixed with explicit full-body framing language. Selfies in particular need `"full-body composition showing entire body from head to feet"` injected.
+- [x] T36.52 — Switch default Pollinations aspect ratio for character images to portrait tall (1024 × 1792). Environment renders stay landscape (1792 × 1024). Set per-call in `buildUrl()`.
+- [x] T36.53 — Update `composePromptViaOllama()` HARD RULES — add a rule that the Ollama-as-prompt-writer MUST instruct the image generator to produce full-body framing, never portrait or mugshot.
+- [x] T36.54 — Add safety net in `sanitizePrompt()` (`imaging.js` lines 290-301) — strip `portrait`, `mugshot`, `headshot`, `bust shot`, `close-up of face` and inject `full body shot` if any leak through.
 
 ### Milestone 21.23 — Captives start in their captured-at outfit — SHIPPED 2026-05-14 (Gee verbatim 2026-05-14, post-compact: *"girls have the clothes they were captured with until changes into others or nothing"*)
 - [x] T36.95 — `js/game/girl-gen.js` wardrobe init — starter wardrobe entry's `displayName` is `'👗 Captured outfit'`, `description` is the archetype-pool outfit she was wearing at capture, `source: 'captured-with'` persists provenance. `id: 'default'` retained so equip/derobe/re-dress wiring still resolves.
