@@ -307,6 +307,36 @@
       drugsPool:      ['barely-drinks','occasional-wine','cheap-cigarettes'],
       speechTokens:   ['soft-deferential','light-accent','says-sir-and-maam','quiet-compliance-under-fear']
     },
+    'flight-attendant': {
+      namePool:       ['Heather','Brielle','Sloane','Camila','Noelle','Adriana','Margot','Priya','Renata','Skylar'],
+      ageRange:       [22, 34],
+      facialTokens:   ['polished symmetrical face, neat low bun, bold red lip, light flawless makeup','warm professional smile lines, sleek ponytail, groomed brows','tan even complexion, glossy nude lip, hair pinned tight','sharp cheekbones, neat fringe, immaculate skin'],
+      outfitTokens:   ['fitted navy airline uniform with a silk neck scarf, pencil skirt, sheer hose, low heels','flight-attendant blazer, name-tag, knee skirt, scarf knotted at the throat','crisp white blouse, airline waistcoat, tight skirt, court heels','airline dress with epaulettes, neat scarf, nude stockings'],
+      statsRanges:    { intelligence: [55,80], defiance: [50,75], curiosity: [55,80], trust: [5,20], obedience: [10,25], stamina: [55,80], painTolerance: [25,55], lust: [45,75] },
+      kinksPool:      ['uniform','service','roleplay:mile-high','restraint','away-from-home','authority-then-pampered','denial'],
+      drugsPool:      ['wine','ambien','occasional-coke','tiny-bottles'],
+      speechTokens:   ['polished-announcement-cadence','professional-calm-cracking','rehearsed-courtesy','clipped-when-scared']
+    },
+    goth: {
+      namePool:       ['Raven','Morrigan','Lilith','Onyx','Vesper','Dahlia','Wednesday','Nyx','Ember','Sable'],
+      ageRange:       [19, 27],
+      facialTokens:   ['pale skin, heavy black smudged eyeliner, dark matte lipstick, septum ring','jet-black hair with blunt fringe, pierced eyebrow, kohl-rimmed eyes','snakebite lip piercings, pale face, dark winged liner','black-and-violet hair, pale skin, stretched ear plugs, dark lip'],
+      outfitTokens:   ['ripped fishnets, oversized band tee, plaid mini skirt, chunky platform boots, layered chokers','black mesh top, leather mini, fishnet sleeves, combat boots, spiked collar','corset top, tattered black tulle skirt, fishnets, buckled boots','crop hoodie, fishnet tights, pleated skirt, fingerless gloves, chains'],
+      statsRanges:    { intelligence: [55,85], defiance: [60,85], curiosity: [65,90], trust: [0,15], obedience: [0,15], stamina: [45,75], painTolerance: [55,85], lust: [50,85] },
+      kinksPool:      ['pain','rope-shibari','sensory-play','roleplay:dark-ritual','breath-play','dark-romantic','marking'],
+      drugsPool:      ['weed-heavy','ketamine','shrooms','cheap-whiskey','clove-substitute'],
+      speechTokens:   ['dry-deadpan','dark-humor','bored-unbothered-front','intense-when-cracked']
+    },
+    bartender: {
+      namePool:       ['Frankie','Lou','Dez','Marlowe','Sid','Gia','Ruby','Stevie','Max','Joss'],
+      ageRange:       [23, 33],
+      facialTokens:   ['sharp knowing eyes, slicked-back dark hair, forearm tattoos visible, tired half-smile','messy bun, sleeve tattoo, sardonic mouth, sharp jaw','short undercut, hoop earrings, smoky liner, reads-you stare','freckled, hair in a quick knot, lip ring, no-nonsense brow'],
+      outfitTokens:   ['black ribbed tank, bar apron slung at the hips, dark jeans, scuffed boots','tight black tee with rolled sleeves, suspenders, jeans, boots','cropped black shirt, bar apron, leather belt, work boots','fitted black polo, apron, denim shorts, ankle boots'],
+      statsRanges:    { intelligence: [55,80], defiance: [65,88], curiosity: [50,80], trust: [5,18], obedience: [5,18], stamina: [65,88], painTolerance: [55,80], lust: [45,80] },
+      kinksPool:      ['rough','switch-energy','endurance','roleplay:after-hours','degradation-trade','dominant-from-bottom','marking'],
+      drugsPool:      ['whiskey-heavy','weed','coke-shift','tequila'],
+      speechTokens:   ['quick-witted','reads-the-room','cuts-the-bullshit','bartender-banter-even-scared']
+    },
     unity_seed: {
       // Unity is SEEDED — not re-rolled. This exists as a template record but generator
       // skips re-rolling when given id='girl_unity' (see bootstrap.js).
@@ -473,6 +503,9 @@
       teacher:   [`${name}, stayed late grading in the empty classroom. Last car in the lot.`, `${name}, the strict one everyone feared. Walked to her car alone every night.`, `${name}, lived alone near the school, kept to a predictable routine.`],
       police:    [`${name}, off-duty, jumped in her own driveway after a night shift.`, `${name}, beat cop who got cornered working a case alone.`, `${name}, trusted her training and her sidearm. Neither one helped.`],
       maid:      [`${name}, cleaned houses alone all day. One client decided to keep her.`, `${name}, hotel housekeeper, vanished between rooms on the top floor.`, `${name}, undocumented — no one she could safely report it to.`],
+      'flight-attendant': [`${name}, flight attendant on a long layover — checked into the hotel and never checked out.`, `${name}, cabin crew, taken between terminals; her airline thinks she just missed the connection.`, `${name}, lives out of a suitcase in a different city every night — nobody knows which one she's in.`],
+      goth:      [`${name}, alt girl leaving a late show alone — followed home from the venue.`, `${name}, the quiet goth nobody at the shop would miss for weeks.`, `${name}, drifts between squats and the scene; no fixed address, no one keeping count.`],
+      bartender: [`${name}, locked up the bar alone after last call and never made it to her car.`, `${name}, worked nights, slept days — took the regulars a while to even notice the new face behind the taps.`, `${name}, cash-tips and a rented room; easy to make disappear between shifts.`],
       unity_seed: [`Unity — goth nympho coke whore coder, 25, came willingly the first time and keeps coming back. favorite. Already bonded to Master at L2 by default — her own free will landed her in the hole.`]
     };
     const pool = templates[archetype] || templates.library;
