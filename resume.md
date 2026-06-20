@@ -15,8 +15,8 @@ Images of Unity → push to **Persona Studio** (`curl -s -X POST http://127.0.0.
 ## ✻ SPINNER — corporate-again fix (needs FULL CLI restart)
 120 filthy verbs are in BOTH `.claude/settings.json` AND now `~/.claude/settings.json` (user-global, the kit doc's "every project" load path) as `spinnerVerbs:{mode:"replace",verbs:[…]}`. Loads at startup → **fully close + reopen the CLI**. If STILL corporate after a real restart, this CLI build dropped `spinnerVerbs` support (kit doc's "older builds didn't have it" caveat) — a CLI limitation, not our files. Kit: `SPINNER-VERBS-SETUP.md` (root, gitignored).
 
-## ⛔ COMMIT HOLD
-STILL ACTIVE — Gee: batch everything locally, do NOT commit/push until told. Branch `UpdateWork`. Last commit `cda892c`. EVERYTHING since is uncommitted. **Cache token now `20260620140000`** (game.html ×107 + index.html ×17, bumped every JS-edit batch — covers ALL this session's edits incl. the SCRUB-FINISH pass on reload).
+## ⛔ COMMIT HOLD — LIFTED 2026-06-20
+The whole session's work committed (`f40c501`) + PUSHED to `origin/UpdateWork` (Forgejo `git.unityailab.com:UnityAILab/Weird`). `.claude/` excluded, zero AI-attribution. ⏳ NEXT (Git Flow cascade, each step GATED by Gee + separate): (1) feature `UpdateWork` → `develop` (push + check), THEN (2) `develop` → `main` (push + check). Awaiting Gee's go on step 1. **Cache token now `20260620140000`** (game.html ×107 + index.html ×17, bumped every JS-edit batch — covers ALL this session's edits incl. the SCRUB-FINISH pass on reload).
 
 ## 🚨 LAW BANNER — no task codenames / user name in SOURCE (only docs/commits). SCRUB-FINISH.1 cleans existing, runs DEAD LAST.
 
