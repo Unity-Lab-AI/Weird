@@ -1080,6 +1080,6 @@ All 25 hand-crafted first-day bugs are DONE + committed local (11 atomic commits
 - [x] AUTOLOGISTICS.1 / STATGATE.1 / TOOLTIPS-FULL.1 — VERIFIED SHIPPED (box-flip + FINALIZE).
 - [x] MODMATRIX.1 — VERIFIED COMPLETE (matrix full; only drug×cumLoad empty, correct-by-design — no drug fills cum).
 - [x] PREGNANCY birthed "no-op" — DEBUNKED; `resolveFullTerm` already routes newborn → pending-disposal; fixed stale comment only.
-- [ ] **WIKI-CLOSEOUT** — public `wiki.html` sections for financial-underworld/logistics/property (Vault, credit cards+interest, loan sharks, gigs, Auto-Logistics, Bloodland property, suspicion/WANTED). LAW #1 scrub.
-- [ ] **ROADMAP-BOXFLIP** — flip/annotate the stale unchecked milestone boxes for verified-shipped features.
+- [x] ✅ DONE (2026-06-20) — **WIKI-CLOSEOUT** — public `wiki.html` sections for financial-underworld/logistics/property (Vault, credit cards+interest, loan sharks, gigs, Auto-Logistics, Bloodland property, suspicion/WANTED). LAW #1 scrub. — VERIFIED already complete + current in wiki.html (landed in the prior doc-sweep); LAW #1 scan of all public files clean (no Claude/Anthropic/Gee/codenames).
+- [x] ✅ DONE (2026-06-20) — **ROADMAP-BOXFLIP** — flip/annotate the stale unchecked milestone boxes for verified-shipped features. — flipped 278 stale `[ ]→[x]` shipped-feature milestone boxes across Phases 1–21; updated the milestone-box notice to "reconciled"; left only the one genuinely-ongoing P3 expansion line open.
 - GIRLTYPESMORE.1 — P3 enrichment (19 archetypes live), deferrable, not a blocker.

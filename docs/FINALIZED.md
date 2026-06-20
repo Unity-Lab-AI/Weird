@@ -13,6 +13,26 @@
 
 ---
 
+## 2026-06-20 — Session: TODO CLEAROUT — source-comment scrub complete + ROADMAP box-flip + WIKI/CLOSEOUT verify
+
+**Gee verbatim:**
+> *"well u still havent made the fucking task list like ive told you three times now to make of the todo work left to do"* → built the harness task list of the open TODO work (SCRUB-FINISH / WIKI-CLOSEOUT / ROADMAP-BOXFLIP / CLOSEOUT / TOOLTIPS.2 / NAMEEXTREME.1 / TUTORIAL).
+> *"get to work after you do it"* + *"tl:dr get to work we are doing all the todo work so we can do docs again then push"*.
+
+Worked the whole open backlog to clear it for the pre-push doc sweep. Branch `feature/source-comment-scrub`. All `node -c` clean. NOT pushed — held for Gee's cascade.
+
+- [x] **SCRUB-FINISH.1** ✅ (🔴 LAW) — finished the source-comment task-codename scrub across **13 files** (cumtool, toys, lifespan, hunt-view, tick, imaging, newgame, player-wardrobe, loot, room, whore-out, ollama-templates, + state earlier). Removed every task-tag / task-codename / task-number from code comments (comments now describe WHAT the code does, never which task produced it) — incl. a `(KINKDISC)` leak that was rendering in a player-facing `data-tooltip`, and a `#306` task-number in imaging.js. Kept `XTOL_LIMIT` (a real exported const identifier, not a comment codename). Full-tree verification: **0 task-codenames + 0 `#NNN` task-numbers** in any js/css/html shipping file. Comments-only changes, zero behavior change, all node -c clean. Method: manual file-by-file, full-file read before each edit, grep-0 verified. 2 commits (`8e3c650` partial + `797439a` complete).
+- [x] **ROADMAP-BOXFLIP** ✅ — reconciled the stale Phase 1–21 milestone checkboxes against the live (feature-complete) code: bulk-flipped **278** shipped-feature boxes `[ ] → [x]`; rewrote the milestone-box notice from "corrected / don't-trust-the-boxes" to "reconciled — boxes flipped"; left exactly ONE box open (the genuinely-ongoing P3 "more locations/templates/rarity" expansion line under Phase 18). `docs/ROADMAP.md`
+- [x] **WIKI-CLOSEOUT** ✅ — VERIFIED already complete + current. `wiki.html` carries full sections for 💰 Money/Vault/Underworld (vault+pocket model, credit cards w/ ~3%/day compounding interest, 3 loan sharks, The Hustle shady gigs incl. crew + kidnap job, in-character broke wording), 🏬 Stores & Property (hub + inventory-first economy + 🏚️ Bloodland Holdings dungeons/turf/buy-out perks), Transport & Logistics, Supplies + 🚚 Auto-Logistics, and the WANTED + dirty-cop-payroll heat sections. LAW #1 scan across ALL public files (README / SETUP-README / wiki / index / game / doc / policies / css) clean — no Claude/Anthropic/Gee/task-codenames. Landed in the prior doc-sweep; the open TODO entry was stale.
+- [x] **CLOSEOUT.1** ✅ (🔴) — final review + doc sweep: entire `js/` tree `node -c` clean; cache-bust token confirmed live (`20260620170000`, 107 refs in game.html); ARCHITECTURE + ROADMAP attemptCapture-removed (audit session); SKILL_TREE verified free of stale `attemptCapture`/deprecation refs; FINALIZED (this entry) + TODO statuses synced. Docs are current-to-code, ready for the cascade. Browser click-test of the High audit fixes (room leak + dead-capture) still wants a live in-browser pass (headless can't poke DOM).
+- [x] **TOOLTIPS.2** ✅ (standing DoD) — satisfied this cycle: no new player-facing actions/stats/buttons added (work was code-cleanup), so nothing new needs tooltips; re-surfaces when new content lands.
+- [x] **NAMEEXTREME.1** ✅ (standing DoD) — satisfied this cycle: no new player-facing names/things/activities added; re-surfaces when new content lands.
+- ⏸️ **TUTORIAL.1** — DEFERRED by Gee until he explicitly says go. Untouched.
+
+**Files touched:** `js/` (13 scrubbed) + `docs/ROADMAP.md` + `docs/TODO.md` + `docs/FINALIZED.md`. All node -c clean. Local on `feature/source-comment-scrub`; not pushed.
+
+---
+
 ## 2026-06-20 — Session: /super-review CODE AUDIT — dead code / memory leaks / poor architecture / wrong code sweep + fixes
 
 **Gee verbatim:**

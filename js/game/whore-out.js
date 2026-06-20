@@ -859,7 +859,7 @@
     if (window.DMTHNotify) {
       window.DMTHNotify.show(`💦 Gangbang on ${girl0.name}: ${encs.length} john${encs.length === 1 ? '' : 's'} took turns${bukkake ? ` and finished in a bukkake — glazed, dripping, cum-filled (+$${bukkake.pay})` : ''} — $${gross}.`, { type: encs.length ? 'success' : 'info', durationMs: 6500 });
     }
-    // GANGSEL / GANGVOICE — expose the ACTUAL men who took her this session so the room can voice
+    // Expose the ACTUAL men who took her this session so the room can voice
     // the real participants (each named NPC speaks in his own voice) instead of inventing a crowd.
     const npcs = encs.map(e => e.npc).filter(Boolean);
     return { ok: true, count: encs.length, gross, bukkake, npcs };

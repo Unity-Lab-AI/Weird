@@ -59,7 +59,7 @@
   }
 
   // Wear an owned outfit — sets the active clothingId AND copies its descriptor into
-  // startClothing so PLAYER-IN-IMAGES renders him in it.
+  // startClothing so the image pipeline renders him in it.
   function wear(id) {
     const o = BY_ID[id];
     if (!o) return { ok: false, reason: 'unknown outfit' };

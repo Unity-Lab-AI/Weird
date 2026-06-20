@@ -355,7 +355,7 @@
   // beauty bias and slaps a smile on a nude girl unless her emotional state hits FIRST. The detailed
   // FACIAL EXPRESSION token sits mid-prompt and loses; this short, forceful state phrase is injected
   // into the PREFIX (the very front, where the model weighs hardest) so the distress/joy WINS. Only
-  // L8-9 smiles; everything below is visceral distress. Positive-only (POSPROMPT) — affirmative
+  // L8-9 smiles; everything below is visceral distress. Positive-only — affirmative
   // anguish wording, no "not smiling".
   const EMOTION_LEAD_BY_LEVEL = [
     /* L0 */ 'screaming and crying in raw terror, face contorted in anguish, mouth open mid-scream',
@@ -457,7 +457,7 @@
 
   // render the actual john/friend USING her into the scene image, using his PERSISTENT
   // build (FRIEND_APPEARANCE / appearanceFor on john-archetypes) so the same monster shows up the same
-  // every visit. Same secondary-figure framing as the captor (girl stays the MAIN SUBJECT, JOHNFOCUS);
+  // every visit. Same secondary-figure framing as the captor (girl stays the MAIN SUBJECT);
   // all johns/friends are male; no genital focus (men crop waist-out, per the image rule). Used by the
   // whore-out / gangbang auto-image pop-ups, which pass the man via options.npc.
   function npcInFrameTokens(npc) {
@@ -513,7 +513,7 @@
     // step per stage, scaling by decayedMinutes. Vocabulary graded from LIGHT (fresh/cooling/rigor)
     // up through GROTESQUE rot to SKELETON, using words like flesh / meat / grotesque / organs .
     // The heavy organs/viscera register lands on the high-decay putrefaction stage (masochist-tier
-    // corpse use, #306). Positive-only (no "no X").
+    // corpse use). Positive-only (no "no X").
     // STAGES 0-2 GO HARD ON "SLEEPING"  — the image model renders a
     // believable FRESH corpse far better as a deeply-asleep girl than a hard "deceased body", so the
     // early stages lead with sound-asleep + only subtle death cues, and stay recognizably her.
@@ -1567,7 +1567,7 @@ Write the Pollinations prompt now.`;
                                                : 'room-high-bond';
     //  / forward the man using her (npc) + player-in-frame toggles so a
     // whore-out / gangbang regen renders her WITH the actual monster, not solo. withPlayer/pov default
-    // to the player's SCENETOGGLES setting ("{playername} in shot" / "POV") unless a caller overrides.
+    // to the player's scene-toggle setting ("{playername} in shot" / "POV") unless a caller overrides.
     const tog = (window.DMTHGame.state && window.DMTHGame.state.getSceneToggles) ? window.DMTHGame.state.getSceneToggles() : {};
     const result = await generateFor(girlId, {
       situation: bondTier, forceRegenerate: false,

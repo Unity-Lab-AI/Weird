@@ -402,7 +402,7 @@
 
   //  (lose-rations) — a defiant LOW-BOND fighter/refuser sometimes hurls + smashes her
   // rations in a rage; the food she throws is DESTROYED and the player LOSES it. This is the
-  // matching mechanic to the FIGHTLIMBS imaging (her arm whipping a thrown object). It only ever
+  // matching mechanic to the fighter-resistance imaging (her arm whipping a thrown object). It only ever
   // decrements her food STOCK (the thrown rations) — it does NOT touch the feeding MECHANISM
   // (decayConsumables, auto-feeder gating, watering all keep working; she just lost what she
   // threw). Gated: fighter/cusser/bargainer affect + bond <= 2; chance scales with her escape
