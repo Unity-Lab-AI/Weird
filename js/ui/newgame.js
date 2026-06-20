@@ -5,7 +5,7 @@
 
   // dropdown option sets for the new-game character creator. These feed the
   // player's avatar (state.playerCharacter), which gets woven into the images he appears in with
-  // the girls (PLAYER-IN-IMAGES) + dressed by his clothing store (PLAYER-CLOTHING-STORE).
+  // the girls + dressed by his in-game clothing store.
   // STANDING RULE : character-creator selections are DROPDOWNS with a full
   // menagerie / complete range — ALL the ages, a whole zoo of builds, broad hair + race sets.
   // Applies to every player-attribute selection built going forward (clothing store etc.).

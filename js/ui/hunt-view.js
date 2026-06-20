@@ -137,7 +137,7 @@
 
     // Encounter-scoped state — survives re-renders, resets on navigate-away.
     let desperationTier = 0;
-    const selected = new Set();   // CAPSTACK loadout — tool ids stacked for the next grab
+    const selected = new Set();   // loadout — tool ids stacked for the next grab
     const attemptHistory = [];    // [{toolIds, roll, chance}]
     let lastReq = null;           // last ask-for-an-item outcome, persisted across re-renders
 
@@ -147,7 +147,7 @@
       for (const id of [...selected]) { if (!tools.find(t => t.id === id)) selected.delete(id); }
 
       const suspicionNow = window.DMTHGame.state.current?.wallet?.suspicionByLocation?.[locId] || 0;
-      // CAPNOHOLD — no empty hold anywhere = no snatch. The button locks with a notice.
+      // No empty hold anywhere = no snatch. The button locks with a notice.
       const openHoldsList = window.DMTHGame.hunt.openHolds ? window.DMTHGame.hunt.openHolds() : [];
       const noHold = openHoldsList.length === 0;
       const despBonus = cap.desperationBonus(desperationTier);
@@ -186,7 +186,7 @@
       // stat-rolled odds shown per option, once per game-day per girl-type per location.
       const reqInfo = (window.DMTHGame.loot && window.DMTHGame.loot.requestOptions)
         ? window.DMTHGame.loot.requestOptions(girl, locId) : { usedToday: false, options: [] };
-      // ASKRESULT — the outcome of the last ask STICKS on the panel (it used to flash for a
+      // The outcome of the last ask STICKS on the panel (it used to flash for a
       // second then get wiped by the re-render that locks the panel, so the player saw nothing).
       let lastReqHtml = '';
       if (lastReq) {
@@ -267,7 +267,7 @@
       };
       el.querySelector('[data-action="walk"]').onclick = () => window.DMTHRouter.go('hunt');
 
-      // ASKRESULT — ask-for-an-item handlers. Roll the chosen option, STORE the outcome, then
+      // Ask-for-an-item handlers. Roll the chosen option, STORE the outcome, then
       // re-render. The stored outcome renders persistently (lastReqHtml) so it survives the panel
       // lock instead of flashing for a second and getting wiped.
       el.querySelectorAll('.req-item-btn').forEach(btn => {
@@ -325,7 +325,7 @@
             injectInto: resultEl.querySelector('#acquire-narr')
           });
           if (result.outcome === 'success') {
-            // HOLDPICK — more than one empty cell means the player chooses where she wakes up.
+            // More than one empty cell means the player chooses where she wakes up.
             // Exactly one open hold already auto-placed her (result.escort) — go straight to transition.
             if (result.needsHoldPick && !result.escort) {
               renderHoldPicker(resultEl, girl, locId, result.openHolds || [], toolIds);
@@ -337,7 +337,7 @@
         }
 
         if (result.outcome === 'no-hold') {
-          // CAPNOHOLD — nowhere to put her; no gear was spent. Tell the player to get a hold/dungeon.
+          // Nowhere to put her; no gear was spent. Tell the player to get a hold/dungeon.
           resultEl.innerHTML = `<div class="panel"><h3>🔒 Nowhere to put her</h3><p class="small danger">Every hold is full — you can't drag anyone home until you free up or build a cell.</p><div class="btn-row"><a href="#dungeon" class="btn-small">🏚️ Manage dungeons →</a></div></div>`;
           setTimeout(rerender, 700);
           return;
@@ -477,7 +477,7 @@
     }
   }
 
-  // HOLDPICK — after a grab when >1 cell is empty, ask the player which dungeon/hold she lands in.
+  // After a grab when >1 cell is empty, ask the player which dungeon/hold she lands in.
   // On pick, escort her there, then run the same arrival transition the single-hold path uses.
   function renderHoldPicker(resultEl, girl, locId, holds, toolIds) {
     const wrap = document.createElement('div');

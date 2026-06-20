@@ -52,7 +52,7 @@
   function label(id) { return ITEM_LABEL[id] || String(id).replace(/-/g, ' '); }
   function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
   // All loot GAINS get a click-away popup (no close button). Prefer the popup; fall back to a
-  // toast if it isn't loaded. (Passive ambient trickle — ARCHGIFT — stays a quiet toast on purpose.)
+  // toast if it isn't loaded. (Passive ambient per-archetype trickle — stays a quiet toast on purpose.)
   function lootPop(msg) {
     if (window.DMTHLootPopup) window.DMTHLootPopup.show(msg);
     else if (window.DMTHNotify) window.DMTHNotify.show(msg, { type: 'success', durationMs: 5000 });
@@ -143,7 +143,7 @@
   }
   // NOTE: there is intentionally NO corpse-loot function. A girl is only lootable
   // ON CAPTURE (grantCaptureHaul) — you can't loot an already-captured girl by killing her. The
-  // "corpsing = best loot" tier lives in grantNpcGift below (the friend's KILLWIN gift on a kill),
+  // "corpsing = best loot" tier lives in grantNpcGift below (the friend's kill-reward gift on a kill),
   // which is the friend rewarding you, NOT stripping her body.
 
   // Loot dropped on a SUCCESSFUL capture — location-aware. ~40% find something; 1-in-4 of

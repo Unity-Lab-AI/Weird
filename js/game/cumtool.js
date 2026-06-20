@@ -100,7 +100,7 @@
     }
   }
 
-  // ── TEMPORARY cum-load-MAX bonus (CUMMOD-MAX) ──────────────────────────────
+  // ── TEMPORARY cum-load-MAX bonus ──────────────────────────────
   // A modifier that does NOT actually produce cum (the Relentless Fucking Machine, a plug left in,
   // any cum-load-modifier toy) must NOT raise her CURRENT load — it raises her cum-load MAX for the
   // next few days. Stored as { bonus, untilMin } on body.cumCapTemp; expires lazily (no tick needed).
