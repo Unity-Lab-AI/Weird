@@ -2,7 +2,7 @@
 
 **Generated:** 2026-04-21 · **Last revised:** 2026-06-20 (first-day-bugs session: escape governor, voice/config fixes, image identity-lock, 3 new archetypes — full doc sweep current-to-stack)
 **Project root:** `C:\Users\gfour\Desktop\weird v2\`
-**Current state:** Live, feature-complete build. All Phase 21 milestones + PRE.* epics shipped, PLUS the 2026-06-18 mega-build (progression/DEPRAVITY spine, depravity + economy systems, death dossier, toys/implements, hold/dungeon supply pool, john variety, transport, balance pass). Entire `js/` tree passes `node -c`. The authoritative current module map + state shape lives in **[`## New Systems & Modules (2026-06-18 build)`](#new-systems--modules-2026-06-18-build)** below; per-session detail in `docs/FINALIZED.md` + `docs/resume.md`; full player-facing reference in `../wiki.html` + `../README.md`.
+**Current state:** Live, feature-complete + deployed build. All Phase 21 milestones + PRE.* epics shipped, PLUS the 2026-06-18 mega-build (progression/DEPRAVITY spine, depravity + economy systems, death dossier, toys/implements, hold/dungeon supply pool, john variety, transport, balance pass), PLUS the 2026-06-19/20 financial-underworld mega-session (vault/credit/loan-sharks/gigs/dirty-cop-payroll, NPC actions, stores hub + Bloodland property store, escape popup, balance audit, TIP-FILTH), PLUS the 2026-06-20 first-day-bugs session (escape governor, voice/config fixes, image identity-lock, 3 new archetypes — see the SHIPPED MODULE MAP below). Entire `js/` tree passes `node -c`; cache-bust token `20260620160000`. The authoritative current module map lives in **[`### ACTUAL SHIPPED MODULE MAP (2026-06-20)`](#actual-shipped-module-map-2026-06-20)** below; per-session detail in `docs/FINALIZED.md` + `docs/resume.md`; full player-facing reference in `../wiki.html` + `../README.md`.
 
 > **Note on the older sections below:** the early "server/*.mjs" directory tree + the Node-backend "Technical Debt"/"Recommendations" notes are the original 2026-04 design sketch. The shipped reality is a **pure static vanilla-JS client** — every "server" responsibility is a `js/game/*.js` IIFE module on `window.DMTHGame.*`. The current module map below supersedes them.
 
@@ -1014,7 +1014,7 @@ Engine lives in `js/game/capture.js` exposing `DMTHGame.capture` with:
 
 Per-tool stage profile lives on each capture tool in `js/assets/catalog.js` as `captureStages: { approach, engage, subdue, secure }` (0-50 per stage).
 
-Per-archetype stage resistance lives in `js/game/hunt.js` as `ARCHETYPE_CAPTURE_RESISTANCE` const, exposed on `DMTHGame.hunt`. 11 archetypes mapped.
+Per-archetype stage resistance lives in `js/game/hunt.js` as `ARCHETYPE_CAPTURE_RESISTANCE` const, exposed on `DMTHGame.hunt`. The core archetypes are explicitly mapped; additional girl-types (flight-attendant, goth, bartender, schoolgirl, cheerleader, teacher, police, maid, stripper, college-student, family-relation types) resolve against comparable per-stage resistance via the difficulty fallback.
 
 UI lives in `js/ui/hunt-view.js` `renderApproach`. Per-stage tool dropdown filtered by `eligibleToolsForStage`, "Begin Attempt" button triggers `runAttempt`, 4 stacked progress bars animate sequentially via `animateProgressBar` (~600ms each). Cleared bars go green; failed gray. Per-stage summary + consequences inline. CSS classes in `css/game.css`: `.capture-stage-grid`, `.capture-stage-row`, `.capture-progress-row`, `.capture-progress-bar`, `.cleared`, `.failed`.
 

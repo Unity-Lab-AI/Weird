@@ -130,7 +130,7 @@ There is no win state. The game is the ever-growing collection and the ever-upgr
 
 ---
 
-## Latest build — major systems (2026-06-18)
+## Major build — DEPRAVITY spine + systems (2026-06-18)
 
 The sections below this one document the original feature set in depth. The 2026-06-18 mega-build layered a full progression spine + depravity/economy/logistics systems on top. Each is covered fully in the [Game Wiki](./wiki.html); here's the map:
 

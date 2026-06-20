@@ -30,7 +30,7 @@ Capability matrix for the weird build. Organized by domain, complexity, dependen
 - **Loot + passive archetype gifts**; **balance pass** (escape pacing + drain/curve audit)
 - **Module extraction** — `window.DMTHRoomPanels` (room/panels.js); migration backfill for all new persisted shapes
 
-### Game Systems (2026-06-19/20 mega-session — all shipped LOCAL + `node -c` validated; commit hold active)
+### Game Systems (2026-06-19/20 mega-session — all shipped + `node -c` validated; cascaded to main + LIVE)
 - **Financial underworld** — Vault/pocket money model + usable credit cards (growing limit + compounding interest) + 3 loan sharks + queueable shady gigs (earn/steal/break-in/kidnap, crew-scaled) + dirty-cop payroll heat-management + multi-option pay button + sex-aware broke wording
 - **NPC action expansion** — `chooseNpcAction`: johns/friends perform nearly the full player action range, gated by archetype intensity (johns, incl. tame care) + creep (friends → extreme/snuff/torture), applied `byJohn`
 - **Stores overhaul (destructive)** — single 🏬 Stores hub; wardrobe deduped apply-only; NEW 🏚️ Bloodland Holdings property store (dungeons + turf); facilities buy-to-inventory → install-from-dungeon

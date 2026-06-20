@@ -30,13 +30,13 @@ The whole session's work is LIVE on Forgejo (`git.unityailab.com:UnityAILab/Weir
 - `UpdateWork` (feature) `06995e0` → pushed.
 - `develop` `e8c8ba8` → merged + pushed + verified (tree-identical to UpdateWork).
 - `main` `35f7063` → **ALPHA RELEASE** merged + pushed + verified (main == origin/main, develop is ancestor, tree-identical, all modules present).
-**Cache token `20260620140000`** (game.html ×107 + index.html ×17 — covers all this session's edits incl. SCRUB-FINISH). No commit hold anymore. NO-BATCH + NO-GITHUB rules stand (Forgejo only). TUTORIAL.1 still deferred.
+**Cache-bust token `20260620160000`** (game.html ×107 + index.html ×17 — bumped 2026-06-20 so the first-day-bug js edits actually re-fetch on redeploy instead of serving cached old code). No commit hold. NO-BATCH + NO-GITHUB rules stand (Forgejo only). TUTORIAL.1 still deferred.
 
 ## 🚨 LAW BANNER — no task codenames / user name in SOURCE (only docs/commits). SCRUB-FINISH.1 cleans existing, runs DEAD LAST.
 
 ---
 
-## 🏁 ALL 13 SESSION TASKS COMPLETE — every box checked (#1–#13). docs/TODO.md mirrors it w/ verbatim Gee quotes + SHIPPED notes. Nothing open in the live tasklist; commit hold still ACTIVE.
+## 🏁 ALL 13 SESSION TASKS COMPLETE — every box checked (#1–#13). docs/TODO.md mirrors it w/ verbatim Gee quotes + SHIPPED notes. Nothing open in that tasklist; all cascaded to main + LIVE (commit hold lifted — superseded by the LATEST block at top).
 
 ## 📋 LIVE TASKLIST = SOURCE OF TRUTH (this session, #1–#13). docs/TODO.md mirrors it w/ verbatim Gee quotes + SHIPPED notes.
 
@@ -85,7 +85,7 @@ Full code-vs-TODO audit (no subagents, all manual grep/read). Most of the "backl
 > 🏁 BOARD: build + scrub + HEADLINE docs done (#1-27, #29; #30 headline-docs done). ⛔ RULES (Gee 2026-06-20): **NO-BATCH-WORK** — edits by hand, not bulk sed. **NO GITHUB** — Forgejo @ git.unityailab.com is the ONLY git host; never reference the old host (it's stale in docs — scrub it during the deferred sweep). REMAINING:
 > - ✅ **FULL DOC SWEEP DONE (2026-06-20)** — README.md got the 2026-06-19/20 systems block; index.html About got a "Bankroll the operation" loop bullet; ALL active/public stale OLD-git-host refs scrubbed → "static host"/"hosting platform" (index.html ×9 legal+about, doc.html comment, SETUP-README deploy guide, ARCHITECTURE ×5 deploy notes, ROADMAP ×3 planning text) — remaining github refs are ONLY Gee verbatim quotes (LAW#0) + the FINALIZED archive recording the real github→Forgejo migration (LAW#1 carve-out) + dated history; supertodo.md got a reconciliation banner (its 51 boxes = shipped EPICS, authoritative status in TODO/FINALIZED). NO-GITHUB: Forgejo @ git.unityailab.com is the ONLY host.
 > - 🔴 **Gee's FINAL BROWSER TEST** of `game.html` (destructive STORES-HUB + property store + facility install + escape popup) — **his test = ship = ALPHA RELEASE**.
-> - Atomic docs+code push only when Gee says go (commit hold ACTIVE); re-verify scrub first if a test-fix touched code. TUTORIAL.1 still deferred.
+> - ✅ Cascaded to main + LIVE (commit hold lifted; the browser-test gate passed). TUTORIAL.1 still deferred.
 - ⏸️ DEFERRED (don't start): **TUTORIAL.1** (Gee says go), **ESCAPE-GAME.1** (minigame style pending Gee's pick).
 - STANDING (not closeable — DoD reminders): **TOOLTIPS.2, NAMEEXTREME.1**. Ignore **TXX.Y** (it's a fenced template example, not a task).
 

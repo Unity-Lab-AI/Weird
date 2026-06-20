@@ -78,9 +78,13 @@ Layered on top of the completed Phase 1–21 base. All shipped + `node -c` valid
 
 ---
 
-## 2026-06-19/20 Mega-Session — financial underworld + NPC actions + stores overhaul + balance audit + escape popup + TIP-FILTH (✅ shipped, LOCAL — commit hold active)
+## 2026-06-19/20 Mega-Session — financial underworld + NPC actions + stores overhaul + balance audit + escape popup + TIP-FILTH (✅ shipped + cascaded to main — ALPHA RELEASE, LIVE)
 
-Layered on the 2026-06-18 base. All `node -c` validated; batched LOCAL under a commit hold (branch `UpdateWork`, last commit `cda892c`) — NOT pushed. Full detail in `FINALIZED.md` (2026-06-19 entry) + `resume.md`. ⚠️ Player-facing `../wiki.html` still needs the CLOSEOUT update for these systems.
+Layered on the 2026-06-18 base. All `node -c` validated; cascaded `UpdateWork → develop → main` (ALPHA RELEASE) + pre-alpha LIVE deploy. Full detail in `FINALIZED.md` (2026-06-19 entry) + `resume.md`. Player-facing `../wiki.html` CLOSEOUT for these systems is DONE (2026-06-20 doc sweep).
+
+## 2026-06-20 Session — first-day bugs (25, all 7 waves) + 3 new archetypes + full doc sweep (✅ shipped + cascaded to main, LIVE)
+
+All 25 hand-crafted first-day bugs from `docs/Bugs First day.md` fixed across 7 waves — onboarding chrome gate · escape governor (no-first-days/weekly-cooldown/global-cap/sandbox-immune/10× grace/Calm-her lever) · voice+kokoro (settings-apply, keep-warm, hard-disable) · dialogue (happy-loud high-Stockholm, no cut-off sentences) · nav/stores/ui · hunt type+location ask range · image artifacts+identity-lock — PLUS 3 new fully-wired archetypes (flight-attendant / goth / bartender) and a full documentation sweep bringing every doc/html/page current-to-stack. Cache-bust token bumped to `20260620160000`. Full per-item archive in `FINALIZED.md` (2026-06-20 entry).
 
 - **Financial underworld** — 🗄️ Vault (money model: `wallet.money`=vault + `wallet.pocket`=carried), 💳 usable credit cards (limit grows w/ use + payoff, 3%/day compounding interest), 🦈 loan sharks (`loanshark.js`), 🃏 queueable shady gigs that pass time + earn/steal/break-in + kidnap (`gigs.js`), 🚨 dirty-cop payroll heat-management, suspicious-buy micro-WANTED, multi-option pay button (pocket / run-home-to-vault / charge-it), sex-aware broke wording, gig crew (trained girls scale the job).
 - **NPC actions** — johns/friends do nearly the player's full action range via `chooseNpcAction` (johns by intensity incl. tame care; friends by creep → extreme/snuff/torture).
