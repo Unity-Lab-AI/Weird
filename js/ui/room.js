@@ -187,7 +187,7 @@
       <div class="grid-2">
 
         <section class="panel">
-          <h2>${girl.mood.moodEmoji} ${escapeHtml(girl.captiveName || girl.name)} <button id="rename-girl" class="btn-small" data-tooltip="Rename her — she's no longer her own person; she answers only to what you call her." style="font-size:0.7rem;padding:1px 6px;vertical-align:middle;">✏️</button> <span class="muted small">(${girl.archetypeTemplate}, ${girl.age}${girl.captiveName && girl.captiveName !== girl.name ? `, was ${escapeHtml(girl.name)}` : ''})</span></h2>
+          <h2>${girl.mood.moodEmoji} ${escapeHtml(girl.captiveName || girl.name)} <button id="rename-girl" class="btn-small" data-tooltip="Rename her — she's no longer her own person; she answers only to what you call her." style="font-size:0.7rem;padding:1px 6px;vertical-align:middle;">✏️</button> <span class="muted small">(${window.DMTHGame.girlGen.archetypeLabel(girl.archetypeTemplate)}, ${girl.age}${girl.captiveName && girl.captiveName !== girl.name ? `, was ${escapeHtml(girl.name)}` : ''})</span></h2>
           <p class="small muted">${girl.backstoryFragment}</p>
           <p class="small">📍 ${dungeonTpl?.displayName || 'Unknown'} · hold ${(girl.assignedHoldIdx ?? 0) + 1}</p>
           <div class="room-profile-img" id="profile-img-slot">
@@ -640,7 +640,7 @@
               <p class="small muted">Team up any captives held in THIS dungeon — pull up to ${MAX_SCENE_PARTNERS} more into ${escapeHtml(host.name)}'s room for a true multi-speaker scene. Every girl present answers in her OWN voice, in turn. Pick who an action targets below. They go back to their own holds when you send them back.${elsewhere ? ` <span class="muted">(${elsewhere} more captive${elsewhere === 1 ? '' : 's'} held in other dungeons — 🚚 transfer one here to add her.)</span>` : ''}</p>
               ${sceneGirls.length ? `
                 <div class="stat-row"><span>In the scene</span><b>${escapeHtml(host.name)} <span class="muted small">(host)</span>${sceneGirls.map(p => `, ${p.mood?.moodEmoji || ''} ${escapeHtml(p.name)}`).join('')}</b></div>
-                ${sceneGirls.map(p => `<div class="stat-row small"><span>${p.mood?.moodEmoji || ''} ${escapeHtml(p.name)} <span class="muted">(${escapeHtml(p.archetypeTemplate)})</span></span><button class="btn-small btn-danger" data-scene-remove="${p.id}" data-tooltip="Send ${escapeHtml(p.name)} back to her own hold.">Send back</button></div>`).join('')}
+                ${sceneGirls.map(p => `<div class="stat-row small"><span>${p.mood?.moodEmoji || ''} ${escapeHtml(p.name)} <span class="muted">(${escapeHtml(window.DMTHGame.girlGen.archetypeLabel(p.archetypeTemplate))})</span></span><button class="btn-small btn-danger" data-scene-remove="${p.id}" data-tooltip="Send ${escapeHtml(p.name)} back to her own hold.">Send back</button></div>`).join('')}
                 <div class="stat-row" data-tooltip="Who your next action + typed line targets. 'Everyone present' makes every girl in the room answer in turn (each in her own voice). Pick one name and only she answers — the others just witness and take a share of the scene.">
                   <span>🎯 Acting on</span>
                   <select id="scene-target" class="inline-select">
@@ -653,7 +653,7 @@
                 <div class="stat-row">
                   <select id="scene-pick" class="inline-select">
                     <option value="">— pick a captive to bring in —</option>
-                    ${available.map(p => `<option value="${p.id}">${escapeHtml(p.name)} (${escapeHtml(p.archetypeTemplate)})</option>`).join('')}
+                    ${available.map(p => `<option value="${p.id}">${escapeHtml(p.name)} (${escapeHtml(window.DMTHGame.girlGen.archetypeLabel(p.archetypeTemplate))})</option>`).join('')}
                   </select>
                   <button class="btn-small" id="scene-add" data-tooltip="Pull this captive into the scene. She answers in her own voice alongside ${escapeHtml(host.name)}.">👯 Bring her in</button>
                 </div>

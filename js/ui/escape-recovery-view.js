@@ -24,7 +24,7 @@
                 <div class="girl-emoji">${g.mood.moodEmoji}</div>
                 <div class="girl-name">${g.name}</div>
                 <div class="girl-meta">
-                  <span>${g.archetypeTemplate}</span>
+                  <span>${window.DMTHGame.girlGen.archetypeLabel(g.archetypeTemplate)}</span>
                   <span data-tooltip="Stockholm bond level 0-9.">Stockholm Level ${g.bond.bondLevel}</span>
                   <span class="warn">${remainingMin} minutes left</span>
                 </div>

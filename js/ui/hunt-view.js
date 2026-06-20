@@ -48,7 +48,7 @@
               <div class="girl-emoji">${moodEmoji(g)}</div>
               <div class="girl-name">${g.name} <span class="muted small">(${g.age})</span></div>
               <div class="girl-meta">
-                <span>${g.archetypeTemplate}</span>
+                <span>${window.DMTHGame.girlGen.archetypeLabel(g.archetypeTemplate)}</span>
                 <span>type diff ${Math.round(archDiff*100)}%</span>
               </div>
               <div class="small muted">${g.backstoryFragment}</div>
@@ -201,7 +201,7 @@
           <h2>Ask her for something</h2>
           <p class="small muted">Sweet-talk one item out of her before you make your move. What she carries depends on her type — cheap gear comes easy, the good stuff rarely. One ask per girl-type here per day.</p>
           ${reqInfo.usedToday
-            ? `<p class="small warn">You already worked a ${escapeHtml(girl.archetypeTemplate)} here today. Come back tomorrow.</p>`
+            ? `<p class="small warn">You already worked a ${escapeHtml(window.DMTHGame.girlGen.archetypeLabel(girl.archetypeTemplate))} here today. Come back tomorrow.</p>`
             : `<div class="btn-col" style="gap:6px;">
                 ${reqInfo.options.map((o, i) => {
                   const pct = Math.round(o.chance * 100);
@@ -221,7 +221,7 @@
         <div class="panel">
           <h2>Approach: ${moodEmoji(girl)} ${girl.name}</h2>
           <p class="small muted">${girl.backstoryFragment}</p>
-          <div class="stat-row small"><span>Archetype</span><b>${girl.archetypeTemplate}</b></div>
+          <div class="stat-row small"><span>Archetype</span><b>${window.DMTHGame.girlGen.archetypeLabel(girl.archetypeTemplate)}</b></div>
           <div class="stat-row small"><span>Location</span><b>${locName}</b></div>
           <div class="stat-row small"><span>Location suspicion</span><b class="${suspicionNow > 5 ? 'warn' : ''}">${suspicionNow}</b></div>
           <div class="btn-row">

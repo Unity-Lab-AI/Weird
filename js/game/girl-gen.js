@@ -530,12 +530,26 @@
     return (girl && FAMILY_RELATION_ARCHETYPES[girl.archetypeTemplate]) || '';
   }
 
+  // Player-facing label for an archetype id. The raw id is an internal token
+  // (unity_seed / college-student / flight-attendant) and must NEVER show in the UI.
+  // Overrides only for ids that don't clean up on their own; everything else converts
+  // its own id to Title Case with dashes/underscores → spaces.
+  const ARCHETYPE_LABEL_OVERRIDES = {
+    unity_seed: 'Goth Nympho'
+  };
+  function archetypeLabel(id) {
+    if (!id) return 'Unknown';
+    if (ARCHETYPE_LABEL_OVERRIDES[id]) return ARCHETYPE_LABEL_OVERRIDES[id];
+    return String(id).replace(/[-_]+/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+  }
+
   window.DMTHGame = window.DMTHGame || {};
   window.DMTHGame.girlGen = Object.freeze({
     generate,
     ARCHETYPE_POOLS,
     FAMILY_RELATION_ARCHETYPES,
     isFamilyRelation,
-    relationLabel
+    relationLabel,
+    archetypeLabel
   });
 })();

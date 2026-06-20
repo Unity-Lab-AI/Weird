@@ -115,9 +115,10 @@
                 const preg = g.pregnancy || {};
                 const pregBadge = preg.status === 'pregnant' ? ' 🤰' : '';
                 const stock = (g.bond?.bondLevel || 0) + 1;
-                return `<a class="cap-tile" href="#room?girl=${g.id}" data-tooltip="Enter ${g.name}'s hold — ${g.archetypeTemplate}, Stockholm ${stock}/10, ${hp}/${maxH} Health.">
+                const archLabel = window.DMTHGame.girlGen.archetypeLabel(g.archetypeTemplate);
+                return `<a class="cap-tile" href="#room?girl=${g.id}" data-tooltip="Enter ${g.name}'s hold — ${archLabel}, Stockholm ${stock}/10, ${hp}/${maxH} Health.">
                   <div class="cap-tile-name">${g.mood.moodEmoji} ${g.name}${pregBadge}</div>
-                  <div class="cap-tile-meta"><span>⛓ Stockholm ${stock}/10</span><span>${g.archetypeTemplate}</span><span>❤️ Health ${hp}/${maxH}</span></div>
+                  <div class="cap-tile-meta"><span>⛓ Stockholm ${stock}/10</span><span>${archLabel}</span><span>❤️ Health ${hp}/${maxH}</span></div>
                   <div class="bar"><div class="bar-fill ${hp < maxH * 0.3 ? 'danger' : ''}" style="width:${hpPct}%"></div></div>
                 </a>`;
               }).join('')}</div>`
