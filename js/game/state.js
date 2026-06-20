@@ -283,7 +283,7 @@
       );
       if (nameLooksLikeArchetype) {
         const fixed = NAME_FALLBACKS[arch] || ARCHETYPE_NAME_POOL_HEAD[arch] || 'Captive';
-        console.info(`[state-migrate] repaired ${g.id} name "${g.name}" → "${fixed}"`);
+        console.debug(`[state-migrate] repaired ${g.id} name "${g.name}" → "${fixed}"`);
         g.name = fixed;
       }
       // Backfill body fields the renderer assumes exist on every captive. Old saves
@@ -369,7 +369,9 @@
   }
 
   function initNew(opts = {}) {
-    state = JSON.parse(JSON.stringify(DEFAULT_STATE));
+    // Deep clone the default so a new game never aliases the shared DEFAULT_STATE object.
+    // structuredClone is the correct primitive (DEFAULT_STATE is plain JSON-shaped data).
+    state = structuredClone(DEFAULT_STATE);
     state.createdAt = Date.now();
     state.mode = opts.mode || 'normal';
     if (state.mode === 'sandbox') {
@@ -659,6 +661,10 @@
 
   function deepMerge(target, src) {
     for (const k of Object.keys(src)) {
+      // Prototype-pollution guard — never let a patch key walk up the prototype chain.
+      // updateGirl(id, patch) feeds arbitrary patch objects through here; a save import
+      // carrying __proto__/constructor/prototype keys must not be able to poison Object.
+      if (k === '__proto__' || k === 'constructor' || k === 'prototype') continue;
       const v = src[k];
       if (v !== null && typeof v === 'object' && !Array.isArray(v) && typeof target[k] === 'object' && target[k] !== null) {
         deepMerge(target[k], v);

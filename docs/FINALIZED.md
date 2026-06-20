@@ -13,6 +13,31 @@
 
 ---
 
+## 2026-06-20 — Session: /super-review CODE AUDIT — dead code / memory leaks / poor architecture / wrong code sweep + fixes
+
+**Gee verbatim:**
+> *"okay u kjnow it.. prove it... /super-review what in the code or game css layout or errrors or forgotten code dead code wrong code bad code poor archetecture memory leaks any thing and everything like anything and evetyhing with the code ultrathink"*
+> + *"make the todo write up too"* + *"make the task list of the todo and the clean up before u get into it all"* (paraphrase-corrected: he caught that the harness task list wasn't made — *"well u didnt make the task list like u r suppose to so idk, do it. then work the todo"*).
+
+Ruthless senior-engineer pass over the static `js/` client (~29k LOC) + `css/`. Findings written into `docs/TODO.md` (the `/super-review CODE AUDIT — 2026-06-20` section) + a 10-task harness task list, then worked top-to-bottom. None Critical (local static client — no auth/server/SQL surface). Branch `feature/super-review-code-audit`. All `node -c` clean. NOT pushed — local per the standing commit hold.
+
+- [x] **AUDIT-ROOMLEAK.1** ✅ (High — *"memory leaks"*) — `js/ui/room.js` render returned an INCOMPLETE disposer: it cleared `tranqTicker` + `unsub` but the cumplug `cpTicker` was `const`-scoped inside its `if` block (invisible to the disposer) and the `document` `'dmth:npc-visit'` listener was only swapped on the NEXT room render, never removed on navigate-away — so it pinned the entire prior room render closure alive AND fired image-regen/state mutations for a captive whose room was closed. FIX: hoisted `cpTicker` to render scope; disposer now clears both tickers + removes/nulls `npcVisitHandler`. `js/ui/room.js`
+- [x] **AUDIT-DEADCAPTURE.1** ✅ (High — *"forgotten code dead code"*) — `js/game/hunt.js` `attemptCapture()` was dead (superseded by `capture.runAttempt()`, zero callers repo-wide, still exported on the frozen `DMTHGame.hunt` surface). Deleted the function body + comment block + export line; `previewCaptureOdds` (which it called) is live in hunt-view/escape-recovery and stays. `js/game/hunt.js`
+- [x] **AUDIT-TICKERHANDLE.1** ✅ (Medium — *"wrong code"*) — `js/ui/room.js` tranq + cumplug tickers called `window.DMTHRouter.handle()` UNCONDITIONALLY on completion (force-re-render of an unrelated page if the player navigated away). FIX: guarded both with `if (location.hash.startsWith('#room'))`. `js/ui/room.js`
+- [x] **AUDIT-VIEWLIFECYCLE.1** ✅ (Medium — *"poor archetecture"*) — only `gallery-view.js` used the router's disposer mechanism; no documented contract. FIX: documented the DISPOSER CONTRACT on `DMTHRouter.register`; swept the views — room (now fixed), gallery, and the ollama-repair overlay (removes its own keydown at line 271) are the only ones touching outside-mountEl resources; all correct. `js/ui/router.js`
+- [x] **AUDIT-SILENTCATCH.1** ✅ (Low — *"bad code"*) — `js/ui/router.js:25` `catch {}` swallowed disposer errors silently → `catch (e) { console.debug('[router] view cleanup threw', e); }`. `js/ui/router.js`
+- [x] **AUDIT-PROTOPOLLUTION.1** ✅ (Low/OWASP — *"bad code"*) — `js/game/state.js` `deepMerge` assigned over `Object.keys(src)` with no guard; `updateGirl(id, patch)` is one untrusted save-import from exploitable. FIX: skip `__proto__`/`constructor`/`prototype` keys at loop top. `js/game/state.js`
+- [x] **AUDIT-CLONE.1** ✅ (Nitpick — *"bad code"*) — `js/game/state.js:372` `JSON.parse(JSON.stringify(DEFAULT_STATE))` (lossy clone) → `structuredClone(DEFAULT_STATE)`. `js/game/state.js`
+- [x] **AUDIT-CONSOLELOG.1** ✅ (Low — *"forgotten code"*) — TRIAGED: of the 34 `console.*`, only 1 was a noisy breadcrumb (`console.info` migration log in state.js:286); the other 33 are `warn`/`error`/`debug` legit error-reporting + fallback diagnostics (the audit itself says keep genuine error reporting). FIX: demoted the single migration `console.info` → `console.debug`. `js/game/state.js`
+- [x] **AUDIT-ZINDEX.1** ✅ (Nitpick — *"game css layout"*) — magic z-index (`50` / `99999` / `100`) → a layering scale in `:root` CSS vars (`--z-chrome:50` / `--z-panel:100` / `--z-overlay:1000`) referenced by the chrome bar, settings slide-out, and gallery lightbox. `css/landing.css`, `css/game.css`
+- [x] **AUDIT-LEGACYSPRAWL.1** ✅ (Low — *"dead code"*) — AUDITED, no change warranted. The whore-out cadence rows (low/standard/premium/all-comers) are reachable old-save back-compat: `getWhoreOut()` normalizes a stale `rate` via its `alias` before any UI read, and they're excluded from `CADENCE_ORDER` so the "(legacy)" labels never render to a player. condoms/market/milk/shop `// legacy` branches are the same — scoped, idempotent save-compat. Removing any would BREAK old saves. Conclusion: keep; the existing scoping is correct.
+
+**POSITIVE (stingy):** the router DOES plumb view disposal correctly (router.js:25) — mechanism right, was under-used; IIFE-per-module + `Object.freeze` public APIs = real discipline; `tick.js` ordering explicitly reasoned (comfort-before-escape); `escapeHtml()` wraps names in streamed bubbles (room.js:1202) — XSS-aware.
+
+**Files touched:** `js/ui/room.js`, `js/game/hunt.js`, `js/ui/router.js`, `js/game/state.js`, `css/landing.css`, `css/game.css`. All `node -c` clean. Cache-bust token bump + browser verification pending Gee's word; not pushed (commit hold).
+
+---
+
 ## 2026-06-19 — Session: CORPSE-PERSIST — the corpse stays in service: johns keep coming + friends too (toggle), rots to a skeleton
 
 **Gee verbatim:**

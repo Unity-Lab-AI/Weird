@@ -17,6 +17,11 @@
   --shadow:        0 8px 32px rgba(0,0,0,0.6);
   --mono:          ui-monospace, SFMono-Regular, Menlo, monospace;
   --sans:          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  /* Layering scale — every stacked element references one of these instead of a magic
+     number, so the order is defined in one place and stays sane (no 99999 arms race). */
+  --z-chrome:      50;     /* sticky top chrome bar */
+  --z-panel:       100;    /* slide-out side panels (settings) */
+  --z-overlay:     1000;   /* full-screen overlays / lightboxes / modals */
 }
 
 * { box-sizing: border-box; }
@@ -230,7 +235,7 @@ input:focus, select:focus { outline: none; border-color: var(--accent); }
   padding: 24px;
   overflow-y: auto;
   transition: right 0.25s;
-  z-index: 100;
+  z-index: var(--z-panel);
 }
 body.settings-open .settings-panel { right: 0; }
 .settings-section {
