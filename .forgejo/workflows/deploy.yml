@@ -1,0 +1,56 @@
+name: Deploy to Pages
+
+# DUNGEON MASTER: THE HUNT — pre-alpha auto-deploy.
+# On every push to main, the pure-static site is rsynced to the live subdomain.
+# This is a STATIC repo (vanilla HTML/JS/CSS, no bundler, no build step) — the entry
+# point served to visitors is index.html (landing/setup) which links into game.html.
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build static site
+        run: |
+          # Pure static site — NO build step. Vanilla HTML + JS + CSS, no bundler.
+          # Nothing to compile; the repo IS the deployable site (entry: index.html).
+          echo "Static site — no build step. Deploying repo contents as-is."
+
+      - name: Deploy to subdomain
+        run: |
+          # Hardcoded repo slug (no CI host-context var) — this is the Weird repo.
+          REPO_NAME="weird"
+
+          # ⚠️ CONFIRM THIS PATH against the nginx subdomain mapping before first deploy.
+          # Default below assumes the per-repo subdomain pattern (<repo>.pages.unityailab.com).
+          # Alternatives (swap in if the convention differs):
+          #   DEPLOY_PATH="/var/www/pages/${REPO_NAME}"
+          #   DEPLOY_PATH="/var/www/${REPO_NAME}"
+          DEPLOY_PATH="/var/www/${REPO_NAME}.pages.unityailab.com"
+
+          echo "Deploying $REPO_NAME (static) to $DEPLOY_PATH"
+          mkdir -p "$DEPLOY_PATH"
+
+          # Pure static repo → no ./dist; rsync the repo root itself. Exclude version-control,
+          # CI internals, and internal docs (the live site only needs the HTML/JS/CSS/assets).
+          rsync -av --delete \
+            --exclude='.git' \
+            --exclude='.git/' \
+            --exclude='.forgejo' \
+            --exclude='.gitignore' \
+            --exclude='docs' \
+            --exclude='*.md' \
+            ./ "$DEPLOY_PATH/"
+
+          # Optional: fix ownership/perms for nginx (uncomment if the runner needs it)
+          # chown -R www-data:www-data "$DEPLOY_PATH" || true
+          # chmod -R 755 "$DEPLOY_PATH" || true
+
+          echo "✅ Deployed $REPO_NAME to $DEPLOY_PATH"
