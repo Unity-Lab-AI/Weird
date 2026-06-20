@@ -190,7 +190,7 @@
     {
       id: 'chloroform', displayName: 'Clear Solvent Bottle', emoji: '⚗️',
       category: 'item', subcategory: 'sedation',
-      prompt: 'studio product shot of a small amber glass laboratory bottle with ground-glass stopper, clear liquid inside, plain white backdrop, science-supplies catalog style',
+      prompt: 'studio product shot of a small amber glass laboratory bottle with ground-glass stopper, clear liquid inside, plain dark backdrop, science-supplies catalog style',
       cost: 220, tier: 2,
       captureStages: { approach: 0, engage: 25, subdue: 35, secure: 0 },
       notes: 'Soak the rag, clamp it over her mouth and nose, ride out the thrashing — Engage 25 + a heavy Subdue 35 as she claws your wrist, goes cross-eyed, then limp in your arms. One use. The sweet stink gives you away if you fumble it.'
@@ -198,7 +198,7 @@
     {
       id: 'ether', displayName: 'Anesthetic Solution', emoji: '🧪',
       category: 'item', subcategory: 'sedation',
-      prompt: 'clinical product photograph of a small brown-glass bottle marked with a simple label, stoppered, placed on a white lab bench, professional medical-supply catalog composition',
+      prompt: 'clinical product photograph of a small brown-glass bottle marked with a simple label, stoppered, placed on a dark lab bench, professional medical-supply catalog composition',
       cost: 300, tier: 3,
       captureStages: { approach: 0, engage: 40, subdue: 30, secure: 0 },
       notes: 'A few wet huffs and her legs quit on her — strong Engage 40 + Subdue 30, dropping her boneless before she can scream. One use. Hits fast and hits hard.'
@@ -354,7 +354,7 @@
     {
       id: 'pipe', displayName: 'Lead Pipe', emoji: '🔧',
       category: 'item', subcategory: 'blunt',
-      prompt: 'product photograph of a short length of weathered lead pipe with threaded ends on a plain white background, hardware-salvage catalog style',
+      prompt: 'product photograph of a short length of weathered lead pipe with threaded ends on a plain dark backdrop, hardware-salvage catalog style',
       cost: 15, tier: 0,
       captureStages: { approach: 10, engage: 0, subdue: 25, secure: 0 },
       notes: 'Crack her across the skull from behind — a stealth Approach 10 then a blunt Subdue 25 that drops her twitching to the pavement. Reusable. Cheap, ugly, and it screams "kidnapper" if anyone catches you swinging it.'
@@ -364,7 +364,7 @@
     {
       id: 'duct-tape', displayName: 'Duct Tape', emoji: '📼',
       category: 'item', subcategory: 'restraint',
-      prompt: 'product photograph of a single roll of heavy-duty silver duct tape on a plain white background, professional commerce photography, commercial grade industrial',
+      prompt: 'product photograph of a single roll of heavy-duty silver duct tape on a plain dark backdrop, professional commerce photography, commercial grade industrial',
       cost: 5, tier: 1,
       captureStages: { approach: 0, engage: 0, subdue: 0, secure: 30 },
       notes: 'Wrench her wrists together and slap a strip across her screaming mouth — Secure 30, one roll per grab. Crude, silver, and it shuts the bitch up fast.'
@@ -372,7 +372,7 @@
     {
       id: 'rope', displayName: 'Nylon Rope Coil', emoji: '🪢',
       category: 'item', subcategory: 'restraint',
-      prompt: 'product shot of a coiled length of black nylon rope on a plain white backdrop, commercial hardware catalog style',
+      prompt: 'product shot of a coiled length of black nylon rope on a plain dark backdrop, commercial hardware catalog style',
       cost: 12, tier: 1,
       captureStages: { approach: 0, engage: 5, subdue: 5, secure: 25 },
       notes: 'Hogtie her however you please — Secure 25 with a little Engage/Subdue as the cord cinches into her skin. One use per grab. Bends her into any shape you want.'
@@ -380,7 +380,7 @@
     {
       id: 'zip-ties', displayName: 'Heavy-Duty Zip Ties', emoji: '🔗',
       category: 'item', subcategory: 'restraint',
-      prompt: 'product photograph of a bundle of heavy-duty black plastic zip ties fanned out on a plain white background, commercial hardware catalog style',
+      prompt: 'product photograph of a bundle of heavy-duty black plastic zip ties fanned out on a plain dark backdrop, commercial hardware catalog style',
       cost: 8, tier: 2,
       captureStages: { approach: 0, engage: 0, subdue: 0, secure: 25 },
       notes: 'Cinch them around her wrists till they bite into the skin — Secure 25, one use per grab. She can thrash all she wants; they only ratchet tighter.'
@@ -388,7 +388,7 @@
     {
       id: 'handcuffs', displayName: 'Steel Cuffs', emoji: '🔒',
       category: 'item', subcategory: 'restraint',
-      prompt: 'product photograph of a pair of chrome-plated steel handcuffs on a plain white background, commercial security-equipment catalog style',
+      prompt: 'product photograph of a pair of chrome-plated steel handcuffs on a plain dark backdrop, commercial security-equipment catalog style',
       cost: 45, tier: 3,
       captureStages: { approach: 0, engage: 0, subdue: 0, secure: 40 },
       notes: 'Ratchet cold steel shut around her wrists — a strong Secure 40, snapping closed on her again and again. Reusable.'
@@ -396,7 +396,7 @@
     {
       id: 'shackles', displayName: 'Steel Shackles', emoji: '⛓️',
       category: 'item', subcategory: 'restraint',
-      prompt: 'product photograph of heavy steel leg shackles with a short connecting chain on a plain white backdrop, industrial-security catalog style',
+      prompt: 'product photograph of heavy steel leg shackles with a short connecting chain on a plain dark backdrop, industrial-security catalog style',
       cost: 120, tier: 4,
       captureStages: { approach: 0, engage: 0, subdue: 10, secure: 35 },
       notes: 'Chain her ankles so she can shuffle but never run — Secure 35 + a slight Subdue 10 as the irons bite. Reusable, bolt it into her hold.'
@@ -404,7 +404,7 @@
     {
       id: 'harness', displayName: 'Full Body Harness Rig', emoji: '🧍',
       category: 'item', subcategory: 'restraint',
-      prompt: 'product photograph of a complex black leather body harness with metal rings, displayed on a dress form against a plain studio backdrop, tasteful product catalog composition',
+      prompt: 'product photograph of a complex black leather body harness with metal rings, displayed on a dress form against a dark studio backdrop, tasteful product catalog composition',
       cost: 320, tier: 5,
       captureStages: { approach: 0, engage: 5, subdue: 10, secure: 40 },
       notes: 'Buckle her into a full leather rig with rings at every joint — max Secure 40 + a little Engage/Subdue as the straps cinch her helpless. Reusable; mounts in a deluxe+ hold to hang or splay her any way you like.'
@@ -414,19 +414,19 @@
     {
       id: 'blindfold', displayName: 'Leather Blindfold', emoji: '🕶️',
       category: 'item', subcategory: 'containment',
-      prompt: 'product photograph of a soft black leather blindfold with elastic strap, resting on a plain neutral background, tasteful product-catalog composition',
+      prompt: 'product photograph of a soft black leather blindfold with elastic strap, resting on a plain dark backdrop, tasteful product-catalog composition',
       cost: 25, tier: 1
     },
     {
       id: 'ballgag', displayName: 'Silicone Gag', emoji: '👄',
       category: 'item', subcategory: 'containment',
-      prompt: 'product photograph of a silicone-and-leather mouth gag on a plain neutral backdrop, product-catalog composition',
+      prompt: 'product photograph of a silicone-and-leather mouth gag on a plain dark backdrop, product-catalog composition',
       cost: 40, tier: 2
     },
     {
       id: 'hood', displayName: 'Canvas Hood', emoji: '🎭',
       category: 'item', subcategory: 'containment',
-      prompt: 'product photograph of a plain canvas hood on a neutral backdrop, utilitarian product-catalog composition',
+      prompt: 'product photograph of a plain canvas hood on a dark backdrop, utilitarian product-catalog composition',
       cost: 60, tier: 2
     },
     {
@@ -440,25 +440,25 @@
     {
       id: 'vibrator', displayName: 'Wand Vibrator', emoji: '💫',
       category: 'item', subcategory: 'toys',
-      prompt: 'product photograph of a modern cordless wand massager on a plain white background, commercial personal-care catalog style',
+      prompt: 'product photograph of a modern cordless wand massager on a plain dark backdrop, commercial personal-care catalog style',
       cost: 70, tier: 2
     },
     {
       id: 'dildo', displayName: 'Silicone Sculpture', emoji: '🔵',
       category: 'item', subcategory: 'toys',
-      prompt: 'product photograph of an abstract blue silicone sculpture on a plain neutral backdrop, artful design-product catalog composition',
+      prompt: 'product photograph of an abstract blue silicone sculpture on a plain dark backdrop, artful design-product catalog composition',
       cost: 60, tier: 2
     },
     {
       id: 'plug', displayName: 'Training Plug', emoji: '🟣',
       category: 'item', subcategory: 'toys',
-      prompt: 'product photograph of a smooth purple silicone object on a plain neutral background, adult-product catalog composition',
+      prompt: 'product photograph of a smooth purple silicone object on a plain dark backdrop, adult-product catalog composition',
       cost: 40, tier: 2
     },
     {
       id: 'clamps', displayName: 'Weighted Clamps', emoji: '📎',
       category: 'item', subcategory: 'toys',
-      prompt: 'product photograph of a pair of small metal adjustable clamps connected by a chain with weighted drops, plain neutral backdrop, accessory catalog composition',
+      prompt: 'product photograph of a pair of small metal adjustable clamps connected by a chain with weighted drops, plain dark backdrop, accessory catalog composition',
       cost: 35, tier: 2
     },
 
@@ -472,7 +472,7 @@
     {
       id: 'basic-meal', displayName: 'Microwave Meals (12pk)', emoji: '🍱',
       category: 'item', subcategory: 'food',
-      prompt: 'product photograph of a stack of plain-packaging frozen microwave meals on a grocery-store shelf style backdrop, cheap-generic-brand catalog style',
+      prompt: 'product photograph of a stack of plain-packaging frozen microwave meals on a dim grocery-store shelf, cheap-generic-brand catalog style',
       cost: 18, tier: 1
     },
     {
@@ -505,7 +505,7 @@
     {
       id: 'weed', displayName: 'Shotgun Joints (pack)', emoji: '🌿',
       category: 'item', subcategory: 'drugs',
-      prompt: 'close-up product photograph of hand-rolled herbal cigarettes in a small tin on a plain neutral background, lifestyle-catalog photography',
+      prompt: 'close-up product photograph of hand-rolled herbal cigarettes in a small tin on a plain dark backdrop, lifestyle-catalog photography',
       cost: 15, tier: 1,
       notes: 'Cannabis. Slow onset, 2hr duration. Mellowing.'
     },
@@ -519,14 +519,14 @@
     {
       id: 'mdma', displayName: 'Jaw-Clamp Pills', emoji: '💊',
       category: 'item', subcategory: 'drugs',
-      prompt: 'macro product photograph of a few small colorful pressed pills in a blister pack on a plain white background, pharmacy-catalog style',
+      prompt: 'macro product photograph of a few small colorful pressed pills in a blister pack on a plain dark backdrop, pharmacy-catalog style',
       cost: 60, tier: 3,
       notes: 'Euphoric empathy drug. 30min onset, 4hr duration. Weekend stuff.'
     },
     {
       id: 'acid', displayName: 'Tongue-Pinned Tabs', emoji: '🧪',
       category: 'item', subcategory: 'drugs',
-      prompt: 'macro product photograph of a small square perforated paper tab on a neutral background, harsh studio lighting, scientific-specimen framing',
+      prompt: 'macro product photograph of a small square perforated paper tab on a dark backdrop, harsh studio lighting, scientific-specimen framing',
       cost: 40, tier: 3,
       notes: 'Psychedelic. 45min onset, 10hr duration. Architecture-session material.'
     },
@@ -553,7 +553,7 @@
     {
       id: 'lights-led', displayName: 'Mood LED Strips', emoji: '🔆',
       category: 'item', subcategory: 'dungeon-upgrade',
-      prompt: 'product photograph of coiled color-changing LED light strips in retail packaging on a neutral backdrop, tech-catalog style',
+      prompt: 'product photograph of coiled color-changing LED light strips in retail packaging on a dark backdrop, tech-catalog style',
       cost: 50, tier: 3
     },
     {
@@ -583,7 +583,7 @@
     {
       id: 'bedding-real-bed', displayName: 'Twin Bed Set', emoji: '🛏️',
       category: 'item', subcategory: 'dungeon-upgrade',
-      prompt: 'product photograph of a basic twin bed with metal frame, plain sheets, single pillow, against a plain studio backdrop, furniture-catalog style',
+      prompt: 'product photograph of a basic twin bed with metal frame, plain sheets, single pillow, against a dark studio backdrop, furniture-catalog style',
       cost: 150, tier: 3
     },
 
@@ -591,13 +591,13 @@
     {
       id: 'lube', displayName: 'Lubricant (bulk)', emoji: '💧',
       category: 'item', subcategory: 'consumables',
-      prompt: 'product photograph of a plain-label pump bottle on a neutral backdrop, pharmacy-catalog style composition',
+      prompt: 'product photograph of a plain-label pump bottle on a dark backdrop, pharmacy-catalog style composition',
       cost: 12, tier: 1
     },
     {
       id: 'bandages', displayName: 'First-Aid Pack', emoji: '🩹',
       category: 'item', subcategory: 'consumables',
-      prompt: 'product photograph of a standard first-aid kit box opened to show contents — bandages, gauze, antiseptic — on a plain neutral backdrop, clinical-supply catalog style',
+      prompt: 'product photograph of a standard first-aid kit box opened to show contents — bandages, gauze, antiseptic — on a plain dark backdrop, clinical-supply catalog style',
       cost: 20, tier: 1
     },
 
@@ -605,7 +605,7 @@
     {
       id: 'cover-clothing', displayName: 'Nondescript Jacket', emoji: '🧥',
       category: 'item', subcategory: 'utility',
-      prompt: 'product photograph of a plain dark-gray zip-up hoodie or light jacket on a mannequin against a plain studio backdrop, commercial apparel catalog style',
+      prompt: 'product photograph of a plain dark-gray zip-up hoodie or light jacket on a mannequin against a dark studio backdrop, commercial apparel catalog style',
       cost: 30, tier: 1
     },
     {
@@ -617,7 +617,7 @@
     {
       id: 'burner-phone', displayName: 'Burner Phone', emoji: '📱',
       category: 'item', subcategory: 'utility',
-      prompt: 'product photograph of a basic candybar-style feature phone in plain retail packaging on a plain neutral backdrop, budget-electronics catalog style',
+      prompt: 'product photograph of a basic candybar-style feature phone in plain retail packaging on a plain dark backdrop, budget-electronics catalog style',
       cost: 40, tier: 2
     },
 
@@ -625,7 +625,7 @@
     {
       id: 'hidden-camera', displayName: 'Hidden Cam (pinhole)', emoji: '🎥',
       category: 'item', subcategory: 'tech',
-      prompt: 'macro product photograph of a tiny pinhole surveillance camera module next to a US quarter for scale on a plain studio backdrop, tech-catalog photography',
+      prompt: 'macro product photograph of a tiny pinhole surveillance camera module next to a US quarter for scale on a dark studio backdrop, tech-catalog photography',
       cost: 120, tier: 3
     },
     {
