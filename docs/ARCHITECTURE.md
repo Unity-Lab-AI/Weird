@@ -1,6 +1,6 @@
 # ARCHITECTURE — weird project
 
-**Generated:** 2026-04-21 · **Last revised:** 2026-06-18 (DEPRAVITY-spine mega-build + ship-readiness pass; pushed to branch `UpdateWork`)
+**Generated:** 2026-04-21 · **Last revised:** 2026-06-20 (first-day-bugs session: escape governor, voice/config fixes, image identity-lock, 3 new archetypes — full doc sweep current-to-stack)
 **Project root:** `C:\Users\gfour\Desktop\weird v2\`
 **Current state:** Live, feature-complete build. All Phase 21 milestones + PRE.* epics shipped, PLUS the 2026-06-18 mega-build (progression/DEPRAVITY spine, depravity + economy systems, death dossier, toys/implements, hold/dungeon supply pool, john variety, transport, balance pass). Entire `js/` tree passes `node -c`. The authoritative current module map + state shape lives in **[`## New Systems & Modules (2026-06-18 build)`](#new-systems--modules-2026-06-18-build)** below; per-session detail in `docs/FINALIZED.md` + `docs/resume.md`; full player-facing reference in `../wiki.html` + `../README.md`.
 
@@ -228,6 +228,8 @@ _(Note from 2026-04-21: at that time only `weird.html` and the local workflow to
 **`js/ui/*.js` — views (registered via `DMTHRouter.register(route, render)`):** `room` (the core interaction screen), `dashboard`, `charsheet`, `roster`, `town-view`, `hunt-view`, `dungeon-view`, `dungeon-plot-view`, `upgrade-view`, `dispose-view`, `slave-market-view`, `market-view`, `gallery-view`, `timeline-view`, `trophy-room-view`, `escape-recovery-view`, `propositioner-view`, `gigs-view` ⭐NEW, `ledger-view` (finance: vault/credit/loansharks/pocket), `stores-hub-view` (🏬 Stores hub), `property-view` ⭐NEW (🏚️ Bloodland Holdings — dungeons + turf), `shop-view`, `clothing-store-view`, `player-clothing-store-view`, `wardrobe-view`, `dairy-view`, `gristle-view`, `in-game-settings`, `settings`, `newgame`, `quick-actions`, `notify` (+ action-button + sticky), `tooltips`, `loot-popup`, `voice-queue`, `asset-img`, `router`, `landing`, `age-gate`, `death-dossier-overlay`, `ollama-repair-overlay`, `game-over-view`.
 
 **Systems added in the 2026-06-19/20 mega-session:** the financial underworld (vault/credit/loan-sharks/shady-gigs/dirty-cop-payroll/pocket-vault money model), NPC-action expansion (`chooseNpcAction`), the Stores hub + Bloodland property store + facility buy→install, the escape warning-popup + grace timer + max-WANTED law-issue, DYNGEN procedural location names, disposal labor-time, the unified loot picker, and the TIP-FILTH tooltip depravity sweep. See `docs/FINALIZED.md` 2026-06-19 entry for the full archive.
+
+**Hardened in the 2026-06-20 first-day-bugs session:** the **escape governor** in `tick.runEscapeRoll` (no-first-days / weekly per-girl cooldown / global daily cap / sandbox-immune / 10× grace; `state.escapeGovernor` + per-girl `heldSinceDay`/`cooldownUntilDay`) + a one-click 🫦 Calm-her lever; `config.js` now reads `dmth_kokoro_voice`/`dmth_kokoro_speed`/`dmth_ollama_temp` from settings (maxTokens 256); `kokoro.js` keep-warm heartbeat in a hold + hard `dmth_kokoro_disabled` gate; `ollama.js` length+completion instruction + trailing-fragment trim; `imaging.js` hard face identity-lock (pre-capture↔in-hold) + nugget limb-token suppression + chain-link artifact removed from the starting dungeon; `body.game-active` chrome gate; `storage.save.del`; `loot.buildRequestList` (type+location-tier ask spread); and **3 new archetypes** in `girl-gen` (flight-attendant / goth / bartender, fully wired across pools / spawns / persona / attitude / talk / affect-weights / backstory). See `docs/FINALIZED.md` 2026-06-20 entry.
 
 ---
 
@@ -714,9 +716,13 @@ const CAPTIVE_AFFECTS = {
     bondLevel: -0.5,    // high bond suppresses escape
     hungerOrAbuse: +0.15
   },
-  lastAttempt: null | { timestamp, outcome: "caught" | "almost" | "contained" }
+  pendingEscapeUntil: null | <gameMinutes>,   // grace-timer deadline once the bar maxes (ESCAPE_GRACE_MIN = 1200, ~10x the old)
+  heldSinceDay:       <gameDay>,               // stamped on first eval; no bolt for the first MIN_HELD_DAYS_BEFORE_BOLT (3) days
+  cooldownUntilDay:   <gameDay>,               // weekly per-girl cooldown after any bolt (PER_GIRL_ESCAPE_COOLDOWN_DAYS = 7)
+  lastAttempt: null | { ts, outcome: "caught" | "escaped" }
 }
 ```
+**Escape governor** (`tick.runEscapeRoll`): escapes are a rare, governed event, not a daily one. Sandbox/cheat mode NEVER bolts (she caps at 0.9). A fresh captive can't bolt for her first `MIN_HELD_DAYS_BEFORE_BOLT` (3) game-days; after any attempt she's on a `PER_GIRL_ESCAPE_COOLDOWN_DAYS` (7) cooldown; and a global `GLOBAL_BOLTS_PER_DAY` (1) cap on `state.escapeGovernor {day, boltsToday}` limits how many captives bolt per game-day. When the bar maxes but a rule blocks the bolt she seethes pinned at 0.97. The room's escape-risk bar carries a one-click 🫦 **Calm her down** lever (`love-hold-her` act + explicit −0.3 risk + cancels a pending bolt).
 
 ### RoomState
 ```js
