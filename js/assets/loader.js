@@ -54,30 +54,51 @@
   }
 
   // Resolve an asset's image URL. Returns null if no image could be discovered.
+  // Three-tier fallback chain (full law in docs/ASSET-STYLE-BIBLE.md):
+  //   2. STATIC default set  — committed assets/<plural>/<id>/cover.* (probed first; instant, no net)
+  //   1. DYNAMIC procedural  — asset-gen.js render via Pollinations, opt-in only (fills static gaps)
+  //   3. EMOJI               — caller renders the catalog emoji when this returns null
+  // Static-first (not procedural-first) so a curated cover.png always wins for speed; procedural
+  // only fires for assets with no committed cover, and only when the operator opts in.
   async function resolveImageUrl(category, id) {
     const key = cacheKey(category, id);
     if (resolved.has(key)) {
       const v = resolved.get(key);
       return v === 'MISSING' ? null : v;
     }
-    if (await probesAreDisabled()) {
-      resolved.set(key, 'MISSING');
-      return null;
-    }
-    const folder = window.DMTHAssets.assetFolderPath(category, id);
-    for (const fname of CANDIDATES) {
-      const url = folder + fname;
-      // eslint-disable-next-line no-await-in-loop
-      if (await imgExists(url)) {
-        resolved.set(key, url);
-        return url;
+
+    // TIER 2 — static default set. Gated by the canary kill-switch so a host with no static set
+    // doesn't spam 404s. When disabled, we skip straight to the procedural / emoji tiers.
+    if (!(await probesAreDisabled())) {
+      const folder = window.DMTHAssets.assetFolderPath(category, id);
+      for (const fname of CANDIDATES) {
+        const url = folder + fname;
+        // eslint-disable-next-line no-await-in-loop
+        if (await imgExists(url)) {
+          resolved.set(key, url);
+          return url;
+        }
       }
+      // Also try `${id}.png` / `${id}.jpg` as a convenience (file named after asset id)
+      const idPng = folder + id + '.png';
+      if (await imgExists(idPng)) { resolved.set(key, idPng); return idPng; }
+      const idJpg = folder + id + '.jpg';
+      if (await imgExists(idJpg)) { resolved.set(key, idJpg); return idJpg; }
     }
-    // Also try `${id}.png` / `${id}.jpg` as a convenience (file named after asset id)
-    const idPng = folder + id + '.png';
-    if (await imgExists(idPng)) { resolved.set(key, idPng); return idPng; }
-    const idJpg = folder + id + '.jpg';
-    if (await imgExists(idJpg)) { resolved.set(key, idJpg); return idJpg; }
+
+    // TIER 1 — dynamic / procedural. Opt-in via localStorage.dmth_procedural_assets === 'true'.
+    // Never touches the filesystem (hits Pollinations + IDB cache) so it's NOT gated by the static
+    // canary above. Returns null when off — falls through to the emoji tier so the live default
+    // game is unchanged until the operator opts in.
+    const gen = window.DMTHAssetGen;
+    if (gen && gen.isEnabled && gen.isEnabled()) {
+      try {
+        const url = await gen.generateAssetImage(category, id);
+        if (url) { resolved.set(key, url); return url; }
+      } catch (e) { console.debug('[loader] procedural asset gen failed', category, id, e); }
+    }
+
+    // TIER 3 — emoji fallback.
     resolved.set(key, 'MISSING');
     return null;
   }
