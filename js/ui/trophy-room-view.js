@@ -61,7 +61,7 @@
       <div class="small muted">${escapeHtml(t.girlName || '')} · ${escapeHtml(t.archetype || '')}${t.affect ? ` · ${escapeHtml(t.affect)}` : ''} · ${escapeHtml(t.rarity || 'common')}</div>
       <div class="small" style="margin:4px 0;font-style:italic">"${escapeHtml(t.flavor || '')}"</div>
       <div class="small ok">${escapeHtml(perkText)}</div>
-      <div class="small muted">via ${escapeHtml(t.method || '')} · bond L${t.bondAtEnd || 0} · held ${t.daysHeld || 0}d · ${when}d ago</div>
+      <div class="small muted">via ${escapeHtml(t.method || '')} · bond Level ${t.bondAtEnd || 0} · held ${t.daysHeld || 0} days · ${when} days ago</div>
       ${renderTrophyHistory(t.deathRecord)}
     </div>`;
   }
@@ -83,7 +83,7 @@
       (t.milkProduced > 0) ? hr('🥛 Milk', `${t.milkProduced}L`) : '',
       (t.chatTurns > 0) ? hr('💬 Chat turns', t.chatTurns) : ''
     ].filter(Boolean);
-    // GIRLHIST.2 — her full ACTIVITY TIMELINE (same running log as the live room panel + the
+    // her full ACTIVITY TIMELINE (same running log as the live room panel + the
     // death dossier), so trophy / dossier / live view all share one unified layout.
     let timeline = '';
     const acts = (window.DMTHGame.state.getActivity && rec.girlId) ? window.DMTHGame.state.getActivity(rec.girlId, 60) : [];

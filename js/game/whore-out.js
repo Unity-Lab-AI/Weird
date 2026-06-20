@@ -47,9 +47,13 @@
   const RATE_PARAMS = {
     off:         { cadenceMinutes: Infinity, displayName: 'off' },
     trickle:     { cadenceMinutes: 120,      displayName: '1 john / 120 game min' },
+    // more GRANULAR cadence steps so the player can dial the pace finely.
+    sparse:      { cadenceMinutes: 90,       displayName: '1 john / 90 game min' },
     casual:      { cadenceMinutes: 60,       displayName: '1 john / 60 game min' },
     steady:      { cadenceMinutes: 30,       displayName: '1 john / 30 game min' },
+    brisk:       { cadenceMinutes: 20,       displayName: '1 john / 20 game min' },
     rapid:       { cadenceMinutes: 10,       displayName: '1 john / 10 game min' },
+    relentless:  { cadenceMinutes: 5,        displayName: '1 john / 5 game min (brutal)' },
     // Legacy alias map — old saves with these values fall through to the closest cadence
     low:         { cadenceMinutes: 120, displayName: '1 john / 120 game min (legacy)', alias: 'trickle' },
     standard:    { cadenceMinutes: 30,  displayName: '1 john / 30 game min (legacy)',  alias: 'steady' },
@@ -83,6 +87,63 @@
     return remaining * r.cadenceMinutes / buzzMul;
   }
 
+  // the granular cadence options shown in the whore-out panel (off → relentless),
+  // in escalating order. Legacy aliases stay out of the picker.
+  const CADENCE_ORDER = ['off', 'trickle', 'sparse', 'casual', 'steady', 'brisk', 'rapid', 'relentless'];
+
+  //   — project, in GAME CLOCK TIME, what a given cadence does to THIS girl:
+  // factoring her natural regen + her current upkeep (fed/watered) + active-drug stamina + her
+  // hold's bedding/climate, when does her STAMINA hit 0%, and (only if friends are allowed — johns
+  // alone stop at the stamina floor and can't kill) when does she become a FRESH CORPSE. Returns
+  // absolute "Day N HH:MM" clock strings, not durations. Used to render a per-option timing message.
+  function johnTimingProjection(girl, rateId) {
+    const clock = window.DMTHGame.gameClock;
+    const wo = getWhoreOut(girl);
+    const TICK_MIN = 30;                                   // one tick = 30 game minutes
+    const arrivalsPerTick = expectedArrivalsPerTick(rateId);
+    const stamina = girl.body?.stamina ?? 70;
+    const health = girl.body?.health ?? 100;
+    // Average stamina a john burns per visit (weighted across the live john actions ~ -8).
+    const AVG_JOHN_STAM = 8;
+    // Natural regen — base passive rest (+8/tick) when she's maintained; neglect flips it negative.
+    const fed = clock ? clock.daysSince(girl.body?.lastFedAt) <= 5 : true;
+    const watered = clock ? clock.daysSince(girl.body?.lastWateredAt) <= 3 : true;
+    let regenPerTick = (fed && watered) ? 8 : -3;
+    // Player-added effects: an active stimulant (coke/mdma) keeps her stamina up; a comfy hold
+    // (bedding/climate) rests her better; both extend how long she lasts before bottoming out.
+    if (girl.body?.high > 0) regenPerTick += 6;
+    const dgn = window.DMTHGame.state.getDungeon ? window.DMTHGame.state.getDungeon(girl.assignedDungeonId) : null;
+    const hold = dgn && dgn.holds ? dgn.holds[girl.assignedHoldIdx ?? 0] : null;
+    if (hold && hold.upgrades) regenPerTick += Math.min(4, (hold.upgrades.bedding || 0) + (hold.upgrades.climate || 0));
+    const netStamPerTick = regenPerTick - arrivalsPerTick * AVG_JOHN_STAM;
+    let staminaBottomMin = null;
+    if (netStamPerTick < 0 && stamina > 0) staminaBottomMin = (stamina / -netStamPerTick) * TICK_MIN;
+    // Fresh-corpse ETA only exists when FRIENDS are allowed — johns stop at the stamina floor and
+    // can't kill; a friend rips ~50 HP/visit and arrives at ~15% of the cadence.
+    let corpseMin = null;
+    if (wo.friendsAllowed) {
+      const friendArrivalsPerTick = arrivalsPerTick * 0.15;
+      const AVG_FRIEND_HP = 50;
+      const healthRegenPerTick = 2;
+      const netHpPerTick = healthRegenPerTick - friendArrivalsPerTick * AVG_FRIEND_HP;
+      if (netHpPerTick < 0 && health > 0) corpseMin = (health / -netHpPerTick) * TICK_MIN;
+    }
+    const nowMin = clock ? clock.now() : 0;
+    return {
+      rateId,
+      displayName: (RATE_PARAMS[rateId] || {}).displayName || rateId,
+      stamina: Math.round(stamina),
+      health: Math.round(health),
+      arrivalsPerTick,
+      netStamPerTick,
+      staminaBottomMin,
+      staminaBottomClock: (staminaBottomMin != null && clock) ? clock.formatStamp(nowMin + staminaBottomMin) : null,
+      corpseMin,
+      corpseClock: (corpseMin != null && clock) ? clock.formatStamp(nowMin + corpseMin) : null,
+      friendsAllowed: !!wo.friendsAllowed
+    };
+  }
+
   // Acts that count as vaginal-cum delivery for pregnancy conception (matches the
   // VAGINAL_CUM_TAGS set in delta.js).
   const VAGINAL_CUM_ACTS = new Set(['creampie', 'breeding', 'cum-in-pussy', 'cum-inside', 'vaginal-cum']);
@@ -101,7 +162,7 @@
       condomRequired: false,
       permittedActs: [],
       blockedJohnTypes: [],
-      // FRIENDS.1 — when ON, a slice of arrivals become "friends": rare, extreme, near-kill
+      // when ON, a slice of arrivals become "friends": rare, extreme, near-kill
       // visitors (see FRIEND_ARCHETYPES). Off by default — the player opts a girl into it.
       friendsAllowed: false,
       johnLedger: [],
@@ -162,13 +223,17 @@
 
     // Postmortem branch — body is dead but whore-out continues. Always uses postmortem-john.
     if (girl.encounterState === 'dead') {
-      // Corpse clientele is niche AND risky. A share of arrivals are disgusted and balk —
-      // no service, and a disgusted client talks (WANTED bump). Disgust rises with decay.
-      const decayDays = (girl.body?.decayedMinutes || 0) / 1440;
-      const disgustChance = Math.min(0.6, 0.15 + decayDays * 0.06);
-      if (Math.random() < disgustChance) {
-        if (window.DMTHGame.wanted) window.DMTHGame.wanted.accrue('john-disgust');
-        return null;
+      // whether a corpse gets used at all is now decided by the arriving
+      // client's TRAITS × her decay stage (inside resolveEncounter / resolveFriendEncounter): a
+      // fresh body anyone uses, but as she rots ordinary clients balk and only a rare
+      // masochist/necrophile/degenerate stays (paying a premium for the rot). The flat
+      // decay-disgust pre-roll is gone — the trait gate is the sole arbiter now.
+      // if corpse-use is toggled ON for her AND friends are allowed, a share of
+      // the corpse clientele are FRIENDS using the body (the rest are random postmortem-johns).
+      // (The decayed-corpse trait gating — only the sickest masochist friends will still touch a
+      // badly-rotted body, johns rarely — is the  layer.)
+      if (wo.corpseUseAllowed && wo.friendsAllowed && window.DMTHJohnArchetypes.rollFriendArchetype && Math.random() < 0.3) {
+        return resolveFriendEncounter(girl, window.DMTHJohnArchetypes.rollFriendArchetype(Math.random));
       }
       return resolveEncounter(girl, 'postmortem-john');
     }
@@ -179,7 +244,7 @@
     // Bond-debt overflow — girl protests, no more johns until debt clears
     if ((girl.bond?.bondDebt || 0) > BONDDEBT_EXCESS) return null;
 
-    // FRIENDDIRECT.1 — corrected (Gee): *"johns can be passive but for a gang bang and same with
+    // corrected : *"johns can be passive but for a gang bang and same with
     // friends i dont need to tell them what to do unless its a gangbang"*. So passive friends ARE
     // back: a friend visits AUTONOMOUSLY (does his own extreme thing — the player doesn't tell him
     // what to do) on a girl whose `friendsAllowed` is ON. The per-girl toggle IS how the player
@@ -201,7 +266,7 @@
     return resolveEncounter(girl, archetypeId);
   }
 
-  // `opts` (NPCDIRECT-PAID.1) lets the caller force a DIRECTED encounter:
+  // `opts`  lets the caller force a DIRECTED encounter:
   //   opts.npc           reuse an already-minted identity (the SAME named man from the scene)
   //   opts.forcedActs    ledger act tags to use verbatim (bypasses the rolled-acts + whitelist path)
   //   opts.forcedActionId  the COMMONALITY-ENGINE-matched action whose stat spec applyAction uses
@@ -210,8 +275,8 @@
     const arc = window.DMTHJohnArchetypes.JOHN_ARCHETYPES[archetypeId];
     if (!arc) return null;
     const wo = getWhoreOut(girl);
-    // NPC-IDENT.1 — mint this john a name so she can reference him + a multi-party scene can address him.
-    // NPCDIRECT-PAID.1 — reuse the passed identity so a directed john is the SAME man, not a fresh name.
+    // mint this john a name so she can reference him + a multi-party scene can address him.
+    // reuse the passed identity so a directed john is the SAME man, not a fresh name.
     const npc = opts.npc || (window.DMTHJohnArchetypes.mintNpcIdentity ? window.DMTHJohnArchetypes.mintNpcIdentity(archetypeId) : null);
 
     // Pick acts — intersection of john's preferences + player's permittedActs (if non-empty).
@@ -234,7 +299,7 @@
       }
     }
 
-    // Condom use (CONDOM-STOCK.1) — a john can only glove up if her hold / the dungeon POOL is
+    // Condom use  — a john can only glove up if her hold / the dungeon POOL is
     // actually STOCKED with condoms. "Condom required" enforces it ONLY when stock exists; with
     // no condoms stocked the john goes RAW regardless (so an unstocked room = pregnancy risk).
     // Each used condom consumes one from the supply (hold first, then dungeon pool).
@@ -256,9 +321,20 @@
     let necroMult = 1;
     if (isPostmortem) {
       const decayDays = (girl.body?.decayedMinutes || 0) / 1440;
-      // CORPSE-TIMER.1 — fresh pays the most, near-rotten very little. Steeper falloff so
-      // across the ~5-day window the premium slides from 2.8× (fresh) toward the 1.2× floor.
-      necroMult = Math.max(1.2, 2.8 - decayDays * 0.32);
+      // corpse-use gated by this john's TRAITS × decay stage. As she rots an
+      // ordinary john balks (only a rare masochist/necrophile/degenerate stays), and the rare trait
+      // commands a premium for the rot. A balk talks (WANTED disgust bump) and ends the visit with
+      // no service — johns RARELY carry a corpse-tolerant trait, so a rotted body sees few of them.
+      const willing = window.DMTHJohnArchetypes.corpseUseWillingness
+        ? window.DMTHJohnArchetypes.corpseUseWillingness(npc && npc.traits, decayDays)
+        : { willing: true, payMult: 1 };
+      if (!willing.willing) {
+        if (window.DMTHGame.wanted) window.DMTHGame.wanted.accrue('john-disgust');
+        return null;
+      }
+      //  base decay curve × the trait premium/penalty for using a body at this stage
+      // (a stray degenerate on bones pays cents; a rare necrophile pays HIGH dollar for the rot).
+      necroMult = Math.max(1.2, 2.8 - decayDays * 0.32) * (willing.payMult || 1);
     }
     const happiness = isPostmortem
       ? { multiplier: 1.0, breakdown: { postmortem: true, necroMult } }
@@ -268,11 +344,17 @@
     // gains" half of the satisfaction loop (hunting bonus lives in hunt.js).
     const sat = window.DMTHGame.state.getSatisfaction ? window.DMTHGame.state.getSatisfaction() : 50;
     const satMul = 1 + ((sat - 50) / 50) * 0.12;
-    // CUMCAP.2 — a filled-up girl (cumLoad near her trained capacity) is premium content: johns
+    // a filled-up girl (cumLoad near her trained capacity) is premium content: johns
     // pay more the closer she is to maxed (up to +35% at cap).
     const cumRatio = Math.min(1, (girl.body?.cumLoad || 0) / ((window.DMTHGame.cumtool && window.DMTHGame.cumtool.effectiveCap ? window.DMTHGame.cumtool.effectiveCap(girl.body) : (girl.body?.cumLoadCap || 10)) || 10));
     const cumMul = 1 + 0.35 * cumRatio;
-    const payment = Math.round(basePay * happiness.multiplier * necroMult * satMul * cumMul);
+    //  / a john has a small 1-round stamina pool; he drinks AT MOST ONE
+    // milk this visit (from her hold store / your stock, if any) to push for a 2nd round = more pay
+    // + more wear on her. Johns are weak — friends get a bigger, creep-scaled pool below.
+    let npcRounds = 1;
+    let npcDrankMilk = false;
+    if (!isPostmortem && window.DMTHGame.milk && window.DMTHGame.milk.npcDrinkMilk && window.DMTHGame.milk.npcDrinkMilk(girl)) { npcRounds = 2; npcDrankMilk = true; }
+    const payment = Math.round(basePay * happiness.multiplier * necroMult * satMul * cumMul * npcRounds);
     const tipRoll = Math.random() < arc.tipChance;
     const tip = tipRoll ? Math.round(payment * (arc.tipMul - 1.0)) : 0;
 
@@ -282,19 +364,31 @@
     const moodBefore = girl.mood?.mood || 'neutral';
     const bondDebtBefore = girl.bond?.bondDebt || 0;
     const bondXPBefore = girl.bond?.bondXP || 0;
+    // a john picks a REAL action from his INTENSITY-gated pool (tame care acts —
+    // a gentle john may wash or kiss her — through bounded extreme) instead of one fixed john-* act.
+    // a DIRECTED encounter still applies the COMMONALITY-ENGINE-matched action.
+    // A corpse keeps the fixed postmortem act (real acts mean nothing to a body).
+    let npcActionId = opts.forcedActionId || arc.johnActionId;
+    if (!opts.forcedActionId && !isPostmortem && window.DMTHGame.actionEffects?.chooseNpcAction) {
+      npcActionId = window.DMTHGame.actionEffects.chooseNpcAction(arc, { isFriend: false });
+    }
     if (window.DMTHGame.actionEffects?.applyAction) {
       const strain = (girl.body?.stamina ?? 70) <= window.DMTHGame.actionEffects.STAMINA_THRESHOLD_FOR_STRAIN;
-      // NPCDIRECT-PAID.1 — a directed encounter applies the COMMONALITY-ENGINE-matched action's stat
-      // spec (so "face fuck her" → extreme-facefuck deltas) instead of the john's default act.
-      window.DMTHGame.actionEffects.applyAction(girl.id, opts.forcedActionId || arc.johnActionId, { strain });
+      // byJohn — the PLAYER is never credited/charged for a john's act; she still takes the full shift.
+      window.DMTHGame.actionEffects.applyAction(girl.id, npcActionId, { strain, byJohn: true });
     }
     // Re-read girl after applyAction mutations
     const refreshed = window.DMTHGame.state.getGirl(girl.id);
+    // a milk-extended extra round drains more stamina + a little health off her.
+    if (npcRounds > 1 && !isPostmortem && refreshed && refreshed.body) {
+      const ex = npcRounds - 1;
+      window.DMTHGame.state.updateGirl(girl.id, { body: { ...refreshed.body, stamina: Math.max(0, (refreshed.body.stamina ?? 70) - 10 * ex), health: Math.max(1, (refreshed.body.health ?? 100) - 4 * ex) } });
+    }
     const moodAfter = refreshed?.mood?.mood || moodBefore;
     const bondDebtAfter = refreshed?.bond?.bondDebt || 0;
     const bondXPAfter = refreshed?.bond?.bondXP || 0;
 
-    // FRIENDKILL.1 / SNUFFBONUS.1 — a normal john kills her only on the RARE occurrence that his
+    //  / a normal john kills her only on the RARE occurrence that his
     // use crossed her death floor (she was already at ~0 — i.e. a poorly-maintained, over-whored
     // girl). A managed girl's tiny per-john debuff never gets there. Snuff bonus folds into his pay.
     let johnKillBonus = 0;
@@ -310,7 +404,7 @@
     let pregnancyHookFired = false;
     if (hasVaginalCum && !condomUsed && window.DMTHGame.pregnancy?.addVaginalCum) {
       try {
-        // CUMFILL.1 — a john's vaginal load raises her vaginal cum-fill; sustained fill (the
+        // a john's vaginal load raises her vaginal cum-fill; sustained fill (the
         // preggo timer in pregnancy.tickCumFill) is what conceives, not a per-john roll.
         window.DMTHGame.pregnancy.addVaginalCum(girl.id, 1.2, { conceptionSource: 'whore-out' });
         pregnancyHookFired = true;
@@ -319,7 +413,7 @@
       }
     }
 
-    // JOHN-VARIETY.1 — a depraved john (intensity ≥ 3) helps himself to what's in the room:
+    // a depraved john (intensity ≥ 3) helps himself to what's in the room:
     // a TOY mounted in her hold and/or a hit of DRUGS from the dungeon pool, used on/around her
     // (smoke her weed and blacken her eye). Draws from the same supply the player stocks; applies
     // the toy's real damage/effect; pays a depravity premium on top. Alive girls only.
@@ -362,8 +456,8 @@
       johnDescription: arc.displayName,
       johnName: npc ? npc.name : null,
       johnHandle: npc ? npc.handle : arc.displayName,
-      npc,                                    // NPCDIRECT-PAID.1 — exposed so a gangbang/scene can voice the actual man
-      directed: !!opts.directiveNote,         // NPCDIRECT-PAID.1 — flags a player-directed history event
+      npc,                                    // exposed so a gangbang/scene can voice the actual man
+      directed: !!opts.directiveNote,         // flags a player-directed history event
       acts: johnExtraActs.length ? [...acts, ...johnExtraActs] : acts,
       duration_min: arc.intensity * 5 + Math.floor(Math.random() * 10),
       payment,
@@ -377,7 +471,7 @@
       bondDebtAdded: bondDebtAfter - bondDebtBefore,
       bruisesAdded: arc.bruisesAdded || 0,
       cumLoadAdded: hasVaginalCum ? 1.2 : (acts.includes('oral') ? 1.0 : 0),
-      staminaDrained: Math.abs(window.DMTHGame.actionEffects?.ACTIONS?.[arc.johnActionId]?.stamina || 5),
+      staminaDrained: Math.abs(window.DMTHGame.actionEffects?.ACTIONS?.[npcActionId]?.stamina || 5),
       notes: `${arc.displayName} — ${arc.dialogueTone}. Acts: ${acts.join(', ')}.${condomUsed ? ' [condom used]' : ' [no condom]'}${opts.directiveNote ? ` [directed: ${opts.directiveNote}]` : ''}`,
       pregnancyHookFired
     };
@@ -416,8 +510,8 @@
       window.DMTHGame.wanted.accrue('corpse-content-sale');
     }
 
-    // FRIENDGIFT.1 — a satisfied john sometimes leaves a high-tier gift (generous types more often).
-    // A KILL is an EPIC WIN for him (Gee) — he ALWAYS leaves loot + tips bigger when she dies on him.
+    // a satisfied john sometimes leaves a high-tier gift (generous types more often).
+    // A KILL is an EPIC WIN for him  — he ALWAYS leaves loot + tips bigger when she dies on him.
     if (window.DMTHGame.loot && window.DMTHGame.loot.grantNpcGift) {
       if (johnKillBonus > 0) {
         window.DMTHGame.loot.grantNpcGift({ from: npc ? npc.handle : arc.displayName, generous: true, kill: true, girlId: girl.id });
@@ -427,32 +521,36 @@
     }
 
     window.DMTHGame.state.updateGirl(girl.id, { whoreOut: newWo });
-    // GIRLHIST.1/.2 — log the john into her LIVE activity history (+ the cash he paid, itemized).
+    // /.2 — log the john into her LIVE activity history (+ the cash he paid, itemized).
     if (window.DMTHGame.state.appendActivity) {
       window.DMTHGame.state.appendActivity(girl.id, { kind: 'john', label: (npc ? npc.handle : arc.displayName), detail: `${acts.join(', ')} · +$${totalPaid}${condomUsed ? ' · 🎈' : ''}` });
     }
     return encounter;
   }
 
-  // FRIENDS.1/.2 — resolve a "friend" visit: the friend's EXTREME act + a direct near-kill
+  // /.2 — resolve a "friend" visit: the friend's EXTREME act + a direct near-kill
   // health drop (~40-60), a fortune in pay, logged to her ledger + a friendVisits counter so the
   // death-dossier / trophy reflects how hard she was used. Alive captives only.
-  // `opts` (NPCDIRECT-PAID.1) — "same for friends": a directed friend reuses opts.npc, records the
+  // `opts`  — "same for friends": a directed friend reuses opts.npc, records the
   // forced act tags (opts.forcedActs) + the raw directive (opts.directiveNote) into her history event,
   // and otherwise resolves exactly like a normal extreme friend visit (near-kill, fortune, can corpse).
   function resolveFriendEncounter(girl, friendId, opts = {}) {
     const arc = window.DMTHJohnArchetypes.FRIEND_ARCHETYPES[friendId];
-    if (!arc || girl.encounterState === 'dead') return null;
-    // NPC-IDENT.1 — mint the friend an identity (title + name) for chat memory + multi-party scenes.
-    // NPCDIRECT-PAID.1 — reuse the passed identity so a directed friend is the SAME man from the scene.
+    if (!arc) return null;
+    // a dead girl is OFF-LIMITS to friends UNLESS the player has toggled
+    // corpse-use ON for her . Johns already keep
+    // coming via the postmortem-john path; this lets FRIENDS keep using the body too.
+    if (girl.encounterState === 'dead' && !getWhoreOut(girl).corpseUseAllowed) return null;
+    // mint the friend an identity (title + name) for chat memory + multi-party scenes.
+    // reuse the passed identity so a directed friend is the SAME man from the scene.
     const npc = opts.npc || (window.DMTHJohnArchetypes.mintNpcIdentity ? window.DMTHJohnArchetypes.mintNpcIdentity(friendId, { isFriend: true }) : null);
 
-    // FRIENDCREEP.1 — his current creep level 0-10 scales how hard he hits, how much he pays, and how
+    // his current creep level 0-10 scales how hard he hits, how much he pays, and how
     // good/plentiful his loot is. A maxed L10 creep is a guaranteed kill on a girl under 60% health.
     const creep = (window.DMTHGame.state.getFriendCreep ? window.DMTHGame.state.getFriendCreep(friendId).level : 0) || 0;
 
-    // FRIENDKINK.1 — his unique kink/dislike vs THIS girl's traits swings his pay + loot, and a
-    // bigot may flat-out REFUSE her (Gee: don't put a racist friend on a girl he despises). Refusal
+    // his unique kink/dislike vs THIS girl's traits swings his pay + loot, and a
+    // bigot may flat-out REFUSE her . Refusal
     // aborts the visit entirely — no act, no pay, no creep — with a notify so the player learns.
     const match = window.DMTHJohnArchetypes.friendMatch
       ? window.DMTHJohnArchetypes.friendMatch(friendId, girl) : { payMult: 1.0, lootDelta: 0, refused: false, reason: '' };
@@ -461,28 +559,95 @@
       return null;
     }
 
+    // corpse-use branch: she's dead + corpse-use is toggled on, so this friend
+    // uses the BODY. No health/kill/cum/bond/toy math (a corpse has none of that). Pay is a
+    // decay-scaled necro premium — a fresh body pays well, a rotting mass / skeleton pays scraps
+    // ("bones pay cents"). (The masochist-trait gating — only the sickest friends will touch a
+    // badly-decayed body, johns rarely — is the richer  layer on top.)
+    if (girl.encounterState === 'dead') {
+      const decayDays = (girl.body?.decayedMinutes || 0) / 1440;
+      // a FRIEND's corpse-use is gated by HIS traits × decay too. Friends carry
+      // the corpse-tolerant traits far more often than johns (some are innate masochists/necrophiles),
+      // so they're who keeps a rotted body in service — and a necrophile/masochist pays HIGH DOLLAR
+      // for the rot (the trait payMult REPLACES the old flat decay penalty). A non-trait friend on a
+      // ripe+ corpse won't touch it: he walks, no pay.
+      const willing = window.DMTHJohnArchetypes.corpseUseWillingness
+        ? window.DMTHJohnArchetypes.corpseUseWillingness(npc && npc.traits, decayDays)
+        : { willing: true, payMult: 1 };
+      if (!willing.willing) {
+        if (window.DMTHNotify) window.DMTHNotify.show(`🚫 ${arc.displayName} took one look at ${girl.name}'s ${decayDays >= 16 ? 'bones' : 'rotting body'} and walked — not even he'll touch that.`, { type: 'warn', durationMs: 5000 });
+        return null;
+      }
+      const decayMult = willing.payMult;
+      const basePayPM = arc.payRange[0] + Math.floor(Math.random() * (arc.payRange[1] - arc.payRange[0]));
+      const paymentPM = Math.max(5, Math.round(basePayPM * (1 + creep * 0.1) * (match.payMult || 1) * decayMult));
+      const actTags = ['necro', 'corpse-use', 'friend-extreme'];
+      if (opts.forcedActs && opts.forcedActs.length) actTags.unshift(...opts.forcedActs);
+      const encounter = {
+        id: 'frnd_' + Date.now().toString(36) + '_' + Math.floor(Math.random() * 0xffff).toString(36),
+        ts: Date.now(), isFriend: true, postmortem: true, johnArchetype: friendId,
+        johnDescription: 'FRIEND (corpse use) — ' + arc.displayName,
+        johnName: npc ? npc.name : null, johnHandle: npc ? npc.handle : arc.displayName, npc,
+        directed: !!opts.directiveNote, acts: actTags,
+        duration_min: 20 + Math.floor(Math.random() * 20),
+        payment: paymentPM, tip: 0, johnExtraPay: 0, totalPaid: paymentPM, condomUsed: false,
+        killed: false, snuffBonus: 0, staminaDrained: 0, healthDropped: 0,
+        notes: `FRIEND ${arc.displayName} used her CORPSE — necro. Paid $${paymentPM} (decay ×${decayMult}). ${arc.dialogueTone || ''}.`
+          + (opts.directiveNote ? ` [directed: ${opts.directiveNote}]` : ''),
+        pregnancyHookFired: false
+      };
+      const newWoPM = { ...getWhoreOut(girl) };
+      newWoPM.johnLedger = [...(newWoPM.johnLedger || []), encounter].slice(-200);
+      newWoPM.unclaimedEarnings = (newWoPM.unclaimedEarnings || 0) + paymentPM;
+      newWoPM.friendVisits = (newWoPM.friendVisits || 0) + 1;
+      if (window.DMTHGame.gameClock) newWoPM.lastJohnArrivalAt = window.DMTHGame.gameClock.now();
+      window.DMTHGame.state.updateGirl(girl.id, { whoreOut: newWoPM });
+      if (window.DMTHGame.state.addBuzz) window.DMTHGame.state.addBuzz(0.4, 'friend-corpse: ' + friendId);
+      try { if (window.DMTHGame.wanted) window.DMTHGame.wanted.accrue('corpse-content-sale'); } catch (e) { /* heat — key-safe */ }
+      if (window.DMTHGame.loot?.grantNpcGift) {
+        const drops = Math.max(1, Math.floor(creep / 3) + (match.lootDelta || 0));
+        for (let i = 0; i < drops; i++) window.DMTHGame.loot.grantNpcGift({ from: (npc ? npc.handle : arc.displayName), generous: false, girlId: girl.id });
+      }
+      const creepAfterPM = window.DMTHGame.state.noteFriendCreepSuccess ? window.DMTHGame.state.noteFriendCreepSuccess(friendId) : { level: creep };
+      if (window.DMTHNotify) window.DMTHNotify.show(`🪦 ${arc.displayName} used ${girl.name}'s corpse — paid $${paymentPM}.`, { type: 'warn', durationMs: 6000 });
+      if (window.DMTHGame.state.appendActivity) window.DMTHGame.state.appendActivity(girl.id, { kind: 'friend', label: `FRIEND (corpse) — ${arc.displayName} (creep ${creepAfterPM.level}/10)`, detail: `used her corpse · +$${paymentPM}` });
+      return encounter;
+    }
+
     const moodBefore = girl.mood?.mood || 'neutral';
     const bondXPBefore = girl.bond?.bondXP || 0;
     const bondDebtBefore = girl.bond?.bondDebt || 0;
 
     // Her health the MOMENT the friend arrives — the kill gate AND the per-visit damage cap are
     // both measured from this. So a girl already low (e.g. ~20%) servicing a friend is near-certain
-    // to come back a corpse; a healthy one survives, wrecked but capped (Gee).
+    // to come back a corpse; a healthy one survives, wrecked but capped .
     const startHealth = (window.DMTHGame.state.getGirl(girl.id)?.body?.health) ?? 100;
 
     // The friend's extreme act — credited to johns (byJohn) so the PLAYER isn't paid/leveled for it.
+    // he picks from his CREEP-gated pool (extreme → snuff → torture as creep climbs)
+    // instead of one fixed act; the ≤HP visit-cap below still overrides any lethal health subtraction
+    // this applies, so a friend never accidentally snuffs a healthy girl outside the real kill gate.
     if (window.DMTHGame.actionEffects?.applyAction) {
-      try { window.DMTHGame.actionEffects.applyAction(girl.id, arc.johnActionId, { byJohn: true, strain: true }); } catch (e) { /* non-fatal */ }
+      const friendActionId = window.DMTHGame.actionEffects.chooseNpcAction
+        ? window.DMTHGame.actionEffects.chooseNpcAction(arc, { isFriend: true, creep })
+        : arc.johnActionId;
+      try { window.DMTHGame.actionEffects.applyAction(girl.id, friendActionId, { byJohn: true, strain: true }); } catch (e) { /* non-fatal */ }
     }
 
-    // FRIENDCREEP.1 — base drop scaled by creep level (L0 ×1 → L10 ×1.8): higher creep does MORE damage.
+    //  / friends have a BIGGER stamina pool than johns, scaling with creep
+    // (1 + creep/3 rounds). A friend drinks AT MOST ONE milk this visit to add a round = longer,
+    // rougher use = more wear on her + more pay.
+    let npcRounds = 1 + Math.floor(creep / 3);
+    let npcDrankMilk = false;
+    if (window.DMTHGame.milk && window.DMTHGame.milk.npcDrinkMilk && window.DMTHGame.milk.npcDrinkMilk(girl)) { npcRounds += 1; npcDrankMilk = true; }
+    // base drop scaled by creep level (L0 ×1 → L10 ×1.8): higher creep does MORE damage.
     let drop = arc.healthDrop[0] + Math.floor(Math.random() * (arc.healthDrop[1] - arc.healthDrop[0] + 1));
     drop = Math.round(drop * (1 + creep * 0.08));
 
-    // FRIENDKILL.1 gate (Gee) — LETHAL when her ARRIVAL health is not greater than his intended damage
+    //  gate  — LETHAL when her ARRIVAL health is not greater than his intended damage
     // (drop >= startHealth). A girl at ~20% servicing a friend is almost certainly a corpse; a healthy
-    // girl just gets wrecked. FRIENDCREEP.1 — a MAXED L10 creep is a GUARANTEED kill on any girl under
-    // 60% of her max health (Gee: "a maxed out 10 creep should kill any girl under 60% health garanteed").
+    // girl just gets wrecked. a MAXED L10 creep is a GUARANTEED kill on any girl under
+    // 60% of her max health .
     const maxH = (window.DMTHGame.actionEffects && window.DMTHGame.actionEffects.maxHealthFor) ? window.DMTHGame.actionEffects.maxHealthFor(girl) : 100;
     const killed = drop >= startHealth || (creep >= 10 && startHealth < maxH * 0.6);
     let snuffBonus = 0;
@@ -497,7 +662,7 @@
       snuffBonus = (k && k.snuffBonus) || 0;
       newHealth = 0;
     } else {
-      // FRIENDTOY.1 (Gee correction) — a friend can only use a toy ALREADY MOUNTED in THIS girl's
+      //   — a friend can only use a toy ALREADY MOUNTED in THIS girl's
       // hold (no bring-your-own, no cross-hold/dungeon). If the hold has toys he'll most likely grab
       // one — favouring his signature `chamberToy` if it happens to be mounted, else a random mounted
       // one — and use it on her (byJohn, hold-gated, same as a john). Its negatives land on her; the
@@ -510,12 +675,12 @@
           if (tr && tr.ok) { chamberToyName = (window.DMTHGame.toys.TOYS?.[pick]?.name) || pick; chamberPremium = 150; }
         } catch (e) { /* non-fatal */ }
       }
-      // Gee: NO single friend takes more than ~50% from one girl in one visit, no matter how many
+      // NO single friend takes more than ~50% from one girl in one visit, no matter how many
       // random acts + the chamber toy he piles on. The friend's WHOLE-visit health damage is capped
       // at 50 HP (and at least 1 HP, never to 0 — that's the lethal path) — recomputed from her
       // arrival health, OVERRIDING whatever applyAction + the toy independently subtracted.
-      // FRIENDACTS.1 cap (≤50 HP/visit) raised by creep (L10 → up to 80) — higher creep hits harder.
-      const loss = Math.min(50 + creep * 3, Math.max(1, drop), startHealth - 1);
+      //  cap (≤50 HP/visit) raised by creep (L10 → up to 80) — higher creep hits harder.
+      const loss = Math.min((50 + creep * 3) * npcRounds, Math.max(1, drop * npcRounds), startHealth - 1);
       newHealth = Math.max(1, startHealth - loss);
       const g1 = window.DMTHGame.state.getGirl(girl.id) || girl;
       const body = { ...(g1.body || {}), health: newHealth, bruises: (g1.body?.bruises || 0) + (arc.bruisesAdded || 0), recentActTag: 'beaten' };
@@ -523,7 +688,7 @@
       window.DMTHGame.state.updateGirl(girl.id, { body });
     }
 
-    // FRIENDCUMWAD.1 (Gee: "a frinde have a much large cum wad for cum fill than normal johns") —
+    //   —
     // a friend busts a MUCH bigger load than a john (~3.5 vs a john's ~1.2), and never gloves up,
     // so it floods her raw: heavy vaginal cum-fill toward breeding + a cum-load bump. Alive girls only.
     const FRIEND_CUM_WAD = 3.5;
@@ -539,7 +704,7 @@
     }
 
     const refreshed = window.DMTHGame.state.getGirl(girl.id) || girl;
-    // Gee — a friend does a WIDE RANGE of random act types per visit (he's not one-note). Roll a
+    // — a friend does a WIDE RANGE of random act types per visit (he's not one-note). Roll a
     // varied 2-4 act subset from his + a shared depraved pool. (Damage is still capped above, so
     // "more acts" reads as variety in the ledger, never extra health loss.)
     const FRIEND_ACT_POOL = ['sex-rough', 'anal', 'choke', 'humiliation', 'spit', 'slap', 'hair-pull', 'degrade', 'piss', 'bukkake', 'pain', 'gag'];
@@ -551,16 +716,16 @@
     }
     actTags.push(killed ? 'snuff' : 'friend-extreme');
     if (chamberToyName) actTags.push('chamber-toy');
-    // NPCDIRECT-PAID.1 — a directed friend records the player's order (verbatim) + matched action up front.
+    // a directed friend records the player's order (verbatim) + matched action up front.
     if (opts.forcedActs && opts.forcedActs.length) actTags.unshift(...opts.forcedActs);
     const basePay = arc.payRange[0] + Math.floor(Math.random() * (arc.payRange[1] - arc.payRange[0]));
     const sat = window.DMTHGame.state.getSatisfaction ? window.DMTHGame.state.getSatisfaction() : 50;
-    // SNUFFBONUS.1 snuff bonus + FRIENDTOY.1 chamber-toy premium both fold into his payout.
-    // FRIENDCREEP.1 — higher creep PAYS MORE (L0 ×1 → L10 ×2). FRIENDKINK.1 — his kink/dislike vs
+    //  snuff bonus +  chamber-toy premium both fold into his payout.
+    // higher creep PAYS MORE (L0 ×1 → L10 ×2). his kink/dislike vs
     // this girl swings it further (premium for a fetish-match, scraps for one he's bigoted against).
-    // FRIENDLOOT.1 (Gee) — a friend ALWAYS pays cash at a minimum (a floor of $40), even a bigoted
+    //   — a friend ALWAYS pays cash at a minimum (a floor of $40), even a bigoted
     // kink-mismatch or a cheap visit; a kill stacks the snuff bonus on top.
-    const payment = Math.max(40, Math.round(basePay * (1 + ((sat - 50) / 50) * 0.12) * (1 + creep * 0.1) * match.payMult)) + snuffBonus + chamberPremium;
+    const payment = Math.max(40, Math.round(basePay * (1 + ((sat - 50) / 50) * 0.12) * (1 + creep * 0.1) * match.payMult * npcRounds)) + snuffBonus + chamberPremium;
 
     const encounter = {
       id: 'frnd_' + Date.now().toString(36) + '_' + Math.floor(Math.random() * 0xffff).toString(36),
@@ -568,10 +733,10 @@
       isFriend: true,
       johnArchetype: friendId,
       johnDescription: 'FRIEND — ' + arc.displayName,
-      johnName: npc ? npc.name : null,            // NPC-IDENT.1 — name she can reference in chat
+      johnName: npc ? npc.name : null,            // name she can reference in chat
       johnHandle: npc ? npc.handle : arc.displayName,
-      npc,                                        // NPCDIRECT-PAID.1 — exposed so a scene can voice the actual friend
-      directed: !!opts.directiveNote,             // NPCDIRECT-PAID.1 — flags a player-directed history event
+      npc,                                        // exposed so a scene can voice the actual friend
+      directed: !!opts.directiveNote,             // flags a player-directed history event
       acts: actTags,
       duration_min: 30 + Math.floor(Math.random() * 30),
       payment, tip: 0, johnExtraPay: 0, totalPaid: payment,
@@ -581,7 +746,7 @@
       bondDeltaApplied: (refreshed.bond?.bondXP || 0) - bondXPBefore,
       bondDebtAdded: (refreshed.bond?.bondDebt || 0) - bondDebtBefore,
       bruisesAdded: arc.bruisesAdded || 0,
-      cumLoadAdded: killed ? 0 : FRIEND_CUM_WAD,   // FRIENDCUMWAD.1 — friends bust a big raw load
+      cumLoadAdded: killed ? 0 : FRIEND_CUM_WAD,   // friends bust a big raw load
       // healthDropped — on a kill she dropped her whole arrival health; otherwise the rolled drop.
       // (Was a latent ReferenceError: `curHealth` never existed; a friend KILL would throw here.)
       healthDropped: killed ? startHealth : drop,
@@ -604,7 +769,7 @@
       cumLoadAdded: newWo.sessionTotals?.cumLoadAdded || 0
     };
     newWo.unclaimedEarnings = (newWo.unclaimedEarnings || 0) + payment;
-    newWo.friendVisits = (newWo.friendVisits || 0) + 1;   // FRIENDS.2 — history for the dossier/trophy
+    newWo.friendVisits = (newWo.friendVisits || 0) + 1;   // history for the dossier/trophy
     if (window.DMTHGame.gameClock) newWo.lastJohnArrivalAt = window.DMTHGame.gameClock.now();
     window.DMTHGame.state.updateGirl(girl.id, { whoreOut: newWo });
 
@@ -618,10 +783,10 @@
         if (newHealth <= 8) window.DMTHNotify.show(`⚠️ ${girl.name} is barely alive (${newHealth} HP) — heal her now or lose her.`, { type: 'danger', durationMs: 8000 });
       }
     }
-    // FRIENDGIFT.1 + FRIENDCREEP.1 — friends always leave loot; higher creep drops BETTER + MORE of it
+    //  + friends always leave loot; higher creep drops BETTER + MORE of it
     // (generous gift + one extra per ~3 creep levels, L10 ≈ 4 drops). A KILL is an epic win on top.
     if (window.DMTHGame.loot && window.DMTHGame.loot.grantNpcGift) {
-      // FRIENDKINK.1 + FRIENDLOOT.1 (Gee) — friends ALMOST ALWAYS leave loot: floor at 1 drop even
+      //  +   — friends ALMOST ALWAYS leave loot: floor at 1 drop even
       // on a kink-mismatch (kink-match still drops MORE). A MURDER guarantees GOOD loot — the i===0
       // drop fires grantNpcGift{kill} (tier-5 best haul).
       const drops = Math.max(1, 1 + Math.floor(creep / 3) + (match.lootDelta || 0));
@@ -629,28 +794,28 @@
         window.DMTHGame.loot.grantNpcGift({ from: (npc ? npc.handle : arc.displayName), generous: true, kill: killed && i === 0, girlId: girl.id });
       }
     }
-    // FRIENDCREEP.1 — a successful visit advances his creep level (triangular). Higher creep = he
+    // a successful visit advances his creep level (triangular). Higher creep = he
     // returns harder, pays more, drops better loot, and at L10 guarantees a kill under 60% health.
     const creepAfter = window.DMTHGame.state.noteFriendCreepSuccess
       ? window.DMTHGame.state.noteFriendCreepSuccess(friendId) : { level: creep, leveled: false };
     if (creepAfter.leveled && window.DMTHNotify) {
       window.DMTHNotify.show(`😈 ${arc.displayName} is now CREEP ${creepAfter.level}/10 — hits harder, pays more, better loot${creepAfter.level >= 10 ? ', GUARANTEED kill under 60% HP' : ''}.`, { type: 'info', durationMs: 5000 });
     }
-    // GIRLHIST.1/.2 — log the friend visit into her LIVE activity history (with his creep level).
+    // /.2 — log the friend visit into her LIVE activity history (with his creep level).
     if (window.DMTHGame.state.appendActivity) {
       window.DMTHGame.state.appendActivity(girl.id, { kind: 'friend', label: `FRIEND — ${arc.displayName} (creep ${creepAfter.level}/10)`, detail: `${killed ? 'KILLED her' : `wrecked her −${drop} HP`} · +$${payment}${match.reason ? ` · ${match.payMult >= 1 ? '😍' : '🤢'} ${match.reason}` : ''}` });
     }
     return encounter;
   }
 
-  // GANGBANG.1 — fire N johns on one girl back-to-back as a single gangbang. Each resolves like a
+  // fire N johns on one girl back-to-back as a single gangbang. Each resolves like a
   // normal arrival (re-reading her so stamina/health/pay/cum-fill stack), summed into one notify.
   // Ends early if she hits the stamina floor / bond-debt wall. Player-triggered from the room.
   function resolveGangbang(girlId, n = 3) {
     const girl0 = window.DMTHGame.state.getGirl(girlId);
     if (!girl0) return { ok: false, reason: 'no such girl' };
     if (!getWhoreOut(girl0).enabled) return { ok: false, reason: 'whore-out is off for her' };
-    // GANGSCALE.1 (Gee) — a bigger dungeon + more girls held throws a BIGGER gangbang. The crowd
+    //   — a bigger dungeon + more girls held throws a BIGGER gangbang. The crowd
     // ceiling scales with the active dungeon's hold count + total captives, so a fledgling
     // hole-in-the-wall draws a few johns while a full operation packs the room.
     const dungeon = window.DMTHGame.state.getDungeon(girl0.assignedDungeonId);
@@ -664,13 +829,13 @@
       if (enc) encs.push(enc); else break;
     }
     let gross = encs.reduce((t, e) => t + (e.totalPaid || 0), 0);
-    // GANGSCALE.1 — a bigger gangbang = better satisfaction (the crowd is the thrill). Scales
+    // a bigger gangbang = better satisfaction (the crowd is the thrill). Scales
     // with how many johns actually took her this session.
     if (encs.length >= 2 && window.DMTHGame.state.addSatisfaction) {
       window.DMTHGame.state.addSatisfaction(Math.min(20, encs.length * 2.5), 'gangbang-scale');
     }
 
-    // GANGBUKKAKE.1 — a gangbang ends in a stacked bukkake / cum-fill finale: every john empties
+    // a gangbang ends in a stacked bukkake / cum-fill finale: every john empties
     // onto/into her at once. Floods her cum-load toward her cap, stamps the bukkake aftermath so
     // her next image renders her glazed, and pays a premium that scales with the crowd size.
     let bukkake = null;
@@ -700,7 +865,7 @@
     return { ok: true, count: encs.length, gross, bukkake, npcs };
   }
 
-  // NPCDIRECT-PAID.1 (Gee: a directed NPC "needs to do that action and have that action be paid for
+  //  (a directed NPC "needs to do that action and have that action be paid for
   // when done with its stat changes take effect on the girl and into her history as an event" +
   // "same for friends"). The player types a directive at a NAMED man in a voiced scene; this resolves
   // it as a REAL encounter — he performs the act, gets paid, her stats shift, it logs to her ledger.
@@ -762,7 +927,14 @@
       let arrivals = 0;
       for (let i = 0; i < toFire; i++) {
         const enc = tryArrival(window.DMTHGame.state.getGirl(girl.id));
-        if (enc) arrivals++;
+        if (enc) {
+          arrivals++;
+          //  (watch-her-visitors) — tell an open room to pop her image WITH this visitor
+          // (the recurring friend or a random john). The room listens + obeys the per-player toggle.
+          if (enc.npc && typeof document !== 'undefined' && document.dispatchEvent) {
+            try { document.dispatchEvent(new CustomEvent('dmth:npc-visit', { detail: { girlId: girl.id, npc: enc.npc, isFriend: !!enc.isFriend, killed: !!enc.killed } })); } catch (e) { /* non-fatal */ }
+          }
+        }
       }
       if (arrivals > 0 && window.DMTHNotify && arrivals >= 2) {
         window.DMTHNotify.show(`💰 ${girl.name}: ${arrivals} johns this tick`, { type: 'info', durationMs: 2000 });
@@ -783,7 +955,7 @@
     window.DMTHGame.state.addMoney(amount, `whore-out:cashout:${girlId}`);
     const newWo = { ...wo, unclaimedEarnings: 0 };
     window.DMTHGame.state.updateGirl(girlId, { whoreOut: newWo });
-    // GIRLHIST.2 — itemized cash she made, into her LIVE activity history.
+    // itemized cash she made, into her LIVE activity history.
     if (window.DMTHGame.state.appendActivity) {
       window.DMTHGame.state.appendActivity(girlId, { kind: 'cash', label: `cashed out $${amount.toLocaleString()}`, detail: 'whore-out earnings → treasury' });
     }
@@ -801,7 +973,7 @@
       ts: e.ts,
       archetype: e.johnArchetype,
       description: e.johnDescription,
-      handle: e.johnHandle || e.johnName || e.johnDescription,   // NPC-IDENT.1 — name she can reference
+      handle: e.johnHandle || e.johnName || e.johnDescription,   // name she can reference
       acts: e.acts.join(', '),
       paid: e.totalPaid,
       notes: e.notes
@@ -839,6 +1011,8 @@
     contextBlockText,
     buzzMultiplier,
     expectedArrivalsPerTick,
-    gameMinutesToNextArrival
+    gameMinutesToNextArrival,
+    CADENCE_ORDER,
+    johnTimingProjection
   });
 })();

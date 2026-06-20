@@ -458,7 +458,7 @@
       throw new Error('she already owns this outfit');
     }
     const ok = window.DMTHGame.state.spendMoney(outfit.price, `wardrobe:${outfitId}:${girlId}`);
-    if (!ok) throw new Error('insufficient funds');
+    if (!ok) throw new Error(window.DMTHGame.state.brokeLine ? window.DMTHGame.state.brokeLine() : 'broke');
     const newWardrobe = [...(girl.wardrobe || []), {
       id: outfit.id,
       displayName: outfit.displayName,
@@ -496,7 +496,7 @@
     if (!o) return { ok: false, reason: 'no such outfit' };
     const st = clothingStatus(outfitId);
     if (st.locked) return { ok: false, reason: 'locked — needs ' + (st.unmet.join(' + ') || 'more progress') };
-    if (!window.DMTHGame.state.spendMoney(o.price, `wardrobe-buy:${outfitId}`)) return { ok: false, reason: 'insufficient funds' };
+    if (!window.DMTHGame.state.spendMoney(o.price, `wardrobe-buy:${outfitId}`)) return { ok: false, reason: (window.DMTHGame.state.brokeLine ? window.DMTHGame.state.brokeLine() : 'broke') };
     window.DMTHGame.state.addItem(outfitId, 1);
     if (window.DMTHNotify) window.DMTHNotify.show(`🧵 Bought ${o.displayName} ($${o.price.toLocaleString()}) — added to your inventory. Apply it to a girl from her wardrobe page.`, { type: 'success', durationMs: 4500 });
     return { ok: true, outfit: o };

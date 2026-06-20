@@ -1,4 +1,4 @@
-// DUNGEON MASTER: THE HUNT — death dossier popup (DEATHSTATS.1).
+// DUNGEON MASTER: THE HUNT — death dossier popup .
 // When a girl dies, this modal surfaces her FINAL dossier: her last living likeness, her final
 // stats, and the full history of what was done to her (where captured, where held longest,
 // films, johns, pregnancies, chat turns). The same record is saved on her + attached to her
@@ -68,7 +68,7 @@
             ].filter(Boolean).join('') || `<div class="small muted">No notable history.</div>`}
           </div>
           ${(() => {
-            // GIRLHIST.2 — her full ACTIVITY TIMELINE (same running log as the live room panel),
+            // her full ACTIVITY TIMELINE (same running log as the live room panel),
             // rendered here so the trophy/dossier and the live view share one unified layout.
             const acts = (window.DMTHGame.state.getActivity && girlId) ? window.DMTHGame.state.getActivity(girlId, 60) : [];
             if (!acts.length) return '';

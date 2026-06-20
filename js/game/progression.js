@@ -85,7 +85,7 @@
     const fee = UNLOCK_FEES[key] || 0;
     if (!fee) return { ok: false, reason: 'no fee defined' };
     const ok = window.DMTHGame.state.spendMoney(fee, 'unlock:' + key);
-    if (!ok) return { ok: false, reason: 'insufficient funds' };
+    if (!ok) return { ok: false, reason: (window.DMTHGame.state.brokeLine ? window.DMTHGame.state.brokeLine() : 'broke') };
     window.DMTHGame.state.addPurchasedUnlock(key);
     if (window.DMTHNotify) window.DMTHNotify.show(`🔓 Bought early access — "${key}" unlocked for $${fee.toLocaleString()}.`, { type: 'success', durationMs: 5000 });
     return { ok: true, key, fee };
@@ -137,6 +137,7 @@
     'private-party': { level: 3, girlCount: 4 },
     'school-campus': { level: 5 },
     'prenatal-clinic': { level: 4 },          // pregnant-girl hunting ground
+    'family-reunion': { level: 3 },           // the gathering — your own relations within reach
     remote:          { level: 6 }
   });
   function captiveCount() {
@@ -169,7 +170,7 @@
     if (!g || !g.cost) return { ok: false, reason: 'not purchasable' };
     if ((window.DMTHGame.state.current?.unlockedLocations || []).includes(locId)) return { ok: false, reason: 'you already own access' };
     const ok = window.DMTHGame.state.spendMoney(g.cost, 'location-access:' + locId);
-    if (!ok) return { ok: false, reason: 'insufficient funds' };
+    if (!ok) return { ok: false, reason: (window.DMTHGame.state.brokeLine ? window.DMTHGame.state.brokeLine() : 'broke') };
     window.DMTHGame.state.addUnlockedLocation(locId);
     if (window.DMTHNotify) window.DMTHNotify.show(`🗝️ Bought private access to ${locId}.`, { type: 'success', durationMs: 4000 });
     return { ok: true, cost: g.cost };
@@ -182,7 +183,7 @@
     witnessReduction: 0.5,   // fewer witnesses → hunt exposure here halved
     wantedReduction:  0.6,   // WANTED accrued from hunts here cut 60%
     captureBoost:     0.15,  // home-turf capture-odds boost
-    passiveIncome:    120    // $/tick skim off the operation you now own
+    passiveIncome:    40     // $/tick skim per owned location — a supplement, NOT a film/john replacement (was 120, trivialized active income once you owned a few)
   });
   const OWNERSHIP_PERK_NAMES = Object.freeze([
     '🙈 The Blind Eye — the whole block has learned not to see a thing (witnesses −50%)',

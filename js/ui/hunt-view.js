@@ -14,9 +14,11 @@
     const locId = params.loc;
     const loc = window.DMTHAssets.getById('location', locId);
     if (!loc) { el.innerHTML = `<p>unknown location</p>`; return; }
-    // PLVL.2 — locked hunting ground can't be entered until its level / roster / purchase gate is met.
+    // this playthrough's rolled name for the grounds (falls back to the catalog displayName).
+    const locName = (window.DMTHGame.state && window.DMTHGame.state.locationName) ? window.DMTHGame.state.locationName(locId) : loc.displayName;
+    // locked hunting ground can't be entered until its level / roster / purchase gate is met.
     if (window.DMTHGame.progression && !window.DMTHGame.progression.isLocationUnlocked(locId)) {
-      el.innerHTML = `<div class="panel"><h2>🔒 ${loc.emoji} ${loc.displayName} — locked</h2><p class="small muted">${window.DMTHGame.progression.locationGateReason(locId)}.</p><a href="#town" class="btn-small">← back to town</a></div>`;
+      el.innerHTML = `<div class="panel"><h2>🔒 ${loc.emoji} ${locName} — locked</h2><p class="small muted">${window.DMTHGame.progression.locationGateReason(locId)}.</p><a href="#town" class="btn-small">← back to town</a></div>`;
       return;
     }
     const encounters = window.DMTHGame.hunt.rollEncounters(locId, 3);
@@ -24,7 +26,7 @@
 
     el.innerHTML = `
       <div class="panel">
-        <h2>${loc.emoji} ${loc.displayName}</h2>
+        <h2>${loc.emoji} ${locName}</h2>
         <p class="small muted">${loc.notes}</p>
         <div class="stat-row small"><span>Notoriety</span><b>${window.DMTHGame.state.current.wallet.notoriety}</b>
           <span class="muted">(experience bonus applied to acquisitions)</span></div>
@@ -76,7 +78,7 @@
       b.onclick = () => window.DMTHRouter.go('hunt');
     });
 
-    // LOOT.2 — search the area for tools/drugs/gear/cash.
+    // search the area for tools/drugs/gear/cash.
     const scavBtn = el.querySelector('#scavenge-area');
     if (scavBtn) scavBtn.onclick = () => {
       const r = window.DMTHGame.loot.scavengeLocation(locId);
@@ -121,7 +123,7 @@
     })();
   }
 
-  // CAPNAME.1 / CAPEASE.1 / CAPSTACK.1 — the SNATCH loadout. Stack any owned drugs + tools (each
+  //  /  / the SNATCH loadout. Stack any owned drugs + tools (each
   // one additively boosts the grab), then hit ONE button to drag her under. Misses don't end the
   // encounter — they make the player DESPERATE so the next grab is easier (the ~3rd is basically a
   // lock). She never escapes the snatch loop, so the player never gets stuck.
@@ -180,7 +182,7 @@
         </div>
       `;
 
-      // REQUEST.1 — pre-capture "ask her for something" panel. Three type-specific options,
+      // pre-capture "ask her for something" panel. Three type-specific options,
       // stat-rolled odds shown per option, once per game-day per girl-type per location.
       const reqInfo = (window.DMTHGame.loot && window.DMTHGame.loot.requestOptions)
         ? window.DMTHGame.loot.requestOptions(girl, locId) : { usedToday: false, options: [] };
@@ -285,7 +287,7 @@
         };
       });
 
-      // CAPSTACK.1 — toggle a tool in/out of the loadout, then re-render so the combined odds update.
+      // toggle a tool in/out of the loadout, then re-render so the combined odds update.
       el.querySelectorAll('.loadout-tool').forEach(btn => {
         btn.onclick = () => {
           const id = btn.dataset.tool;
@@ -295,7 +297,7 @@
       });
 
       // Fire the stacked grab. Success → escort + transition. Miss → desperation up, re-render
-      // (the next grab is easier). She never escapes the loop (CAPEASE.1).
+      // (the next grab is easier). She never escapes the loop .
       const snatchBtn = el.querySelector('#snatch-btn');
       if (snatchBtn) snatchBtn.onclick = async () => {
         if (selected.size === 0) return;
@@ -503,7 +505,7 @@
   // Shared placement tail — drop her from the location's spawn set, play the arrival transition,
   // then surface the "enter her hold" link. Used by both the auto-placed and hand-picked paths.
   async function finalizePlacement(resultEl, girl, locId, escort, toolIds) {
-    // LOCPERSIST.1 — she's taken; drop her from this location's persistent spawn set.
+    // she's taken; drop her from this location's persistent spawn set.
     try { window.DMTHGame.hunt.markEncounterCaptured(locId, girl.id); } catch (e) { /* non-fatal */ }
     const sceneVars = window.DMTHGame.hunt.composeSceneVars({
       girl, toolId: toolIds[0], locationId: locId, dungeonId: escort.dungeonId

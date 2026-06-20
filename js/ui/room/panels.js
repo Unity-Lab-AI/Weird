@@ -35,7 +35,7 @@
         <select id="transfer-method" class="inline-select">
           ${methods.map(([id, m]) => {
             const unlocked = T.isMethodUnlocked(id);
-            return `<option value="${id}" ${unlocked ? '' : 'disabled'}>${m.emoji} ${escapeHtml(m.displayName)} — T${m.tier}${m.cost ? ` · $${m.cost}` : ' · free'}${unlocked ? '' : ` 🔒 L${m.levelReq}`}</option>`;
+            return `<option value="${id}" ${unlocked ? '' : 'disabled'}>${m.emoji} ${escapeHtml(m.displayName)} — Tier ${m.tier}${m.cost ? ` · $${m.cost}` : ' · free'}${unlocked ? '' : ` 🔒 Level ${m.levelReq}`}</option>`;
           }).join('')}
         </select>
       </div>
@@ -78,7 +78,7 @@
       const buyLocked = T.buyStatus ? T.buyStatus(id).locked : false;
       const buyReason = T.buyLockReason ? T.buyLockReason(id) : '';
       const tip = (T.toyTooltip ? T.toyTooltip(id) : `${t.notes}${t.gore ? ' · ⚠ gore/mutilation' : ''}${t.masoFlips ? ' · a masochist craves this' : ''}`).replace(/"/g, '&quot;');
-      const lock = lvlOk ? '' : ` <span class="muted">🔒 L${t.levelReq}</span>`;
+      const lock = lvlOk ? '' : ` <span class="muted">🔒 Level ${t.levelReq}</span>`;
       let btns;
       if (isAtt) {
         btns = `<button class="btn-small btn-danger" data-toy-use="${id}" ${lvlOk ? '' : 'disabled'} data-tooltip="${tip}">Use</button>
@@ -118,7 +118,7 @@
     const rows = Object.entries(C.CONDOM_TYPES).map(([id, t]) => {
       const unlocked = C.isLevelUnlocked(id);
       const have = inv[id] || 0;
-      if (!unlocked) return `<div class="stat-row small" data-tooltip="🔒 ${t.notes.replace(/"/g, '&quot;')} — reach DEPRAVITY level ${t.levelReq}"><span>${t.emoji} ${t.displayName} 🔒</span><b>L${t.levelReq}</b></div>`;
+      if (!unlocked) return `<div class="stat-row small" data-tooltip="🔒 ${t.notes.replace(/"/g, '&quot;')} — reach DEPRAVITY level ${t.levelReq}"><span>${t.emoji} ${t.displayName} 🔒</span><b>Level ${t.levelReq}</b></div>`;
       const tip = `${t.notes}${t.blocks === false ? ' · ⚠️ does NOT block pregnancy' : ' · blocks pregnancy'}${t.pleasure ? ` · +${t.pleasure} her arousal/use` : ''}${t.indoctrination ? ` · +${t.indoctrination} indoctrination/use` : ''}`;
       return `<div class="stat-row small" data-tooltip="${tip.replace(/"/g, '&quot;')}">
         <span>${t.emoji} ${t.displayName}${have ? ` (have ${have})` : ''}</span>

@@ -9,11 +9,13 @@
     const bondMult = 1 + 0.2 * (girl.bond.bondLevel || 0);
     const kinkMult = 1 + ((girl.kinks?.length || 0) * 0.03);
     const rarityMult = girl.archetypeTemplate === 'sorority' ? 1.3 : girl.archetypeTemplate === 'unity_seed' ? 2.5 : 1;
-    // OUTFITSYNC.1 — a girl dressed in her matching girl-type outfit sells for more (Gee: "more cash
+    // a girl dressed in her matching girl-type outfit sells for more ("more cash
     // for selling girls" from the sync).
     const syncMult = window.DMTHGame.wardrobe?.syncMultiplier ? window.DMTHGame.wardrobe.syncMultiplier(girl) : 1;
+    // Family / incest taboo premium — a captive who's the seller's own blood/kin fetches more.
+    const familyMult = window.DMTHGame.girlGen?.isFamilyRelation?.(girl) ? 1.3 : 1;
     const base = 80 + statAgg * 1.2;
-    return Math.round(base * bondMult * wardrobeMult * kinkMult * rarityMult * syncMult);
+    return Math.round(base * bondMult * wardrobeMult * kinkMult * rarityMult * syncMult * familyMult);
   }
 
   function listForSale(girlId, price) {
@@ -53,7 +55,7 @@
     const listing = s.slaveMarket.available[listingIdx];
     if (!listing) throw new Error('no such listing');
     const ok = window.DMTHGame.state.spendMoney(listing.price, `buy-girl:${listing.girl.id}`);
-    if (!ok) throw new Error('insufficient funds');
+    if (!ok) throw new Error(window.DMTHGame.state.brokeLine ? window.DMTHGame.state.brokeLine() : 'broke');
     // Escort to open hold in active dungeon
     const result = window.DMTHGame.hunt.escortToHold(listing.girl, s.settings.activeDungeonId);
     s.slaveMarket.available.splice(listingIdx, 1);

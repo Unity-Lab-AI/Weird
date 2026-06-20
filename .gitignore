@@ -45,3 +45,7 @@ build/
 # === Logs ===
 *.log
 logs/
+
+# === LAW #1 — portable CLI spinner-setup helper (names the CLI tooling) must NOT ship ===
+# Lives in root so it can be handed to / copied to any project's CLI, but never goes public.
+/SPINNER-VERBS-SETUP.md

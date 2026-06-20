@@ -83,7 +83,15 @@
   // is the messiest (blood, parts moving through a market) → lowest cleanliness.
   const METHOD_CLEANLINESS = { incinerate: 0.95, trade: 0.92, 'lose-at-sea': 0.80, 'finalization-film': 0.55, bury: 0.55, dismember: 0.30, release: 0.20 };
 
-  // DEP-EXP.3 — body-part harvest. Dismemberment yields organs + intact limbs, each listed
+  //   —
+  // game-MINUTES of labor each method costs. You can't dump five bodies in five clicks: each is a
+  // real time-consuming operation — dig the grave, run the boat out past the shelf, cook her down in
+  // the furnace, butcher her on the table — and the world reconciles forward across that whole span
+  // (johns arrive, corpses decay, meters drift) while you're busy getting rid of her. Trade is a
+  // quick handoff; everything physical costs hours.
+  const METHOD_LABOR_MIN = { bury: 180, 'lose-at-sea': 240, incinerate: 150, trade: 30, release: 60, 'finalization-film': 90, dismember: 300 };
+
+  // body-part harvest. Dismemberment yields organs + intact limbs, each listed
   // in the body-part market (market.runBodyPartSaleTick). Value scales with archetype rarity +
   // her Stockholm bond (a trained, prime body fetches more). Limbs already taken as a nugget
   // (body.limbs[x] === 'removed') aren't harvestable — they're already gone.
@@ -132,7 +140,7 @@
     const facilities = dungeon?.facilities || {};
     if (method === 'incinerate' && !facilities.incinerator) return 'Requires an Incinerator facility — build it in the dungeon first.';
     if (method === 'lose-at-sea' && !facilities.boat) return 'Requires a Boat + coastal access — acquire it first.';
-    // DEPRAVITY gate (PLVL.1) — dismemberment is the highest-tier disposal; locked until level.
+    // DEPRAVITY gate  — dismemberment is the highest-tier disposal; locked until level.
     if (method === 'dismember' && window.DMTHGame.progression && !window.DMTHGame.progression.isUnlocked('dismember')) {
       return `Dismemberment is locked — reach DEPRAVITY level ${window.DMTHGame.progression.requiredLevel('dismember')} first.`;
     }
@@ -167,7 +175,13 @@
     if (method === 'trade') {
       const price = Math.round(50 + (girl.bond.bondLevel * 30) + (girl.stats.obedience || 0) * 1.5);
       window.DMTHGame.state.listGirlForSale(girl.id, price);
-      return { ok: true, method, listedPrice: price };
+      // even a handoff eats a little game-time (broker meet, paperwork).
+      const tmin = METHOD_LABOR_MIN.trade || 30;
+      if (window.DMTHGame.gameClock?.advanceBy) {
+        window.DMTHGame.gameClock.advanceBy(tmin);
+        if (window.DMTHGame.tick?.reconcileSpan) { try { window.DMTHGame.tick.reconcileSpan(tmin); } catch (e) { /* non-fatal */ } }
+      }
+      return { ok: true, method, listedPrice: price, laborMin: tmin };
     }
 
     // Finalization film — record, then dispose. D.5: NO silent swallow — if the premium
@@ -224,7 +238,7 @@
     };
     window.DMTHGame.state.addDisposal(log);
 
-    // DEP-EXP.3 — dismemberment harvests sellable body parts into the body-part market.
+    // dismemberment harvests sellable body parts into the body-part market.
     let harvested = [];
     if (method === 'dismember') {
       harvested = harvestBodyParts(girl);
@@ -244,10 +258,19 @@
     // Remove from roster
     window.DMTHGame.state.removeGirl(girl.id);
 
-    // DEPRAVITY XP (PLVL.2) — retiring a girl feeds the level; dismemberment the most.
+    // DEPRAVITY XP  — retiring a girl feeds the level; dismemberment the most.
     if (window.DMTHGame.progression) window.DMTHGame.progression.grantXp(method === 'dismember' ? 20 : 15, 'dispose:' + method);
 
-    return { ok: true, method, log, generatedFilmId, leftEvidence, trophy, harvested };
+    // disposal is a real, time-consuming operation: burn the game-time the labor takes
+    // (digging / boating / cooking / butchering), then reconcile the world for the skipped span so
+    // johns, decay, and the wallet meters all move on while you're occupied dumping her.
+    const laborMin = METHOD_LABOR_MIN[method] || 30;
+    if (window.DMTHGame.gameClock?.advanceBy) {
+      window.DMTHGame.gameClock.advanceBy(laborMin);
+      if (window.DMTHGame.tick?.reconcileSpan) { try { window.DMTHGame.tick.reconcileSpan(laborMin); } catch (e) { /* non-fatal */ } }
+    }
+
+    return { ok: true, method, log, generatedFilmId, leftEvidence, trophy, harvested, laborMin };
   }
 
   // Ollama narration of a disposal scene — called by UI after dispose() returns.
@@ -281,7 +304,7 @@
 
   window.DMTHGame = window.DMTHGame || {};
   window.DMTHGame.disposal = Object.freeze({
-    METHODS, dispose, narrateDisposal,
+    METHODS, METHOD_LABOR_MIN, dispose, narrateDisposal,
     requirementError, availableMethodsFor, ALIVE_ONLY_METHODS
   });
 })();

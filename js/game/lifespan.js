@@ -8,7 +8,7 @@
   const REAL_MS_PER_GAME_DAY = 30 * 60_000;       // 30 real minutes = 1 in-game day
   const AGING_REAL_MS_PER_GAME_YEAR = 30 * 24 * 60 * 60 * 1000; // slow — 30 real days = 1 in-game year
 
-  // Corpse usability window (CORPSE-TIMER.1) — game minutes since death. The decay timer
+  // Corpse usability window  — game minutes since death. The decay timer
   // starts the instant the corpse is made; you've got ~5 game days to make money off the body,
   // FRESH paying the most and NEAR-ROTTEN very little (whore-out necro multiplier scales down
   // with decayDays). Past the limit it's a maggot-infested mess no one wants — the UI nudges
@@ -75,7 +75,7 @@
     if (!girl) return null;
     // Dead-body decay-only branch — no vital re-evaluation.
     if (girl.encounterState === 'dead') {
-      // Death dossier backstop (DEATHSTATS.1) — catches a death from ANY path that didn't
+      // Death dossier backstop  — catches a death from ANY path that didn't
       // already build the record (idempotent). Fires the popup + saves her final snapshot.
       if (window.DMTHGame.death && !girl.deathRecord) {
         window.DMTHGame.death.ensureDeathRecord(girl.id, girl.deceasedCause);
@@ -85,7 +85,10 @@
       const patch = { body: { ...girl.body, decayedMinutes: newDecay } };
       if (newDecay >= POSTMORTEM_DECAY_LIMIT && (girl.body.decayedMinutes || 0) < POSTMORTEM_DECAY_LIMIT) {
         if (window.DMTHNotify) {
-          window.DMTHNotify.show(`☠️ ${girl.name}'s body has decayed past usability — dispose now or the smell draws attention.`, { type: 'error', durationMs: 8000 });
+          // The body is NOT "past usability" — it rots all the way down to a skeleton and the most
+          // depraved (masochist) friends will still use it (CORPSE-TRAIT-ECON). But a rotting body
+          // reeks and draws heat — dispose it, or keep cashing in the rot at rising WANTED risk.
+          window.DMTHNotify.show(`☠️ ${girl.name}'s body is rotting badly — the stench draws heat. Dispose it, or keep it: only the sickest friends will still touch it as it goes to the bone.`, { type: 'error', durationMs: 8000 });
         }
       }
       // A body left to rot past the limit is evidence — passive WANTED accrual every tick it
@@ -260,18 +263,18 @@
     if (window.DMTHGame.state.addBuzz) window.DMTHGame.state.addBuzz(opts.filmed ? -1 : -3, 'snuff:' + methodId);
     if (window.DMTHGame.wanted) window.DMTHGame.wanted.accrue('captive-death');
     if (window.DMTHGame.progression) window.DMTHGame.progression.grantXp(m.xp + (opts.filmed ? 4 : 0), 'snuff:' + methodId);
-    // LOOTALL.1 (Gee) — NO corpse-loot here: you can only loot a girl ON CAPTURE, never by killing an
+    //   — NO corpse-loot here: you can only loot a girl ON CAPTURE, never by killing an
     // already-captured one (she was stripped when you took her). The "corpsing = best loot" ladder is
     // the friend/john GIFT on a kill (loot.grantNpcGift{kill}), not looting her body.
     if (window.DMTHNotify) window.DMTHNotify.show(`☠️ ${girl.name} — ${m.displayName}${opts.filmed ? ' (premium snuff film listed)' : ''}. Her body's in the hold for postmortem use until you dispose of it.`, { type: 'error', durationMs: 7000 });
     return { ok: true, methodId, filmed: !!opts.filmed, filmId };
   }
 
-  // ---- DEATH DURING AN ACT (FRIENDKILL.1 / SNUFFBONUS.1 / DEATHBAL.1) ----
+  // ---- DEATH DURING AN ACT ( /  / ) ----
   // The lethal-finish path shared by the player's extreme acts, johns, and "friends". Flips a
   // living captive to a corpse, stamps cause + corpse marker, builds the death record, and
   // returns a SNUFF BONUS payout the caller credits to the right pocket (player wallet / john
-  // earnings). GATE (Gee): callers only fire this when the act's damage would cross her death
+  // earnings). GATE : callers only fire this when the act's damage would cross her death
   // floor (her remaining health <= the act's debuff) — so a managed, healed, robust girl is
   // never low enough for a normal act to kill her. Death is a risk you manage, not attrition.
   function killDuringAct(girlId, opts = {}) {
@@ -286,14 +289,14 @@
       body: { ...girl.body, health: 0, diedAt: window.DMTHGame.gameClock?.now?.() ?? 0, decayedMinutes: 0, corpseMarker: corpse, recentActTag: 'beaten' }
     });
     if (window.DMTHGame.death) { try { window.DMTHGame.death.ensureDeathRecord(girlId, cause); } catch (e) { /* non-fatal */ } }
-    // SNUFFBONUS.1 — a girl corpsing mid-act is PREMIUM content, not pure loss. Bonus scales with
+    // a girl corpsing mid-act is PREMIUM content, not pure loss. Bonus scales with
     // bond (a trained/broken girl dying on camera sells for more) + a flat snuff premium.
     const bondLvl = girl.bond?.bondLevel || 0;
     const snuffBonus = Math.round((opts.baseBonus || 600) * (1 + bondLvl * 0.12));
     if (window.DMTHGame.state.addBuzz) window.DMTHGame.state.addBuzz(-2, 'act-death:' + cause);
     if (window.DMTHGame.wanted) window.DMTHGame.wanted.accrue('captive-death');
     if (window.DMTHGame.progression) window.DMTHGame.progression.grantXp(14, 'act-death');
-    // LOOTALL.1 (Gee) — NO corpse-loot: a captured girl is only lootable ON CAPTURE, not by killing
+    //   — NO corpse-loot: a captured girl is only lootable ON CAPTURE, not by killing
     // her later. NPC kills still pay the SNUFF BONUS + the friend's KILLWIN gift (grantNpcGift), which
     // is the friend rewarding you — not looting her corpse.
     if (window.DMTHNotify) {

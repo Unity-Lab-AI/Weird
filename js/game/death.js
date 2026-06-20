@@ -1,4 +1,4 @@
-// DUNGEON MASTER: THE HUNT — death dossier (DEATHSTATS.1 / DEATHIMG.1 / TROPHYSTATS.1).
+// DUNGEON MASTER: THE HUNT — death dossier ( /  / ).
 // When a girl dies — by ANY path (neglect, snuff, overdose, transit) — we snapshot a full
 // DEATH RECORD: her final stats, her history (where captured, where held longest, films,
 // johns, pregnancies, chat turns), and her final living likeness. It's built ONCE (idempotent),
@@ -61,7 +61,7 @@
     const b = girl.body || {};
     const films = (window.DMTHGame.state.current?.films || []).filter(f => f.girlId === girl.id);
     const wo = girl.whoreOut?.sessionTotals || {};
-    // FRIENDKILL.1 / trophy-history — count the sadistic FRIEND visits + how hard she was used so
+    //  / trophy-history — count the sadistic FRIEND visits + how hard she was used so
     // her death record (and the trophy chosen at corpse disposal) carries what was done to her.
     const friendVisits = girl.whoreOut?.friendVisits || 0;
     const friendActs = (girl.whoreOut?.johnLedger || []).filter(e => e.isFriend).length;
@@ -69,7 +69,7 @@
     const ls = window.DMTHGame.lifespan;
     const turns = window.DMTHGame.state.getTurns ? window.DMTHGame.state.getTurns(girl.id, 200).length : 0;
     return {
-      girlId: girl.id,                 // GIRLHIST.2 — so the trophy/dossier can pull her activity timeline
+      girlId: girl.id,                 // so the trophy/dossier can pull her activity timeline
       name: girl.name,
       archetype: girl.archetypeTemplate,
       affect: girl.captiveAffect || null,

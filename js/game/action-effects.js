@@ -38,7 +38,7 @@
     // -----------------------------------------------------------------
     'feed-basic': {
       stamina: +6, health: +2, mood: +3, bondXP: +1, satisfaction: +1,
-      notes: 'Basic meal — light stamina + health restore. Modest bond.'
+      notes: 'Hand-feed your pet a basic meal — light stamina + health restore, modest bond. A fed thing learns to crave the hand that feeds it.'
     },
     'feed-gourmet': {
       stamina: +12, health: +5, mood: +6, bondXP: +3, satisfaction: +1,
@@ -54,7 +54,7 @@
     },
     'heal': {
       stamina: +10, health: +20, mood: +6, bruises: -10, satisfaction: +1,
-      notes: 'Heal — major bruise reset + meaningful health restore.'
+      notes: 'Patch your broken toy back up — major bruise wipe + real health restore, so she\'s fresh and unmarked to ruin all over again.'
     },
     'rest-tick': {                  // passive, fired from tick.js when no scene happens
       stamina: +8, health: +2, satisfaction: 0,
@@ -67,23 +67,23 @@
     // -----------------------------------------------------------------
     'love-kiss-gentle': {
       stamina: +4, health: +2, mood: +5, bondXP: +3, bondDebt: -1, satisfaction: +1,
-      notes: 'Gentle kiss — small stamina + bond bump, mood lift.'
+      notes: 'Kiss her soft and slow until she kisses back — the grooming that melts a captive into thinking she wants you. Small stamina + a bond bump, mood lift.'
     },
     'love-cuddle': {
       stamina: +8, health: +4, mood: +6, bondXP: +4, bondDebt: -2, satisfaction: +2,
-      notes: 'Cuddle — stronger stamina restore + bond bump + bondDebt forgiveness.'
+      notes: 'Pull her trembling body into yours and hold her like you love her — the warmth that makes her forgive what you did. Stronger stamina restore + bond bump + bond-debt forgiven.'
     },
     'love-praise': {
       stamina: +2, health: +1, mood: +8, bondXP: +5, bondDebt: -1, satisfaction: +1,
-      notes: 'Whispered praise — heavy mood + bond hit, minor body restore.'
+      notes: 'Whisper how good she is, what a perfect little thing she\'s becoming for you — the praise that hooks deep into a broken girl. Heavy mood + bond, minor body restore.'
     },
     'love-massage': {
       stamina: +12, health: +6, mood: +5, bondXP: +3, bondDebt: -2, satisfaction: +2,
-      notes: 'Massage — major stamina + health restore, modest bond.'
+      notes: 'Work your hands down her bare body till the fight drains out of her muscles — major stamina + health restore, modest bond. She hates how good it feels.'
     },
     'love-bathe-her': {
       stamina: +10, health: +8, mood: +6, bondXP: +4, bondDebt: -2, cumLoad: -3, satisfaction: +2,
-      notes: 'Bathe her — strong health + stamina rebuild, real intimacy. Drains cumLoad in the bath.'
+      notes: 'Strip her down and wash every inch of your property by hand — strong health + stamina rebuild, real grooming intimacy, and it rinses the cum-load out of her in the water.'
     },
     'wipe-down': {
       stamina: +2, health: +1, mood: +3, bondXP: +1, bondDebt: -1, cumLoad: -2, satisfaction: +1,
@@ -107,7 +107,7 @@
     },
     'love-aftercare': {
       stamina: +15, health: +10, mood: +10, bondXP: +6, bondDebt: -4, bruises: -2, satisfaction: +3,
-      notes: 'Full aftercare — water, blanket, treat bruises, hold her until she sleeps.'
+      notes: 'After you\'ve wrecked her — water, a blanket, salve on the bruises, hold her shaking body till she sleeps. The tenderness after the cruelty is what truly breaks her into needing you.'
     },
     'love-forehead-kiss': {
       stamina: +2, health: +1, mood: +4, bondXP: +3, bondDebt: -1, satisfaction: +1,
@@ -173,8 +173,8 @@
       stamina: -3, health: 0, mood: -2, cumLoad: +1.2, bondDebt: +2, satisfaction: +6,
       notes: 'Cum inside her pussy — adds bondDebt, fires pregnancy conception roll.'
     },
-    // PERIOD.1 — bloody-fucking acts (surfaced in the room only while she's ON her period). A taboo
-    // PREMIUM — appropriately balanced (Gee's "big boosts" = balanced): a notch above rough sex on
+    // bloody-fucking acts (surfaced in the room only while she's ON her period). A taboo
+    // PREMIUM — appropriately balanced : a notch above rough sex on
     // satisfaction, heavier humiliation, no health wreck.
     'period-fuck': {
       stamina: -16, health: -2, mood: -6, arousal: +16, wetness: +18, cumLoad: +0.9, bondDebt: +2, satisfaction: +8,
@@ -184,7 +184,7 @@
       stamina: -8, health: -1, mood: -7, arousal: +9, bondDebt: +2, satisfaction: +7,
       notes: 'Make her clean you off bloody with her mouth — degrading period oral. Strong satisfaction, real humiliation.'
     },
-    // PERIOD.2 — more on-the-rag (ragging) options (Gee). Balanced premiums.
+    // more on-the-rag (ragging) options . Balanced premiums.
     'period-creampie': {
       stamina: -15, health: -2, mood: -6, arousal: +14, wetness: +12, cumLoad: +1.0, bondDebt: +3, satisfaction: +9,
       notes: 'Breed her bloody — cum deep inside her while she\'s on the rag. Filthiest premium; fires the conception hook.'
@@ -252,7 +252,7 @@
     },
 
     // -----------------------------------------------------------------
-    // TORTURE (TORTURECAT.1) — straight-up evil, NON-sexual torture. SEVERE health damage + huge
+    // TORTURE  — straight-up evil, NON-sexual torture. SEVERE health damage + huge
     // bond-debt + mood crater + premium film/satisfaction value. These are the acts that wreck a
     // girl fast — spread across the roster or heal her between, or they kill her (several are
     // ACT_CAN_KILL). Distinct from the sexual Extreme tab.    // -----------------------------------------------------------------
@@ -376,7 +376,7 @@
     'love-massage':          'caressed',
     'love-hold-her':         'caressed',
     'love-hair-brush':       'caressed',
-    // IMGAFTERMATH.1 — fill the appearance-changing gaps so EVERY such act marks her next image.
+    // fill the appearance-changing gaps so EVERY such act marks her next image.
     'love-aftercare':        'cleaned',   // water + blanket + bruises treated → cleaned-up look
     'love-bathe-her':        'cleaned',
     'wipe-down':             'cleaned',
@@ -386,7 +386,7 @@
     'love-promise-sweet':    'kissed',
     'john-gentle':           'used',
     'john-quick':            'used',
-    // TORTURECAT.1 — torture leaves visible damage on her next image (battered / welted-raw).
+    // torture leaves visible damage on her next image (battered / welted-raw).
     'torture-rack':          'beaten',
     'torture-burn':          'beaten',
     'torture-break':         'beaten',
@@ -395,14 +395,14 @@
     'torture-flay':          'whipped',
     'torture-acid':          'whipped',
     'torture-waterboard':    'beaten',
-    // PERIOD.1 / IMGAFTERMATH.1 — bloody-fuck acts mark her next image (blood smear), TTL-faded.
+    //  / bloody-fuck acts mark her next image (blood smear), TTL-faded.
     'period-fuck':           'bloody-fucked',
     'period-oral':           'bloodied-mouth',
     'period-creampie':       'bloody-fucked',
     'period-finger':         'bloody-fucked'
   });
 
-  // KINKMATRIX.1 — classify an action into the broad category her hidden kink like/dislike keys on.
+  // classify an action into the broad category her hidden kink like/dislike keys on.
   // Returns null for acts that don't map to a kink category (feed/water/heal/rest/drug-curve admin).
   function actionCategory(actionId) {
     if (!actionId) return null;
@@ -422,22 +422,22 @@
   // a bigger health hit + bigger mood penalty.
   const STAMINA_THRESHOLD_FOR_STRAIN = 20;
 
-  // XTOL.1 — a girl absorbs ~XTOL_LIMIT extreme acts before she's spent and needs recovery
+  // a girl absorbs ~XTOL_LIMIT extreme acts before she's spent and needs recovery
   // (heal / caress / love / feed / water / time). Care acts + rest walk the streak back down;
   // pushing past the limit piles extra damage on top.
   const XTOL_LIMIT = 10;
   const EXTREME_ACTS_FOR_TOL = new Set(['extreme-facefuck', 'extreme-rough-anal', 'extreme-breeding-rape', 'extreme-degrade', 'extreme-beatdown', 'extreme-choke-out', 'masochist-overload']);
-  // TORTURECAT.1 — the dedicated evil-torture acts. They count toward extreme-act tolerance too.
+  // the dedicated evil-torture acts. They count toward extreme-act tolerance too.
   const TORTURE_ACTS = new Set(['torture-rack', 'torture-flay', 'torture-burn', 'torture-break', 'torture-waterboard', 'torture-electro', 'torture-nail', 'torture-acid']);
   for (const t of TORTURE_ACTS) EXTREME_ACTS_FOR_TOL.add(t);
 
-  // FRIENDKILL.1 / DEATHBAL.1 — acts that CAN finish a captive when they cross her death floor.
+  //  / acts that CAN finish a captive when they cross her death floor.
   // The kill only lands when her remaining health <= the act's damage (the player already got the
   // DEATHWARN confirm), so a managed/healed girl never dies to a routine act — death is a risk you
   // choose, not attrition. A girl corpsing under the player's own hands pays a snuff bonus too.
   const ACT_CAN_KILL = new Set([...EXTREME_ACTS_FOR_TOL, 'whip', 'punch', 'choke']);
 
-  // CRIMEPERK (Gee) — the more fucked-up the crime, the BIGGER the player's stat gains. This
+  // CRIMEPERK  — the more fucked-up the crime, the BIGGER the player's stat gains. This
   // multiplier scales satisfaction + sex-drive + DEPRAVITY XP by how depraved the act is, so
   // torture/extreme acts pump the player's stats far harder than vanilla use. Rewards going dark.
   function crimeMultiplier(actionId) {
@@ -447,20 +447,56 @@
     return 1;                                                // vanilla care/sex — baseline
   }
 
-  // STOCK-BUILD.1 — the ONLY way Stockholm degrades: the most extreme BRUTAL acts traumatize her
+  // the ONLY way Stockholm degrades: the most extreme BRUTAL acts traumatize her
   // and subtract bond XP (recomputed into a possible level drop). Routine use never degrades it.
   const STOCKHOLM_SETBACK = { 'extreme-beatdown': -30, 'extreme-choke-out': -22 };
-  // STOCK-BUILD.2 — trauma bonding: a rough act that isn't a brutal setback grants a sliver of
+  // trauma bonding: a rough act that isn't a brutal setback grants a sliver of
   // bond XP, so REGULAR ABUSE (alongside loving/care acts) slowly indoctrinates over game-weeks.
   const STOCKHOLM_TRAUMA_XP = 1;
 
-  // ROBUST-HP.1 — higher Stockholm lifts her MAX health ceiling above 100 (a fully-bonded captive
+  // higher Stockholm lifts her MAX health ceiling above 100 (a fully-bonded captive
   // is hardier; heal/rest can carry her up to ~130 at L9). Used everywhere health is clamped at top.
   function maxHealthFor(girl) {
     const lvl = (girl && girl.bond && girl.bond.bondLevel) || 0;
-    // SPECIALIZE.1 — a 🩹 pain-proof girl carries a higher max-health ceiling so she survives more.
+    // a 🩹 pain-proof girl carries a higher max-health ceiling so she survives more.
     const specBonus = window.DMTHGame.specialize ? window.DMTHGame.specialize.maxHealthBonus(girl) : 0;
     return 100 + Math.min(30, lvl * 3) + specBonus;
+  }
+
+  // game-minutes each physical act consumes. anchors: a kiss ~1 min, a
+  // marathon-to-death torture session ~hours (the longest single acts here run ~2 hrs; chaining
+  // them is how you burn a whole night). Exact-id lookup first, then prefix/category, then a
+  // short default. These are GAME minutes (1 real second = 1 game minute, 1440 = a game day).
+  const ACTION_DURATION_MIN = {
+    // featherweight — a moment of tenderness
+    'love-forehead-kiss': 1, 'love-kiss-gentle': 2, 'love-praise': 2, 'love-promise-sweet': 3,
+    'wipe-down': 8, 'love-lullaby': 12, 'love-hair-brush': 15, 'love-feed-by-hand': 15,
+    'love-hold-her': 20, 'love-cuddle': 25, 'love-massage': 30, 'love-bathe-her': 35,
+    'love-aftercare': 45, 'heal': 30,
+    // sex
+    'sex-oral': 15, 'sex-cum-inside': 20, 'sex-rough': 25, 'sex-gentle': 30, 'sex-anal': 30,
+    'period-finger': 10, 'period-oral': 15, 'period-creampie': 22, 'period-fuck': 25,
+    // restraint / quick violence — brutal but fast
+    'restrain': 5, 'slap': 1, 'punch': 2, 'choke': 3, 'whip': 10,
+    // extreme — long, heavy sessions
+    'extreme-choke-out': 20, 'extreme-beatdown': 25, 'extreme-facefuck': 30, 'extreme-degrade': 35,
+    'extreme-breeding-rape': 40, 'extreme-rough-anal': 45,
+    // torture — methodical, runs into the hours
+    'torture-electro': 45, 'torture-burn': 60, 'torture-waterboard': 60, 'torture-nail': 70,
+    'torture-break': 75, 'torture-acid': 80, 'torture-rack': 90, 'torture-flay': 120,
+    // johns (proxy acts) — whore-out owns john pacing; keep these modest
+    'john-quick': 8, 'john-gentle': 20, 'john-postmortem': 20, 'john-rough': 25, 'john-degrader': 30
+  };
+  const ACTION_DURATION_PREFIX = [
+    ['feed-', 10], ['water-', 5], ['love-', 15], ['sex-', 25], ['period-', 18],
+    ['extreme-', 35], ['torture-', 75], ['john-', 20]
+  ];
+  function actionDurationMin(actionId) {
+    if (ACTION_DURATION_MIN[actionId] != null) return ACTION_DURATION_MIN[actionId];
+    for (const [pfx, mins] of ACTION_DURATION_PREFIX) {
+      if (String(actionId).startsWith(pfx)) return mins;
+    }
+    return 5;   // any unlisted act burns a short default
   }
 
   // Apply an action's deltas to a girl. Optional opts:
@@ -481,7 +517,7 @@
 
     if (action.health) {
       const d = action.health < 0 ? action.health * strainMul : action.health;
-      body.health = clamp((body.health ?? 100) + d, 0, maxHealthFor(girl));   // ROBUST-HP.1 ceiling
+      body.health = clamp((body.health ?? 100) + d, 0, maxHealthFor(girl));   //  ceiling
     }
     if (action.stamina) {
       const d = action.stamina < 0 ? action.stamina * strainMul : action.stamina;
@@ -503,7 +539,7 @@
     if (action.arousal) body.arousal = clamp((body.arousal ?? 0) + action.arousal, 0, 100);
     if (action.wetness) body.wetness = clamp((body.wetness ?? 0) + action.wetness, 0, 100);
     if (action.bruises) body.bruises = clamp((body.bruises ?? 0) + (action.bruises < 0 ? action.bruises : action.bruises * strainMul), 0, 99);
-    // CUMCAP.1 — clamp cumLoad to her storage capacity (trained cap + any temporary modifier bonus).
+    // clamp cumLoad to her storage capacity (trained cap + any temporary modifier bonus).
     if (action.cumLoad) { const _cc = (window.DMTHGame.cumtool && window.DMTHGame.cumtool.effectiveCap) ? window.DMTHGame.cumtool.effectiveCap(body) : (body.cumLoadCap ?? 10); body.cumLoad = Math.max(0, Math.min(_cc, (body.cumLoad ?? 0) + action.cumLoad)); }
 
     // Mood was previously declared in 30+ ACTIONS entries but never applied. moodPressure
@@ -540,12 +576,12 @@
       const d = action.bondDebt < 0 ? action.bondDebt : action.bondDebt * strainMul;
       bond.bondDebt = Math.max(0, (bond.bondDebt ?? 0) + d);
     }
-    // STOCK-BUILD.2 — trauma bonding: a rough act (positive bondDebt) that ISN'T a brutal setback
+    // trauma bonding: a rough act (positive bondDebt) that ISN'T a brutal setback
     // and carries no explicit bondXP still grants a sliver, so regular abuse slowly indoctrinates.
     if (!STOCKHOLM_SETBACK[actionId] && action.bondDebt > 0 && !action.bondXP) {
       bond.bondXP = (bond.bondXP ?? 0) + STOCKHOLM_TRAUMA_XP;
     }
-    // STOCK-BUILD.1 — the most extreme brutal acts SET BACK indoctrination (the only degrade path).
+    // the most extreme brutal acts SET BACK indoctrination (the only degrade path).
     if (STOCKHOLM_SETBACK[actionId]) {
       bond.bondXP = Math.max(0, (bond.bondXP ?? 0) + STOCKHOLM_SETBACK[actionId]);
     }
@@ -563,11 +599,11 @@
     // John actions intentionally have satisfaction=0 in their spec (proxied service, not
     // direct intimacy). Mercy / passive ticks have 0 too. Hunting bonus draws from this
     // meter via hunt.previewCaptureOdds.
-    // PLAYERSTAM.1 — the PLAYER spends Nut Reserve + earns satisfaction/sex-drive on his OWN acts.
+    // the PLAYER spends Nut Reserve + earns satisfaction/sex-drive on his OWN acts.
     // Proxy acts performed BY a john or a "friend" (john-* ids OR opts.byJohn) must NOT credit or
     // charge the player — a friend wrecking her doesn't fill the player's tank or drain it.
     const isProxyAct = String(actionId).startsWith('john-') || opts.byJohn === true;
-    // NUGGETPERF (Gee) — performing on a NUGGET (limbless, can never escape) pays a kink + personal
+    // NUGGETPERF  — performing on a NUGGET (limbless, can never escape) pays a kink + personal
     // stat bonus: she's the ultimate helpless fuck-object, so every act on her hits +50% satisfaction
     // + sex-drive. The reward for committing to the slow saw-work of nuggeting her.
     const nuggetMul = girl.body?.isNugget ? 1.5 : 1;
@@ -578,10 +614,10 @@
     if (action.satisfaction && !isProxyAct && window.DMTHGame.state.addSatisfaction) {
       window.DMTHGame.state.addSatisfaction(action.satisfaction * perfMul, actionId);
     }
-    // SEXDRIVE.1 — sex acts feed the player's sexual-drive need (clamped to its scaling cap,
+    // sex acts feed the player's sexual-drive need (clamped to its scaling cap,
     // so one girl can't push it into the maxed boost band — you need a roster).
     if (action.satisfaction && !isProxyAct && window.DMTHGame.sexdrive) {
-      // SEXDRIVE.2 — pass girl + act so fill scales by variety (distinct girls/day) and decays
+      // pass girl + act so fill scales by variety (distinct girls/day) and decays
       // when the same act is spammed on the same girl.
       try { window.DMTHGame.sexdrive.feed(action.satisfaction * perfMul, { girlId, actId: actionId }); } catch (e) { /* non-fatal */ }
     }
@@ -589,7 +625,7 @@
     if (!isProxyAct && window.DMTHGame.playerStamina) {
       try { window.DMTHGame.playerStamina.drainForAction(actionId); } catch (e) { /* non-fatal */ }
     }
-    // WANTEDDOWN.1 — TENDERNESS cools heat a little (Gee): caring for a captive (love-/feed-/
+    // TENDERNESS cools heat a little : caring for a captive (love-/feed-/
     // water-/heal — keeping her cared-for, alive, unmarked) quietly bleeds a sliver of WANTED off,
     // so heat is a managed stat, not a wait-it-out timer.
     if (!isProxyAct && window.DMTHGame.wanted && (/^(love-|feed-|water-)/.test(actionId) || actionId === 'heal')) {
@@ -621,7 +657,7 @@
     escape.currentRisk = clamp((escape.currentRisk ?? 0.1) + escapeRiskDelta, 0, 1);
     escape.lastRiskDelta = escapeRiskDelta;
 
-    // Clothing stat bonuses (CLOTHING.1) — on a SEXUAL act, the equipped outfit boosts the
+    // Clothing stat bonuses  — on a SEXUAL act, the equipped outfit boosts the
     // player's satisfaction + her arousal; a restraint-flavored outfit also suppresses escape.
     if ((action.arousal || action.cumLoad) && window.DMTHGame.wardrobe?.outfitBonuses) {
       const ob = window.DMTHGame.wardrobe.outfitBonuses(girl);
@@ -632,7 +668,7 @@
       }
     }
 
-    // XTOL.1 — extreme-act tolerance. Extreme acts stack a streak; care/rest walk it back.
+    // extreme-act tolerance. Extreme acts stack a streak; care/rest walk it back.
     // Past the limit she's spent → extra health/stamina toll until she's recovered.
     const isExtremeAct = EXTREME_ACTS_FOR_TOL.has(actionId);
     const isRecoveryAct = actionId === 'heal' || actionId.startsWith('love-') || actionId.startsWith('feed-') || actionId.startsWith('water-');
@@ -657,14 +693,14 @@
     // are counted separately in the whore-out ledger). Persists into her death record + trophy.
     if (!isProxyAct) body.actsCommitted = (body.actsCommitted || 0) + 1;
 
-    // KINKMATRIX.1 / KINKDISC.1 — her hidden like/dislike modifies the act + is DISCOVERED on it.
+    //  / her hidden like/dislike modifies the act + is DISCOVERED on it.
     // A like buffs (mood/arousal/bond + satisfaction); a dislike debuffs (mood −, bond-debt +). The
     // first time each fires, it's revealed as a status notice. Skipped for proxy (john/friend) acts.
     let kinkPatch = null;
     if (!isProxyAct && girl.kink) {
       const cat = actionCategory(actionId);
       if (cat && cat === girl.kink.like) {
-        // PREGNEED.1 (finishing the deferred part) — a PREGNANT girl gets a BIGGER kink payoff
+        //  (finishing the deferred part) — a PREGNANT girl gets a BIGGER kink payoff
         // ("pregoo girls ... get bonius to kink"): hornier + more satisfaction on her loved act.
         const preg = girl.pregnancy && girl.pregnancy.status === 'pregnant';
         mood.moodPressure = clamp((mood.moodPressure || 0) + (preg ? 9 : 6), -60, 60);
@@ -688,7 +724,7 @@
 
     window.DMTHGame.state.updateGirl(girlId, kinkPatch ? { body, bond, mood, escape, kink: kinkPatch } : { body, bond, mood, escape });
 
-    // GIRLHIST.1 — record this act into her LIVE activity history (player acts only; johns/friends
+    // record this act into her LIVE activity history (player acts only; johns/friends
     // log themselves via the whore-out ledger + their own activity entries). Compact label + the
     // buff/debuff deltas it carried, so the running list shows what was done + how it moved her.
     if (!isProxyAct && window.DMTHGame.state.appendActivity) {
@@ -701,7 +737,7 @@
       window.DMTHGame.state.appendActivity(girlId, { kind: 'action', label: niceLabel, detail: bits.join(' · ') });
     }
 
-    // FRIENDKILL.1 / SNUFFBONUS.1 — the player's OWN extreme act finishes her when it crosses her
+    //  / the player's OWN extreme act finishes her when it crosses her
     // death floor (health hit 0 on a kill-capable act she wasn't already too healthy to survive).
     // She got the DEATHWARN confirm first, so a confirmed lethal act SHOULD kill her — and a girl
     // corpsing under your own hands still pays a snuff bonus (premium content, not pure loss).
@@ -714,14 +750,14 @@
       } catch (e) { /* non-fatal — she stays at 0 HP and the lifespan tick will catch it */ }
     }
 
-    // Breeding / cum-inside ACTIONS raise her VAGINAL cum-fill (CUMFILL.1) — sustained fill is
+    // Breeding / cum-inside ACTIONS raise her VAGINAL cum-fill  — sustained fill is
     // what conceives (pregnancy.tickCumFill timer), not this single event. Skipped when a
     // condom is equipped. Only these vaginal-cum acts feed the fill — anal/oral don't.
     const CUM_INSIDE_ACTIONS = new Set(['sex-cum-inside', 'extreme-breeding-rape', 'period-creampie']);
     const condomBlocks = window.DMTHGame.condoms ? window.DMTHGame.condoms.blocks(girl) : (girl.currentOutfit === 'condom-on');
     const holed = window.DMTHGame.condoms?.isHoled ? window.DMTHGame.condoms.isHoled(girl) : false;
     if (CUM_INSIDE_ACTIONS.has(actionId) && !condomBlocks && window.DMTHGame.pregnancy?.addVaginalCum) {
-      // PLAYERCUMLVL.1 — the player's cum-wad scales with his DEPRAVITY level (L1 ×1.0 → L12 ×1.88).
+      // the player's cum-wad scales with his DEPRAVITY level (L1 ×1.0 → L12 ×1.88).
       const cumWad = window.DMTHGame.progression?.cumWadMultiplier ? window.DMTHGame.progression.cumWadMultiplier() : 1;
       const amt = (actionId === 'extreme-breeding-rape' ? 1.6 : 1.2) * cumWad;
       try { window.DMTHGame.pregnancy.addVaginalCum(girlId, amt, { conceptionSource: 'master:' + actionId }); } catch (e) { /* non-fatal */ }
@@ -731,18 +767,36 @@
         try { window.DMTHGame.pregnancy.attemptConception(girlId, { conceptionSource: 'holed-condom:' + actionId, guaranteed: true }); } catch (e) { /* non-fatal */ }
       }
     }
-    // Condom wear-effect (CONDOMS.1) — on a sex act, the equipped condom type's pleasure +
+    // Condom wear-effect  — on a sex act, the equipped condom type's pleasure +
     // indoctrination bump (e.g. french-tickler). No-op when she's not wearing one.
     if ((action.arousal || action.cumLoad) && window.DMTHGame.condoms?.applyWearEffect) {
       try { window.DMTHGame.condoms.applyWearEffect(girlId); } catch (e) { /* non-fatal */ }
     }
 
-    // DEPRAVITY XP (PLVL.2) — every successful act feeds the player's level, weighted by how
+    // DEPRAVITY XP  — every successful act feeds the player's level, weighted by how
     // depraved it is: a gentle kiss a sliver, an extreme act a lot. satisfaction is the proxy.
     // CRIMEPERK — depraved acts also level the player's DEPRAVITY faster (scaled by crimeMul).
     if (window.DMTHGame.progression && !isProxyAct) window.DMTHGame.progression.grantXp(Math.max(1, Math.round((action.satisfaction || 1) * crimeMul)), 'action:' + actionId);
 
-    return { ok: true, action, strain: !!opts.strain, escapeRiskDelta };
+    // the act consumes GAME TIME. Burn the clock forward by the act's duration,
+    // then reconcile the deterministic per-tick accruals (consumable decay + owned-location skim +
+    // wallet meter drift) across the skipped span. Time-based systems (drug curves, lifespan aging,
+    // pregnancy gestation) self-reconcile off the now-advanced clock on the next real tick; random
+    // events (johns, raids, propositioners, market sales) intentionally do NOT fire mid-act.
+    const durMin = actionDurationMin(actionId);
+    if (durMin > 0 && window.DMTHGame.gameClock?.advanceBy) {
+      window.DMTHGame.gameClock.advanceBy(durMin);
+      if (window.DMTHGame.tick?.reconcileSpan) {
+        try { window.DMTHGame.tick.reconcileSpan(durMin); } catch (e) { /* non-fatal */ }
+      }
+      // Make a long session FELT — surface a time-passed notice for anything 45+ minutes
+      // (kisses/slaps stay silent so routine acts don't spam the player).
+      if (durMin >= 45 && window.DMTHNotify && window.DMTHGame.gameClock.formatDuration) {
+        window.DMTHNotify.show(`⏱️ ${window.DMTHGame.gameClock.formatDuration(durMin)} passed — ${window.DMTHGame.gameClock.formatNow()}`, { type: 'info', durationMs: 3500 });
+      }
+    }
+
+    return { ok: true, action, strain: !!opts.strain, escapeRiskDelta, durationMin: durMin };
   }
 
   // -----------------------------------------------------------------
@@ -798,11 +852,11 @@
     const girl = window.DMTHGame.state.getGirl(girlId);
     if (!girl) return { ok: false, reason: 'no such girl' };
     if (!LIMB_KEYS.includes(limbKey)) return { ok: false, reason: 'invalid limb' };
-    // DEPRAVITY gate (PLVL.1) — nugget-making is high-tier; locked until level (cheat bypasses).
+    // DEPRAVITY gate  — nugget-making is high-tier; locked until level (cheat bypasses).
     if (window.DMTHGame.progression && !window.DMTHGame.progression.isUnlocked('nugget')) {
       return { ok: false, reason: `nugget-making is locked — reach DEPRAVITY level ${window.DMTHGame.progression.requiredLevel('nugget')} first` };
     }
-    // TORTURE/SAWGATE (Gee) — you can't take a limb bare-handed; nuggeting needs a 🪚 Bone Saw.
+    // TORTURE/SAWGATE  — you can't take a limb bare-handed; nuggeting needs a 🪚 Bone Saw.
     // It's slow, methodical, multi-day work — the NUGGET_HEAL_GATE below makes her heal between
     // each amputation, so the whole nugget is an operation of damage + healing across game-days.
     if ((window.DMTHGame.state.current?.inventory?.['bone-saw'] || 0) < 1) {
@@ -962,7 +1016,7 @@
     if (hasMark(girl, markType)) {
       return { ok: false, reason: `she already bears a ${spec.label} — ownership marks are permanent, you can't put the same one on her twice` };
     }
-    // DEPRAVITY gate (PLVL.1) — permanent marking is high-tier; locked until level (cheat bypasses).
+    // DEPRAVITY gate  — permanent marking is high-tier; locked until level (cheat bypasses).
     if (window.DMTHGame.progression && !window.DMTHGame.progression.isUnlocked('own')) {
       return { ok: false, reason: `marking her is locked — reach DEPRAVITY level ${window.DMTHGame.progression.requiredLevel('own')} first` };
     }
@@ -1022,8 +1076,8 @@
     bruises: 'BR', cumLoad: 'CL', bondXP: 'BX', bondDebt: 'BD',
     escapeRisk: 'ER', notoriety: 'NT', satisfaction: 'SAT'
   };
-  // ── DEATHWARN.1 — lethality prediction + low-health alerts ──────────────────────────────
-  // Depraved are-you-sure lines (NOT Gee's literal examples). Rotated when an act would kill her.
+  // ── lethality prediction + low-health alerts ──────────────────────────────
+  // Depraved are-you-sure lines (NOT literal examples). Rotated when an act would kill her.
   const LETHAL_WARNINGS = [
     'she\'s hanging by a thread — do this and you\'ll feel her go limp and cold while you\'re still inside her. finish her off?',
     'one more and her heart quits mid-scream — you want to be balls-deep when the light goes out of her eyes?',
@@ -1068,7 +1122,7 @@
     }
   }
 
-  // CUMCAP.1 — train her cum-load STORAGE capacity with the Ben Wa balls (kegel trainer). Requires
+  // train her cum-load STORAGE capacity with the Ben Wa balls (kegel trainer). Requires
   // owning 'ben-wa-balls'. Each session raises cumLoadCap +2 up to a trained max of 30. Net-positive
   // (bigger payouts later); the downside lives in the economy (a full girl gets moody/restless).
   const CUMCAP_MAX = 30;
@@ -1076,7 +1130,7 @@
     const girl = window.DMTHGame.state.getGirl(girlId);
     if (!girl) return { ok: false, reason: 'no such girl' };
     const inv = (window.DMTHGame.state.current && window.DMTHGame.state.current.inventory) || {};
-    // VAGTOOL.1 — any owned vaginal trainer works (Ben Wa balls / plug / expander). Strongest wins.
+    // any owned vaginal trainer works (Ben Wa balls / plug / expander). Strongest wins.
     const items = (window.DMTHAssets && window.DMTHAssets.ITEMS) || [];
     const owned = items.filter(it => it.cumTrainer && (inv[it.id] > 0));
     if (!owned.length) return { ok: false, reason: 'you need a vaginal trainer (Ben Wa balls / plug / expander) — buy one in the shop' };
@@ -1112,7 +1166,7 @@
     return cost ? `${label}\n📊 ${cost}` : label;
   }
 
-  // TOOLTIPS-FULL.1 — THOROUGH non-truncated tooltip (Gee: "tool tips and shit need to be
+  // THOROUGH non-truncated tooltip ("tool tips and shit need to be
   // thourough ie drug types need to show theri modifiers, actions need to show there buffs and
   // debuffs for bothe the girl and the player"). Lays the full effect out in plain language,
   // split into a 👤 HER line (her body/bond buffs+debuffs) and a 🎮 YOU line (the PLAYER's gains
@@ -1262,7 +1316,7 @@
       let holdDirty = false;
       const holdPatch = hold ? { ...hold } : null;
 
-      // STARVEDAY (Gee) — the starve / deny-water punishments cut off her eating / drinking for a
+      // STARVEDAY  — the starve / deny-water punishments cut off her eating / drinking for a
       // full game day. While the timer's live she can't auto-consume (even from a plumbed faucet) —
       // her hunger/thirst clock keeps climbing. One day never kills (food grace 5 days / water 3).
       const nowMin = clock ? clock.now() : 0;
@@ -1292,7 +1346,7 @@
         window.DMTHGame.state.updateDungeon(dungeon.id, { holds: newHolds });
       }
 
-      // POOL-SUPPLY.1 — if her own hold reserve couldn't cover it, fall back to the dungeon
+      // if her own hold reserve couldn't cover it, fall back to the dungeon
       // POOL (shared evenly across holds). Only fires when she's still hungry/thirsty after the
       // hold pass above (supply.draw tries hold-first, which is already empty here, then pool).
       if (!blockDrink && !waterPlumbed && daysSinceWatered > WATER_AUTOCONSUME_DAYS && window.DMTHGame.supply?.draw) {
@@ -1325,7 +1379,7 @@
         healthDelta += ACTIONS['chronic-bruise-tick'].health;
         reasons.push('chronic-injury');
       }
-      // CUMCAP.2 — a girl stuffed near her cum-load capacity is uncomfortable: small stamina +
+      // a girl stuffed near her cum-load capacity is uncomfortable: small stamina +
       // health drain (the escape + mood cost is applied to the patch below).
       const cumRatio = (body.cumLoad || 0) / ((window.DMTHGame.cumtool && window.DMTHGame.cumtool.effectiveCap ? window.DMTHGame.cumtool.effectiveCap(body) : (body.cumLoadCap || 10)) || 10);
       const overfull = cumRatio >= 0.85;
@@ -1341,7 +1395,7 @@
         healthDelta += ACTIONS['rest-tick'].health;
       }
 
-      // STOCK-BUILD.3 — higher Stockholm makes her MORE ROBUST: negative health drain (neglect /
+      // higher Stockholm makes her MORE ROBUST: negative health drain (neglect /
       // chronic injury) is softened by her bond level. A fully-bonded captive (L9) endures ~50%
       // less; a fresh terrified one takes the full hit. Positive regen is left untouched.
       if (healthDelta < 0) {
@@ -1353,7 +1407,7 @@
       // loop and may carry self-serve updates to lastFedAt / lastWateredAt — so
       // we always persist the body, even if both deltas are zero, so those
       // timestamp resets aren't lost.
-      const newHealth = clamp((body.health ?? 100) + healthDelta, 0, maxHealthFor(girl));   // ROBUST-HP.1 ceiling
+      const newHealth = clamp((body.health ?? 100) + healthDelta, 0, maxHealthFor(girl));   //  ceiling
       // Stamina capped by health — low health pulls down the stamina ceiling.
       body.health = newHealth;
       body.stamina = clamp((body.stamina ?? 70) + staminaDelta, 0, newHealth);
@@ -1385,10 +1439,10 @@
         unlockedTier = 2;
       }
 
-      // XTOL.1 — the extreme-act streak heals down over time (rest / food / water / time).
+      // the extreme-act streak heals down over time (rest / food / water / time).
       if ((body.extremeStreak || 0) > 0) body.extremeStreak = Math.max(0, body.extremeStreak - 0.5);
 
-      // CUMCAP.2 — overfull also makes her restless + moody: small escape bump + mood dip.
+      // overfull also makes her restless + moody: small escape bump + mood dip.
       const tickPatch = { body, bonuses, _lastStaminaReasons: reasons };
       if (overfull) {
         const escape = { ...(girl.escape || {}) };
@@ -1433,14 +1487,14 @@
     // Stockholm bond — every level multiplies pay by ~10%. Cap at 1.9 (L9).
     const bondFactor = 1 + (bond.bondLevel || 0) * 0.10;
 
-    // MONEYSWEETSPOT.1 (Gee: "no one wants a fresh sority girl they want a half dead one that can
+    //  ("no one wants a fresh sority girl they want a half dead one that can
     // barily move") — stamina is NEAR-NEUTRAL now: a limp, barely-moving, used-up girl is what the
     // clientele wants, so low stamina is no longer punished (floor 0.85, full ~1.0). Spent ≠ cheap.
     const staminaFactor = stamina >= STAMINA_THRESHOLD_FOR_STRAIN
       ? 1.0
       : Math.max(0.85, 0.85 + stamina / STAMINA_THRESHOLD_FOR_STRAIN * 0.15);
 
-    // MONEYSWEETSPOT.1 — earnings PEAK on a half-dead girl, NOT a fresh one. Health is a sweet-spot
+    // earnings PEAK on a half-dead girl, NOT a fresh one. Health is a sweet-spot
     // curve: the premium "half-dead, can barely move" zone (~15-40% HP) tops out at 1.30×; a fresh
     // full-health girl is worth LESS (~0.85×, nobody wants the untouched sorority girl); and a girl
     // teetering at death's door (<8%) tapers back (buyers get wary of a corpse-in-waiting).
@@ -1464,11 +1518,14 @@
       if (mood.includes(k)) { moodFactor = v; break; }
     }
 
-    const multiplier = clamp(bondFactor * staminaFactor * healthFactor * moodFactor * outfitMul, 0.2, 3.0);
+    // Family / incest taboo premium — clients pay extra to use the operator's own blood/kin.
+    const familyFactor = (window.DMTHGame.girlGen?.isFamilyRelation?.(girl)) ? 1.25 : 1.0;
+
+    const multiplier = clamp(bondFactor * staminaFactor * healthFactor * moodFactor * outfitMul * familyFactor, 0.2, 3.5);
     return {
       multiplier,
       breakdown: {
-        bondFactor, staminaFactor, healthFactor, moodFactor, outfitMul,
+        bondFactor, staminaFactor, healthFactor, moodFactor, outfitMul, familyFactor,
         stamina, health, mood, bondLevel: bond.bondLevel || 0
       }
     };
@@ -1502,7 +1559,7 @@
     break: ['break'], waterboard: ['waterboard'], drown: ['waterboard'], electro: ['electro'], shock: ['electro'], nail: ['nail'], acid: ['acid'],
     tie: ['restrain'], bind: ['restrain'], cuff: ['restrain'], restrain: ['restrain'],
     fuck: ['sex','rough'], sex: ['sex'], use: ['rough'], ride: ['sex'],
-    // TYPEDACT.1 — care/affection synonyms so a typed player line ("let me wash you", "kiss her")
+    // care/affection synonyms so a typed player line ("let me wash you", "kiss her")
     // matches the corresponding care act. Only consulted when matchDirectedAction is called with
     // { includeCare: true } (the typed-chat path), never for a directed JOHN.
     wash: ['bathe'], bathe: ['bathe'], clean: ['bathe'], rinse: ['bathe'], shower: ['bathe'], wipe: ['wipe'],
@@ -1528,7 +1585,7 @@
   const DIRECTED_CANDIDATES = Object.keys(ACTIONS).filter(id =>
     /^(sex-|extreme-|torture-|john-)/.test(id) || ['slap','choke','whip','punch','restrain'].includes(id)
   );
-  // TYPEDACT.1 — care/affection acts are matchable too, but ONLY for a typed PLAYER line (a john
+  // care/affection acts are matchable too, but ONLY for a typed PLAYER line (a john
   // never gets directed to "wash" her). matchDirectedAction(text, {includeCare:true}) widens the pool.
   const CARE_CANDIDATES = Object.keys(ACTIONS).filter(id =>
     /^(love-|feed-|water-)/.test(id) || ['heal', 'wipe-down'].includes(id)
@@ -1559,9 +1616,51 @@
     return { actionId: best.actionId, action: best.action, score: best.score, matched: true };
   }
 
+  // -------------------------------------------------------------------------
+  // johns/friends do (nearly) ALL the player's actions, gated by trait + creep.
+  // An NPC no longer fires one fixed john-* act forever; he picks a REAL action from a tier pool
+  // gated by his nature — a JOHN by his archetype INTENSITY (1-5), a FRIEND by his CREEP level
+  // (0-10). A quiet low-intensity john might just bathe or kiss her (incl. the tame care acts);
+  // a sadist runs the extreme tier; a creep-grown friend climbs from extreme into torture. ALWAYS
+  // resolved with {byJohn:true} (the caller passes it) so the PLAYER is never credited or charged —
+  // but the GIRL still takes the act's full body/bond/mood/escape shift. A john has NO health cap,
+  // so johns top out at the bounded extreme tier (≤8 HP/act); the explicit kill-tier (beatdown /
+  // choke-out) + all torture are FRIEND-ONLY, where the ≤HP visit-cap stops an accidental snuff.
+  const NPC_TAME_ACTS    = ['love-kiss-gentle', 'love-bathe-her', 'wipe-down', 'love-cuddle', 'love-massage', 'love-hold-her', 'love-praise', 'sex-gentle', 'sex-oral'];
+  const NPC_STD_ACTS     = ['sex-gentle', 'sex-oral', 'sex-anal', 'sex-cum-inside'];
+  const NPC_ROUGH_ACTS   = ['sex-rough', 'sex-anal', 'slap', 'choke', 'extreme-facefuck'];
+  const NPC_EXTREME_ACTS = ['extreme-facefuck', 'extreme-rough-anal', 'extreme-degrade', 'extreme-breeding-rape', 'whip', 'punch', 'choke'];
+  const NPC_SNUFF_ACTS   = ['extreme-beatdown', 'extreme-choke-out', 'masochist-overload'];   // FRIEND-ONLY (HP-capped)
+  const NPC_TORTURE_ACTS = ['torture-burn', 'torture-electro', 'torture-nail', 'torture-break', 'torture-waterboard', 'torture-rack', 'torture-flay', 'torture-acid'];   // FRIEND-ONLY
+  function npcPickOne(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+  function chooseNpcAction(arc, opts = {}) {
+    const isFriend = !!opts.isFriend;
+    const fallback = (arc && arc.johnActionId) || 'john-gentle';
+    if (isFriend) {
+      const creep = Math.max(0, Math.min(10, opts.creep || 0));
+      let pool = NPC_EXTREME_ACTS.concat(NPC_ROUGH_ACTS);   // friends are extreme by nature
+      if (creep >= 3) pool = pool.concat(NPC_SNUFF_ACTS);
+      if (creep >= 6) pool = pool.concat(NPC_TORTURE_ACTS.slice(0, 4));
+      if (creep >= 9) pool = pool.concat(NPC_TORTURE_ACTS);
+      return pool.length ? npcPickOne(pool) : fallback;
+    }
+    // ~30% of johns just do their archetype's signature act (keeps quick/postmortem johns one-note
+    // + the ledger cheap); the rest pick from their intensity-gated pool.
+    if (Math.random() < 0.3) return fallback;
+    const intensity = arc ? (arc.intensity || 2) : 2;
+    let pool;
+    if (intensity <= 1)       pool = NPC_TAME_ACTS;                                  // quick john — tame
+    else if (intensity === 2) pool = NPC_TAME_ACTS.concat(NPC_STD_ACTS);             // a gentle john may wash/kiss her
+    else if (intensity === 3) pool = NPC_STD_ACTS.concat(NPC_ROUGH_ACTS, ['love-bathe-her']);
+    else if (intensity === 4) pool = NPC_ROUGH_ACTS.concat(NPC_EXTREME_ACTS);
+    else                      pool = NPC_EXTREME_ACTS.concat(NPC_ROUGH_ACTS);        // sadist — bounded extreme, no kill-tier
+    return pool.length ? npcPickOne(pool) : fallback;
+  }
+
   window.DMTHGame = window.DMTHGame || {};
   window.DMTHGame.actionEffects = Object.freeze({
     ACTIONS,
+    chooseNpcAction,
     STAMINA_THRESHOLD_FOR_STRAIN,
     XTOL_LIMIT,
     COST_CODES,

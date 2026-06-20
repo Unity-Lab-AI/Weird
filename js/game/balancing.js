@@ -53,7 +53,7 @@
     return CURVES.bondLevelXpRequired[Math.max(0, Math.min(9, level))];
   }
 
-  // STOCK-BUILD.1 — the bond LEVEL a given cumulative XP corresponds to. Used to recompute level
+  // the bond LEVEL a given cumulative XP corresponds to. Used to recompute level
   // both UP (normal indoctrination climb) and DOWN (only the most extreme acts subtract XP and can
   // knock her back). Highest level whose cumulative threshold is met.
   function bondLevelForXp(xp) {

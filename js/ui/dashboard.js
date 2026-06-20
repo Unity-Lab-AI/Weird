@@ -24,7 +24,7 @@
 
     el.innerHTML = `
       <div class="dash-stats">
-        <section class="panel" data-tooltip="DEPRAVITY — the player level. Earns XP from EVERY successful act (a kiss to a capture to a 'mass' drop). Higher level unlocks the heaviest depravities: branding (L3), extreme acts (L4), nugget-making (L6), dismemberment (L7). Cheat/sandbox start unlocks everything.">
+        <section class="panel" data-tooltip="DEPRAVITY — the player level. Earns experience from EVERY successful act (a kiss to a capture to a 'mass' drop). Higher level unlocks the heaviest depravities: branding (Level 3), extreme acts (Level 4), nugget-making (Level 6), dismemberment (Level 7). Cheat/sandbox start unlocks everything.">
           <h2>😈 Depravity</h2>
           ${(() => {
             const p = window.DMTHGame.progression;
@@ -33,16 +33,16 @@
             const nx = p.xpToNext();
             const lo = p.LEVEL_THRESHOLDS[lvl - 1] || 0;
             const pct = nx ? Math.max(0, Math.min(100, Math.round(((nx.have - lo) / Math.max(1, nx.need - lo)) * 100))) : 100;
-            return `<div class="big-num">L${lvl}</div>
+            return `<div class="big-num">Level ${lvl}</div>
               <div class="sub">"${p.titleFor(lvl)}"${p.isCheatUnlocked() ? ' · 🔓 all unlocked (cheat)' : ''}</div>
               <div class="bar"><div class="bar-fill" style="width:${pct}%;background:#8e44ad"></div></div>
-              <div class="sub small">${nx ? `${nx.have} / ${nx.need} XP → L${nx.next}` : 'MAX LEVEL — The Depraved'}</div>
+              <div class="sub small">${nx ? `${nx.have} / ${nx.need} experience → Level ${nx.next}` : 'MAX LEVEL — The Depraved'}</div>
               ${(() => {
-                // LEVELVIEW.1 — viewable detail of what the NEXT level unlocks (cum-wad growth + features).
+                // viewable detail of what the NEXT level unlocks (cum-wad growth + features).
                 const ni = p.nextLevelInfo && p.nextLevelInfo();
                 if (!ni) return '';
                 return `<details class="sub small" style="margin-top:4px" data-tooltip="What hitting the next DEPRAVITY level gets you.">
-                  <summary style="cursor:pointer">▸ Next: L${ni.level} "${ni.title}"</summary>
+                  <summary style="cursor:pointer">▸ Next: Level ${ni.level} "${ni.title}"</summary>
                   <ul style="margin:4px 0 0;padding-left:16px">${ni.perks.map(pk => `<li>${pk}</li>`).join('')}</ul>
                 </details>`;
               })()}
@@ -71,7 +71,7 @@
                 const keys = Object.keys(p.UNLOCKS).filter(k => !p.isUnlocked(k) && p.unlockFee(k) > 0);
                 if (!keys.length) return '';
                 return `<div class="sub small" style="margin-top:6px"><b>🔒 Locked — level up, or buy early:</b></div>` +
-                  keys.map(k => `<div class="stat-row small" data-tooltip="Unlock &quot;${k}&quot; now for $${p.unlockFee(k).toLocaleString()} instead of grinding to DEPRAVITY level ${p.requiredLevel(k)}."><span>${k} <span class="muted">L${p.requiredLevel(k)}</span></span><button class="btn-small" data-buy-unlock="${k}">🔓 $${p.unlockFee(k).toLocaleString()}</button></div>`).join('');
+                  keys.map(k => `<div class="stat-row small" data-tooltip="Unlock &quot;${k}&quot; now for $${p.unlockFee(k).toLocaleString()} instead of grinding to DEPRAVITY level ${p.requiredLevel(k)}."><span>${k} <span class="muted">Level ${p.requiredLevel(k)}</span></span><button class="btn-small" data-buy-unlock="${k}">🔓 $${p.unlockFee(k).toLocaleString()}</button></div>`).join('');
               })()}`;
           })()}
         </section>
@@ -115,7 +115,7 @@
                 const preg = g.pregnancy || {};
                 const pregBadge = preg.status === 'pregnant' ? ' 🤰' : '';
                 const stock = (g.bond?.bondLevel || 0) + 1;
-                return `<a class="cap-tile" href="#room?girl=${g.id}" data-tooltip="Enter ${g.name}'s hold — ${g.archetypeTemplate}, Stockholm ${stock}/10, ${hp}/${maxH} HP.">
+                return `<a class="cap-tile" href="#room?girl=${g.id}" data-tooltip="Enter ${g.name}'s hold — ${g.archetypeTemplate}, Stockholm ${stock}/10, ${hp}/${maxH} Health.">
                   <div class="cap-tile-name">${g.mood.moodEmoji} ${g.name}${pregBadge}</div>
                   <div class="cap-tile-meta"><span>⛓ Stockholm ${stock}/10</span><span>${g.archetypeTemplate}</span><span>❤️ Health ${hp}/${maxH}</span></div>
                   <div class="bar"><div class="bar-fill ${hp < maxH * 0.3 ? 'danger' : ''}" style="width:${hpPct}%"></div></div>
@@ -138,13 +138,22 @@
           const bribe = A.hasBribeContacts()
             ? `<div class="stat-row" data-tooltip="Active — a raid you can afford the bribe on (~1.6× the fine) auto-resolves with WANTED slashed and no record."><span>💰 Dirty-Cop Connections</span><b class="ok">✓ active</b></div>`
             : `<div class="stat-row" data-tooltip="One-time. Unlocks bribing a raid away — costs ~1.6× the fine but slashes WANTED far harder than a fine and leaves no escalating record."><span>💰 Dirty-Cop Connections</span><button class="btn-small" data-buy-bribe>Buy $${A.BRIBE_COST.toLocaleString()}</button></div>`;
-          return rows + bribe;
+          // the standing Dirty-Cop Payroll: pay the badges off in tiers so raids get
+          // far rarer + WANTED cools faster — the mid/end-game way to not get stopped + jailed daily.
+          const pr = A.payrollInfo ? A.payrollInfo() : null;
+          const payroll = pr
+            ? `<div class="stat-row" data-tooltip="Dirty-Cop Payroll — buy the badges off in tiers. Each tier makes raids far RARER and cools WANTED faster, so a high-heat empire isn't raided every day. Beat-Cop Envelope → Precinct Captain → City Hall's Pocket.">
+                <span>🚓 Dirty-Cop Payroll <b class="${pr.tier > 0 ? 'ok' : 'muted'}">${pr.current.name}</b>${pr.tier > 0 ? ` <span class="muted small">(raids ${Math.round((1 - A.payrollRaidMul()) * 100)}% rarer)</span>` : ''}</span>
+                ${pr.next ? `<button class="btn-small" data-buy-payroll data-tooltip="Upgrade to ${pr.next.name}: raids ${Math.round((1 - pr.next.raidMul) * 100)}% rarer + faster WANTED cooling.">${pr.next.name} — $${pr.next.cost.toLocaleString()}</button>` : '<b class="ok small">whole city owned</b>'}
+              </div>`
+            : '';
+          return rows + bribe + payroll;
         })() : '<p class="muted small">—</p>'}
       </div></details>
 
     `;
 
-    // PLAYERSTAM.2 — pop a refill item / drink girl-milk to top up Nut Reserve.
+    // pop a refill item / drink girl-milk to top up Nut Reserve.
     el.querySelectorAll('[data-pop-refill]').forEach(b => {
       b.onclick = () => {
         const r = window.DMTHGame.playerStamina.popRefill(b.dataset.popRefill);
@@ -159,7 +168,7 @@
       render(el);
     };
 
-    // PAYUNLOCK.1 — buy early access to a gated action tier.
+    // buy early access to a gated action tier.
     el.querySelectorAll('[data-buy-unlock]').forEach(b => {
       b.onclick = () => {
         const r = window.DMTHGame.progression.buyUnlock(b.dataset.buyUnlock);
@@ -182,8 +191,15 @@
       if (!r.ok) { alert(r.reason); return; }
       render(el);
     };
+    // buy / upgrade the Dirty-Cop Payroll tier.
+    const payrollBtn = el.querySelector('[data-buy-payroll]');
+    if (payrollBtn) payrollBtn.onclick = () => {
+      const r = window.DMTHGame.arrest.buyPayroll();
+      if (!r.ok) { alert(r.reason); return; }
+      render(el);
+    };
 
-    // WANTEDDOWN.1 — bribe heat down directly.
+    // bribe heat down directly.
     const wantedBribe = el.querySelector('[data-bribe]');
     if (wantedBribe) wantedBribe.onclick = () => {
       const r = window.DMTHGame.wanted.bribe(15);

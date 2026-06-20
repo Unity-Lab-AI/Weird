@@ -180,12 +180,12 @@
     drugs: {
       label: '💊 Drugs',
       actions: [
-        { emoji: '❄️',  label: 'line of coke',          text: '*cuts a line on the back of my hand, holds it out to her*', applyId: 'drug-coke' },
-        { emoji: '🌿',  label: 'share a joint',         text: '*lights a joint, takes a drag, passes it to her*', applyId: 'drug-weed' },
-        { emoji: '🥃',  label: 'whiskey shot',          text: '*pours whiskey into a tumbler, presses it to her lips*', applyId: 'drug-whiskey' },
-        { emoji: '💊',  label: 'feed her a pill',       text: '*places a pill on her tongue* swallow.', applyId: 'drug-mdma' },
-        { emoji: '🧪',  label: 'tab of acid',           text: '*places a tab on her tongue, holds her jaw shut*', applyId: 'drug-acid' },
-        { emoji: '💉',  label: 'k-shot',                text: '*jabs a small syringe into her thigh*', applyId: 'drug-ketamine' },
+        { emoji: '❄️',  label: 'rail it up her nose',     text: '*pin her head back by the hair, pack a fat rail on the blade and ram it up her nostril, clamp her face shut till she snorts the whole line*', applyId: 'drug-coke' },
+        { emoji: '🌿',  label: 'shotgun it down her lungs', text: '*pin her down, drag deep off the joint, seal my mouth over hers and force the smoke down her lungs till she chokes it in*', applyId: 'drug-weed' },
+        { emoji: '🥃',  label: 'drown her in whiskey',    text: '*wrench her jaw open and pour the whiskey straight down her throat, pinch her nose so she gulps it or drowns*', applyId: 'drug-whiskey' },
+        { emoji: '💊',  label: 'force-feed her the pill',  text: '*jam the pill past her teeth, clamp her jaw shut and stroke her throat till it goes down*', applyId: 'drug-mdma' },
+        { emoji: '🧪',  label: 'pin the tab on her tongue', text: '*pry her mouth open, press the tab onto her tongue and hold her jaw clamped shut till it soaks in*', applyId: 'drug-acid' },
+        { emoji: '💉',  label: 'k-hole her',              text: '*hold her thrashing thigh still and drive the needle in, dumping her into a k-hole while she goes limp and slack*', applyId: 'drug-ketamine' },
         { emoji: '🥛',  label: 'feed her girl-milk',   text: '*tips a glass of warm girl-milk to her lips and makes her drink every drop down*', milkDrink: true }
       ]
     },
@@ -283,7 +283,7 @@
     }
   };
 
-  // STATGATE.1 / FORCEGATE.1 — unified action gate. Returns { locked, forceable, forced, tip }.
+  //  / unified action gate. Returns { locked, forceable, forced, tip }.
   //   FORCEABLE gates (she'd REFUSE — Stockholm too low / not worn down enough) can be overridden
   //     with the 💢 FORCE toggle, at a cost (bond-debt + escape spike applied on use).
   //   HARD gates (missing tool/drug, requires-a-prior-extreme, too-hurt-floor) can NOT be forced.
@@ -310,7 +310,7 @@
     return { locked: false, tip: null };
   }
 
-  // FORCEGATE.1 — forcing a refused act costs her: a spike of bond-debt + escape-risk + a mood hit
+  // forcing a refused act costs her: a spike of bond-debt + escape-risk + a mood hit
   // (she fought it / it set her back). Applied AFTER the act resolves, only on a forced use.
   function applyForcePenalty(girlId) {
     const g = window.DMTHGame.state.getGirl(girlId);
@@ -326,7 +326,7 @@
   }
 
   function render(container, girl, mode, onSelect) {
-    // DEPRAVITY-level gating (PLVL.1) — the heaviest tabs are locked until the player levels
+    // DEPRAVITY-level gating  — the heaviest tabs are locked until the player levels
     // up (cheat/sandbox start bypasses). A locked tab can't be opened; it shows the required
     // level in a tooltip. Tab keys map 1:1 to progression UNLOCK keys.
     const prog = window.DMTHGame.progression;
@@ -335,7 +335,7 @@
     let currentTab = container.dataset.qaTab || 'force';
     if (tabLocked(currentTab)) currentTab = 'force';   // never sit on a locked tab
     const tabKeys = Object.keys(TABS);
-    // FORCEGATE.1 — the FORCE toggle: when ON, "she'd refuse" gates (Stockholm / not-worn-down)
+    // the FORCE toggle: when ON, "she'd refuse" gates (Stockholm / not-worn-down)
     // become doable on a new girl, at a cost (applyForcePenalty on each forced use).
     const forceOn = container.dataset.qaForce === '1';
     container.innerHTML = `
@@ -349,7 +349,7 @@
       </div>
       <div class="qa-grid">
         ${TABS[currentTab].actions.map((a, i) => {
-          // TOOLTIPS-FULL.1 — thorough tooltip: action text + the act's full buffs/debuffs split
+          // thorough tooltip: action text + the act's full buffs/debuffs split
           // into a 👤 HER line and a 🎮 YOU line (satisfaction / sex-drive / DEPRAVITY / Nut
           // Reserve / crime-mult). data-tooltip → DMTHTooltips styled multi-line bubble, no
           // native-title truncation. Ownership marks live in MARK_SPECS, not ACTIONS.
@@ -362,7 +362,7 @@
           } else {
             tip = a.text;
           }
-          // STATGATE.1 / FORCEGATE.1 — unified gate (Stockholm + HP-threshold both ways + after-
+          //  / unified gate (Stockholm + HP-threshold both ways + after-
           // extreme + tool). Forceable gates open under the 💢 FORCE toggle (at a cost on use).
           const g = gateOf(a, girl, forceOn);
           const locked = g.locked;
@@ -382,7 +382,7 @@
         render(container, girl, mode, onSelect);
       };
     });
-    // FORCEGATE.1 — toggle FORCE on/off, then re-render so forceable gates flip.
+    // toggle FORCE on/off, then re-render so forceable gates flip.
     const forceBtn = container.querySelector('#qa-force-toggle');
     if (forceBtn) forceBtn.onclick = () => {
       container.dataset.qaForce = (container.dataset.qaForce === '1') ? '0' : '1';
@@ -393,12 +393,12 @@
         const idx = parseInt(b.dataset.qaIdx, 10);
         const action = TABS[currentTab].actions[idx];
         if (!action) return;
-        // STATGATE.1 / FORCEGATE.1 — unified gate. A hard gate blocks outright; a forceable gate
+        //  / unified gate. A hard gate blocks outright; a forceable gate
         // blocks UNLESS the 💢 FORCE toggle is on (then it resolves but levies a force penalty).
         const forcedNow = container.dataset.qaForce === '1';
         const g = gateOf(action, girl, forcedNow);
         if (g.locked) { alert(g.tip); return; }
-        // DEATHWARN.1 — if this act would likely KILL her, throw a depraved confirm first.
+        // if this act would likely KILL her, throw a depraved confirm first.
         if (action.applyId && girl?.id && window.DMTHGame?.actionEffects?.wouldBeLethal
             && window.DMTHGame.actionEffects.wouldBeLethal(girl.id, action.applyId)) {
           if (!confirm(window.DMTHGame.actionEffects.lethalWarningLine())) return;
@@ -433,18 +433,18 @@
           const r = window.DMTHGame.milk.drinkGirl(girl.id);
           if (!r.ok) { alert(r.reason); return; }
         }
-        // CUMCAP.1 — train her cum-load storage capacity (needs Ben Wa balls). Refused if unowned/maxed.
+        // train her cum-load storage capacity (needs Ben Wa balls). Refused if unowned/maxed.
         if (action.cumTrain && girl?.id && window.DMTHGame?.actionEffects?.trainCumCapacity) {
           const r = window.DMTHGame.actionEffects.trainCumCapacity(girl.id);
           if (!r.ok) { alert(r.reason); return; }
         }
-        // Suck milk straight from her breast (MILK.2) — bonus boost, no rig needed. Refused
+        // Suck milk straight from her breast  — bonus boost, no rig needed. Refused
         // (turn not sent) if she isn't lactating.
         if (action.milkSuck && girl?.id && window.DMTHGame?.milk?.suckFromBreast) {
           const r = window.DMTHGame.milk.suckFromBreast(girl.id);
           if (!r.ok) { alert(r.reason); return; }
         }
-        // STARVEDAY (Gee) — the "starve her today" punishment CUTS OFF her eating for a full game
+        // STARVEDAY  — the "starve her today" punishment CUTS OFF her eating for a full game
         // day: sets body.starveUntil; the tick's auto-consume skips food while it's active. One day
         // of no food never kills her (FOOD_GRACE_DAYS = 5 game days before health even drops).
         if (action.starveDay && girl?.id) {
@@ -454,7 +454,7 @@
           window.DMTHGame.state.updateGirl(girl.id, { body: { ...(g0?.body || {}), starveUntil: now + dayMin } });
           if (window.DMTHNotify) window.DMTHNotify.show(`🥣 ${g0?.name || 'She'} gets NOTHING to eat for 24 game-hours — food cut off.`, { type: 'warn', durationMs: 4500 });
         }
-        // STARVEDAY (Gee: "and do water too") — deny-water punishment cuts off drinking for a full
+        // STARVEDAY  — deny-water punishment cuts off drinking for a full
         // game day (body.thirstUntil). One day of no water never kills (WATER_GRACE_DAYS = 3 days).
         if (action.thirstDay && girl?.id) {
           const now = window.DMTHGame.gameClock ? window.DMTHGame.gameClock.now() : 0;
@@ -502,7 +502,7 @@
             window.DMTHGame.state.updateGirl(girl.id, { body });
           }
         }
-        // FORCEGATE.1 — a forced act (she'd have refused) sets her back: bond-debt + escape spike + mood hit.
+        // a forced act (she'd have refused) sets her back: bond-debt + escape spike + mood hit.
         if (g.forced && girl?.id) applyForcePenalty(girl.id);
         onSelect(action.text);
       };

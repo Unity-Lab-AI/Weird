@@ -271,9 +271,9 @@
       .sort((a, b) => a.chance - b.chance);
   }
 
-  // --- CAPEASE.1 — DESPERATION model (REVERSES the old tightening escalation) ---
+  // --- DESPERATION model (REVERSES the old tightening escalation) ---
   //
-  // Gee: the grab must NOT be the boring stuck part — no endless missing, no getting stuck. Each
+  // the grab must NOT be the boring stuck part — no endless missing, no getting stuck. Each
   // failed grab makes the PLAYER more desperate and the NEXT attempt EASIER (an additive bonus),
   // so two misses in a row means the third grab is basically a guaranteed win. She no longer
   // "escapes" from repeated attempts — you always run her down, it just takes a beat or two.
@@ -297,7 +297,7 @@
   function desperationLabel(tier) { return DESPERATION_LABELS[Math.min(tier || 0, DESP_MAX_TIER)] || 'frenzied'; }
   function desperationNarration(tier) { return DESPERATION_NARRATION[Math.min(tier || 0, DESP_MAX_TIER)]; }
 
-  // CAPDEBUFF.1 — per-tool debuff applied to the girl AT the grab. Gee: the COMBINED effects of
+  // per-tool debuff applied to the girl AT the grab. the COMBINED effects of
   // every drug/tool/equipment you used (consciousness, mood, health, etc.) debuff her starting
   // captive stats in TOTALITY — a rohi + pipe + cuffs grab leaves her bruised, dazed, sedated and
   // bound at the start of captivity. Blunt tools do real health damage + bruises; chemicals leave
@@ -342,7 +342,7 @@
     }
   }
 
-  // CAPWANTED.1 — heat from a grab scales by the BEST tool tier used. Higher-tier gear is cleaner
+  // heat from a grab scales by the BEST tool tier used. Higher-tier gear is cleaner
   // (quiet sedatives, pro restraints) → far less WANTED heat + suspicion; crude low-tier grabs
   // (a pipe in the open, tape) draw the most. "higher teir items have less negatives more positives."
   function bestToolTier(toolIds) {
@@ -356,7 +356,7 @@
   // Heat for a successful grab — 0..~3, shrinking with tier. Tier 4+ = a clean, quiet snatch.
   function captureHeat(toolIds) { return Math.max(0, 3 - bestToolTier(toolIds) * 0.7); }
 
-  // CAPSTACK.1 — combine MULTIPLE selected drugs+tools into one grab. Each one stacks toward the
+  // combine MULTIPLE selected drugs+tools into one grab. Each one stacks toward the
   // snatch (probabilistic OR — every tool is an independent shot at landing her, so more gear =
   // higher chance), then the CAPEASE desperation bonus is added on top. Clamped 5-98%.
   function stackedChance(toolIds, desperationTier) {
@@ -371,7 +371,7 @@
   // Fire a grab with a loadout of selected tools/drugs. On success, escort her to the active
   // dungeon's first open hold via hunt.js. On a miss, bump location suspicion + the player's
   // DESPERATION tier (the next grab gets EASIER) — she never "escapes" from repeated attempts,
-  // so the player never gets stuck (CAPEASE.1). Single-use tools in the loadout are consumed per
+  // so the player never gets stuck . Single-use tools in the loadout are consumed per
   // attempt; reusable ones (pipe / handcuffs / shackles / harness) survive.
   function stackedAttempt({ girl, toolIds, locationId, desperationTier = 0, holdChoice = null }) {
     const ids = (toolIds || []).filter(id => SIMPLE_CAPTURE_CHANCE[id] != null);
@@ -380,7 +380,7 @@
     // when every hold is full, so the player gets a clean "go get another hold/dungeon" lockout.
     const holdsBefore = window.DMTHGame.hunt && window.DMTHGame.hunt.openHolds ? window.DMTHGame.hunt.openHolds() : [];
     if (!holdsBefore.length) return { outcome: 'no-hold', reason: 'no-free-hold', desperationTier };
-    // WANTEDDOWN.1 — stamp hunting activity so "time off from hunting" cools WANTED faster.
+    // stamp hunting activity so "time off from hunting" cools WANTED faster.
     if (window.DMTHGame.wanted?.noteHunt) window.DMTHGame.wanted.noteHunt();
     const inv = window.DMTHGame.state.current.inventory || {};
     for (const id of ids) {
@@ -395,12 +395,12 @@
     const roll = Math.random();
     if (roll < chance) {
       try {
-        // CAPDEBUFF.1 — the COMBINED debuff from the whole loadout hits her starting captive stats
+        // the COMBINED debuff from the whole loadout hits her starting captive stats
         // (health/bruises/dazed/sedated/mood/escape) in totality. Apply BEFORE escort so it persists.
         applyCaptureDebuffs(girl, ids);
-        // CAPWANTED.1 — heat from the grab scales by tool tier (higher tier = cleaner = less heat).
+        // heat from the grab scales by tool tier (higher tier = cleaner = less heat).
         let heat = captureHeat(ids);
-        // BUYLOCATION.1 — owning this turf (greased badges) cuts the WANTED heat from a grab here.
+        // owning this turf (greased badges) cuts the WANTED heat from a grab here.
         const op = window.DMTHGame.progression?.ownedLocationPerks ? window.DMTHGame.progression.ownedLocationPerks(locationId) : null;
         if (op && op.wantedReduction) heat = heat * (1 - op.wantedReduction);
         if (heat > 0 && window.DMTHGame.state.addWanted) window.DMTHGame.state.addWanted(heat, 'snatch:' + bestToolTier(ids));
@@ -419,21 +419,21 @@
         } else {
           escort = window.DMTHGame.hunt.escortToHold(girl);   // safety net (shouldn't reach — guarded)
         }
-        // LOOT.1 — a successful grab drops location-aware loot (a tool from the scene, or cash).
+        // a successful grab drops location-aware loot (a tool from the scene, or cash).
         let loot = null;
         if (window.DMTHGame.loot) { try { loot = window.DMTHGame.loot.rollCaptureLoot(locationId); } catch (e) { /* non-fatal */ } }
-        // REQUEST.1 — strip her stash on the grab: 2-5 of EACH item her girl-type offered.
+        // strip her stash on the grab: 2-5 of EACH item her girl-type offered.
         let haul = null;
         if (window.DMTHGame.loot && window.DMTHGame.loot.grantCaptureHaul) { try { haul = window.DMTHGame.loot.grantCaptureHaul(girl); } catch (e) { /* non-fatal */ } }
-        // DEPRAVITY XP (PLVL.2) — a successful snatch is a big level boost.
+        // DEPRAVITY XP  — a successful snatch is a big level boost.
         if (window.DMTHGame.progression) window.DMTHGame.progression.grantXp(25, 'snatch');
         return { outcome: 'success', toolIds: ids, chance, roll, escort, needsHoldPick, openHolds: holds, desperationTier, loot, haul, consumed };
       } catch (err) {
         return { outcome: 'success-no-room', toolIds: ids, chance, roll, error: err.message, desperationTier, consumed };
       }
     }
-    // Miss — desperation rises (next grab easier), a little location heat. NO escape (CAPEASE.1).
-    // CAPWANTED.1 — a clean high-tier loadout botches QUIETLY: tier 3+ adds no suspicion/heat,
+    // Miss — desperation rises (next grab easier), a little location heat. NO escape .
+    // a clean high-tier loadout botches QUIETLY: tier 3+ adds no suspicion/heat,
     // crude low-tier grabs draw the usual blip.
     const s = window.DMTHGame.state.current;
     const tier = bestToolTier(ids);

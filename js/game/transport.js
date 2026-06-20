@@ -1,4 +1,4 @@
-// DUNGEON MASTER: THE HUNT — inter-dungeon transport (TRANSPORT.1).
+// DUNGEON MASTER: THE HUNT — inter-dungeon transport .
 // Moving a captive between your dungeons is a RISKY operation, not a free teleport. You pick
 // a method — stuffing her in a duffel bag is free but rough and likely to hurt her, draw heat,
 // or let her wriggle loose; a private medical transport costs real money but is fast, discreet,
@@ -87,7 +87,7 @@
 
   // Other dungeons (not the girl's current one) that have at least one open hold — valid
   // transport destinations. Returns [{ id, templateId, displayName, openHolds }].
-  // Valid destinations with an open hold. For a CORPSE (CORPSE-MOVE.1) the CURRENT dungeon is
+  // Valid destinations with an open hold. For a CORPSE  the CURRENT dungeon is
   // also a valid destination (hold-to-hold repositioning) as long as a different hold is open.
   function destinationsFor(girl) {
     const s = window.DMTHGame.state.current;
@@ -124,7 +124,7 @@
       const pool = m.requiresItemAny || [m.requiresItem];
       return { ok: false, reason: `needs a sedative (${pool.join(' / ')})` };
     }
-    if ((window.DMTHGame.state.current?.wallet?.money || 0) < m.cost) return { ok: false, reason: 'insufficient funds' };
+    if ((window.DMTHGame.state.current?.wallet?.money || 0) < m.cost) return { ok: false, reason: (window.DMTHGame.state.brokeLine ? window.DMTHGame.state.brokeLine() : 'broke') };
     return { ok: true };
   }
 
@@ -140,7 +140,7 @@
 
     // Pay the toll up front (cash + — for a LIVE move only — a sedative).
     if (m.cost > 0 && !window.DMTHGame.state.spendMoney(m.cost, `transport:${methodId}:${girlId}`)) {
-      return { ok: false, reason: 'insufficient funds' };
+      return { ok: false, reason: (window.DMTHGame.state.brokeLine ? window.DMTHGame.state.brokeLine() : 'broke') };
     }
     if (!isCorpse && (m.requiresItem || m.requiresItemAny)) {
       const sed = sedativeInInventory(m);
@@ -154,7 +154,7 @@
       window.DMTHGame.state.updateDungeon(srcDungeon.id, { holds: nh });
     }
 
-    // ── CORPSE MOVE (CORPSE-MOVE.1) — no risk roll, she's already dead. Clean body haul to
+    // ── CORPSE MOVE  — no risk roll, she's already dead. Clean body haul to
     // another hold (same or different dungeon). Costs cash + a little WANTED (moving a body
     // draws eyes; rougher/cheaper methods more). Preserves the corpse + its decay timer. ──
     if (isCorpse) {
@@ -242,7 +242,7 @@
     const patch = {
       assignedDungeonId: destDungeon.id,
       assignedHoldIdx: openIdx,
-      // Track the move for the death dossier's "held longest at" stat (DEATHSTATS.1).
+      // Track the move for the death dossier's "held longest at" stat .
       dungeonHistory: [...(girl.dungeonHistory || []), { dungeonId: destDungeon.id, at: Date.now() }],
       body,
       // A rough move adds bond-debt (resentment); the gentle med-transport pays a little down.

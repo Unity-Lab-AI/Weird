@@ -25,7 +25,8 @@
     'corpse-content-sale':  7,   // selling necro / postmortem content draws the worst heat
     'decay-discovery':      1,   // per-tick pressure from a rotting body left past the limit
     'release-low-bond':    12,   // letting a non-bonded captive walk — she rats
-    'john-disgust':         4    // a john recoiled at something and talked
+    'john-disgust':         4,   // a john recoiled at something and talked
+    'suspicious-purchase':  0.4  // a hair of heat per suspicious item bought (duct tape, chems, restraints, saws…) — scaled up by tier + qty at the call site, capped; mundane food/water/contraception never trips it
   });
 
   // Tier bands (ascending by `min`). Each carries the hunt-odds liability and the per-tick
@@ -115,7 +116,9 @@
     if (!s || !(s.wallet.wanted > 0)) return;
     const ticksSinceHunt = (s.tickCount || 0) - (s._lastHuntTick || 0);
     const layingLow = ticksSinceHunt > 20;   // ~haven't hunted in a while → heat cools faster
-    s._wantedDrift = (s._wantedDrift || 0) + DECAY_PER_TICK * (layingLow ? 2.5 : 1);
+    // the Dirty-Cop Payroll cools heat faster on top of laying low.
+    const payrollCool = (window.DMTHGame.arrest && window.DMTHGame.arrest.payrollDecayBonus) ? window.DMTHGame.arrest.payrollDecayBonus() : 0;
+    s._wantedDrift = (s._wantedDrift || 0) + DECAY_PER_TICK * (layingLow ? 2.5 : 1) + payrollCool;
     if (s._wantedDrift >= 1) {
       const amount = Math.floor(s._wantedDrift);
       s.wallet.wanted = Math.max(0, s.wallet.wanted - amount);

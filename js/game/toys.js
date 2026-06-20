@@ -118,10 +118,14 @@
     if (!t) return { ok: false, reason: 'unknown toy' };
     const st = buyStatus(id);
     if (st.locked) return { ok: false, reason: 'locked — needs ' + (st.unmet.join(' + ') || 'more progress') };
-    if (!window.DMTHGame.state.spendMoney(t.cost, 'toy:' + id)) return { ok: false, reason: 'insufficient funds' };
+    if (!window.DMTHGame.state.spendMoney(t.cost, 'toy:' + id)) return { ok: false, reason: (window.DMTHGame.state.brokeLine ? window.DMTHGame.state.brokeLine() : 'broke') };
     window.DMTHGame.state.addItem(id, 1);
+    // Every toy is suspicious gear — buying one leaves a paper trail. A hair of heat, scaled
+    // by how heinous the implement is (its level-req), the same micro-bump shop purchases take.
+    let wantedBump = 0;
+    if (window.DMTHGame.wanted) wantedBump = window.DMTHGame.wanted.accrue('suspicious-purchase', 1 + (t.levelReq || 0) * 0.5);
     if (window.DMTHNotify) window.DMTHNotify.show(`${t.emoji} Bought ${t.name} ($${t.cost.toLocaleString()}) — added to your inventory. Mount it in a hold to use it.`, { type: 'success', durationMs: 4500 });
-    return { ok: true, id, cost: t.cost };
+    return { ok: true, id, cost: t.cost, wantedBump };
   }
 
   function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }

@@ -133,20 +133,20 @@ Then open `http://localhost:8000` in your browser.
 
 ---
 
-## Deploy to GitHub Pages
+## Deploy to a static host
+
+The game is a pure static site — no build step, no bundler, plain HTML + JS + CSS. Drop the repository's files behind any static web host (or a static-pages feature of your git host) and serve them as-is; the entry point is `index.html`.
 
 ```bash
 git init
 git add .
 git commit -m "DUNGEON MASTER: THE HUNT initial"
 git branch -M main
-git remote add origin https://github.com/<you>/<repo>.git
+git remote add origin <your-static-host-or-git-remote>
 git push -u origin main
 ```
 
-Enable GitHub Pages: **Settings → Pages → Source: main → Save.** Site goes live at `https://<you>.github.io/<repo>/`.
-
-No build step. No bundler. Plain HTML + JS + CSS.
+Point the host's pages/static-serve feature at the served branch and the site goes live at whatever URL your host assigns. Nothing runs on a server — Ollama is the visitor's local machine, Kokoro runs in their browser, Pollinations is called client-side with the visitor's own key.
 
 ### What's NOT deployed
 

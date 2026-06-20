@@ -56,7 +56,7 @@
         <h2>Disposal log (${s.disposals.length})</h2>
         ${s.disposals.length === 0 ? `<p class="muted small">No disposals yet.</p>` :
           `<ul class="small">${s.disposals.slice(-10).reverse().map(d =>
-            `<li>${new Date(d.disposalDate).toLocaleDateString()} — <b>${d.girlNameAtDisposal}</b> — ${d.method} — L${d.finalBondLevel}${d.generatedFilmId ? ' · film recorded' : ''} · +${d.notorietyImpact} notoriety</li>`
+            `<li>${new Date(d.disposalDate).toLocaleDateString()} — <b>${d.girlNameAtDisposal}</b> — ${d.method} — Level ${d.finalBondLevel}${d.generatedFilmId ? ' · film recorded' : ''} · +${d.notorietyImpact} notoriety</li>`
           ).join('')}</ul>`
         }
       </div>
@@ -73,7 +73,7 @@
       const preg = g.pregnancy || {};
       const pregBadge = preg.status === 'pregnant' ? ' 🤰' : '';
       const pregMeta = preg.status === 'pregnant'
-        ? `<span class="muted small" data-tooltip="🤰 Pregnant — gestation day ${preg.gestationDays}/280 (trimester ${preg.trimester})">🤰T${preg.trimester}·d${preg.gestationDays}</span>`
+        ? `<span class="muted small" data-tooltip="🤰 Pregnant — gestation day ${preg.gestationDays}/280 (trimester ${preg.trimester})">🤰Trimester ${preg.trimester} · day ${preg.gestationDays}</span>`
         : preg.status === 'aborted' ? `<span class="muted small" data-tooltip="Pregnancy aborted">⚪aborted</span>`
         : preg.status === 'miscarried' ? `<span class="muted small" data-tooltip="Miscarried (complication)">🩸miscarried</span>`
         : preg.status === 'birthed' ? `<span class="muted small" data-tooltip="Birthed">🍼birthed</span>`
@@ -84,10 +84,10 @@
           <div class="girl-emoji">${g.mood.moodEmoji}</div>
           <div class="girl-name">${g.name}${pregBadge}</div>
           <div class="girl-meta">
-            <span data-tooltip="Stockholm rating L${g.bond.bondLevel}/9 — captivity bond level. Higher = lower escape risk + bigger pay multiplier when whoring out.">⛓ Stockholm L${g.bond.bondLevel}</span>
+            <span data-tooltip="Stockholm rating Level ${g.bond.bondLevel}/9 — captivity bond level. Higher = lower escape risk + bigger pay multiplier when whoring out.">⛓ Stockholm Level ${g.bond.bondLevel}</span>
             <span>${g.archetypeTemplate}</span>
-            <span>🩸${g.body.bruises}</span>
-            ${ls ? `<span>${ls.daysCaptive}d</span>` : ''}
+            <span data-tooltip="Bruise count.">🩸${g.body.bruises}</span>
+            ${ls ? `<span>${ls.daysCaptive} days held</span>` : ''}
             ${pregMeta}
           </div>
           ${ls ? `<div class="small muted">${ls.label}</div>` : ''}

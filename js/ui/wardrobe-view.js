@@ -57,50 +57,10 @@
       </div>
 
       <div class="panel">
-        <h2>🧵 The Carcass Closet <span class="small muted">— buy outfits into your inventory, then apply them to any girl (you can stockpile duplicates; her captured-at outfit is hers forever)</span></h2>
-        <div class="girl-grid">
-          ${window.DMTHGame.wardrobe.catalog().map(o => {
-            const W = window.DMTHGame.wardrobe;
-            const inWardrobe = owned.has(o.id);
-            const equipped = girl.currentOutfit === o.id;
-            const invQty = W.ownedQty(o.id);
-            const st = W.clothingStatus(o.id);
-            const lockReason = (st.unmet || []).join(' + ');
-            const cardTip = (o.description || '').replace(/"/g, '&quot;');
-            const canAfford = money >= o.price;
-            // Buy button (into shared inventory) — gated.
-            const buyBtn = st.locked
-              ? `<button class="btn-small" disabled data-tooltip="Locked — needs ${lockReason}. Buying adds it to your inventory; then apply it to a girl.">🔒 ${lockReason}</button>`
-              : `<button class="btn-small ${canAfford ? 'btn-primary' : ''}" data-buy="${o.id}" ${canAfford ? '' : 'disabled'} data-tooltip="Buy 1 into your inventory ($${o.price.toLocaleString()}). Stackable — hoard as many as you want, then apply to any girl.">${canAfford ? `Buy $${o.price.toLocaleString()}` : 'Too poor'}</button>`;
-            // Apply button (consume from inventory onto her) — available when held in inventory or already in her wardrobe.
-            const applyBtn = equipped
-              ? `<div class="small gold">EQUIPPED</div>`
-              : (invQty > 0 || inWardrobe)
-                ? `<button class="btn-small" data-apply="${o.id}" data-tooltip="${inWardrobe ? 'Re-equip this on her (already in her wardrobe — no inventory used).' : `Apply one from inventory onto ${girl.name} (consumes 1, equips it).`}">${inWardrobe ? 'Equip' : 'Apply to her'}</button>`
-                : '';
-            return `<div class="model-card" data-tooltip="${cardTip}">
-              <div class="model-name">${o.emoji} ${o.displayName}</div>
-              <div class="model-notes small">${o.description}</div>
-              <div class="model-meta">
-                <span data-tooltip="Purchase cost in dollars">$${o.price}</span>
-                <span data-tooltip="Outfit tier — higher tier = more elaborate, costlier, bigger film-value multiplier, later unlock">tier ${o.tier}</span>
-                <span data-tooltip="Multiplies film sale price when she's wearing this outfit during recording">×${o.multiplier} film value</span>
-                <span data-tooltip="How many of this outfit you're holding in your inventory">inv: ${invQty}</span>
-              </div>
-              <div style="display:flex;gap:4px;flex-wrap:wrap">${buyBtn}${applyBtn}</div>
-            </div>`;
-          }).join('')}
-        </div>
+        <p class="small muted">🧵 Out of outfits? Buy more at <a href="#clothing-store">The Carcass Closet</a> (Stores hub) — everything stockpiles in your inventory, then comes back here to dress her. <span class="muted">(: buying lives at the storefront now; this page is for dressing her from what you own.)</span></p>
       </div>
     `;
 
-    el.querySelectorAll('[data-buy]').forEach(b => {
-      b.onclick = () => {
-        const r = window.DMTHGame.wardrobe.buyToInventory(b.dataset.buy);
-        if (!r.ok) { alert(r.reason); return; }
-        window.DMTHRouter.handle();
-      };
-    });
     el.querySelectorAll('[data-apply]').forEach(b => {
       b.onclick = () => {
         const r = window.DMTHGame.wardrobe.applyToGirl(girl.id, b.dataset.apply);

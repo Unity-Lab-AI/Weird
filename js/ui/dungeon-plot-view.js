@@ -37,7 +37,7 @@
               <div class="stat-row small"><span>Cost</span><b>$${f.cost.toLocaleString()}</b></div>
               <p class="small muted">Click an empty slot above first, then pick here.</p>
               <button class="btn-small ${money >= f.cost ? 'btn-primary' : ''}" data-add-facility="${f.id}" ${money >= f.cost ? '' : 'disabled'}>
-                ${money >= f.cost ? 'Prepare' : 'Too poor'}
+                ${money >= f.cost ? 'Prepare' : (window.DMTHGame.state.brokeShort ? window.DMTHGame.state.brokeShort() : 'broke')}
               </button>
             </div>
           `).join('')}

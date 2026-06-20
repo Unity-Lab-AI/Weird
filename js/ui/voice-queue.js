@@ -24,7 +24,7 @@
   let activeToken = 0;
   let activeAudio = null;
 
-  // Threshold under which we pass the whole text to Kokoro as ONE generation. Gee (2026-06-18):
+  // Threshold under which we pass the whole text to Kokoro as ONE generation. (2026-06-18):
   // play the FULL response in a single clip — chat replies (girls + johns) are short, so
   // per-sentence splitting just stacked 5-6 separate Kokoro round-trips and a wall of loading
   // time for one little reply. Raised way up so a whole turn is one fast generation; only a rare

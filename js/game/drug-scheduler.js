@@ -28,7 +28,7 @@
     tranquilizer: { onsetMin: 5, peakMin: 10, wearOffMin: 240, highContribution: 100, speechEffect: 'unconscious', stackable: false, itemId: 'tranquilizer' }
   };
 
-  // ---- FORCED ADDICTION + WITHDRAWAL (DEP-EXP.2) ----
+  // ---- FORCED ADDICTION + WITHDRAWAL  ----
   // Per-dose addiction gain. Forced dosing racks up body.addiction[drug] (0-100). Weed
   // barely hooks; coke/mdma/ketamine hook hard. tranquilizer is a medical knockout, not a
   // recreational hook → 0. When addiction is high AND she's cut off from that drug she goes
@@ -38,13 +38,13 @@
   const WITHDRAWAL_THRESHOLD = 30;       // addiction must exceed this for that drug to bite
   const ADDICTION_DECAY_PER_TICK = 0.5;  // slow clear — toughing out withdrawal eventually works
 
-  // ---- OVERDOSE TOXICITY (ODSPAM.1) ----
-  // Spamming a hard drug in a row kills (Gee 2026-06-18: "10 x molly in a row shes dead for
+  // ---- OVERDOSE TOXICITY  ----
+  // Spamming a hard drug in a row kills (2026-06-18: "10 x molly in a row shes dead for
   // sure then u got a corpse to make extra money"). Each canOD dose stacks body.odLoad; the
   // death roll uses it (minus a small free allowance) so the first dose or two are survivable
   // but rapid repeats ramp to a guaranteed kill. odLoad decays while sober (tickAll), so it's
   // RAPID "in a row" dosing that's lethal, not doses spaced across the day.
-  // Tuned to Gee's example: mdma 0.12/dose, free 0.2 → 10th molly = odLoad 1.2 → certain death.
+  // Tuned to example: mdma 0.12/dose, free 0.2 → 10th molly = odLoad 1.2 → certain death.
   const OD_POTENCY = Object.freeze({ coke: 0.10, mdma: 0.12, acid: 0.10, whiskey: 0.07, alcohol: 0.07, ketamine: 0.15 });
   const OD_LOAD_FREE = 0.2;        // first dose or two are survivable
   const OD_LOAD_DECAY = 0.10;      // toxicity clears while sober (per tick) — must be dosed "in a row"
@@ -115,7 +115,7 @@
     const escape = { ...(girl.escape || { currentRisk: 0.1, factors: {}, lastAttempt: null }) };
     if (inst.escapeRisk) escape.currentRisk = clamp((escape.currentRisk ?? 0.1) + inst.escapeRisk, 0, 1);
 
-    // Forced dosing builds chemical dependency (DEP-EXP.2). Each addictive drug racks up
+    // Forced dosing builds chemical dependency . Each addictive drug racks up
     // body.addiction[drugKey]; high enough + then cut off → withdrawal in tickAll().
     const addGain = ADDICTIVENESS[drugKey] || 0;
     if (addGain) {
@@ -124,8 +124,8 @@
       newBody.addiction = addiction;
     }
 
-    // Overdose toxicity (ODSPAM.1) — each hard-drug dose stacks; decays while sober (tickAll).
-    // A girl SELF-DOSING to survive (DRUG-SELFSERVE.1) never stacks toxicity — she paces herself
+    // Overdose toxicity  — each hard-drug dose stacks; decays while sober (tickAll).
+    // A girl SELF-DOSING to survive  never stacks toxicity — she paces herself
     // and will not OD on her own; only the player force-dosing builds odLoad toward death.
     if (curve.canOD && !selfServe) newBody.odLoad = (newBody.odLoad || 0) + (OD_POTENCY[drugKey] || 0.10);
 
@@ -137,7 +137,7 @@
 
     // OVERDOSE — hard drugs only (weed can NOT kill). Death chance combines two sources:
     //   (a) current `high` over the OD threshold — stacking stackable drugs (coke etc.), and
-    //   (b) cumulative odLoad toxicity from rapid repeat dosing (ODSPAM.1) — this is what makes
+    //   (b) cumulative odLoad toxicity from rapid repeat dosing  — this is what makes
     //       "10 x molly in a row = dead for sure" work even though molly is non-stackable and
     //       its single-dose high never crosses the threshold.
     if (curve.canOD && !selfServe) {
@@ -223,7 +223,7 @@
   }
 
   // Called by tick — updates every captive girl's body.high + drug list, AND runs the
-  // addiction-decay + withdrawal pass (DEP-EXP.2). Withdrawal symptoms spike escape-risk,
+  // addiction-decay + withdrawal pass . Withdrawal symptoms spike escape-risk,
   // crash mood, and make her dope-sick + begging (voice + image) — the control lever.
   function tickAll() {
     const s = window.DMTHGame.state.current;
@@ -251,7 +251,7 @@
       }
       body.addiction = addiction;
 
-      // Overdose toxicity clears while sober (ODSPAM.1) — so the kill comes from RAPID repeat
+      // Overdose toxicity clears while sober  — so the kill comes from RAPID repeat
       // dosing within a session, not doses spread out across the day.
       if (body.odLoad > 0) body.odLoad = Math.max(0, body.odLoad - OD_LOAD_DECAY);
 
@@ -261,7 +261,7 @@
 
       if (worstSeverity > 0) {
         body.withdrawalState = { drugs: withdrawingFrom, severity: +worstSeverity.toFixed(2) };
-        // Withdrawal hits MOOD + STATS but is NEVER a killer (Gee 2026-06-18): it does NOT
+        // Withdrawal hits MOOD + STATS but is NEVER a killer : it does NOT
         // touch health (the death/survival bar — owned by lifespan/starvation). It only
         // drains stamina (a recoverable stat) so dope-sickness saps her without risking death.
         body.stamina = cl((body.stamina ?? 70) - 2 * worstSeverity, 0, body.health ?? 100);
@@ -309,7 +309,7 @@
   // pool + the room "stock drugs" control so a stocked drug ITEM maps to a self-serve curve.
   const ITEM_TO_DRUG = (() => { const m = {}; for (const k of Object.keys(DRUG_CURVES)) { if (DRUG_CURVES[k].itemId) m[DRUG_CURVES[k].itemId] = k; } return m; })();
 
-  // DRUG-SELFSERVE.1 — captives passively self-dose from their hold / the dungeon drug pool to
+  // captives passively self-dose from their hold / the dungeon drug pool to
   // stave off withdrawal and stay functional. They PACE themselves: a self-dose never stacks
   // toxicity and never ODs (selfServe flag) — only the player force-dosing can kill her. One
   // maintenance dose per needy girl per tick, drawn from supply.
@@ -331,7 +331,7 @@
     }
   }
 
-  // DRUGUSE.1 — drug use-case taxonomy. Drives the "wide range of use cases" — knockout drugs put
+  // drug use-case taxonomy. Drives the "wide range of use cases" — knockout drugs put
   // her under (manage anyone), docile drugs calm fighters (escape-risk already drops on administer),
   // stimulants loosen tongues (a mute talks — see the DRUG×AFFECT OVERRIDE prompt block). All three
   // already have mechanical hooks (knockout via isUnconscious; docile via instant.escapeRisk;

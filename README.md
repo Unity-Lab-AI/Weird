@@ -159,6 +159,21 @@ The sections below this one document the original feature set in depth. The 2026
 
 ---
 
+## Newest systems (2026-06-19/20 mega-session)
+
+Layered on the 2026-06-18 build. Full player-facing detail in the [Game Wiki](./wiki.html).
+
+- **💰 The financial underworld** — a 🗄️ **Vault** (everything you own) + a **pocket** (cash you carry); choose how to pay at checkout (💵 pocket · 🏦 run home to the vault · 💳 charge it). Usable **💳 credit cards** whose limit grows as you use + pay off, with compounding interest that spirals if ignored. **🦈 Loan sharks** (Gutterbank / Knuckles / Syndicate) for fast cash against a deadline. **🃏 The Hustle** — queueable shady gigs (roll-a-drunk → break-ins → stick-ups → armored trucks → 🎯 kidnap-a-girl) that burn game-time + pay + lift loot + stack WANTED; bring a trained captive as crew to scale the take. Sex-aware broke wording.
+- **🚨 Heat management** — a **dirty-cop payroll** (Beat-Cop Envelope → Precinct Captain → City Hall's Pocket) that multiplies your raid chance DOWN + speeds WANTED cooling, so a flush operation isn't stopped + jailed every day.
+- **🏬 Stores hub + 🏚️ Bloodland Holdings** — every storefront behind one door; everything buys into your **inventory** first, then you install/apply/use it. NEW property den (Bloodland Holdings) to buy hideouts (dungeons) + buy access to and BUY OUT the hunting grounds (own the turf → fewer witnesses, less heat, a passive skim). Dungeon facilities now buy-to-inventory at the shop → install from the dungeon page.
+- **👥 NPCs do your filthy range** — johns + friends perform nearly any act you can, gated by their nature: a gentle john might just bathe or kiss her; a sadist runs the extreme tier; friends climb into snuff/torture as their creep level grows.
+- **🏃 Escape, reworked** — when a captive works toward bolting you get a warning pop-up naming exactly WHY (mood, bond-debt, a bleak hold, pain, neglect) with a jump to her hold; if the bar maxes a grace **timer** ticks down — rush in and calm her or she's gone, and slipping loose while you're MOST WANTED brings the law down hard.
+- **⏱️ John timing forecast** — per-cadence (off → trickle → sparse → casual → steady → brisk → rapid → relentless) projection of the in-game clock time each girl's stamina hits 0% — and, with friends on, when she'd become a fresh corpse.
+- **🪦 Corpse economy + ⚱️ deeper disposal** — a rotting corpse repels everyone but rare masochist/necrophile clients who pay high dollar for the rot; disposing a body now burns real game-time (dig / boat / burn / butcher) while the world moves on.
+- **🎲 Per-playthrough flavor** — every run names its hunting grounds differently; one unified loot system behind every drop; a whole-game balance audit; and a top-to-bottom depravity rewrite of the tooltips + descriptions.
+
+---
+
 ## Hunt → Capture
 
 ### 4-stage capture mechanic

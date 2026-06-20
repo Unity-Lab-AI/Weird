@@ -82,7 +82,7 @@
     if (!t) return { ok: false, reason: 'unknown condom' };
     if (!isLevelUnlocked(typeId)) return { ok: false, reason: `${t.displayName} is locked — reach DEPRAVITY level ${t.levelReq} first` };
     const ok = window.DMTHGame.state.spendMoney(t.cost, 'buy:' + typeId);
-    if (!ok) return { ok: false, reason: 'insufficient funds' };
+    if (!ok) return { ok: false, reason: (window.DMTHGame.state.brokeLine ? window.DMTHGame.state.brokeLine() : 'broke') };
     window.DMTHGame.state.addItem(typeId, 1);
     return { ok: true, typeId, cost: t.cost };
   }

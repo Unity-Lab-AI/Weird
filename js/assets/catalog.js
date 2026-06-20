@@ -121,7 +121,7 @@
       id: 'remote', displayName: 'Backroads', emoji: '🛣️',
       category: 'location', subcategory: 'hard',
       prompt: 'dusk landscape photograph of a two-lane backroad winding through scrubland, single car headlights approaching, power lines following the road, wide horizon, isolated-highway photography',
-      personEnvPrompt: 'on a two-lane backroad at dusk, scrubland and low brush stretching to a wide horizon behind her, power lines following the road into the distance, asphalt with painted yellow centerline visible at her feet, distant single car headlights approaching, isolated-highway atmosphere, deep-orange sunset color cast, nobody else in sight',
+      personEnvPrompt: 'on a two-lane backroad at dusk, scrubland and low brush stretching to a wide horizon behind her, power lines following the road into the distance, asphalt with painted yellow centerline visible at her feet, distant single car headlights approaching, isolated-highway atmosphere, deep-orange sunset color cast, the road stretching empty and deserted in both directions',
       cost: 800, unlock: { minNotoriety: 4 },
       gridPlacement: { x: 3, y: 2 },
       notes: 'Hard+. Rare hitchhiker-type spawns. Remote = excellent capture conditions.'
@@ -161,6 +161,15 @@
       cost: 700, unlock: { minNotoriety: 2 },
       gridPlacement: { x: 1, y: 3 },
       notes: 'Medium-hard. Young-adult spawns. Campus security.'
+    },
+    {
+      id: 'family-reunion', displayName: 'Family Reunion', emoji: '🧺',
+      category: 'location', subcategory: 'hard',
+      prompt: 'warm documentary photograph of a sprawling backyard family reunion at golden hour, long folding tables loaded with potluck dishes, string lights strung between the trees, lawn games and coolers across the grass, multiple generations mingling, suburban-Americana editorial photography, nostalgic warm color grade',
+      personEnvPrompt: 'at a backyard family reunion during golden hour, long potluck tables and string lights behind her, lawn games and coolers scattered across the grass, relatives mingling as soft-focus silhouettes in the background, warm nostalgic suburban-Americana atmosphere, late-afternoon golden light',
+      cost: 1100, unlock: { minNotoriety: 3 },
+      gridPlacement: { x: 2, y: 2 },
+      notes: 'Hard. The family gathering — where your own relations come within reach: nieces, cousins, long-lost and half sisters, step daughters. Blood and kin run a family kink premium, but everyone here knows you.'
     }
   ];
 
@@ -176,7 +185,7 @@
       prompt: 'product photograph on plain background of a single small glass medical vial of clear liquid, rubber-stopper top, pharmacy-grade labeling slightly blurred, professional commerce photography',
       cost: 180, tier: 2,
       captureStages: { approach: 0, engage: 30, subdue: 15, secure: 0 },
-      notes: 'Capture tool. Engage 30 + slow Subdue 15. Single-use per stage. Drop it in her drink before she clocks it.'
+      notes: 'Slip it in her drink and watch her "no" dissolve — Engage 30 while her words slur, slow Subdue 15 as her knees fold under her and the lights die behind her eyes. One spike per grab. Get it in her before she tastes the bitter.'
     },
     {
       id: 'chloroform', displayName: 'Clear Solvent Bottle', emoji: '⚗️',
@@ -184,7 +193,7 @@
       prompt: 'studio product shot of a small amber glass laboratory bottle with ground-glass stopper, clear liquid inside, plain white backdrop, science-supplies catalog style',
       cost: 220, tier: 2,
       captureStages: { approach: 0, engage: 25, subdue: 35, secure: 0 },
-      notes: 'Capture tool. Engage 25 + heavy Subdue 35. Single-use. Smells obvious if wasted.'
+      notes: 'Soak the rag, clamp it over her mouth and nose, ride out the thrashing — Engage 25 + a heavy Subdue 35 as she claws your wrist, goes cross-eyed, then limp in your arms. One use. The sweet stink gives you away if you fumble it.'
     },
     {
       id: 'ether', displayName: 'Anesthetic Solution', emoji: '🧪',
@@ -192,7 +201,7 @@
       prompt: 'clinical product photograph of a small brown-glass bottle marked with a simple label, stoppered, placed on a white lab bench, professional medical-supply catalog composition',
       cost: 300, tier: 3,
       captureStages: { approach: 0, engage: 40, subdue: 30, secure: 0 },
-      notes: 'Capture tool. Strong Engage 40 + Subdue 30. Single-use. Fast-acting.'
+      notes: 'A few wet huffs and her legs quit on her — strong Engage 40 + Subdue 30, dropping her boneless before she can scream. One use. Hits fast and hits hard.'
     },
     {
       id: 'ketamine', displayName: 'Veterinary Bottle', emoji: '🐴',
@@ -200,7 +209,7 @@
       prompt: 'product shot of a small amber veterinary medicine bottle with clinical label partially obscured, placed next to a small bag of white crystalline powder on a dark surface, muted documentary photography',
       cost: 450, tier: 4,
       captureStages: { approach: 0, engage: 0, subdue: 50, secure: 0 },
-      notes: 'Capture tool. Heavy Subdue 50. Single-use. Requires contacts to acquire.'
+      notes: 'Sink the needle and drop her into the K-hole — heavy Subdue 50, leaving her conscious but dissociated, floppy and pliable, watching from somewhere far away while you fold her into the trunk. One use. Takes the right contacts to score.'
     },
     {
       // Tranquilizer drug — makes the captive limp and unconscious with a 4-minute timer.
@@ -213,7 +222,7 @@
       prompt: 'studio product photograph of an unmarked tranquilizer dart with feathered tail and capped needle, lying on a plain dark surface beside a small clear vial of amber liquid, clinical-supply catalog composition, muted lighting',
       cost: 200, tier: 3,
       captureStages: { approach: 0, engage: 0, subdue: 50, secure: 0 },
-      notes: 'Capture tool AND in-dungeon administered drug. Heavy Subdue 50. Single-use. 4-minute unconscious window — she goes limp, eyes close, slack jaw, deeply sedated. Distinct from ketamine (which is dissociation, not knockout).'
+      notes: 'Punch a dart into her thigh and watch the lights go out — heavy Subdue 50, then a ~4-minute window where she\'s a dead-weight rag-doll: eyes rolled shut, jaw slack, body limp and unresisting, yours to pose however you please. Also dart a captive in the hold for the same blackout. Distinct from ketamine — this is a full knockout, not a daze.'
     },
 
     // --- REPRODUCTIVE / CONTRACEPTION ---
@@ -232,7 +241,7 @@
       category: 'item', subcategory: 'contraception',
       prompt: 'product photograph of a circular birth-control pill blister-pack with small unmarked tablets on a plain backdrop, pharmacy commerce style, muted lighting',
       cost: 30, tier: 1,
-      notes: 'Stock these in a hold or the dungeon pool and every captive who draws on it takes one AUTOMATICALLY — one pill keeps her off the breeding track for two full days, and the instant it wears off she takes another (if stocked) so there is never a gap to knock her up. Max one pill per girl per two days. Pack of 5.'
+      notes: 'Stock a hold or the pool and every captive auto-pops one to keep her womb shut for you — one pill holds the breeding off two full days, and she takes the next the instant it lapses (if stocked) so there\'s never a gap to plant one in her by accident. Max one per girl per two days. Pack of 5.'
     },
     {
       id: 'plan-b', displayName: 'Plan B Pill', emoji: '💊',
@@ -240,7 +249,7 @@
       prompt: 'product photograph of a small unmarked white tablet next to its foil blister-pack on a plain backdrop, pharmacy commerce style',
       cost: 25, tier: 1,
       pregnancyAbort: { window: [0, 3], complications: 0.05, notoriety: 0 },
-      notes: 'Post-coital emergency contraceptive. Works only in gestation days 0-3. 5% complication chance. Zero notoriety.'
+      notes: 'Make her choke it down the morning after you bred her raw — snuffs the spark before it roots. Only bites in gestation days 0-3, 5% it cramps her wrong, zero heat.'
     },
     {
       id: 'abortion-pill-medical', displayName: 'Medical Abortion Pill', emoji: '💊',
@@ -248,7 +257,7 @@
       prompt: 'product photograph of a sealed clinical pharmacy blister-pack with two unmarked pills, beside a folded prescription slip on a plain backdrop, medical-supply catalog composition',
       cost: 120, tier: 2,
       pregnancyAbort: { window: [4, 93], complications: 0.10, notoriety: 1 },
-      notes: '1st-trimester abortion (days 4-93). 10% complication chance. Mild notoriety bump.'
+      notes: 'Flush the thing you planted in her — a 1st-trimester purge (gestation days 4-93). 10% it goes messy on her, a mild heat bump.'
     },
     {
       id: 'surgical-kit-back-alley', displayName: 'Back-alley Surgical Kit', emoji: '🔪',
@@ -256,7 +265,7 @@
       prompt: 'product shot of a battered closed leather pouch lying on dark concrete, partial glint of metal instruments visible at the seam, ominous low-key documentary photography',
       cost: 200, tier: 3,
       pregnancyAbort: { window: [94, 186], complications: 0.30, notoriety: 3 },
-      notes: '2nd-trimester procedure (days 94-186). 30% complication risk — miscarriage with damage. +3 notoriety. Cheap but dangerous.'
+      notes: 'Do the 2nd-trimester job yourself on a dirty table (gestation days 94-186) — 30% you butcher her doing it (miscarriage + lasting damage), +3 heat. Cheap, brutal, bloody.'
     },
     {
       id: 'obgyn-referral-clean', displayName: 'Clean OB-GYN Referral', emoji: '🏥',
@@ -264,7 +273,7 @@
       prompt: 'product photograph of a sealed white medical envelope with embossed clinic logo, neat appointment card visible at the corner, professional clinical-supply catalog style',
       cost: 600, tier: 4,
       pregnancyAbort: { window: [0, 200], complications: 0.03, notoriety: 0 },
-      notes: 'Clean clinical referral — works any time before day 200. 3% complication. Zero notoriety. Expensive but safe.'
+      notes: 'A bought clinic that asks no questions — scrub the pregnancy out clean any time before day 200, 3% complication, zero heat. Costs a fortune, but nobody ever talks.'
     },
 
     // --- PLAYER BOOST — refill your 💦 Nut Reserve. `playerRefill` = amount
@@ -348,7 +357,7 @@
       prompt: 'product photograph of a short length of weathered lead pipe with threaded ends on a plain white background, hardware-salvage catalog style',
       cost: 15, tier: 0,
       captureStages: { approach: 10, engage: 0, subdue: 25, secure: 0 },
-      notes: 'Starter blunt-weapon. Stealth Approach 10 + blunt Subdue 25. Reusable across stages. Cheap, messy, high suspicion if witnessed.'
+      notes: 'Crack her across the skull from behind — a stealth Approach 10 then a blunt Subdue 25 that drops her twitching to the pavement. Reusable. Cheap, ugly, and it screams "kidnapper" if anyone catches you swinging it.'
     },
 
     // --- RESTRAINT-GRADE ---
@@ -358,7 +367,7 @@
       prompt: 'product photograph of a single roll of heavy-duty silver duct tape on a plain white background, professional commerce photography, commercial grade industrial',
       cost: 5, tier: 1,
       captureStages: { approach: 0, engage: 0, subdue: 0, secure: 30 },
-      notes: 'Restraint basic. Secure 30. Single-use per stage. Crude but effective.'
+      notes: 'Wrench her wrists together and slap a strip across her screaming mouth — Secure 30, one roll per grab. Crude, silver, and it shuts the bitch up fast.'
     },
     {
       id: 'rope', displayName: 'Nylon Rope Coil', emoji: '🪢',
@@ -366,7 +375,7 @@
       prompt: 'product shot of a coiled length of black nylon rope on a plain white backdrop, commercial hardware catalog style',
       cost: 12, tier: 1,
       captureStages: { approach: 0, engage: 5, subdue: 5, secure: 25 },
-      notes: 'Restraint basic. Secure 25 + slight Engage/Subdue. Single-use per stage. Versatile.'
+      notes: 'Hogtie her however you please — Secure 25 with a little Engage/Subdue as the cord cinches into her skin. One use per grab. Bends her into any shape you want.'
     },
     {
       id: 'zip-ties', displayName: 'Heavy-Duty Zip Ties', emoji: '🔗',
@@ -374,7 +383,7 @@
       prompt: 'product photograph of a bundle of heavy-duty black plastic zip ties fanned out on a plain white background, commercial hardware catalog style',
       cost: 8, tier: 2,
       captureStages: { approach: 0, engage: 0, subdue: 0, secure: 25 },
-      notes: 'Restraint tier-2. Secure 25. Single-use per stage.'
+      notes: 'Cinch them around her wrists till they bite into the skin — Secure 25, one use per grab. She can thrash all she wants; they only ratchet tighter.'
     },
     {
       id: 'handcuffs', displayName: 'Steel Cuffs', emoji: '🔒',
@@ -382,7 +391,7 @@
       prompt: 'product photograph of a pair of chrome-plated steel handcuffs on a plain white background, commercial security-equipment catalog style',
       cost: 45, tier: 3,
       captureStages: { approach: 0, engage: 0, subdue: 0, secure: 40 },
-      notes: 'Restraint tier-3. Strong Secure 40. Reusable.'
+      notes: 'Ratchet cold steel shut around her wrists — a strong Secure 40, snapping closed on her again and again. Reusable.'
     },
     {
       id: 'shackles', displayName: 'Steel Shackles', emoji: '⛓️',
@@ -390,7 +399,7 @@
       prompt: 'product photograph of heavy steel leg shackles with a short connecting chain on a plain white backdrop, industrial-security catalog style',
       cost: 120, tier: 4,
       captureStages: { approach: 0, engage: 0, subdue: 10, secure: 35 },
-      notes: 'Restraint tier-4. Secure 35 + slight Subdue 10. Reusable. Install in room.'
+      notes: 'Chain her ankles so she can shuffle but never run — Secure 35 + a slight Subdue 10 as the irons bite. Reusable, bolt it into her hold.'
     },
     {
       id: 'harness', displayName: 'Full Body Harness Rig', emoji: '🧍',
@@ -398,7 +407,7 @@
       prompt: 'product photograph of a complex black leather body harness with metal rings, displayed on a dress form against a plain studio backdrop, tasteful product catalog composition',
       cost: 320, tier: 5,
       captureStages: { approach: 0, engage: 5, subdue: 10, secure: 40 },
-      notes: 'Restraint tier-5. Max Secure 40 + slight Engage/Subdue. Reusable. Install in deluxe+ rooms.'
+      notes: 'Buckle her into a full leather rig with rings at every joint — max Secure 40 + a little Engage/Subdue as the straps cinch her helpless. Reusable; mounts in a deluxe+ hold to hang or splay her any way you like.'
     },
 
     // --- CONTAINMENT ---
@@ -457,7 +466,7 @@
     {
       id: 'slop', displayName: 'Rations Bucket', emoji: '🥣',
       category: 'item', subcategory: 'food',
-      prompt: 'overhead photograph of a plastic bucket of uniform beige paste-like rations, no branding, flat cafeteria lighting, documentary photography',
+      prompt: 'overhead photograph of a plastic bucket of uniform beige paste-like rations, plain unbranded bucket with a blank smooth surface, flat cafeteria lighting, documentary photography',
       cost: 3, tier: 0
     },
     {
@@ -477,7 +486,7 @@
       category: 'item', subcategory: 'food',
       prompt: 'product photograph of a 24-pack flat of plain plastic water bottles in clear plastic shrink-wrap on a plain backdrop, grocery-catalog style',
       cost: 8, tier: 1,
-      notes: 'Water consumable for captives. Refills girl.consumables.water.stock by 6. Plumbed-toilet holds (toilet >= 2) draw their own water — no need to buy.'
+      notes: 'Keep your livestock hydrated enough to keep performing — refills her water stock by 6. A plumbed hold (toilet ≥ 2) feeds her its own supply, so you skip buying.'
     },
     {
       id: 'filtered-water', displayName: 'Filtered Water (5gal)', emoji: '💦',
@@ -487,35 +496,35 @@
       notes: 'Higher-tier water consumable. Refills stock by 12. Small bond XP bonus over bottled.'
     },
     {
-      id: 'wine', displayName: 'Bottle of Red', emoji: '🍷',
+      id: 'wine', displayName: 'Gag-Pour Bottle (wine/whiskey)', emoji: '🍷',
       category: 'item', subcategory: 'drugs',
       prompt: 'product photograph of a single bottle of red wine on a plain dark backdrop, minimal label, wine-catalog editorial style',
       cost: 25, tier: 2,
       notes: 'Wine or whiskey. Slurring onset ~20min, 90min duration.'
     },
     {
-      id: 'weed', displayName: 'Rolled Joints (pack)', emoji: '🌿',
+      id: 'weed', displayName: 'Shotgun Joints (pack)', emoji: '🌿',
       category: 'item', subcategory: 'drugs',
       prompt: 'close-up product photograph of hand-rolled herbal cigarettes in a small tin on a plain neutral background, lifestyle-catalog photography',
       cost: 15, tier: 1,
       notes: 'Cannabis. Slow onset, 2hr duration. Mellowing.'
     },
     {
-      id: 'coke-bumps', displayName: 'Small White Packet', emoji: '❄️',
+      id: 'coke-bumps', displayName: 'Nose-Rail Powder', emoji: '❄️',
       category: 'item', subcategory: 'drugs',
       prompt: 'close-up product photograph of a small folded paper packet of white powder on a black mirrored surface with a thin metal straw, moody chiaroscuro product photography',
       cost: 80, tier: 3,
       notes: 'Stimulant. Rapid onset, jaw-clenching high, 45min duration.'
     },
     {
-      id: 'mdma', displayName: 'Pressed Pills', emoji: '💊',
+      id: 'mdma', displayName: 'Jaw-Clamp Pills', emoji: '💊',
       category: 'item', subcategory: 'drugs',
       prompt: 'macro product photograph of a few small colorful pressed pills in a blister pack on a plain white background, pharmacy-catalog style',
       cost: 60, tier: 3,
       notes: 'Euphoric empathy drug. 30min onset, 4hr duration. Weekend stuff.'
     },
     {
-      id: 'acid', displayName: 'Blotter Tab', emoji: '🧪',
+      id: 'acid', displayName: 'Tongue-Pinned Tabs', emoji: '🧪',
       category: 'item', subcategory: 'drugs',
       prompt: 'macro product photograph of a small square perforated paper tab on a neutral background, harsh studio lighting, scientific-specimen framing',
       cost: 40, tier: 3,
@@ -653,7 +662,7 @@
     {
       id: 'hole-in-the-desert', displayName: 'Hole in the Desert', emoji: '🕳️',
       category: 'dungeon', subcategory: 'starter',
-      prompt: 'documentary landscape photograph at dusk of a remote desert clearing with a rectangular pit dug into the earth, edges reinforced with weathered plywood and tarps, rope ladder coiled at the rim, a single heavy iron ring embedded in the pit floor with a length of chain attached, scrub brush and tumbleweeds scattered around, distant mountains on the horizon, no structures in sight, desolate isolation, muted golden-hour light, 35mm film aesthetic',
+      prompt: 'documentary landscape photograph at dusk of a remote desert clearing with a rectangular pit dug into the earth, edges reinforced with weathered plywood and tarps, rope ladder coiled at the rim, a single heavy iron ring embedded in the pit floor with a length of chain attached, scrub brush and tumbleweeds scattered around, distant mountains on the horizon, empty bare wasteland stretching to every horizon, desolate isolation, muted golden-hour light, 35mm film aesthetic',
       cost: 0, tier: 0, roomSlots: 1, contentValueMultiplier: 0.65,
       isolation: 0.95, concealment: 0.7,
       plotTokens: 'buried desert pit, plywood-reinforced walls, rope ladder, iron floor ring, chain, remote, dusty',
@@ -758,10 +767,10 @@
     {
       id: 'remote-compound', displayName: 'Remote Off-Grid Compound', emoji: '🏕️',
       category: 'dungeon', subcategory: 'endgame',
-      prompt: 'documentary landscape photograph of an isolated off-grid compound on a dirt track deep in the mountains, weathered single-story main building with metal roof and five adjacent hardened outbuildings each visible in the frame, solar panel array, propane tank, no power lines or other structures within sight, dense tree cover on all sides, miles of dirt road visible curling away toward the horizon, overcast muted lighting, wilderness-isolation aesthetic, wide establishing shot',
+      prompt: 'documentary landscape photograph of an isolated off-grid compound on a dirt track deep in the mountains, weathered single-story main building with metal roof and five adjacent hardened outbuildings each visible in the frame, solar panel array, propane tank, surrounded by open untouched wilderness on every side, dense tree cover on all sides, miles of dirt road visible curling away toward the horizon, overcast muted lighting, wilderness-isolation aesthetic, wide establishing shot',
       cost: 60000, tier: 6, roomSlots: 24, contentValueMultiplier: 1.4,
       isolation: 0.98, concealment: 0.7,
-      plotTokens: 'remote off-grid mountain compound, solar panels, propane, main building plus hardened outbuildings, miles of dirt track, no neighbors, wilderness',
+      plotTokens: 'remote off-grid mountain compound, solar panels, propane, main building plus hardened outbuildings, miles of dirt track, total isolation, open empty surrounding wilderness',
       holdType: 'outbuilding-cell',
       holdPrompt: 'interior of a hardened wooden outbuilding fitted as a single-captive cell with bed-frame cuff rails and a barred outer door',
       capacityUpgrades: [
