@@ -31,6 +31,12 @@ A massive multi-page text+emoji adult game where you run a sex-slave operation. 
 
 ## In-game footage
 
+### The landing page
+
+![Game landing page](docs/screenshots/01-landing-home.png)
+
+The public front door — what the game is, Start / Continue / Wiki, the team, behind the 18+ gate. (This is the view the social link-preview card is shot from.)
+
 ### A captive replying via real local LLM, with her persistent Pollinations portrait
 
 ![Captive room with LLM reply](docs/screenshots/11-room-ollama-reply.png)
@@ -67,8 +73,8 @@ Six body bars (arousal / wetness / cum-load / bruises / high), plus stamina + he
 ### In-game settings (Ollama health check + repair, voice picker, save slots)
 ![Settings](docs/screenshots/13-settings.png)
 
-### Setup wizard (landing page, auto-installs everything)
-![Landing setup wizard](docs/screenshots/01-landing-setup.png)
+### Setup wizard (auto-installs everything — Ollama, model pull, Kokoro, Pollinations key)
+![Setup wizard](docs/screenshots/01-landing-setup.png)
 
 ---
 
