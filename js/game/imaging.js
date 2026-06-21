@@ -1088,7 +1088,12 @@
       const params = new URLSearchParams(baseParams);
       return `${p.imageEndpointWorker}${encoded}?${params.toString()}`;
     }
-    if (hasKey() && !opts.forceFree) {
+    // The keyed gen.pollinations.ai endpoint FLAKILY returns 400 on the game's long full-body
+    // prompts (tested live: short prompts 200, ~1.4k-char prompts 400, alternating under bursts —
+    // reads like rate-limit-as-400) while the FREE image.pollinations.ai endpoint rendered EVERY
+    // test 200 (short / long / explicit) AND keeps the sk_ key out of the request URL. So the free
+    // endpoint is the DEFAULT now; the keyed one is opt-in (opts.preferAuthed) as a fallback only.
+    if (hasKey() && opts.preferAuthed && !opts.forceFree) {
       const params = new URLSearchParams({ ...baseParams, key: p.apiKey });
       return `${p.imageEndpointAuth}${encoded}?${params.toString()}`;
     }
