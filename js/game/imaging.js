@@ -30,9 +30,17 @@
     return mine;
   }
   async function doFetchWithRetry(url, maxRetries) {
+    // Pollinations token via Authorization: Bearer HEADER (NOT a ?key= query param — the key in the
+    // URL pushed long prompts over gen.pollinations.ai's URL limit → 400). Header auth keeps the URL
+    // short AND honors the daily-replenishing token. Only attach it to the authed host; the free
+    // fallback host (image.pollinations.ai) takes no key + no custom header (avoids a CORS preflight).
+    const p = cfg();
+    const fetchOpts = (p.apiKey && p.imageEndpointAuth && url.startsWith(p.imageEndpointAuth))
+      ? { headers: { Authorization: `Bearer ${p.apiKey}` } }
+      : {};
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
       try {
-        const res = await fetch(url);
+        const res = await fetch(url, fetchOpts);
         if (res.status === 429) {
           if (attempt >= maxRetries) return res;
           const wait = 1000 * Math.pow(2, attempt);  // 1s, 2s, 4s
@@ -1088,13 +1096,12 @@
       const params = new URLSearchParams(baseParams);
       return `${p.imageEndpointWorker}${encoded}?${params.toString()}`;
     }
-    // The keyed gen.pollinations.ai endpoint FLAKILY returns 400 on the game's long full-body
-    // prompts (tested live: short prompts 200, ~1.4k-char prompts 400, alternating under bursts —
-    // reads like rate-limit-as-400) while the FREE image.pollinations.ai endpoint rendered EVERY
-    // test 200 (short / long / explicit) AND keeps the sk_ key out of the request URL. So the free
-    // endpoint is the DEFAULT now; the keyed one is opt-in (opts.preferAuthed) as a fallback only.
-    if (hasKey() && opts.preferAuthed && !opts.forceFree) {
-      const params = new URLSearchParams({ ...baseParams, key: p.apiKey });
+    // AUTHED BY DEFAULT — your daily-replenishing Pollinations token is used on the authed host.
+    // The key is NOT in the URL anymore (a ?key= query made long prompts overflow → 400); it rides
+    // the Authorization: Bearer header attached in doFetchWithRetry. Tested 200 on long prompts via
+    // header. forceFree → the keyless reliable image.pollinations.ai fallback (the last return).
+    if (hasKey() && !opts.forceFree) {
+      const params = new URLSearchParams(baseParams);
       return `${p.imageEndpointAuth}${encoded}?${params.toString()}`;
     }
     const params = new URLSearchParams(baseParams);
