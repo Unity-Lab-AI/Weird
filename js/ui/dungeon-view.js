@@ -46,6 +46,7 @@
       const tpl = window.DMTHAssets.getById('dungeon', d.templateId);
       return `
         <div class="model-card">
+          <div class="asset-slot" data-asset-category="dungeon" data-asset-id="${d.templateId}" data-asset-size="140"></div>
           <div class="model-name">${tpl?.emoji || '⛓️'} ${tpl?.displayName || d.templateId} <span class="muted small">— ${d.locationDescriptor}</span></div>
           <div class="model-meta">
             <span data-tooltip="Cages full of meat / total cages you've got to fill">${d.holds.filter(h => h.captiveGirlId).length}/${d.capacity} held</span>

@@ -74,6 +74,7 @@
             const afford = money >= t.cost;
             const tip = (t.notes || '').replace(/"/g, '&quot;');
             return `<div class="model-card" data-tooltip="${tip}">
+              <div class="asset-slot" data-asset-category="dungeon" data-asset-id="${t.id}" data-asset-size="100"></div>
               <div class="model-name">${t.emoji} ${esc(t.displayName)}</div>
               <div class="model-meta">
                 <span data-tooltip="Purchase cost">$${t.cost.toLocaleString()}</span>
@@ -114,6 +115,7 @@
                 : `<div class="small muted">access unlocked</div>`;
             }
             return `<div class="model-card${owns ? ' owned' : ''}" data-tooltip="${esc(loc.notes || '')}">
+              <div class="asset-slot" data-asset-category="location" data-asset-id="${locId}" data-asset-size="100"></div>
               <div class="model-name">${loc.emoji} ${esc(name)}</div>
               <div class="model-meta"><span>${loc.subcategory || ''} grounds</span></div>
               <div>${action}</div>

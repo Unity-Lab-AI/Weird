@@ -53,34 +53,50 @@
     return true;
   }
 
-  // Resolve an asset's image URL. Returns null if no image could be discovered.
+  // Resolve an asset's image URL for inline SLOT display — NO network generation here (that fires
+  // on click via the popup, or on acquire via asset-gen.prewarm). Order (full law in
+  // docs/ASSET-STYLE-BIBLE.md):
+  //   1. cached procedural render (asset-gen.getCached — the live per-playthrough image)
+  //   2. static default cover.png (the committed FALLBACK when generation fails / isn't done yet)
+  //   3. null → caller shows the emoji placeholder (clicking it generates)
+  // Successful resolutions are memoized; misses are NOT (so a later click-generation / prewarm is
+  // picked up on the next render). Call invalidate(category,id) to force a re-resolve after a gen.
   async function resolveImageUrl(category, id) {
     const key = cacheKey(category, id);
-    if (resolved.has(key)) {
-      const v = resolved.get(key);
-      return v === 'MISSING' ? null : v;
+    if (resolved.has(key)) return resolved.get(key);
+
+    // TIER 1 — cached procedural render (cache-only, no network).
+    const gen = window.DMTHAssetGen;
+    if (gen && gen.getCached && (!gen.isEnabled || gen.isEnabled())) {
+      try {
+        const cu = await gen.getCached(category, id);
+        if (cu) { resolved.set(key, cu); return cu; }
+      } catch (e) { /* cache miss */ }
     }
-    if (await probesAreDisabled()) {
-      resolved.set(key, 'MISSING');
-      return null;
-    }
-    const folder = window.DMTHAssets.assetFolderPath(category, id);
-    for (const fname of CANDIDATES) {
-      const url = folder + fname;
-      // eslint-disable-next-line no-await-in-loop
-      if (await imgExists(url)) {
-        resolved.set(key, url);
-        return url;
+
+    // TIER 2 — static default cover.png (the fallback). Canary-gated so a host with no static set
+    // doesn't spam 404s.
+    if (!(await probesAreDisabled())) {
+      const folder = window.DMTHAssets.assetFolderPath(category, id);
+      for (const fname of CANDIDATES) {
+        const url = folder + fname;
+        // eslint-disable-next-line no-await-in-loop
+        if (await imgExists(url)) { resolved.set(key, url); return url; }
       }
+      // Also try `${id}.png` / `${id}.jpg` as a convenience (file named after asset id)
+      const idPng = folder + id + '.png';
+      if (await imgExists(idPng)) { resolved.set(key, idPng); return idPng; }
+      const idJpg = folder + id + '.jpg';
+      if (await imgExists(idJpg)) { resolved.set(key, idJpg); return idJpg; }
     }
-    // Also try `${id}.png` / `${id}.jpg` as a convenience (file named after asset id)
-    const idPng = folder + id + '.png';
-    if (await imgExists(idPng)) { resolved.set(key, idPng); return idPng; }
-    const idJpg = folder + id + '.jpg';
-    if (await imgExists(idJpg)) { resolved.set(key, idJpg); return idJpg; }
-    resolved.set(key, 'MISSING');
+
+    // TIER 3 — no image; caller renders the emoji placeholder. NOT memoized, so a later
+    // click-generation or prewarm is reflected on the next render.
     return null;
   }
+
+  // Drop a memoized resolution so the next resolveImageUrl re-checks (after a fresh/forced gen).
+  function invalidate(category, id) { resolved.delete(cacheKey(category, id)); }
 
   // Render an asset as either an <img> (if resolved) or an emoji placeholder.
   // Returns an HTMLElement ready to insert into the DOM.
@@ -143,6 +159,7 @@
 
   window.DMTHAssetLoader = Object.freeze({
     resolveImageUrl,
+    invalidate,
     renderAsset,
     getPromptText,
     allAssetsWithPaths

@@ -1,0 +1,516 @@
+{
+  "schema": "dmth-assets-v1",
+  "count": 102,
+  "covers": [
+    {
+      "category": "location",
+      "id": "street",
+      "path": "assets/locations/street/cover.png"
+    },
+    {
+      "category": "location",
+      "id": "club",
+      "path": "assets/locations/club/cover.png"
+    },
+    {
+      "category": "location",
+      "id": "strip-club",
+      "path": "assets/locations/strip-club/cover.png"
+    },
+    {
+      "category": "location",
+      "id": "library",
+      "path": "assets/locations/library/cover.png"
+    },
+    {
+      "category": "location",
+      "id": "park",
+      "path": "assets/locations/park/cover.png"
+    },
+    {
+      "category": "location",
+      "id": "gym",
+      "path": "assets/locations/gym/cover.png"
+    },
+    {
+      "category": "location",
+      "id": "mall",
+      "path": "assets/locations/mall/cover.png"
+    },
+    {
+      "category": "location",
+      "id": "coffee-shop",
+      "path": "assets/locations/coffee-shop/cover.png"
+    },
+    {
+      "category": "location",
+      "id": "sorority",
+      "path": "assets/locations/sorority/cover.png"
+    },
+    {
+      "category": "location",
+      "id": "remote",
+      "path": "assets/locations/remote/cover.png"
+    },
+    {
+      "category": "location",
+      "id": "hotel-lobby",
+      "path": "assets/locations/hotel-lobby/cover.png"
+    },
+    {
+      "category": "location",
+      "id": "private-party",
+      "path": "assets/locations/private-party/cover.png"
+    },
+    {
+      "category": "location",
+      "id": "prenatal-clinic",
+      "path": "assets/locations/prenatal-clinic/cover.png"
+    },
+    {
+      "category": "location",
+      "id": "school-campus",
+      "path": "assets/locations/school-campus/cover.png"
+    },
+    {
+      "category": "location",
+      "id": "family-reunion",
+      "path": "assets/locations/family-reunion/cover.png"
+    },
+    {
+      "category": "item",
+      "id": "rohypnol",
+      "path": "assets/items/rohypnol/cover.png"
+    },
+    {
+      "category": "item",
+      "id": "chloroform",
+      "path": "assets/items/chloroform/cover.png"
+    },
+    {
+      "category": "item",
+      "id": "ether",
+      "path": "assets/items/ether/cover.png"
+    },
+    {
+      "category": "item",
+      "id": "ketamine",
+      "path": "assets/items/ketamine/cover.png"
+    },
+    {
+      "category": "item",
+      "id": "tranquilizer",
+      "path": "assets/items/tranquilizer/cover.png"
+    },
+    {
+      "category": "item",
+      "id": "condom",
+      "path": "assets/items/condom/cover.png"
+    },
+    {
+      "category": "item",
+      "id": "birth-control-pill",
+      "path": "assets/items/birth-control-pill/cover.png"
+    },
+    {
+      "category": "item",
+      "id": "plan-b",
+      "path": "assets/items/plan-b/cover.png"
+    },
+    {
+      "category": "item",
+      "id": "abortion-pill-medical",
+      "path": "assets/items/abortion-pill-medical/cover.png"
+    },
+    {
+      "category": "item",
+      "id": "surgical-kit-back-alley",
+      "path": "assets/items/surgical-kit-back-alley/cover.png"
+    },
+    {
+      "category": "item",
+      "id": "obgyn-referral-clean",
+      "path": "assets/items/obgyn-referral-clean/cover.png"
+    },
+    {
+      "category": "item",
+      "id": "blue-pill",
+      "path": "assets/items/blue-pill/cover.png"
+    },
+    {
+      "category": "item",
+      "id": "energy-shot",
+      "path": "assets/items/energy-shot/cover.png"
+    },
+    {
+      "category": "item",
+      "id": "the-good-coke",
+      "path": "assets/items/the-good-coke/cover.png"
+    },
+    {
+      "category": "item",
+      "id": "oyster-tonic",
+      "path": "assets/items/oyster-tonic/cover.png"
+    },
+    {
+      "category": "item",
+      "id": "ben-wa-balls",
+      "path": "assets/items/ben-wa-balls/cover.png"
+    },
+    {
+      "category": "item",
+      "id": "vaginal-plug",
+      "path": "assets/items/vaginal-plug/cover.png"
+    },
+    {
+      "category": "item",
+      "id": "vaginal-expander",
+      "path": "assets/items/vaginal-expander/cover.png"
+    },
+    {
+      "category": "item",
+      "id": "pussy-wrecker",
+      "path": "assets/items/pussy-wrecker/cover.png"
+    },
+    {
+      "category": "item",
+      "id": "bone-saw",
+      "path": "assets/items/bone-saw/cover.png"
+    },
+    {
+      "category": "item",
+      "id": "harvest-knife",
+      "path": "assets/items/harvest-knife/cover.png"
+    },
+    {
+      "category": "item",
+      "id": "pipe",
+      "path": "assets/items/pipe/cover.png"
+    },
+    {
+      "category": "item",
+      "id": "duct-tape",
+      "path": "assets/items/duct-tape/cover.png"
+    },
+    {
+      "category": "item",
+      "id": "rope",
+      "path": "assets/items/rope/cover.png"
+    },
+    {
+      "category": "item",
+      "id": "zip-ties",
+      "path": "assets/items/zip-ties/cover.png"
+    },
+    {
+      "category": "item",
+      "id": "handcuffs",
+      "path": "assets/items/handcuffs/cover.png"
+    },
+    {
+      "category": "item",
+      "id": "shackles",
+      "path": "assets/items/shackles/cover.png"
+    },
+    {
+      "category": "item",
+      "id": "harness",
+      "path": "assets/items/harness/cover.png"
+    },
+    {
+      "category": "item",
+      "id": "blindfold",
+      "path": "assets/items/blindfold/cover.png"
+    },
+    {
+      "category": "item",
+      "id": "ballgag",
+      "path": "assets/items/ballgag/cover.png"
+    },
+    {
+      "category": "item",
+      "id": "hood",
+      "path": "assets/items/hood/cover.png"
+    },
+    {
+      "category": "item",
+      "id": "collar",
+      "path": "assets/items/collar/cover.png"
+    },
+    {
+      "category": "item",
+      "id": "vibrator",
+      "path": "assets/items/vibrator/cover.png"
+    },
+    {
+      "category": "item",
+      "id": "dildo",
+      "path": "assets/items/dildo/cover.png"
+    },
+    {
+      "category": "item",
+      "id": "plug",
+      "path": "assets/items/plug/cover.png"
+    },
+    {
+      "category": "item",
+      "id": "clamps",
+      "path": "assets/items/clamps/cover.png"
+    },
+    {
+      "category": "item",
+      "id": "slop",
+      "path": "assets/items/slop/cover.png"
+    },
+    {
+      "category": "item",
+      "id": "basic-meal",
+      "path": "assets/items/basic-meal/cover.png"
+    },
+    {
+      "category": "item",
+      "id": "gourmet-meal",
+      "path": "assets/items/gourmet-meal/cover.png"
+    },
+    {
+      "category": "item",
+      "id": "bottled-water",
+      "path": "assets/items/bottled-water/cover.png"
+    },
+    {
+      "category": "item",
+      "id": "filtered-water",
+      "path": "assets/items/filtered-water/cover.png"
+    },
+    {
+      "category": "item",
+      "id": "wine",
+      "path": "assets/items/wine/cover.png"
+    },
+    {
+      "category": "item",
+      "id": "weed",
+      "path": "assets/items/weed/cover.png"
+    },
+    {
+      "category": "item",
+      "id": "coke-bumps",
+      "path": "assets/items/coke-bumps/cover.png"
+    },
+    {
+      "category": "item",
+      "id": "mdma",
+      "path": "assets/items/mdma/cover.png"
+    },
+    {
+      "category": "item",
+      "id": "acid",
+      "path": "assets/items/acid/cover.png"
+    },
+    {
+      "category": "item",
+      "id": "lock-basic",
+      "path": "assets/items/lock-basic/cover.png"
+    },
+    {
+      "category": "item",
+      "id": "lock-steel",
+      "path": "assets/items/lock-steel/cover.png"
+    },
+    {
+      "category": "item",
+      "id": "lights-dim",
+      "path": "assets/items/lights-dim/cover.png"
+    },
+    {
+      "category": "item",
+      "id": "lights-led",
+      "path": "assets/items/lights-led/cover.png"
+    },
+    {
+      "category": "item",
+      "id": "toilet-can",
+      "path": "assets/items/toilet-can/cover.png"
+    },
+    {
+      "category": "item",
+      "id": "toilet-bucket",
+      "path": "assets/items/toilet-bucket/cover.png"
+    },
+    {
+      "category": "item",
+      "id": "toilet-plumbing",
+      "path": "assets/items/toilet-plumbing/cover.png"
+    },
+    {
+      "category": "item",
+      "id": "bedding-mat",
+      "path": "assets/items/bedding-mat/cover.png"
+    },
+    {
+      "category": "item",
+      "id": "bedding-real-bed",
+      "path": "assets/items/bedding-real-bed/cover.png"
+    },
+    {
+      "category": "item",
+      "id": "lube",
+      "path": "assets/items/lube/cover.png"
+    },
+    {
+      "category": "item",
+      "id": "bandages",
+      "path": "assets/items/bandages/cover.png"
+    },
+    {
+      "category": "item",
+      "id": "cover-clothing",
+      "path": "assets/items/cover-clothing/cover.png"
+    },
+    {
+      "category": "item",
+      "id": "fake-id",
+      "path": "assets/items/fake-id/cover.png"
+    },
+    {
+      "category": "item",
+      "id": "burner-phone",
+      "path": "assets/items/burner-phone/cover.png"
+    },
+    {
+      "category": "item",
+      "id": "hidden-camera",
+      "path": "assets/items/hidden-camera/cover.png"
+    },
+    {
+      "category": "item",
+      "id": "security-camera",
+      "path": "assets/items/security-camera/cover.png"
+    },
+    {
+      "category": "item",
+      "id": "recording-rig",
+      "path": "assets/items/recording-rig/cover.png"
+    },
+    {
+      "category": "dungeon",
+      "id": "hole-in-the-desert",
+      "path": "assets/dungeons/hole-in-the-desert/cover.png"
+    },
+    {
+      "category": "dungeon",
+      "id": "woods-container",
+      "path": "assets/dungeons/woods-container/cover.png"
+    },
+    {
+      "category": "dungeon",
+      "id": "basement-hidden-room",
+      "path": "assets/dungeons/basement-hidden-room/cover.png"
+    },
+    {
+      "category": "dungeon",
+      "id": "subway-service-room",
+      "path": "assets/dungeons/subway-service-room/cover.png"
+    },
+    {
+      "category": "dungeon",
+      "id": "sewer-tunnel-locked",
+      "path": "assets/dungeons/sewer-tunnel-locked/cover.png"
+    },
+    {
+      "category": "dungeon",
+      "id": "coldwar-bunker",
+      "path": "assets/dungeons/coldwar-bunker/cover.png"
+    },
+    {
+      "category": "dungeon",
+      "id": "abandoned-mine-shaft",
+      "path": "assets/dungeons/abandoned-mine-shaft/cover.png"
+    },
+    {
+      "category": "dungeon",
+      "id": "remote-compound",
+      "path": "assets/dungeons/remote-compound/cover.png"
+    },
+    {
+      "category": "dungeon",
+      "id": "underground-complex",
+      "path": "assets/dungeons/underground-complex/cover.png"
+    },
+    {
+      "category": "room",
+      "id": "room-basic",
+      "path": "assets/rooms/room-basic/cover.png"
+    },
+    {
+      "category": "room",
+      "id": "room-standard",
+      "path": "assets/rooms/room-standard/cover.png"
+    },
+    {
+      "category": "room",
+      "id": "room-deluxe",
+      "path": "assets/rooms/room-deluxe/cover.png"
+    },
+    {
+      "category": "room",
+      "id": "room-themed-medical",
+      "path": "assets/rooms/room-themed-medical/cover.png"
+    },
+    {
+      "category": "room",
+      "id": "room-themed-classroom",
+      "path": "assets/rooms/room-themed-classroom/cover.png"
+    },
+    {
+      "category": "room",
+      "id": "room-themed-bedroom",
+      "path": "assets/rooms/room-themed-bedroom/cover.png"
+    },
+    {
+      "category": "room",
+      "id": "room-themed-chapel",
+      "path": "assets/rooms/room-themed-chapel/cover.png"
+    },
+    {
+      "category": "facility",
+      "id": "main-hall",
+      "path": "assets/facilities/main-hall/cover.png"
+    },
+    {
+      "category": "facility",
+      "id": "kitchen",
+      "path": "assets/facilities/kitchen/cover.png"
+    },
+    {
+      "category": "facility",
+      "id": "security-office",
+      "path": "assets/facilities/security-office/cover.png"
+    },
+    {
+      "category": "facility",
+      "id": "storage",
+      "path": "assets/facilities/storage/cover.png"
+    },
+    {
+      "category": "facility",
+      "id": "utility-closet",
+      "path": "assets/facilities/utility-closet/cover.png"
+    },
+    {
+      "category": "facility",
+      "id": "recording-studio",
+      "path": "assets/facilities/recording-studio/cover.png"
+    },
+    {
+      "category": "facility",
+      "id": "observation-deck",
+      "path": "assets/facilities/observation-deck/cover.png"
+    },
+    {
+      "category": "facility",
+      "id": "playroom",
+      "path": "assets/facilities/playroom/cover.png"
+    }
+  ]
+}

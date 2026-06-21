@@ -47,6 +47,59 @@
 # 🆕 NEXT BUILD — the live work-to-be-done list (top of queue)
 # ═══════════════════════════════════════════════════════════════
 
+# ───────────────────────────────────────────────────────────────
+# 🎨 PROCEDURAL ASSET SYSTEM — Gee verbatim 2026-06-20 (✅ SHIPPED — 102 covers live, prompts rebuilt coy-concrete, loader-wire + slots + manifest done)
+# ───────────────────────────────────────────────────────────────
+
+> Gee verbatim: *"build out what you need for the asset build to use to build assets but remember we want these assets for the game to be dynamic and procedural like as we can get but with templetes, im not reallly 100% sure where in the game theese assets are used ass the game world is already pretty crowded but im sure youll find a good way to figure it out in the todo you write up of it all and the nbuild the task list and then right the resume.md file and wait"* + *"but i still want to make a defualt fallback set of assets that also examples sitting there as the fallback example and templete all for each asset"*.
+
+**The vision:** cohesive game-asset art (location cards / item icons / dungeon-room-facility art) that is DYNAMIC + PROCEDURAL with TEMPLATES — same pattern as the per-girl imaging (shared style spine + deterministic per-asset seed + cache) — PLUS a committed static DEFAULT SET (one example per asset) that is both the offline/static-host fallback AND the visual template each procedural render aims to match.
+
+**KEY DISCOVERY — the spine already exists.** `js/assets/loader.js` (`resolveImageUrl` → probes `assets/<plural>/<id>/cover.png` → emoji fallback), `js/ui/asset-img.js` (`decorate()` fills `[data-asset-category][data-asset-id]` slots), and the catalog (`js/assets/catalog.js`) where every asset already carries an `id` + `emoji` + `prompt`. `town-view.js` already emits location asset-slots. What was missing = an image SOURCE. So this plugs straight in.
+
+**The 3-tier chain** (full law in `docs/ASSET-STYLE-BIBLE.md`) — procedural is the DEFAULT, static is the FALLBACK:
+  1. DYNAMIC / PROCEDURAL (default ON) → `js/assets/asset-gen.js` generates each asset's image PER PLAYTHROUGH — warmed on first acquire (`prewarm` from `state.addItem`/`addDungeon`/`addOwnedLocation`) + on first emoji-click → `STYLE_BLOCK + catalog.prompt` + seed → Pollinations → IDB cache → stacked into the playthrough asset gallery.
+  2. STATIC DEFAULT SET → committed `assets/<plural>/<id>/cover.png` — the FALLBACK shown only when a live gen fails, + the visual template each render matches.
+  3. EMOJI → catalog emoji (clickable placeholder; never removed; ultimate safety net).
+
+**Asset inventory:** 102 total — 15 locations · 63 items · 9 dungeons · 7 rooms · 8 facilities.
+
+## ✅ FOUNDATION — built 2026-06-20 (local, branch `feature/asset-build-foundation`, node -c clean)
+- [x] **`docs/ASSET-STYLE-BIBLE.md`** — the cohesion spine: locked palette (black/charcoal/oxblood + blood-red/neon-pink/bruise-purple accents), the verbatim `STYLE_BLOCK`, per-category template guidance, the 3-tier chain, promo-safe rule, regen instructions.
+- [x] **`js/assets/asset-gen.js`** — DORMANT/opt-in procedural engine. `STYLE_BLOCK`, `buildAssetPrompt(cat,id)` (style + catalog prompt), `assetSeed(cat,id)` (djb2 deterministic), `generateAssetImage(cat,id)` (reuses `imaging.buildUrl` + IDB cache, opt-in via `dmth_procedural_assets`, returns null when off so the static/emoji tiers take over). Loading it changes NO live behavior — not wired anywhere yet.
+- [x] **`scripts/build-assets.mjs`** — pure-node batch harness. Loads the catalog + asset-gen in a window shim, walks all 102 assets, composes styled prompt + seed, fetches Pollinations, writes `assets/<plural>/<id>/cover.png`. CLI: all / per-category / per-asset; `DELAY_MS` throttle; reads the Pollinations key from `env.local.js` (authed endpoint when present). Wiring dry-run-verified (loads 102 assets, builds prompts/seeds) — NOT yet run against Pollinations.
+
+## ✅ SHIPPED — the actual asset build (2026-06-20)
+
+> Gee verbatim mid-build (the fuckup + fix): *"you toatlly fucked up your templetes for items and all the differnt categoriezes of objects are totally fucked up nike nothing is acurate like you didnt even try to build propmts for each and every assest correctly but instead we have over 100 images to trash"* → *"you dont want to use obscure and obtuse wording for actually things is find for the ingame name nname to be crazy but it not okay when describeing the prompts and laying them out, do you see why ie a pear of agony it would image a pear. gett it?"* → *"coy shit only, and 2. all of it was fucked every image needs replaced once you fix the templets for every asset"* → *"untill notified all the images look well at what i saw"* → *"continue the work whats left"*.
+>
+> **What landed:** first gen pass shat out abstract blobs / name-echo garbage because the catalog prompts parroted the coy in-game displayNames ("abstract silicone sculpture", "pear of agony" → a literal pear) instead of describing the real object. FIX: rewrote every busted/vague item template to **coy-but-concrete** (clean wording, real physical form — shape/parts/material — so flux renders the actual object), carved the prompt-authoring law into `docs/ASSET-STYLE-BIBLE.md`, added a `SEED_SALT`+`EXTRA` re-roll knob to `scripts/build-assets.mjs`, and REGENERATED ALL 102 fresh (0 failures). Gee reviewed in-game: "all the images look well." Cache token bumped to 20260620230000. (NOTE: per Gee's follow-up, these 102 are the FALLBACK set — the live default is per-playthrough procedural generation; see DYNAMIC ASSET RUNTIME below.)
+
+- [x] **ASSET-PROMPT-TUNE** ✅ SHIPPED 2026-06-20 (coy-concrete rebuild — see note above) — the "better prompts where they're stylized together" pass: audit all 102 catalog `prompt` fields against the style bible; rewrite thin/off-palette ones toward the per-category template shapes so the set is cohesive (esp. items — many are plain "product photo"). Keep prompts in `catalog.js` (single source of truth). Per the existing `personEnvPrompt` precedent, locations already have strong prompts.
+- [x] **ASSET-DEFAULT-SET-GEN** ✅ SHIPPED 2026-06-20 (102 covers generated + coy-concrete-rebuilt + curated as the FALLBACK hoard) — run `node scripts/build-assets.mjs`, eyeball every `cover.png`, re-roll the misses (per-asset CLI), curate, COMMIT the keepers as the static default set. ~102 images; Pollinations rate-limited so it's a throttled batch + human curation pass.
+- [x] **ASSET-LOADER-PROCEDURAL-WIRE** ✅ SHIPPED 2026-06-20 (REVISED per Gee's runtime model → procedural DEFAULT-ON, gen on acquire+click, static = fallback, no-network slot resolve; see DYNAMIC ASSET RUNTIME below) — extend `js/assets/loader.js resolveImageUrl` so when `dmth_procedural_assets` is on it tries `DMTHAssetGen.generateAssetImage` BEFORE/AFTER the static cover.png probe (decide order: static-first for speed, procedural for freshness). Keep emoji as the final fallback. Register `asset-gen.js` in `game.html` + `index.html` load order. Off by default so live game is unchanged til opted in.
+- [x] **ASSET-SLOT-PLACEMENT** ✅ SHIPPED 2026-06-20 (slots at shop/town/property/dungeon; every slot now click-opens the popup via `asset-img.decorate`) — the "where in the crowded game" map. The slots EXIST in town-view (locations); ADD `[data-asset-category][data-asset-id]` slots + a `DMTHAssetImg.decorate(el)` call after render at these natural seams (icon-sized, emoji already there as fallback so it degrades clean):
+    · **Stores hub** (`stores-hub-view.js`) — each store card's emoji → asset slot (category 'location'/custom store art).
+    · **Shop** (`shop-view.js`) — each item card's `it.emoji` → `data-asset-category="item"` slot (63 item icons — the biggest visual win).
+    · **Dungeon view** (`dungeon-view.js`) — dungeon template art (`data-asset-category="dungeon"`) + hold/room thumbnails (`room`).
+    · **Hunt/Town** — location cards already slotted in town; hunt-view location header could add one.
+    · **Upgrade/facility views** — facility fixture art (`data-asset-category="facility"`).
+    · **Roster/dashboard** — leave girl tiles to the per-girl imaging system (NOT this — these are PLACES + OBJECTS, no people).
+- [x] **ASSET-MANIFEST** ✅ SHIPPED 2026-06-20 (`assets/manifest.json` lists all 102 covers, schema `dmth-assets-v1`) — write `assets/manifest.json` after the default set lands so `loader.js probesAreDisabled()` sees it and keeps probes enabled on static hosts without the canary 404 dance.
+
+## ✅ SHIPPED — DYNAMIC ASSET RUNTIME (2026-06-20, per Gee's runtime-model clarification)
+
+> Gee verbatim: *"remember those are just the fallbacks on a new game the get generateds when first aquired aand the emoji equivent is clicked on the image generates if generation failes it uses the fall backs"* + *"the assets should be like a pop up that click away able from any click and remembre all generations stack in gallery for a complete history of all generations in that playthrough"*.
+
+The static 102 are the FALLBACK; procedural is the live DEFAULT. Built (branch `feature/asset-build-foundation`, all `node -c` clean):
+- [x] **Procedural DEFAULT ON** — `asset-gen.isEnabled()` is on unless `localStorage.dmth_procedural_assets === 'false'`.
+- [x] **Generate on first acquire** — `asset-gen.prewarm(cat,id)` fired fire-and-forget from `state.addItem` / `addDungeon` / `addOwnedLocation` (one gen per acquire — no mass-fire).
+- [x] **Click-away popup** — `js/ui/asset-popup.js` (modeled on loot-popup; ANY click dismisses): click any asset slot → pops the image big, generating live on the spot if not cached, static-cover fallback on fail, emoji last.
+- [x] **Playthrough gallery** — every fresh generation stacks into `state.assetGallery` (bounded 500); viewable at `#asset-gallery` (`js/ui/asset-gallery-view.js`), reached from the Stores hub ("🖼️ The Gallery").
+- [x] **No-network slot resolve** — `loader.resolveImageUrl` = cached-gen → static fallback → emoji (no gen on render, so a 63-item shop doesn't mass-fire); added `loader.invalidate` + `asset-gen.getCached`; live gen happens in the popup + the acquire prewarm.
+- [x] **Slots click-open the popup** — `asset-img.decorate` binds every `[data-asset-category][data-asset-id]` slot.
+- ⏳ **Gee in-game click-test PENDING** — committed local, HELD for Gee's test (click an asset → popup → gen → gallery) before the live cascade.
+
 _(The 2026-06-19 UX OVERHAUL directive block — freeze fix, full-width, dashboard declutter, room reorg, toy-list minimize, captives hero, plus the same-day Treasury→Ledger + WANTED-top-bar + girls-list + Ollama-bind + cache-busting work — shipped + verified headless; archived verbatim in `FINALIZED.md` under the 2026-06-19 session entry.)_
 
 # ═══════════════════════════════════════════════════════════════

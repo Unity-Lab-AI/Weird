@@ -32,7 +32,20 @@
     container.querySelectorAll('[data-asset-category][data-asset-id]').forEach(el => {
       const cat = el.dataset.assetCategory;
       const id  = el.dataset.assetId;
-      if (cat && id) lazyInto(el, cat, id, parseInt(el.dataset.assetSize, 10) || sizePx);
+      if (!cat || !id) return;
+      // Click any asset slot (emoji placeholder OR its generated image) → click-away popup that
+      // shows it big, generating it live on the spot if it hasn't been generated yet this run.
+      if (!el.dataset.assetClickBound) {
+        el.dataset.assetClickBound = '1';
+        el.style.cursor = 'pointer';
+        if (!el.title) el.title = 'click to view / generate image';
+        el.addEventListener('click', (ev) => {
+          ev.preventDefault();
+          ev.stopPropagation();   // the image is its own action — don't fire the parent card's nav
+          if (window.DMTHAssetPopup) window.DMTHAssetPopup.show(cat, id);
+        });
+      }
+      lazyInto(el, cat, id, parseInt(el.dataset.assetSize, 10) || sizePx);
     });
   }
 
