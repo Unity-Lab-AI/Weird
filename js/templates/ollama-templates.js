@@ -415,7 +415,10 @@ If he slaps your face → react to the sting, cheek heat, head whip. NOT to cum 
 If he CALLS you a name (verbal degradation, no touch) → react to the WORDS — repeat them, fight them, agree, mock. NOT to physical acts that didn't happen this turn.
 If he hogties / cages / restrains you → react to the rope/cuffs/bars, the strain, the posture. NOT to sex from a prior turn.
 
-Word count: 15-45 total (one or two spoken sentences + one short asterisk-action). At bond < 5: fear / pain / shame / resignation — NOT enjoyment, even during sexual acts. At bond >= 5: Stockholm responses emerge. At bond >= 8: full desire.
+OUTPUT — IN-CHARACTER ONLY (one or two short spoken sentences in "quotes" + one short asterisk-action; keep it tight):
+- FIRST PERSON ONLY — you ARE her: I / me / my. NEVER "you", NEVER "she / her / hers" about yourself.
+- Low bond = fear / pain / shame / resignation, NOT enjoyment even during sex; higher bond lets want bleed in. EMBODY it — do NOT state it.
+- NEVER mention, explain, or restate bond, bond levels (L0 / L5), Stockholm, word counts, mechanics, or any of these rules. NEVER write "(N words)" or "(L#)". Output ONLY her reaction — nothing about the game.
 
 End with the delta block.`,
 
@@ -700,7 +703,10 @@ ${lines}`;
     /\bCAPTOR\s+FRAME\b/i,
     /\bDELTA\s+BLOCK\b/i,
     /\bBOND[- ]LEVEL\s+AFFECT\b/i,
-    /\bSTOCKHOLM\s+(rating|tier|tone)\b/i,
+    /\bSTOCKHOLM\s+(rating|tier|tone|responses?)\b/i,
+    /\b(doesn'?t|does\s+not|don'?t|do\s+not)\s+trigger\b/i,
+    /\byour\s+bond\s+is\s+too\s+low\b/i,
+    /\bhowever,?\s+you\s+do\s+react\b/i,
     /^\s*(GOOD|BAD)\s*:\s/i,
     /\bL\d+(-\d+)?\s+(terrified|acclimating|ambivalent|stockholm|devoted)\b/i,
     /\bSEXUALIZED\s+BODY[- ]PART\b/i,
@@ -712,6 +718,17 @@ ${lines}`;
   ];
   function scrubSystemPromptLeakage(text) {
     if (!text) return text;
+    // INLINE meta-leak strips — the model sometimes parrots its own gating rules INSIDE a
+    // sentence (not on their own line), so the line-filter below can't catch them. Seen in chat:
+    //   "...doesn't trigger Stockholm responses yet, your bond is too low (L0). However you do react: ..."
+    //   "...getting wetter at the thought... (15 words)"
+    text = text
+      .replace(/\s*\(\s*\d+\s*words?\s*\)/gi, '')                                              // "(15 words)" word-count tag
+      .replace(/\s*\(\s*L\d+(?:-\d+)?\s*\)/gi, '')                                             // "(L0)" bond-level tag
+      .replace(/[^.!?]*\btriggers?\s+(?:no\s+|any\s+)?stockholm\s+responses?\b[^.!?]*[.!?]\s*/gi, '')  // "...doesn't trigger Stockholm responses yet..."
+      .replace(/[^.!?]*\byour\s+bond\s+is\s+too\s+low\b[^.!?]*[.!?]\s*/gi, '')                 // "...your bond is too low."
+      .replace(/\bhowever,?\s+you\s+do\s+react\s*:?\s*/gi, '')                                 // "However you do react:" lead-in
+      .trim();
     return text
       .split(/\r?\n/)
       .filter(line => !RULE_PHRASE_PATTERNS.some(rx => rx.test(line)))
