@@ -130,6 +130,12 @@
     // Same location, same day = same girls; the set refreshes after a randomized 2-4 day window.
     locationSpawns: {},
 
+    // playthrough-wide ASSET image gallery — every procedurally-generated game-asset image
+    // (location/item/dungeon/room/facility) stacks here as a complete history for the run:
+    // { category, id, displayName, url, cacheKey, ts }. The committed static cover.png set is the
+    // FALLBACK when live generation fails; THIS is the live per-playthrough generated history.
+    assetGallery: [],
+
     settings: {
       mode: 'sexy',                // 'sexy' | 'hurtme' | 'sexy_with_damage'
       activeGirlId: null,
@@ -236,6 +242,7 @@
     if (!s.itemRequestLog || typeof s.itemRequestLog !== 'object') s.itemRequestLog = {};
     if (!Array.isArray(s.usedNames)) s.usedNames = [];
     if (!s.locationSpawns || typeof s.locationSpawns !== 'object') s.locationSpawns = {};
+    if (!Array.isArray(s.assetGallery)) s.assetGallery = [];   // playthrough asset-gen history
     // Dungeon-level backfill — the shared supply POOL  + per-hold toy mounts
     //  + condom/drug reserves. Defense-in-depth so any future unguarded read on an
     // old save can't hit undefined.
@@ -628,6 +635,9 @@
   const ITEM_MAX = 9999;
   function addItem(itemId, qty = 1) {
     mutate(s => { s.inventory[itemId] = Math.min(ITEM_MAX, (s.inventory[itemId] || 0) + qty); });
+    // Generated-on-acquire: warm this item's procedural asset image in the background (it caches +
+    // stacks into the asset gallery). No-op if already generated, procedural off, or engine absent.
+    try { window.DMTHAssetGen?.prewarm?.('item', itemId); } catch (e) { /* non-fatal */ }
   }
   function consumeItem(itemId, qty = 1) {
     if (!state || (state.inventory[itemId] || 0) < qty) return false;
@@ -639,7 +649,7 @@
   }
 
   // dungeons
-  function addDungeon(dungeon) { mutate(s => { s.dungeons.push(dungeon); }); }
+  function addDungeon(dungeon) { mutate(s => { s.dungeons.push(dungeon); }); try { window.DMTHAssetGen?.prewarm?.('dungeon', dungeon && dungeon.templateId); } catch (e) { /* non-fatal */ } }
   function updateDungeon(id, patch) {
     mutate(s => {
       const d = s.dungeons.find(x => x.id === id);
@@ -776,7 +786,7 @@
   // unlocked hunting grounds — bought private access . Never removed.
   function addUnlockedLocation(locId) { mutate(s => { if (!s.unlockedLocations) s.unlockedLocations = []; if (!s.unlockedLocations.includes(locId)) s.unlockedLocations.push(locId); }); }
   // locations BOUGHT OUT (you own the turf → perks). Never removed.
-  function addOwnedLocation(locId) { mutate(s => { if (!s.ownedLocations) s.ownedLocations = []; if (!s.ownedLocations.includes(locId)) s.ownedLocations.push(locId); }); }
+  function addOwnedLocation(locId) { mutate(s => { if (!s.ownedLocations) s.ownedLocations = []; if (!s.ownedLocations.includes(locId)) s.ownedLocations.push(locId); }); try { window.DMTHAssetGen?.prewarm?.('location', locId); } catch (e) { /* non-fatal */ } }
   // merge a patch into the logistics config (unlock / enable / target sliders).
   function setLogistics(patch) { mutate(s => { s.logistics = { ...(s.logistics || { unlocked: false, enabled: false, targets: { food: 20, water: 20, condoms: 10 } }), ...patch }; }); }
   // purchased early-access action unlocks . Never removed.
@@ -945,6 +955,24 @@
     });
   }
 
+  // ASSET gallery — every procedural asset-image generation stacks here as a complete
+  // playthrough history. Deduped by cacheKey so re-opening the same generated asset never piles
+  // duplicates; a fresh generation (force → new cacheKey) always adds. Bounded to the last 500.
+  function pushAssetGen(entry) {
+    if (!entry || !entry.url) return;
+    mutate(s => {
+      if (!Array.isArray(s.assetGallery)) s.assetGallery = [];
+      if (entry.cacheKey && s.assetGallery.some(e => e.cacheKey === entry.cacheKey)) return;
+      s.assetGallery.push({
+        category: entry.category, id: entry.id,
+        displayName: entry.displayName || entry.id,
+        url: entry.url, cacheKey: entry.cacheKey || null, ts: Date.now()
+      });
+      if (s.assetGallery.length > 500) s.assetGallery = s.assetGallery.slice(-500);
+    });
+  }
+  function getAssetGallery() { return (state && state.assetGallery) || []; }
+
   window.DMTHGame = window.DMTHGame || {};
   window.DMTHGame.state = {
     get current() { return state; },
@@ -985,6 +1013,7 @@
     locationName,
     noteItemRequest, lastItemRequestDay,
     noteUsedName,
-    getLocationSpawns, setLocationSpawns, updateLocationSpawns
+    getLocationSpawns, setLocationSpawns, updateLocationSpawns,
+    pushAssetGen, getAssetGallery
   };
 })();
