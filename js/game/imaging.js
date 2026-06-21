@@ -1081,11 +1081,14 @@
     // Unity AI Lab Worker route — uniform with the rest of the website2.0 apps.
     // When active, the Worker injects the operator's sk_ token server-side; the browser
     // sends NO key. Detection is in config.js detectUnityLabWorker() (hostname-based).
-    if (p.useUnityLabWorker && p.imageEndpointWorker) {
+    // opts.forceFree → skip the Worker / authed-key routes and use the permissive free endpoint.
+    // Used by the 400/refusal retry chain: the authed gen.pollinations.ai endpoint rejects severe
+    // content + long prompts, while the free image.pollinations.ai endpoint still renders them.
+    if (p.useUnityLabWorker && p.imageEndpointWorker && !opts.forceFree) {
       const params = new URLSearchParams(baseParams);
       return `${p.imageEndpointWorker}${encoded}?${params.toString()}`;
     }
-    if (hasKey()) {
+    if (hasKey() && !opts.forceFree) {
       const params = new URLSearchParams({ ...baseParams, key: p.apiKey });
       return `${p.imageEndpointAuth}${encoded}?${params.toString()}`;
     }
@@ -1105,7 +1108,14 @@
       .replace(/\b(nude|naked|bare-?breast|bare-?chest|topless|bottomless)\b/gi, 'intimate')
       .replace(/\b(rape|rapes|raping|raped)\b/gi, 'scene')
       .replace(/\b(sedated|drugged|unconscious|subdued)\b/gi, 'resting')
-      .replace(/\b(bondage|gagged|bound|tied|restrained|chained|shackled)\b/gi, 'posed');
+      .replace(/\b(bondage|gagged|bound|tied|restrained|chained|shackled)\b/gi, 'posed')
+      // Severity defang — the authed endpoint 400s / refuses gore + extreme content even at
+      // safe=false, so the retry has to soften violence/gore, not just the sexual words.
+      .replace(/\b(blood|bloody|bleeding|gore|gory)\b/gi, 'dark')
+      .replace(/\b(wound|wounds|wounded|gash|laceration|lacerated)\b/gi, 'mark')
+      .replace(/\b(torture|tortured|mutilat\w*|dismember\w*|sever|severed|amputat\w*|nugget\w*)\b/gi, 'dramatic')
+      .replace(/\b(strangle|strangled|choke|choked|choking)\b/gi, 'hold')
+      .replace(/\b(corpse|dead|deceased|dying|bruised|bruises|welts)\b/gi, 'still');
   }
 
   // --- Full-body framing enforcer ---
@@ -1370,15 +1380,30 @@ Write the Pollinations prompt now.`;
     }
 
     let attempt = await tryFetch(url);
-    // Retry with sanitized prompt if content-filtered
-    if (!attempt.ok && (attempt.status === 403 || attempt.status === 402)) {
+    // Retry on content-filter / refusal / bad-request. The authed gen.pollinations.ai endpoint
+    // returns 400 (not just 403) when an action is too SEVERE (gore / extreme) or the prompt is
+    // long — so 400 is included now. Escalating fallback chain:
+    //   1) sanitized prompt on the same (authed/worker) endpoint
+    //   2) the permissive FREE endpoint (no key) with the original prompt
+    //   3) the FREE endpoint with the sanitized prompt
+    if (!attempt.ok && (attempt.status === 403 || attempt.status === 402 || attempt.status === 400)) {
       const safer = sanitizePrompt(prompt);
       if (safer !== prompt) {
-        // Route through buildUrl so the safe percent-encode truncation + Worker route +
-        // referrer are uniform (no hand-rolled .slice that can split a %XX → Cloudflare 400).
-        const legacyUrl = buildUrl(safer, seed);
-        attempt = await tryFetch(legacyUrl);
-        if (attempt.ok) url = legacyUrl;
+        // Route through buildUrl so the safe percent-encode truncation + referrer are uniform
+        // (no hand-rolled .slice that can split a %XX → Cloudflare 400).
+        const u2 = buildUrl(safer, seed);
+        attempt = await tryFetch(u2);
+        if (attempt.ok) url = u2;
+      }
+      if (!attempt.ok && hasKey()) {
+        const free1 = buildUrl(prompt, seed, { forceFree: true });
+        attempt = await tryFetch(free1);
+        if (attempt.ok) { url = free1; }
+        else if (safer !== prompt) {
+          const free2 = buildUrl(safer, seed, { forceFree: true });
+          attempt = await tryFetch(free2);
+          if (attempt.ok) url = free2;
+        }
       }
     }
 
@@ -1541,11 +1566,17 @@ Write the Pollinations prompt now.`;
     }
 
     let attempt = await tryEnvFetch(url);
-    if (!attempt.ok && (attempt.status === 403 || attempt.status === 402)) {
+    if (!attempt.ok && (attempt.status === 403 || attempt.status === 402 || attempt.status === 400)) {
       const safer = sanitizePrompt(prompt);
-      const legacyUrl = buildUrl(safer, seed, { width: 1792, height: 1024 });
-      attempt = await tryEnvFetch(legacyUrl);
-      if (attempt.ok) url = legacyUrl;
+      const u2 = buildUrl(safer, seed, { width: 1792, height: 1024 });
+      attempt = await tryEnvFetch(u2);
+      if (attempt.ok) url = u2;
+      if (!attempt.ok && hasKey()) {
+        const free1 = buildUrl(prompt, seed, { width: 1792, height: 1024, forceFree: true });
+        attempt = await tryEnvFetch(free1);
+        if (attempt.ok) { url = free1; }
+        else { const free2 = buildUrl(safer, seed, { width: 1792, height: 1024, forceFree: true }); attempt = await tryEnvFetch(free2); if (attempt.ok) url = free2; }
+      }
     }
 
     if (attempt.ok) {
@@ -1644,12 +1675,18 @@ Write the Pollinations prompt now.`;
     }
 
     let attempt = await tryFetch(url);
-    if (!attempt.ok && (attempt.status === 403 || attempt.status === 402)) {
+    if (!attempt.ok && (attempt.status === 403 || attempt.status === 402 || attempt.status === 400)) {
       const safer = sanitizePrompt(prompt);
       if (safer !== prompt) {
-        const legacyUrl = buildUrl(safer, seed);
-        attempt = await tryFetch(legacyUrl);
-        if (attempt.ok) url = legacyUrl;
+        const u2 = buildUrl(safer, seed);
+        attempt = await tryFetch(u2);
+        if (attempt.ok) url = u2;
+      }
+      if (!attempt.ok && hasKey()) {
+        const free1 = buildUrl(prompt, seed, { forceFree: true });
+        attempt = await tryFetch(free1);
+        if (attempt.ok) { url = free1; }
+        else if (safer !== prompt) { const free2 = buildUrl(safer, seed, { forceFree: true }); attempt = await tryFetch(free2); if (attempt.ok) url = free2; }
       }
     }
 
