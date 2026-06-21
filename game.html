@@ -9,128 +9,128 @@
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
-  <link rel="stylesheet" href="css/landing.css?v=20260620230000" />
-  <link rel="stylesheet" href="css/game.css?v=20260620230000" />
+  <link rel="stylesheet" href="css/landing.css?v=20260621000000" />
+  <link rel="stylesheet" href="css/game.css?v=20260621000000" />
 </head>
 <body>
 
   <!-- Env injection (local dev only; no error if absent) -->
-  <script src="js/env.local.js?v=20260620230000" onerror="console.debug('[env] no env.local.js — normal for deploy')"></script>
+  <script src="js/env.local.js?v=20260621000000" onerror="console.debug('[env] no env.local.js — normal for deploy')"></script>
 
   <!-- Age verification + legal acceptance gate — first thing that fires. -->
-  <script src="js/ui/age-gate.js?v=20260620230000"></script>
+  <script src="js/ui/age-gate.js?v=20260621000000"></script>
 
   <!-- Core config + libs -->
-  <script src="js/config.js?v=20260620230000"></script>
-  <script src="js/storage.js?v=20260620230000"></script>
-  <script src="js/voices/catalog.js?v=20260620230000"></script>
-  <script src="js/templates/john-archetypes.js?v=20260620230000"></script>
-  <script src="js/templates/ollama-templates.js?v=20260620230000"></script>
-  <script src="js/assets/catalog.js?v=20260620230000"></script>
-  <script src="js/assets/loader.js?v=20260620230000"></script>
-  <script src="js/assets/asset-gen.js?v=20260620230000"></script>
-  <script src="js/setup/detector.js?v=20260620230000"></script>
-  <script src="js/setup/models.js?v=20260620230000"></script>
-  <script src="js/setup/ollama-repair.js?v=20260620230000"></script>
-  <script src="js/setup/kokoro.js?v=20260620230000"></script>
+  <script src="js/config.js?v=20260621000000"></script>
+  <script src="js/storage.js?v=20260621000000"></script>
+  <script src="js/voices/catalog.js?v=20260621000000"></script>
+  <script src="js/templates/john-archetypes.js?v=20260621000000"></script>
+  <script src="js/templates/ollama-templates.js?v=20260621000000"></script>
+  <script src="js/assets/catalog.js?v=20260621000000"></script>
+  <script src="js/assets/loader.js?v=20260621000000"></script>
+  <script src="js/assets/asset-gen.js?v=20260621000000"></script>
+  <script src="js/setup/detector.js?v=20260621000000"></script>
+  <script src="js/setup/models.js?v=20260621000000"></script>
+  <script src="js/setup/ollama-repair.js?v=20260621000000"></script>
+  <script src="js/setup/kokoro.js?v=20260621000000"></script>
 
   <!-- Game engine -->
-  <script src="js/game/state.js?v=20260620230000"></script>
-  <script src="js/game/progression.js?v=20260620230000"></script>
-  <script src="js/game/sexdrive.js?v=20260620230000"></script>
-  <script src="js/game/playerstamina.js?v=20260620230000"></script>
-  <script src="js/game/wanted.js?v=20260620230000"></script>
-  <script src="js/game/game-clock.js?v=20260620230000"></script>
-  <script src="js/game/girl-gen.js?v=20260620230000"></script>
-  <script src="js/game/bootstrap.js?v=20260620230000"></script>
-  <script src="js/game/ollama.js?v=20260620230000"></script>
-  <script src="js/game/delta.js?v=20260620230000"></script>
-  <script src="js/game/imaging.js?v=20260620230000"></script>
-  <script src="js/game/damage.js?v=20260620230000"></script>
-  <script src="js/game/drug-scheduler.js?v=20260620230000"></script>
-  <script src="js/game/wardrobe.js?v=20260620230000"></script>
-  <script src="js/game/player-wardrobe.js?v=20260620230000"></script>
-  <script src="js/game/dungeon-ops.js?v=20260620230000"></script>
-  <script src="js/game/town-plot.js?v=20260620230000"></script>
-  <script src="js/game/dungeon-plot.js?v=20260620230000"></script>
-  <script src="js/game/voice-in.js?v=20260620230000"></script>
-  <script src="js/game/balancing.js?v=20260620230000"></script>
-  <script src="js/game/memory-embed.js?v=20260620230000"></script>
-  <script src="js/game/achievements.js?v=20260620230000"></script>
-  <script src="js/game/escape-recovery.js?v=20260620230000"></script>
-  <script src="js/game/save-slots.js?v=20260620230000"></script>
-  <script src="js/game/lifespan.js?v=20260620230000"></script>
-  <script src="js/game/death.js?v=20260620230000"></script>
-  <script src="js/game/action-effects.js?v=20260620230000"></script>
-  <script src="js/game/pregnancy.js?v=20260620230000"></script>
-  <script src="js/game/condoms.js?v=20260620230000"></script>
-  <script src="js/game/whore-out.js?v=20260620230000"></script>
-  <script src="js/game/film.js?v=20260620230000"></script>
-  <script src="js/game/market.js?v=20260620230000"></script>
-  <script src="js/game/specialize.js?v=20260620230000"></script>
-  <script src="js/game/milk.js?v=20260620230000"></script>
-  <script src="js/game/cumtool.js?v=20260620230000"></script>
-  <script src="js/game/period.js?v=20260620230000"></script>
-  <script src="js/game/shop.js?v=20260620230000"></script>
-  <script src="js/game/loanshark.js?v=20260620230000"></script>
-  <script src="js/game/gigs.js?v=20260620230000"></script>
-  <script src="js/game/hunt.js?v=20260620230000"></script>
-  <script src="js/game/capture.js?v=20260620230000"></script>
-  <script src="js/game/supply.js?v=20260620230000"></script>
-  <script src="js/game/loot.js?v=20260620230000"></script>
-  <script src="js/game/toys.js?v=20260620230000"></script>
-  <script src="js/game/transport.js?v=20260620230000"></script>
-  <script src="js/game/propositioner.js?v=20260620230000"></script>
-  <script src="js/game/disposal.js?v=20260620230000"></script>
-  <script src="js/game/trophies.js?v=20260620230000"></script>
-  <script src="js/game/slave-market.js?v=20260620230000"></script>
-  <script src="js/game/arrest.js?v=20260620230000"></script>
-  <script src="js/game/tick.js?v=20260620230000"></script>
+  <script src="js/game/state.js?v=20260621000000"></script>
+  <script src="js/game/progression.js?v=20260621000000"></script>
+  <script src="js/game/sexdrive.js?v=20260621000000"></script>
+  <script src="js/game/playerstamina.js?v=20260621000000"></script>
+  <script src="js/game/wanted.js?v=20260621000000"></script>
+  <script src="js/game/game-clock.js?v=20260621000000"></script>
+  <script src="js/game/girl-gen.js?v=20260621000000"></script>
+  <script src="js/game/bootstrap.js?v=20260621000000"></script>
+  <script src="js/game/ollama.js?v=20260621000000"></script>
+  <script src="js/game/delta.js?v=20260621000000"></script>
+  <script src="js/game/imaging.js?v=20260621000000"></script>
+  <script src="js/game/damage.js?v=20260621000000"></script>
+  <script src="js/game/drug-scheduler.js?v=20260621000000"></script>
+  <script src="js/game/wardrobe.js?v=20260621000000"></script>
+  <script src="js/game/player-wardrobe.js?v=20260621000000"></script>
+  <script src="js/game/dungeon-ops.js?v=20260621000000"></script>
+  <script src="js/game/town-plot.js?v=20260621000000"></script>
+  <script src="js/game/dungeon-plot.js?v=20260621000000"></script>
+  <script src="js/game/voice-in.js?v=20260621000000"></script>
+  <script src="js/game/balancing.js?v=20260621000000"></script>
+  <script src="js/game/memory-embed.js?v=20260621000000"></script>
+  <script src="js/game/achievements.js?v=20260621000000"></script>
+  <script src="js/game/escape-recovery.js?v=20260621000000"></script>
+  <script src="js/game/save-slots.js?v=20260621000000"></script>
+  <script src="js/game/lifespan.js?v=20260621000000"></script>
+  <script src="js/game/death.js?v=20260621000000"></script>
+  <script src="js/game/action-effects.js?v=20260621000000"></script>
+  <script src="js/game/pregnancy.js?v=20260621000000"></script>
+  <script src="js/game/condoms.js?v=20260621000000"></script>
+  <script src="js/game/whore-out.js?v=20260621000000"></script>
+  <script src="js/game/film.js?v=20260621000000"></script>
+  <script src="js/game/market.js?v=20260621000000"></script>
+  <script src="js/game/specialize.js?v=20260621000000"></script>
+  <script src="js/game/milk.js?v=20260621000000"></script>
+  <script src="js/game/cumtool.js?v=20260621000000"></script>
+  <script src="js/game/period.js?v=20260621000000"></script>
+  <script src="js/game/shop.js?v=20260621000000"></script>
+  <script src="js/game/loanshark.js?v=20260621000000"></script>
+  <script src="js/game/gigs.js?v=20260621000000"></script>
+  <script src="js/game/hunt.js?v=20260621000000"></script>
+  <script src="js/game/capture.js?v=20260621000000"></script>
+  <script src="js/game/supply.js?v=20260621000000"></script>
+  <script src="js/game/loot.js?v=20260621000000"></script>
+  <script src="js/game/toys.js?v=20260621000000"></script>
+  <script src="js/game/transport.js?v=20260621000000"></script>
+  <script src="js/game/propositioner.js?v=20260621000000"></script>
+  <script src="js/game/disposal.js?v=20260621000000"></script>
+  <script src="js/game/trophies.js?v=20260621000000"></script>
+  <script src="js/game/slave-market.js?v=20260621000000"></script>
+  <script src="js/game/arrest.js?v=20260621000000"></script>
+  <script src="js/game/tick.js?v=20260621000000"></script>
 
   <!-- UI layer -->
-  <script src="js/ui/router.js?v=20260620230000"></script>
-  <script src="js/ui/newgame.js?v=20260620230000"></script>
-  <script src="js/ui/dashboard.js?v=20260620230000"></script>
-  <script src="js/ui/charsheet.js?v=20260620230000"></script>
-  <script src="js/ui/game-over-view.js?v=20260620230000"></script>
-  <script src="js/ui/trophy-room-view.js?v=20260620230000"></script>
-  <script src="js/ui/room/panels.js?v=20260620230000"></script>
-  <script src="js/ui/room.js?v=20260620230000"></script>
-  <script src="js/ui/roster.js?v=20260620230000"></script>
-  <script src="js/ui/dungeon-view.js?v=20260620230000"></script>
-  <script src="js/ui/hunt-view.js?v=20260620230000"></script>
-  <script src="js/ui/stores-hub-view.js?v=20260620230000"></script>
-  <script src="js/ui/clothing-store-view.js?v=20260620230000"></script>
-  <script src="js/ui/player-clothing-store-view.js?v=20260620230000"></script>
-  <script src="js/ui/shop-view.js?v=20260620230000"></script>
-  <script src="js/ui/market-view.js?v=20260620230000"></script>
-  <script src="js/ui/dairy-view.js?v=20260620230000"></script>
-  <script src="js/ui/gristle-view.js?v=20260620230000"></script>
-  <script src="js/ui/property-view.js?v=20260620230000"></script>
-  <script src="js/ui/ledger-view.js?v=20260620230000"></script>
-  <script src="js/ui/propositioner-view.js?v=20260620230000"></script>
-  <script src="js/ui/dispose-view.js?v=20260620230000"></script>
-  <script src="js/ui/slave-market-view.js?v=20260620230000"></script>
-  <script src="js/ui/upgrade-view.js?v=20260620230000"></script>
-  <script src="js/ui/wardrobe-view.js?v=20260620230000"></script>
-  <script src="js/ui/quick-actions.js?v=20260620230000"></script>
-  <script src="js/ui/town-view.js?v=20260620230000"></script>
-  <script src="js/ui/gigs-view.js?v=20260620230000"></script>
-  <script src="js/ui/dungeon-plot-view.js?v=20260620230000"></script>
-  <script src="js/ui/asset-img.js?v=20260620230000"></script>
-  <script src="js/ui/tooltips.js?v=20260620230000"></script>
-  <script src="js/ui/notify.js?v=20260620230000"></script>
-  <script src="js/ui/death-dossier-overlay.js?v=20260620230000"></script>
-  <script src="js/ui/voice-queue.js?v=20260620230000"></script>
-  <script src="js/ui/timeline-view.js?v=20260620230000"></script>
-  <script src="js/ui/gallery-view.js?v=20260620230000"></script>
-  <script src="js/ui/loot-popup.js?v=20260620230000"></script>
-  <script src="js/ui/asset-popup.js?v=20260620230000"></script>
-  <script src="js/ui/asset-gallery-view.js?v=20260620230000"></script>
-  <script src="js/ui/achievements-view.js?v=20260620230000"></script>
-  <script src="js/ui/escape-recovery-view.js?v=20260620230000"></script>
-  <script src="js/ui/in-game-settings.js?v=20260620230000"></script>
-  <script src="js/ui/ollama-repair-overlay.js?v=20260620230000"></script>
+  <script src="js/ui/router.js?v=20260621000000"></script>
+  <script src="js/ui/newgame.js?v=20260621000000"></script>
+  <script src="js/ui/dashboard.js?v=20260621000000"></script>
+  <script src="js/ui/charsheet.js?v=20260621000000"></script>
+  <script src="js/ui/game-over-view.js?v=20260621000000"></script>
+  <script src="js/ui/trophy-room-view.js?v=20260621000000"></script>
+  <script src="js/ui/room/panels.js?v=20260621000000"></script>
+  <script src="js/ui/room.js?v=20260621000000"></script>
+  <script src="js/ui/roster.js?v=20260621000000"></script>
+  <script src="js/ui/dungeon-view.js?v=20260621000000"></script>
+  <script src="js/ui/hunt-view.js?v=20260621000000"></script>
+  <script src="js/ui/stores-hub-view.js?v=20260621000000"></script>
+  <script src="js/ui/clothing-store-view.js?v=20260621000000"></script>
+  <script src="js/ui/player-clothing-store-view.js?v=20260621000000"></script>
+  <script src="js/ui/shop-view.js?v=20260621000000"></script>
+  <script src="js/ui/market-view.js?v=20260621000000"></script>
+  <script src="js/ui/dairy-view.js?v=20260621000000"></script>
+  <script src="js/ui/gristle-view.js?v=20260621000000"></script>
+  <script src="js/ui/property-view.js?v=20260621000000"></script>
+  <script src="js/ui/ledger-view.js?v=20260621000000"></script>
+  <script src="js/ui/propositioner-view.js?v=20260621000000"></script>
+  <script src="js/ui/dispose-view.js?v=20260621000000"></script>
+  <script src="js/ui/slave-market-view.js?v=20260621000000"></script>
+  <script src="js/ui/upgrade-view.js?v=20260621000000"></script>
+  <script src="js/ui/wardrobe-view.js?v=20260621000000"></script>
+  <script src="js/ui/quick-actions.js?v=20260621000000"></script>
+  <script src="js/ui/town-view.js?v=20260621000000"></script>
+  <script src="js/ui/gigs-view.js?v=20260621000000"></script>
+  <script src="js/ui/dungeon-plot-view.js?v=20260621000000"></script>
+  <script src="js/ui/asset-img.js?v=20260621000000"></script>
+  <script src="js/ui/tooltips.js?v=20260621000000"></script>
+  <script src="js/ui/notify.js?v=20260621000000"></script>
+  <script src="js/ui/death-dossier-overlay.js?v=20260621000000"></script>
+  <script src="js/ui/voice-queue.js?v=20260621000000"></script>
+  <script src="js/ui/timeline-view.js?v=20260621000000"></script>
+  <script src="js/ui/gallery-view.js?v=20260621000000"></script>
+  <script src="js/ui/loot-popup.js?v=20260621000000"></script>
+  <script src="js/ui/asset-popup.js?v=20260621000000"></script>
+  <script src="js/ui/asset-gallery-view.js?v=20260621000000"></script>
+  <script src="js/ui/achievements-view.js?v=20260621000000"></script>
+  <script src="js/ui/escape-recovery-view.js?v=20260621000000"></script>
+  <script src="js/ui/in-game-settings.js?v=20260621000000"></script>
+  <script src="js/ui/ollama-repair-overlay.js?v=20260621000000"></script>
 
   <header class="app-chrome">
     <div class="chrome-brand">DUNGEON MASTER: THE HUNT</div>
