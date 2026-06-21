@@ -1,7 +1,9 @@
 // DUNGEON MASTER: THE HUNT — Asset Gallery. The complete history of every game-asset image
 // generated THIS playthrough (locations / items / dungeons / rooms / facilities), newest first.
-// Source: state.assetGallery (asset-gen.js stacks every fresh generation). Click a thumbnail for
-// a click-away lightbox. Reuses the .gallery-grid / .gallery-lightbox styling from the Spank Bank.
+// EXPERIENCE-ONLY: it holds ONLY the images actually generated/used in-game — it is NOT pre-filled
+// with assets the player hasn't encountered yet. Source: state.assetGallery (asset-gen.js stacks
+// every fresh generation). Click a thumbnail for a click-away lightbox. Reuses the
+// .gallery-grid / .gallery-lightbox styling from the Spank Bank.
 
 (function () {
   'use strict';
@@ -16,7 +18,7 @@
     el.innerHTML = `
       <div class="panel">
         <h2>🖼️ Asset Gallery (${gallery.length})</h2>
-        <p class="small muted">Every game-asset image generated this playthrough — locations, items, dungeons, rooms, facilities — stacked newest-first into one complete history. Click any asset's emoji anywhere in the game to generate + view it; it all collects here. (The committed static cover.png art is the fallback used only when a live generation fails.)</p>
+        <p class="small muted">Every game-asset image you've actually generated this playthrough — locations, items, dungeons, rooms, facilities — stacked newest-first. Only what you've ENCOUNTERED shows here; it's not pre-filled with assets you haven't touched. Click any asset's emoji/tile anywhere in the game to generate + view it; it all collects here. (The committed static cover.png art is the fallback used only when a live generation fails.)</p>
         <div class="btn-row"><a href="#stores" class="btn-small">← Stores</a> <a href="#dashboard" class="btn-small">Dashboard</a></div>
       </div>
       ${gallery.length === 0 ? `

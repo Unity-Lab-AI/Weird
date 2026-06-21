@@ -32,10 +32,11 @@
         <div class="girl-grid">
           ${window.DMTHGame.dungeonPlot.INTERIOR_ITEMS.filter(i => i.category === 'facility').map(f => `
             <div class="model-card">
-              <div class="model-name">${f.emoji} ${f.displayName}</div>
+              <div class="asset-slot slot-emoji" data-asset-category="facility" data-asset-id="${f.id}" data-asset-size="90" style="font-size:2rem" title="Click to view / generate this facility's image">${f.emoji}</div>
+              <div class="model-name">${f.displayName}</div>
               <div class="model-notes small">${f.promptTokens}</div>
               <div class="stat-row small"><span>Cost</span><b>$${f.cost.toLocaleString()}</b></div>
-              <p class="small muted">Click an empty slot above first, then pick here.</p>
+              <p class="small muted">Click the icon to view its image · click an empty slot above, then Prepare to place.</p>
               <button class="btn-small ${money >= f.cost ? 'btn-primary' : ''}" data-add-facility="${f.id}" ${money >= f.cost ? '' : 'disabled'}>
                 ${money >= f.cost ? 'Prepare' : (window.DMTHGame.state.brokeShort ? window.DMTHGame.state.brokeShort() : 'broke')}
               </button>
@@ -43,6 +44,20 @@
           `).join('')}
         </div>
         <div class="small muted" id="place-status"></div>
+      </div>
+
+      <div class="panel">
+        <h2>Room styles</h2>
+        <p class="small muted">The room style each hold can wear (set per-hold from upgrades). Click any icon to view / generate its image.</p>
+        <div class="girl-grid">
+          ${window.DMTHGame.dungeonPlot.INTERIOR_ITEMS.filter(i => i.category === 'room').map(r => `
+            <div class="model-card" style="text-align:center">
+              <div class="asset-slot slot-emoji" data-asset-category="room" data-asset-id="${r.id}" data-asset-size="90" style="font-size:2rem" title="Click to view / generate this room style's image">${r.emoji}</div>
+              <div class="model-name">${r.displayName}</div>
+              <div class="stat-row small"><span>Cost</span><b>$${r.cost.toLocaleString()}</b></div>
+            </div>
+          `).join('')}
+        </div>
       </div>
 
       <div class="panel">
@@ -91,6 +106,10 @@
       if (r.url) slot.innerHTML = `<img src="${r.url}" alt="interior" class="gen-img" />${r.cached ? '<p class="small muted">cached</p>' : ''}`;
       else      slot.innerHTML = `<p class="small danger">render failed: ${r.error}</p>`;
     };
+
+    // Every room-style + facility icon → clickable button that pops its image up big (generating
+    // it live if needed). This is the contextual home for rooms + facilities.
+    if (window.DMTHAssetImg) window.DMTHAssetImg.decorate(el, 90);
   }
 
   function slotHtml(s, dungeon, money) {
