@@ -75,7 +75,7 @@
 
     // Generation params — overridable via settings (Settings panel writes dmth_ollama_temp).
     // 200 tokens leaves room for: 1-2 short sentences + 1 asterisk-action + the delta block.
-    temperature: (() => { const v = parseFloat(pick('dmth_ollama_temp', 'OLLAMA_TEMP', '0.85')); return Number.isFinite(v) ? v : 0.85; })(),
+    temperature: (() => { const v = parseFloat(pick('dmth_ollama_temp', 'OLLAMA_TEMP', '0.92')); return Number.isFinite(v) ? v : 0.92; })(),   // 0.92 (was 0.85) — more reply variety, less repetition
     topP: 0.92,
     repeatPenalty: 1.25,           // higher = less likely to repeat the same response
     maxTokens: 256,                // headroom so a SHORT complete reply + the full <delta> block both finish before the cap (was 200 → chopped mid-sentence)
