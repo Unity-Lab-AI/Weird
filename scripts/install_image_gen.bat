@@ -53,8 +53,11 @@ if errorlevel 1 (
 
 echo.
 echo   [ok] done. Any other .safetensors dropped into models\ is picked up
-echo        automatically ^(first by name^). Run scripts\start_image_gen.bat
-echo        to start the server on 127.0.0.1:7860.
+echo        automatically ^(first by name^). start.bat will auto-launch the
+echo        server on 127.0.0.1:7860 on next launch; or run
+echo        scripts\start_image_gen.bat to start it now.
 echo.
-pause
+REM No pause on success - start.bat chains a `&& python sd_server.py` after this
+REM script exits, and a pause would block that auto-launch. Errors above DO
+REM pause (see the `pause && exit /b 1` lines) so the user sees the failure.
 endlocal

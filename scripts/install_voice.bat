@@ -64,7 +64,11 @@ if not exist "models\whisper-small\model.bin" (
 )
 
 echo.
-echo   [ok] voice setup complete. Run scripts\start_voice.bat
-echo        to start the server on 127.0.0.1:7861.
+echo   [ok] voice setup complete. start.bat will auto-launch the server on
+echo        127.0.0.1:7861 on next launch; or run scripts\start_voice.bat
+echo        to start it now.
 echo.
+REM No pause on success - start.bat chains a `&& python voice_server.py` after this
+REM script exits, and a pause would block that auto-launch. Errors above DO
+REM exit with a non-zero code so the chained launch is skipped on failure.
 endlocal

@@ -220,11 +220,13 @@
               </div>
               <div class="model-notes">${escapeHtml(m.notes)}</div>
               <div class="model-actions">
-                ${isActive
+                ${isActive && isInstalled
                   ? `<button class="btn-small" disabled data-tooltip="Already the active model — nothing to do here.">Active ✓</button>`
-                  : isInstalled
-                    ? `<button class="btn-small" data-set-active="${m.id}">Set active</button>`
-                    : `<button class="btn-small btn-primary" data-pull="${m.id}">Pull</button>`
+                  : isActive && !isInstalled
+                    ? `<button class="btn-small btn-primary" data-pull="${m.id}" data-tooltip="This is the ACTIVE pick per your config, but the weights aren't downloaded yet. Click Pull to fetch them (~${m.sizeGB.toFixed(1)}GB).">Pull now (active pick — not installed yet)</button>`
+                    : isInstalled
+                      ? `<button class="btn-small" data-set-active="${m.id}">Set active</button>`
+                      : `<button class="btn-small btn-primary" data-pull="${m.id}">Pull</button>`
                 }
               </div>
               <div class="model-progress" id="mp-${cssId(m.id)}"></div>
@@ -304,40 +306,32 @@
     const voiceReachable = !!(s.localVoice && s.localVoice.reachable);
 
     // Per-server status label — distinguishes "not running" from "running but the
-    // model/checkpoint isn't there yet" so the visitor knows which script to run.
+    // model/checkpoint isn't there yet" so the visitor knows what state they're in.
     const imageLabel = imageReady
       ? `Ready · ${escapeHtml(s.localImage.model || '')}${s.localImage.device ? ' · ' + escapeHtml(s.localImage.device) : ''}`
       : imageReachable
-        ? `Server up · ${escapeHtml(s.localImage.state || 'unknown')}${s.localImage.state === 'no-checkpoint' ? ' — drop a .safetensors into models/' : ' (still loading)'}`
-        : 'Not running — run start_image_gen to serve on 127.0.0.1:7860';
+        ? `Server up · ${escapeHtml(s.localImage.state || 'unknown')}${s.localImage.state === 'no-checkpoint' ? ' — drop a .safetensors into models/' : ' (still loading — may take 30-60s on first render)'}`
+        : 'Not running yet — the launcher (start.bat / start.sh) auto-installs + starts it; still initializing on first run';
     const voiceLabel = voiceReady
       ? 'Ready · faster-whisper on your GPU (CPU fallback available)'
       : voiceReachable
-        ? 'Server up · STT model missing — run install_voice to download whisper-small'
-        : 'Not running — run start_voice to serve on 127.0.0.1:7861';
+        ? 'Server up · STT model still downloading (~480MB, first run only)'
+        : 'Not running yet — the launcher auto-installs + starts it; still initializing on first run';
 
     $('#polly-setup').innerHTML = `
-      <h3>4. Local image + voice servers (optional — enable pictures + mic-in)</h3>
-      <p class="small">Both run on YOUR machine. No API key, no cloud, no rate limit. The game plays fully as text+emoji without either — turn them on when you want images and mic-in.</p>
+      <h3>4. Local image + voice servers</h3>
+      <p class="small">Both run on YOUR machine. No API key, no cloud, no rate limit. <b>The launcher auto-installs + auto-starts both</b> alongside Ollama — no terminal needed. First launch pulls ~2.5GB of models in the background; status pills below flip to Ready when downloads finish. Game is fully playable as text+emoji while the download runs.</p>
 
       <div class="step-card">
         <div class="step-label">🖼️ Local Stable Diffusion (image generation)</div>
         <div class="status-row" style="margin:8px 0">${statusPill(imageReady, imageLabel)}</div>
-        <pre class="code-block" id="li-install">${shellPrefix}scripts${sep}install_image_gen${scriptExt}</pre>
-        <button class="btn-small" data-copy="li-install">Copy install command</button>
-        <pre class="code-block" id="li-start" style="margin-top:8px">${shellPrefix}scripts${sep}start_image_gen${scriptExt}</pre>
-        <button class="btn-small" data-copy="li-start">Copy start command</button>
-        <div class="step-note">Install (~2GB): torch + diffusers + Realistic Vision V5.1 uncensored checkpoint. Then start_image_gen serves on <code>127.0.0.1:7860</code>. Drop any <code>.safetensors</code> into <code>models/</code> to swap.</div>
+        <div class="step-note">Serves on <code>127.0.0.1:7860</code>. Realistic Vision V5.1 uncensored checkpoint (~2GB). Drop any <code>.safetensors</code> into <code>models/</code> to swap. Not running? Close the game window, re-run <code>${escapeHtml(shellPrefix + 'start' + scriptExt)}</code> from the project root, wait for the SD window to say "ready". Manual override: <code>${escapeHtml(shellPrefix + 'scripts' + sep + 'install_image_gen' + scriptExt)}</code> then <code>${escapeHtml(shellPrefix + 'scripts' + sep + 'start_image_gen' + scriptExt)}</code>.</div>
       </div>
 
       <div class="step-card">
         <div class="step-label">🎤 Local voice-in (speech-to-text)</div>
         <div class="status-row" style="margin:8px 0">${statusPill(voiceReady, voiceLabel)}</div>
-        <pre class="code-block" id="lv-install">${shellPrefix}scripts${sep}install_voice${scriptExt}</pre>
-        <button class="btn-small" data-copy="lv-install">Copy install command</button>
-        <pre class="code-block" id="lv-start" style="margin-top:8px">${shellPrefix}scripts${sep}start_voice${scriptExt}</pre>
-        <button class="btn-small" data-copy="lv-start">Copy start command</button>
-        <div class="step-note">Install (~480MB): faster-whisper + Whisper-small model. Serves on <code>127.0.0.1:7861</code>. GPU-first with a CPU fallback so it works without CUDA. TTS stays in the browser via Kokoro.</div>
+        <div class="step-note">Serves on <code>127.0.0.1:7861</code>. faster-whisper + Whisper-small (~480MB). GPU-first with a CPU int8 fallback so it works without CUDA. TTS stays in the browser via Kokoro. Manual override: <code>${escapeHtml(shellPrefix + 'scripts' + sep + 'install_voice' + scriptExt)}</code> then <code>${escapeHtml(shellPrefix + 'scripts' + sep + 'start_voice' + scriptExt)}</code>.</div>
       </div>
     `;
 
