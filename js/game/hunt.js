@@ -416,7 +416,7 @@
         if (r && r.ok && window.DMTHLootPopup) window.DMTHLootPopup.show(`👗 Rare find — ${girl.name} had a ${r.outfit.displayName} stashed. It's hers now.`);
       }
     }
-    // Fire-and-forget capture memorial + profile image — Pollinations overlay, silent if unavailable.
+    // Fire-and-forget capture memorial + profile image — local SD overlay, silent if unavailable.
     if (window.DMTHGame.imaging && window.DMTHGame.imaging.isAvailable()) {
       window.DMTHGame.imaging.generateFor(girl.id, { situation: 'capture' }).catch(() => {});
       window.DMTHGame.imaging.profileImageFor(girl.id).catch(() => {});

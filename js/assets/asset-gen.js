@@ -3,8 +3,8 @@
 // Generates cohesive game-asset images (location cards, item icons, dungeon/room/facility art)
 // on demand from a SHARED STYLE BLOCK + each asset's own catalog prompt + a DETERMINISTIC
 // per-asset seed, so the whole set reads like one artist made it and the SAME asset always
-// renders consistently. Reuses the Pollinations pipeline already exported by imaging.js
-// (buildUrl + promptHash) + the IDB cache.
+// renders consistently. Reuses the local SD pipeline already exported by imaging.js
+// (renderImage + promptHash) + the IDB cache.
 //
 // This module is the procedural source — the DEFAULT live image path (tier-1) in the chain:
 //   1. procedural (THIS — default ON; generated on-acquire + on-click, stacked in the gallery)
@@ -60,12 +60,14 @@
   }
 
   // Generate (or pull cached) a procedural image URL for one asset. Returns a usable URL string
-  // or null (caller falls through to the static/emoji tiers). Requires imaging.buildUrl + the cache.
+  // or null (caller falls through to the static/emoji tiers). Uses imaging.renderImage which
+  // POSTs to the local SD server and returns a blob URL directly. When the server is down
+  // there is no cross-origin URL to fall back to — the caller falls through to static/emoji.
   async function generateAssetImage(category, id, opts = {}) {
     if (!isEnabled() && !opts.force) return null;
     const imaging = window.DMTHGame && window.DMTHGame.imaging;
     const store = window.DMTHStorage && window.DMTHStorage.cache;
-    if (!imaging || !imaging.buildUrl) return null;
+    if (!imaging || !imaging.renderImage) return null;
     const key = cacheKey(category, id);
 
     // Cache hit — rebuild a live blob URL from the stored Blob (a persisted blobUrl dies on reload).
@@ -81,27 +83,19 @@
 
     const prompt = buildAssetPrompt(category, id);
     const seed = assetSeed(category, id);
-    const url = imaging.buildUrl(prompt, seed, { width: 768, height: 768 });
-
-    // Try to fetch + cache the blob (so a static host / reload reuses it). On any failure return
-    // the direct Pollinations URL — it still works as an <img src>.
+    // Local SD render — returns { blob, url, error }. On failure the caller falls through
+    // to the static default tier; nothing else to try (no cross-origin URL fallback exists).
+    const attempt = await imaging.renderImage(prompt, seed, { width: 768, height: 768 });
+    if (!attempt.blob) return null;
+    const objUrl = attempt.url;
+    if (store) { try { await store.put(key, { category, id, prompt, seed, blob: attempt.blob, blobUrl: objUrl, createdAt: 0 }); } catch (e) { /* non-fatal */ } }
+    // Stack this FRESH generation into the playthrough asset gallery (complete history). Only on
+    // a real generation — cache hits above already recorded theirs, so re-shows never duplicate.
     try {
-      const res = await fetch(url);
-      if (!res.ok) return url;
-      const blob = await res.blob();
-      if (blob.size < 500) return url;            // guard the placeholder error image
-      const objUrl = URL.createObjectURL(blob);
-      if (store) { try { await store.put(key, { category, id, prompt, seed, blob, blobUrl: objUrl, createdAt: 0 }); } catch (e) { /* non-fatal */ } }
-      // Stack this FRESH generation into the playthrough asset gallery (complete history). Only on
-      // a real generation — cache hits above already recorded theirs, so re-shows never duplicate.
-      try {
-        const meta = (window.DMTHAssets && window.DMTHAssets.getById) ? window.DMTHAssets.getById(category, id) : null;
-        window.DMTHGame?.state?.pushAssetGen?.({ category, id, displayName: meta ? meta.displayName : id, url: objUrl, cacheKey: key });
-      } catch (e) { /* non-fatal */ }
-      return objUrl;
-    } catch (e) {
-      return url;
-    }
+      const meta = (window.DMTHAssets && window.DMTHAssets.getById) ? window.DMTHAssets.getById(category, id) : null;
+      window.DMTHGame?.state?.pushAssetGen?.({ category, id, displayName: meta ? meta.displayName : id, url: objUrl, cacheKey: key });
+    } catch (e) { /* non-fatal */ }
+    return objUrl;
   }
 
   // Cache-only lookup (NO network) — returns a live blob URL for an already-generated asset, or

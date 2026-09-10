@@ -1,70 +1,79 @@
-// DUNGEON MASTER: THE HUNT — Pollinations imaging pipeline.
-// 6-block prompt composer: strict prefix + LOCKED face + LOCKED outfit+state layers +
-// pose + state tokens + env + strict suffix. Generates + caches in IDB keyed by (girlId, promptHash).
-// Same girl.visualIdentity.seed drives every image of her — facial + outfit persist across contexts.
+// DUNGEON MASTER: THE HUNT — LOCAL image pipeline (Stable Diffusion on the visitor's machine).
+// 8-position prompt composer: prefix + face/nudity + env + face/outfit + pose + drug-state +
+// body-state + suffix. Generates + caches in IDB keyed by (girlId, stateSignature).
+// Same girl.visualIdentity.seed → torch.Generator seed on the SD side, so facial identity
+// and outfit persist across every image of her.
+//
+// No cloud service. No API key. The browser POSTs to a local SD server at
+// http://127.0.0.1:7860/sdapi/v1/txt2img that ships with this project (see
+// local-services/image-server/sd_server.py + scripts/install_image_gen.*). The server sends
+// Access-Control-Allow-Origin: * so this browser-direct pattern works from any origin.
 
 (function () {
   'use strict';
 
-  function cfg() { return window.DMTHConfig.POLLINATIONS; }
-
-  // Pollinations key attach: if a key is present (any prefix), send it to the authed endpoint.
-  // Let the server tell us if it's rejected (403/401) — at which point we fall back to the legacy
-  // endpoint.  Don't pre-filter by prefix: the user set a key, we respect that.
-  function hasKey() {
-    return !!(cfg().apiKey && cfg().apiKey.length > 0);
-  }
+  function cfg() { return window.DMTHConfig.LOCAL_IMAGE; }
 
   // --- Single-slot request serializer ---
-  // Pollinations' anonymous tier caps at 1 concurrent request per IP.  Even when authed, bursts
-  // (profile image + room scene + selfie clicked in quick succession) can exceed per-second caps.
-  // This queue guarantees we send ONE Pollinations fetch at a time; the rest wait their turn.
-  // Also handles 429 retries with exponential backoff (1s → 2s → 4s → give up).
-  let pollinationsTail = Promise.resolve();
-  async function queuedFetch(url, { maxRetries = 3 } = {}) {
-    // Chain onto the tail so callers serialize FIFO even across concurrent callers.
-    const mine = pollinationsTail.then(() => doFetchWithRetry(url, maxRetries));
-    // Update the tail so the next caller waits for us. Swallow rejections on the chain so
-    // one failure doesn't poison the whole queue.
-    pollinationsTail = mine.catch(() => {});
+  // The local SD server renders ONE image at a time under an internal lock (a single GPU
+  // doesn't need a queue upstream). Serializing on the client too means bursts (profile +
+  // room scene + selfie clicked in quick succession) queue in FIFO order instead of all
+  // stalling on the server-side lock, and callers see predictable ordering.
+  let renderTail = Promise.resolve();
+  async function queuedRender(fn) {
+    const mine = renderTail.then(fn);
+    renderTail = mine.catch(() => {});
     return mine;
   }
-  async function doFetchWithRetry(url, maxRetries) {
-    // Pollinations token via Authorization: Bearer HEADER (NOT a ?key= query param — the key in the
-    // URL pushed long prompts over gen.pollinations.ai's URL limit → 400). Header auth keeps the URL
-    // short AND honors the daily-replenishing token. Only attach it to the authed host; the free
-    // fallback host (image.pollinations.ai) takes no key + no custom header (avoids a CORS preflight).
-    const p = cfg();
-    const fetchOpts = (p.apiKey && p.imageEndpointAuth && url.startsWith(p.imageEndpointAuth))
-      ? { headers: { Authorization: `Bearer ${p.apiKey}` } }
-      : {};
-    for (let attempt = 0; attempt <= maxRetries; attempt++) {
-      try {
-        const res = await fetch(url, fetchOpts);
-        if (res.status === 429) {
-          if (attempt >= maxRetries) return res;
-          const wait = 1000 * Math.pow(2, attempt);  // 1s, 2s, 4s
-          console.debug(`[imaging] 429 from Pollinations, retry ${attempt + 1}/${maxRetries} in ${wait}ms`);
-          await new Promise(r => setTimeout(r, wait));
-          continue;
-        }
-        return res;
-      } catch (err) {
-        if (attempt >= maxRetries) throw err;
-        await new Promise(r => setTimeout(r, 1000 * Math.pow(2, attempt)));
-      }
-    }
+
+  // Turn a base64 PNG string (as returned by /sdapi/v1/txt2img) into a Blob suitable for
+  // URL.createObjectURL() and IDB persistence. atob is fine here — the server sends
+  // base64 in the images[] array, no data-URI prefix.
+  function b64ToBlob(b64) {
+    const bin = atob(b64);
+    const arr = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+    return new Blob([arr], { type: 'image/png' });
   }
 
-  // --- Startup key info ---
-  (function keyInfo() {
-    const k = cfg().apiKey || '';
-    if (!k) {
-      void 0;
-    } else {
-      void 0;
-    }
-  })();
+  // Core render call — POSTs to the local SD server and returns { blob, url, error }.
+  // Serialized via queuedRender so parallel callers wait their turn instead of all pounding
+  // the loopback socket. No retry ladder: the local server has no rate limit and no
+  // content filter — a failure is a real failure worth surfacing to the caller.
+  async function renderImage(prompt, seed, opts = {}) {
+    return queuedRender(async () => {
+      const c = cfg();
+      const body = {
+        prompt: String(prompt || '').slice(0, 1500),
+        negative_prompt: opts.negative || c.negativePrompt,
+        steps: opts.steps || c.steps,
+        width: opts.width || c.width,
+        height: opts.height || c.height,
+        cfg_scale: opts.cfgScale || c.cfgScale,
+        seed: (seed != null && Number.isFinite(seed)) ? Number(seed) : -1
+      };
+      let res;
+      try {
+        res = await fetch(c.endpoint + c.txt2img, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+      } catch (err) {
+        return { blob: null, url: null, error: 'network' };
+      }
+      if (!res.ok) {
+        return { blob: null, url: null, error: `sd-${res.status}` };
+      }
+      let j;
+      try { j = await res.json(); } catch { return { blob: null, url: null, error: 'bad-json' }; }
+      const b64 = (j.images || [])[0];
+      if (!b64) return { blob: null, url: null, error: 'empty-images' };
+      const blob = b64ToBlob(b64);
+      if (blob.size < 500) return { blob: null, url: null, error: 'empty-body' };
+      return { blob, url: URL.createObjectURL(blob), error: null };
+    });
+  }
 
   // --- Body-state → prompt-token library ---
   function bodyStateTokens(body) {
@@ -563,7 +572,7 @@
   // maximum-bump appearance. Age is taken from the girl's own profile via callers
   // (girl.age >= 18 is already gated in girl-gen).
   function pregnancyTokens(pregnancy) {
-    // When she's NOT actively pregnant, emit POSITIVE body-shape markers so Pollinations
+    // When she's NOT actively pregnant, emit POSITIVE body-shape markers so the image model
     // doesn't drift toward a baby bump on its own. Pure positive description only — never
     // negation language like "not pregnant" or "no bump", which would pattern-match
     // pregnancy tokens and make the model render exactly what it's told to avoid.
@@ -903,7 +912,7 @@
     // Age derived from girl.age (her own profile value). Never hardcode "20s" —
     // 18-19 year-old captives must render as their actual age for face/age persistence.
     const ageStr = girl.age && Number.isFinite(girl.age) ? `adult female age ${girl.age}` : 'adult female, grown adult';
-    // Female sex-lock — Pollinations occasionally drifts and renders male subjects when
+    // Female sex-lock — the image model occasionally drifts and renders male subjects when
     // the gender token isn't aggressive enough. Kept INTENTIONALLY MINIMAL and conflict-
     // free: NO anatomy tokens (would leak through clothed outfits), NO "alone in frame"
     // (would break multi-person scenes — johns, sex with Master, group), NO negation
@@ -975,7 +984,7 @@
       let outfitBlock = currentOutfitEntry?.description || baseOutfit;
       const outfitState = outfitStateTokens(girl.body);
       // When pregnant + outfit looks form-fitting, append a
-      // reconciler so Pollinations doesn't get contradictory "tight" + "big bump" tokens.
+      // reconciler so the image model doesn't get contradictory "tight" + "big bump" tokens.
       // Heuristic: any outfit description containing fit-hugging keywords gets the
       // reconciler appended. Past trimester 2 (day 94+), the bump is too pronounced to
       // be plausibly contained — the reconciler explicitly mentions strain.
@@ -1030,19 +1039,15 @@
     return (h >>> 0).toString(16);
   }
 
-  // --- Pollinations URL builder ---
-  // Returns the full GET URL — any client can point an <img src> at it.
-  // pk_ keys route through authed endpoint; sk_ / no-key routes through the legacy free endpoint.
-  // Pollinations requires seed to fit in positive int32 (0 to 2_147_483_647).  Mask every seed
-  // we emit with 0x7FFFFFFF so oversized stored seeds (e.g., the 48-bit Unity bootstrap seed or
-  // anything multiplied by 0xFFFFFFFF) never hit the API raw.
+  // Facial persistence is the project's #1 image-pipeline invariant: the same girl renders
+  // with the same face across every image of her. Local SD accepts an integer seed and
+  // hands it to a torch.Generator on the pipeline device, so (prompt, seed, size, steps)
+  // reproduces her face bit-for-bit. Mask to positive int32 to match A1111 conventions
+  // (matches the mask sd_server.py applies via `seed_int & 0x7FFFFFFF`).
   //
-  // Deterministic seed fallback. Facial persistence is the project's
-  // #1 image-pipeline invariant: same girl renders with the same face across every image of her.
-  // The previous fallback (Math.floor(Math.random() * 0x7FFFFFFF)) silently turned every
-  // seed-less girl into a different face on every generation. Now a `fallbackKey` parameter
-  // (typically girl.id) deterministically derives a stable seed via the existing djb2 hash, so
-  // seed-less girls still render consistently.
+  // Deterministic fallback: seed-less girls derive a stable seed from `fallbackKey` (their
+  // girl.id) via djb2 hash. Falling back to Math.random() would silently give the same girl
+  // a different face on every regeneration.
   function clampSeed(s, fallbackKey) {
     const n = Number(s);
     if (Number.isFinite(n) && n > 0) {
@@ -1051,65 +1056,16 @@
     if (fallbackKey) {
       return parseInt(promptHash(String(fallbackKey)), 16) & 0x7FFFFFFF;
     }
-    // No seed AND no fallback key — non-girl-bound callers (rare ad-hoc utility).
-    // Fresh random rather than throwing, but surface the situation so the missing
-    // invariant is visible in dev.
     console.warn('[imaging] clampSeed called without seed AND without fallbackKey — using fresh random; facial persistence will not hold');
     return Math.floor(Math.random() * 0x7FFFFFFF) & 0x7FFFFFFF;
   }
-  // Safely truncate a URL-encoded prompt so the cut never lands inside a percent-escape
-  // sequence. Previous `encodeURIComponent(prompt).slice(0, 1800)` could leave a trailing
-  // `%` or `%X` (incomplete percent-escape) — Cloudflare's URL parser rejects those with
-  // 400 Bad Request, which broke image gen entirely when the prompt was long enough.
-  function safeEncodedPrompt(prompt, maxLen) {
-    let enc = encodeURIComponent(prompt);
-    if (enc.length <= maxLen) return enc;
-    enc = enc.slice(0, maxLen);
-    // Rewind past any partial %XX at the tail. % is escape opener; if it's in the last
-    // 2 chars, the cut split a percent-escape — drop everything from that % onward.
-    const tail = enc.lastIndexOf('%');
-    if (tail >= 0 && tail >= enc.length - 2) {
-      enc = enc.slice(0, tail);
-    }
-    return enc;
-  }
 
-  function buildUrl(prompt, seed, opts = {}) {
-    const p = cfg();
-    const encoded = safeEncodedPrompt(prompt, 1800);
-    const baseParams = {
-      model: opts.model || p.imageModel,
-      width: String(opts.width  || p.width),
-      height: String(opts.height || p.height),
-      nologo: String(p.nologo),
-      seed: String(clampSeed(seed)),
-      safe: 'false',
-      referrer: 'dungeon-master-the-hunt'
-    };
-    // Unity AI Lab Worker route — uniform with the rest of the website2.0 apps.
-    // When active, the Worker injects the operator's sk_ token server-side; the browser
-    // sends NO key. Detection is in config.js detectUnityLabWorker() (hostname-based).
-    // opts.forceFree → skip the Worker / authed-key routes and use the permissive free endpoint.
-    // Used by the 400/refusal retry chain: the authed gen.pollinations.ai endpoint rejects severe
-    // content + long prompts, while the free image.pollinations.ai endpoint still renders them.
-    if (p.useUnityLabWorker && p.imageEndpointWorker && !opts.forceFree) {
-      const params = new URLSearchParams(baseParams);
-      return `${p.imageEndpointWorker}${encoded}?${params.toString()}`;
-    }
-    // AUTHED BY DEFAULT — your daily-replenishing Pollinations token is used on the authed host.
-    // The key is NOT in the URL anymore (a ?key= query made long prompts overflow → 400); it rides
-    // the Authorization: Bearer header attached in doFetchWithRetry. Tested 200 on long prompts via
-    // header. forceFree → the keyless reliable image.pollinations.ai fallback (the last return).
-    if (hasKey() && !opts.forceFree) {
-      const params = new URLSearchParams(baseParams);
-      return `${p.imageEndpointAuth}${encoded}?${params.toString()}`;
-    }
-    const params = new URLSearchParams(baseParams);
-    return `${p.imageEndpoint}${encoded}?${params.toString()}`;
-  }
-
-  // Build a sanitized prompt that strips the most aggressive trigger words — used as a retry
-  // when the first request 403s (content filter on the free endpoint).
+  // Build a sanitized prompt that softens the most aggressive trigger words. Preserved as
+  // an optional prompt-hygiene lever some visitors may want (e.g. if they swap in a
+  // partly-censored checkpoint) — the local SD server itself has no content filter, so
+  // the sanitize→retry chain the old cloud pipeline used is gone. Callers can pass
+  // `opts.sanitize: true` to renderImage-based helpers below to opt in (not wired by
+  // default — kept as an available lever, not an automatic one).
   function sanitizePrompt(p) {
     return p
       .replace(/\b(cum|cumming|cumshot|squirt|squirting)\b/gi, 'glow')
@@ -1139,7 +1095,7 @@
   //   3. THIS function — strips any portrait/mugshot/headshot/bust leakage from composed
   //      prompts (whether from POSE_LIBRARY, Ollama prompt-writer, or sanitizePrompt
   //      fallback) and injects an affirmative "full body" marker if none is present.
-  // Plus the default Pollinations aspect ratio (config.js) is portrait tall (1024×1792)
+  // Plus the default aspect ratio (config.js LOCAL_IMAGE.width/height) is portrait tall (1024×1792)
   // to give vertical room for the full body — env renders override to landscape.
   function enforceFullBody(prompt) {
     if (!prompt) return prompt;
@@ -1161,7 +1117,7 @@
   }
 
   // --- Ollama prompt-writer meta-layer ---
-  // Given a girl + situation, asks Ollama to compose the Pollinations prompt from scene context.
+  // Given a girl + situation, asks Ollama to compose the image prompt from scene context.
   // The generated prompt is LOCKED to the girl's facial + default outfit descriptors for persistence.
   async function composePromptViaOllama(girl, options = {}) {
     const { situation = 'profile', customPose, additionalTokens = '', locationId, userStaging, withPlayer = false, pov = false, npc = null } = options;
@@ -1263,7 +1219,7 @@ CANONICAL PROMPT POSITION ORDERING (8 slots):
 7. BODY-STATE (arousal / wetness / cum / bruises)
 8. SUFFIX (cinematic lighting, color-graded, clean unmarked frame)
 
-Write the Pollinations prompt now.`;
+Write the image prompt now.`;
 
     try {
       const res = await window.DMTHGame.ollama.chat({
@@ -1277,7 +1233,7 @@ Write the Pollinations prompt now.`;
       const cleaned = text
         .replace(/^```[a-z]*\n/i, '')
         .replace(/```$/, '')
-        .replace(/^(prompt|image prompt|pollinations prompt)\s*:\s*/i, '')
+        .replace(/^(prompt|image prompt)\s*:\s*/i, '')
         .trim();
       return groupConcepts(enforceFullBody(cleaned));   // same concept-grouping on the Ollama-composed path
     } catch (err) {
@@ -1289,7 +1245,7 @@ Write the Pollinations prompt now.`;
   // outfit, nudity, bond tier, drug set, banded body state, pregnancy/decay, location/hold,
   // recent-act aftermath, custom pose/staging. The image cache keys on THIS, not on the
   // (non-deterministic, Ollama-written) prompt text — so the same state reuses the cached
-  // image instead of re-billing Pollinations every render, while a real state change still
+  // image instead of re-rendering on the local GPU every call, while a real state change still
   // busts the cache and regenerates.
   function stateSignature(girl, options = {}) {
     const b = girl.body || {};
@@ -1350,7 +1306,7 @@ Write the Pollinations prompt now.`;
     }
 
     // Don't re-attempt a generation that already hard-failed this session for this exact
-    // state (Pollinations down / blocked) — avoids a doomed network stall on every re-render.
+    // state (local SD down / no checkpoint) — avoids a doomed stall on every re-render.
     if (!options.forceRegenerate && sessionFailures.has(cacheKey)) {
       return { url: null, cached: false, error: 'session-failed', cacheKey, prompt: null };
     }
@@ -1366,65 +1322,15 @@ Write the Pollinations prompt now.`;
     const hash = promptHash(prompt);
 
     const seed = clampSeed(girl.visualIdentity?.seed, girl.id);
-    let url = buildUrl(prompt, seed);
-
-    // Try fetch for blob caching. If any failure, we still return the URL so the caller
-    // can render via <img src=> which bypasses CORS / some content filters for image display.
-    let blob = null;
-    let objUrl = null;
-    let fetchError = null;
-
-    async function tryFetch(u) {
-      try {
-        const res = await queuedFetch(u);
-        if (res.status === 403 || res.status === 401 || res.status === 402) {
-          return { ok: false, status: res.status };
-        }
-        if (res.status === 429) return { ok: false, status: 429 };
-        if (!res.ok) return { ok: false, status: res.status };
-        const b = await res.blob();
-        // Guard against Pollinations returning a placeholder error image (tiny size)
-        if (b.size < 500) return { ok: false, status: 'empty-body' };
-        return { ok: true, blob: b };
-      } catch (err) {
-        return { ok: false, status: 'cors-or-network' };
-      }
-    }
-
-    let attempt = await tryFetch(url);
-    // Retry on content-filter / refusal / bad-request. The authed gen.pollinations.ai endpoint
-    // returns 400 (not just 403) when an action is too SEVERE (gore / extreme) or the prompt is
-    // long — so 400 is included now. Escalating fallback chain:
-    //   1) sanitized prompt on the same (authed/worker) endpoint
-    //   2) the permissive FREE endpoint (no key) with the original prompt
-    //   3) the FREE endpoint with the sanitized prompt
-    if (!attempt.ok && (attempt.status === 403 || attempt.status === 402 || attempt.status === 400)) {
-      const safer = sanitizePrompt(prompt);
-      if (safer !== prompt) {
-        // Route through buildUrl so the safe percent-encode truncation + referrer are uniform
-        // (no hand-rolled .slice that can split a %XX → Cloudflare 400).
-        const u2 = buildUrl(safer, seed);
-        attempt = await tryFetch(u2);
-        if (attempt.ok) url = u2;
-      }
-      if (!attempt.ok && hasKey()) {
-        const free1 = buildUrl(prompt, seed, { forceFree: true });
-        attempt = await tryFetch(free1);
-        if (attempt.ok) { url = free1; }
-        else if (safer !== prompt) {
-          const free2 = buildUrl(safer, seed, { forceFree: true });
-          attempt = await tryFetch(free2);
-          if (attempt.ok) url = free2;
-        }
-      }
-    }
-
-    if (attempt.ok) {
-      blob = attempt.blob;
-      objUrl = URL.createObjectURL(blob);
-    } else {
-      fetchError = attempt.status;
-      // Hard failure — debounce this (girl × state) so re-renders don't keep stalling on it.
+    // Local SD render — one POST, no ladder. No key, no rate limit, no content filter on
+    // our end (safety_checker=None triple-belted in sd_server.py). If it fails it's a real
+    // failure — the server is down, the checkpoint is missing, or the visitor's GPU is out
+    // of VRAM. Debounce the (girl × state) so re-renders don't stall on the same cause.
+    const attempt = await renderImage(prompt, seed);
+    let blob = attempt.blob;
+    let objUrl = attempt.url;
+    let fetchError = attempt.error;
+    if (!blob) {
       sessionFailures.add(cacheKey);
     }
 
@@ -1451,30 +1357,32 @@ Write the Pollinations prompt now.`;
         situation: options.situation || 'profile',
         pose: options.customPose || options.situation || 'profile',
         cacheKey, promptHash: hash, createdAt: Date.now(),
-        directUrl: !blob ? url : null
+        directUrl: null   // local SD returns blobs only — no direct-URL fallback exists
       };
       if (existing >= 0) additional[existing] = entry;
       else additional.push(entry);
 
       // Gallery history. Every generation appends a new entry to
-      // imageHistory with full URL + prompt + situation + timestamp. Capped at last 100 per
-      // girl to keep state size bounded. The `additionalImages` map-by-situation behavior
-      // above stays for latest-by-situation lookup; this history is the gallery source.
+      // imageHistory with the blob URL + prompt + situation + timestamp. Capped at last
+      // 100 per girl to keep state size bounded. Only records successful renders (blob
+      // present) so the gallery never displays broken entries.
       const history = [...(girlNow.visualIdentity.imageHistory || [])];
-      history.push({
-        id: 'img_' + hash + '_' + Date.now().toString(36),
-        ts: Date.now(),
-        situation: options.situation || 'profile',
-        pose: options.customPose || options.situation || 'profile',
-        userStaging: options.userStaging || null,
-        url: objUrl || url,    // prefer the cached blob URL so the gallery doesn't re-hit Pollinations
-        cacheKey,
-        promptHash: hash
-      });
+      if (objUrl) {
+        history.push({
+          id: 'img_' + hash + '_' + Date.now().toString(36),
+          ts: Date.now(),
+          situation: options.situation || 'profile',
+          pose: options.customPose || options.situation || 'profile',
+          userStaging: options.userStaging || null,
+          url: objUrl,
+          cacheKey,
+          promptHash: hash
+        });
+      }
       const trimmedHistory = history.slice(-100);
 
       const patch = { visualIdentity: { ...girlNow.visualIdentity, additionalImages: additional, imageHistory: trimmedHistory } };
-      if ((options.situation || 'profile') === 'profile') {
+      if ((options.situation || 'profile') === 'profile' && blob) {
         patch.visualIdentity.profileImagePath = cacheKey;
         patch.visualIdentity.profileImageGeneratedAt = Date.now();
       }
@@ -1482,8 +1390,8 @@ Write the Pollinations prompt now.`;
     }
 
     return {
-      url: objUrl || url,               // blob URL if cached, else direct Pollinations URL (works as <img src>)
-      directUrl: !blob ? url : null,    // hint to caller that this is a direct URL not a blob
+      url: objUrl,                       // blob URL from the local render (null on failure)
+      directUrl: null,                   // no direct URL exists — local SD only returns blobs
       cached: false,
       error: fetchError || null,
       cacheKey,
@@ -1507,19 +1415,35 @@ Write the Pollinations prompt now.`;
   }
 
   // Session-scoped set of (girlId, situation) pairs we've already failed to generate —
-  // don't retry on every render if Pollinations is unreachable.
+  // don't retry on every render if the local SD server is unreachable.
   const sessionFailures = new Set();
 
-  // Images are "available" if either:
-  //   - we have a browser-usable pk_ key (authed endpoint), OR
-  //   - we have no key (legacy free endpoint still works, rate-limited).
-  // An sk_ key alone doesn't count as "available with auth" but the legacy endpoint still works.
+  // Local SD is available whenever GET /sdapi/v1/options succeeds. Cached at module scope
+  // (probed lazily) so the setup wizard's per-second poll doesn't compete with generateFor
+  // for slots. The probe runs once and re-evaluates only after `refreshAvailable()` is
+  // called (e.g. after the setup wizard reports the SD server just started).
+  let _availableCache = null;
+  async function probeAvailable() {
+    try {
+      const c = cfg();
+      const res = await fetch(c.endpoint + c.options, { method: 'GET' });
+      return res.ok;
+    } catch { return false; }
+  }
+  async function refreshAvailable() {
+    _availableCache = await probeAvailable();
+    return _availableCache;
+  }
+  // Sync isAvailable() returns cached truth (defaults true — callers still try, and a
+  // failed render debounces via sessionFailures). Callers that want a live probe can
+  // await refreshAvailable() explicitly (setup detector, landing wizard).
   function isAvailable() {
-    return true;    // legacy free endpoint is always available for text→image
+    return _availableCache !== false;
   }
 
   // Convenience — fetch the profile image blob URL for a girl, generating if missing.
-  // Returns null if no Pollinations key + no cached image (text+emoji fallback is up to caller).
+  // Returns null if the local SD server is unavailable + no cached image
+  // (text+emoji fallback is up to caller).
   async function profileImageFor(girlId, { lazy = false } = {}) {
     const girl = window.DMTHGame.state.getGirl(girlId);
     if (!girl) return null;
@@ -1529,7 +1453,7 @@ Write the Pollinations prompt now.`;
       if (url) return url;
     }
     if (lazy) return null;
-    // If Pollinations isn't configured, don't try — image gen is optional overlay.
+    // If the local SD server isn't up, don't try — image gen is optional overlay.
     if (!isAvailable()) return null;
     // If we failed this session for this girl, don't retry until reload.
     const failureKey = `${girlId}:profile`;
@@ -1564,40 +1488,21 @@ Write the Pollinations prompt now.`;
       if (!cached.blobUrl) await window.DMTHStorage.cache.put(cacheKey, { ...cached, blobUrl: url });
       return { url, cached: true, cacheKey, prompt };
     }
+    // Environment renders are landscape (town aerial / dungeon cross-section) instead of
+    // the portrait-tall default used for character images. The hash IS the seed identity
+    // for these — same slot-array hash reproduces the same environment.
     const seed = parseInt(hash, 16) & 0x7FFFFFFF;
-    let url = buildUrl(prompt, seed, { width: 1792, height: 1024 });
-
-    async function tryEnvFetch(u) {
-      try {
-        const res = await queuedFetch(u);
-        if (!res.ok) return { ok: false, status: res.status };
-        const b = await res.blob();
-        if (b.size < 500) return { ok: false, status: 'empty-body' };
-        return { ok: true, blob: b };
-      } catch (err) { return { ok: false, status: 'cors-or-network' }; }
+    const attempt = await renderImage(prompt, seed, { width: 1792, height: 1024 });
+    if (attempt.blob) {
+      await window.DMTHStorage.cache.put(cacheKey, {
+        kind, hash, prompt,
+        blob: attempt.blob, blobUrl: attempt.url,
+        createdAt: Date.now()
+      });
+      return { url: attempt.url, cached: false, cacheKey, prompt };
     }
-
-    let attempt = await tryEnvFetch(url);
-    if (!attempt.ok && (attempt.status === 403 || attempt.status === 402 || attempt.status === 400)) {
-      const safer = sanitizePrompt(prompt);
-      const u2 = buildUrl(safer, seed, { width: 1792, height: 1024 });
-      attempt = await tryEnvFetch(u2);
-      if (attempt.ok) url = u2;
-      if (!attempt.ok && hasKey()) {
-        const free1 = buildUrl(prompt, seed, { width: 1792, height: 1024, forceFree: true });
-        attempt = await tryEnvFetch(free1);
-        if (attempt.ok) { url = free1; }
-        else { const free2 = buildUrl(safer, seed, { width: 1792, height: 1024, forceFree: true }); attempt = await tryEnvFetch(free2); if (attempt.ok) url = free2; }
-      }
-    }
-
-    if (attempt.ok) {
-      const objUrl = URL.createObjectURL(attempt.blob);
-      await window.DMTHStorage.cache.put(cacheKey, { kind, hash, prompt, blob: attempt.blob, blobUrl: objUrl, createdAt: Date.now() });
-      return { url: objUrl, cached: false, cacheKey, prompt };
-    }
-    // Fetch failed — return the direct URL anyway so the UI can try <img src=url>
-    return { url, directUrl: url, cached: false, error: attempt.status, cacheKey, prompt };
+    // Render failed — nothing to fall through to; local SD returns blobs, not URLs.
+    return { url: null, directUrl: null, cached: false, error: attempt.error, cacheKey, prompt };
   }
 
   // Room-scene regeneration on meaningful state change.
@@ -1632,7 +1537,7 @@ Write the Pollinations prompt now.`;
   // --- Disposal final-image generation ---
   // The disposal option renders a final image of the grave / water / crematorium burning /
   // etc — for each disposal method, the final image shows
-  // the image of it". Renders a per-method final-scene Pollinations image after the Ollama
+  // the image of it". Renders a per-method final-scene image via local SD after the Ollama
   // disposal narration. Recognizable-girl methods (release / finalization-film) use her
   // locked seed so she appears as herself; abstract-scene methods (bury / lose-at-sea /
   // incinerate) use a method+girl hash so the image is consistent for that disposal but
@@ -1674,53 +1579,25 @@ Write the Pollinations prompt now.`;
     const seed = useGirlSeed
       ? clampSeed(girl.visualIdentity?.seed, girl.id)
       : (parseInt(promptHash(method + ':' + girl.id), 16) & 0x7FFFFFFF);
-    let url = buildUrl(prompt, seed);
-
-    async function tryFetch(u) {
-      try {
-        const res = await queuedFetch(u);
-        if (!res.ok) return { ok: false, status: res.status };
-        const b = await res.blob();
-        if (b.size < 500) return { ok: false, status: 'empty-body' };
-        return { ok: true, blob: b };
-      } catch { return { ok: false, status: 'cors-or-network' }; }
-    }
-
-    let attempt = await tryFetch(url);
-    if (!attempt.ok && (attempt.status === 403 || attempt.status === 402 || attempt.status === 400)) {
-      const safer = sanitizePrompt(prompt);
-      if (safer !== prompt) {
-        const u2 = buildUrl(safer, seed);
-        attempt = await tryFetch(u2);
-        if (attempt.ok) url = u2;
-      }
-      if (!attempt.ok && hasKey()) {
-        const free1 = buildUrl(prompt, seed, { forceFree: true });
-        attempt = await tryFetch(free1);
-        if (attempt.ok) { url = free1; }
-        else if (safer !== prompt) { const free2 = buildUrl(safer, seed, { forceFree: true }); attempt = await tryFetch(free2); if (attempt.ok) url = free2; }
-      }
-    }
-
-    if (attempt.ok) {
-      const objUrl = URL.createObjectURL(attempt.blob);
+    const attempt = await renderImage(prompt, seed);
+    if (attempt.blob) {
       await window.DMTHStorage.cache.put(cacheKey, {
         method, girlId: girl.id, prompt, seed,
-        blob: attempt.blob, blobUrl: objUrl, createdAt: Date.now()
+        blob: attempt.blob, blobUrl: attempt.url,
+        createdAt: Date.now()
       });
-      return { url: objUrl, cached: false, cacheKey, method, prompt };
+      return { url: attempt.url, cached: false, cacheKey, method, prompt };
     }
-    // Fallback — return the direct URL so the UI can try <img src> anyway.
-    return { url, directUrl: url, cached: false, error: attempt.status, cacheKey, method, prompt };
+    return { url: null, directUrl: null, cached: false, error: attempt.error, cacheKey, method, prompt };
   }
 
   window.DMTHGame = window.DMTHGame || {};
   window.DMTHGame.imaging = Object.freeze({
-    composePrompt, composePromptViaOllama, buildUrl, promptHash,
+    composePrompt, composePromptViaOllama, renderImage, promptHash,
     generateFor, resolveCached, profileImageFor, filmCover,
     renderEnvironment, roomScene, bondMilestone,
     generateDisposalFinalImage,
-    isAvailable,
+    isAvailable, refreshAvailable,
     POSE_LIBRARY,
     DISPOSAL_PROMPTS
   });

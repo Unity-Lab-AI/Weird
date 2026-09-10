@@ -142,7 +142,7 @@
         cumLoadAtRecording: cl
       });
     }
-    // Auto-generate cover image IF Pollinations is configured — otherwise text+emoji film lives fine without it.
+    // Auto-generate cover image IF the local SD server is up — otherwise text+emoji film lives fine without it.
     if (window.DMTHGame.imaging && window.DMTHGame.imaging.isAvailable()) {
       window.DMTHGame.imaging.filmCover(film.id).catch(() => {});
     }

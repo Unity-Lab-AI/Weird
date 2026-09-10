@@ -93,27 +93,17 @@
       </div>
 
       <div class="panel">
-        <h2>Pollinations (optional images)</h2>
-        ${(() => {
-          const k = cfg.POLLINATIONS.apiKey || '';
-          if (!k) {
-            return `<p class="small">Key: <b>none — using anonymous endpoint (rate-limited)</b></p>`;
-          }
-          const lsHas = !!localStorage.getItem('dmth_pollinations_key');
-          const src = lsHas ? 'from Settings' : 'from .env / env.local.js';
-          const masked = k.slice(0, 4) + '•'.repeat(8) + k.slice(-4);
-          return `
-            <div style="background:#1a2a1a;border:1px solid #2f5d3a;border-left:4px solid #53d68a;border-radius:6px;padding:10px 12px;margin:6px 0 12px;">
-              <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-                <span style="font-size:1.05rem;color:#53d68a;font-weight:600;">✓ KEY LOADED</span>
-                <code style="background:#0e1a0e;padding:3px 8px;border-radius:3px;color:#9fefb5;">${masked}</code>
-                <span class="small muted">(${src})</span>
-              </div>
-            </div>
-          `;
-        })()}
-        <label class="field" data-tooltip="Optional Pollinations key (sk_ or pk_) for image generation — paste one to lift the anonymous rate limit + unlock better models. Without it images use the rate-limited anonymous endpoint. Reloads on save."><span>${cfg.POLLINATIONS.apiKey ? 'Replace key' : 'API key'}</span>
-          <input type="password" id="s-polly" ${cfg.POLLINATIONS.apiKey ? `value="${'•'.repeat(Math.min(cfg.POLLINATIONS.apiKey.length, 48))}" data-masked="1"` : `placeholder="sk_... or pk_..."`} />
+        <h2>Local image + voice servers</h2>
+        <p class="small muted" style="margin-bottom:10px;">
+          Both run on this machine — no cloud, no API keys. Start / install via the
+          <code>scripts/</code> folder (batches for Windows, .sh for Linux). Override the
+          endpoints only if you moved them off the default loopback ports.
+        </p>
+        <label class="field" data-tooltip="Local Stable Diffusion server endpoint. Default http://127.0.0.1:7860. Run scripts/start_image_gen (Windows: .bat, Linux: .sh). Install script pulls torch + diffusers + a ~2GB uncensored checkpoint."><span>Image endpoint (local SD)</span>
+          <input type="text" id="s-local-image-endpoint" value="${cfg.LOCAL_IMAGE.endpoint}" placeholder="http://127.0.0.1:7860" />
+        </label>
+        <label class="field" data-tooltip="Local speech-to-text endpoint. Default http://127.0.0.1:7861. Whisper-small under faster-whisper, GPU-first with a CPU fallback. TTS still runs in the browser via Kokoro."><span>Voice endpoint (local STT)</span>
+          <input type="text" id="s-local-voice-endpoint" value="${cfg.LOCAL_VOICE.endpoint}" placeholder="http://127.0.0.1:7861" />
         </label>
       </div>
 
@@ -146,12 +136,12 @@
       <div class="panel">
         <h2>Danger zone</h2>
         <div class="btn-row">
-          <button class="btn-small btn-danger" id="new-game-btn" data-tooltip="Wipe the current save + open new-game setup. KEEPS your Ollama / Kokoro / Pollinations settings. Confirms first.">🔄 Start over (new game)</button>
+          <button class="btn-small btn-danger" id="new-game-btn" data-tooltip="Wipe the current save + open new-game setup. KEEPS your Ollama / Kokoro / local-endpoint settings. Confirms first.">🔄 Start over (new game)</button>
           <button class="btn-small btn-danger" id="wipe-all" data-tooltip="Wipe IndexedDB + every dmth_* localStorage key (all saves AND settings). Age-gate stays accepted. Cannot be undone.">💥 Wipe ALL saves + settings</button>
           <button class="btn-small btn-danger" id="full-nuke" style="border:2px solid #ff3060;background:#3a0a14;" data-tooltip="Burns the whole origin down — IndexedDB, ALL localStorage (incl. 18+ age verification + ToS acceptance), sessionStorage. You re-verify 18+ + re-accept ToS on next load. No traces. Double-confirms.">☢️ FULL NUKE — delete ALL user data (fresh slate)</button>
         </div>
         <p class="small muted">
-          <b>Start over</b> — wipes the current save, opens the new-game setup. Keeps Ollama/Kokoro/Pollinations settings.<br>
+          <b>Start over</b> — wipes the current save, opens the new-game setup. Keeps Ollama/Kokoro/local-endpoint settings.<br>
           <b>Wipe ALL saves + settings</b> — wipes IndexedDB + every <code>dmth_*</code> localStorage key. Age-gate stays accepted.<br>
           <b>FULL NUKE</b> — burns the whole origin down: IndexedDB, ALL localStorage (incl. age verification + ToS acceptance), sessionStorage. You'll re-verify 18+ and re-accept ToS on next load. Fresh slate, no traces.
         </p>
@@ -234,20 +224,15 @@
       else localStorage.removeItem('dmth_kokoro_disabled');
       location.reload();
     };
-    const pollyInput = el.querySelector('#s-polly');
-    // Wipe the dot-mask on first focus/keypress so the user can paste a clean replacement.
-    if (pollyInput && pollyInput.dataset.masked === '1') {
-      const wipeMask = () => { pollyInput.value = ''; delete pollyInput.dataset.masked; pollyInput.removeEventListener('focus', wipeMask); pollyInput.removeEventListener('input', wipeMask); };
-      pollyInput.addEventListener('focus', wipeMask);
-      pollyInput.addEventListener('input', wipeMask);
-    }
-    pollyInput.onchange = e => {
-      const v = e.target.value.trim();
-      // Don't save the dot-mask itself if the user clicked away without editing.
-      if (v && !/^•+$/.test(v)) {
-        localStorage.setItem('dmth_pollinations_key', v);
-        location.reload();
-      }
+    const localImageEndpointEl = el.querySelector('#s-local-image-endpoint');
+    if (localImageEndpointEl) localImageEndpointEl.onchange = e => {
+      localStorage.setItem('dmth_local_image_endpoint', e.target.value.trim() || 'http://127.0.0.1:7860');
+      location.reload();
+    };
+    const localVoiceEndpointEl = el.querySelector('#s-local-voice-endpoint');
+    if (localVoiceEndpointEl) localVoiceEndpointEl.onchange = e => {
+      localStorage.setItem('dmth_local_voice_endpoint', e.target.value.trim() || 'http://127.0.0.1:7861');
+      location.reload();
     };
 
     el.querySelectorAll('[data-save-to]').forEach(b => {
@@ -281,12 +266,17 @@
     }
 
     el.querySelector('#new-game-btn').onclick = async () => {
-      if (!confirm('Start over? Wipes your current save but keeps your settings (Ollama model, Kokoro voice, Pollinations key).')) return;
+      if (!confirm('Start over? Wipes your current save but keeps your settings (Ollama model, Kokoro voice, local endpoints).')) return;
       shutdownBeforeWipe();
       await window.DMTHStorage.wipeAll();
       // Keep settings-y localStorage, wipe game-state pointers only
+      const KEEP = new Set([
+        'dmth_ollama_endpoint','dmth_ollama_model','dmth_ollama_temp',
+        'dmth_kokoro_voice','dmth_kokoro_speed','dmth_kokoro_model','dmth_kokoro_dtype',
+        'dmth_local_image_endpoint','dmth_local_voice_endpoint'
+      ]);
       for (const k of Object.keys(localStorage)) {
-        if (k.startsWith('dmth_') && !['dmth_pollinations_key','dmth_ollama_endpoint','dmth_ollama_model','dmth_ollama_temp','dmth_kokoro_voice','dmth_kokoro_speed','dmth_pollinations_model'].includes(k)) {
+        if (k.startsWith('dmth_') && !KEEP.has(k)) {
           localStorage.removeItem(k);
         }
       }
@@ -305,7 +295,7 @@
     // FULL NUKE — burns the origin down: IndexedDB + ALL localStorage (including
     // age-gate + ToS acceptance) + sessionStorage. No survivors.
     el.querySelector('#full-nuke').onclick = async () => {
-      if (!confirm('FULL NUKE — delete EVERYTHING: game data, Pollinations key, age verification, ToS acceptance, all preferences. You will re-verify 18+ and re-accept the ToS on the next load. This cannot be undone. Proceed?')) return;
+      if (!confirm('FULL NUKE — delete EVERYTHING: game data, local endpoint overrides, age verification, ToS acceptance, all preferences. You will re-verify 18+ and re-accept the ToS on the next load. This cannot be undone. Proceed?')) return;
       if (!confirm('Second confirmation — really wipe ALL user data?')) return;
       shutdownBeforeWipe();
       try { await window.DMTHStorage.wipeAll(); } catch (e) { console.warn('IDB wipe failed:', e); }

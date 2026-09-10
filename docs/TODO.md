@@ -43,6 +43,45 @@
 
 ## 🟢 ACTIVE BACKLOG
 
+### Gee's directive (verbatim 2026-09-10) — Unity 18+ image gen replaces Pollinations:
+
+> *"here is what we are doing: 1. looking over Unity 18+ and we are going to use its image gen exact for the weird project. in doing so we will entirelly gut pollinations every and reconnect everything that needed pollinations to the new image gen like the Unity 18+ project"*
+
+### Follow-up verbatim (2026-09-10, scope answer for voice-in):
+
+> *"remember it all has to install and work as its opwn thing ecxacly as it did just not ust pollinations so when we ship nothing needs a key or token and all auto installs in the checks it already has just update them"*
+
+### Epic: Gut Pollinations everywhere + wire Unity 18+ local Stable Diffusion image gen `(XL)` — 🔴 CRITICAL
+
+Investigation done — Unity 18+ image gen surface documented. Source paths (D:\Unity 18+):
+- `image-server/sd_server.py` — Python HTTP server, `127.0.0.1:7860`, A1111-compatible API (`/sdapi/v1/txt2img`, `/sdapi/v1/options`, `/status`). Uses `diffusers` + `torch` + CUDA. Realistic Vision V5.1 default checkpoint (~2GB) from `models/*.safetensors`. `safety_checker=None` triple-belted (checker returns silent black images if left on — measured + neutralized 3 ways).
+- `voice-server/voice_server.py` — Python HTTP server, `127.0.0.1:7861`, does BOTH TTS + STT ("her voice and her ears"). Rewire target for `voice-in.js` STT (gutting Pollinations transcribe).
+- `server/server.mjs` — Node router for reference only (NOT bundled; direct browser→SD chosen).
+- `windows/install_image_gen.bat` + `install_voice.bat` (mirrored under `linux/`) — Python venv + torch + diffusers + checkpoint download pattern to mirror in weird's setup wizard.
+
+Confirmed decisions (via AskUserQuestion 2026-09-10):
+- **Voice-in fate:** Rewire STT to Unity 18+ voice-server (7861). Also gut Pollinations transcribe. Same "everything local, no keys, no tokens, auto-installs via existing setup checks" rule as image gen.
+- **Integration model:** Direct browser → local SD (patch `sd_server.py` to send `Access-Control-Allow-Origin: *`, matches weird's existing Ollama pattern with `OLLAMA_ORIGINS=*`). Same for voice-server.
+- **Branch:** `feature/local-sd` cut from `develop` (this branch).
+
+Weird gut scope — 16 JS files reference `pollinations` (case-insensitive):
+`js/env.local.js`, `js/env.example.js`, `js/config.js` (whole POLLINATIONS block + Worker detect + toggle), `js/game/imaging.js` (composer built around URL-with-prompt), `js/game/hunt.js`, `js/game/film.js`, `js/game/girl-gen.js`, `js/game/voice-in.js` (STT — separate from image gen), `js/ui/room.js`, `js/ui/landing.js`, `js/ui/town-view.js`, `js/ui/settings.js`, `js/ui/in-game-settings.js`, `js/ui/gallery-view.js`, `js/ui/dungeon-plot-view.js`, `js/setup/detector.js`. Also `.claude/settings.local.json` may hold pk_ keys (verify + scrub).
+
+Sub-tasks (decompose as work progresses):
+- [x] **LOCAL-SD.1** — Fork `sd_server.py` into weird: `local-services/sd_server.py`. Add CORS headers (`Access-Control-Allow-Origin: *`, OPTIONS preflight). Keep triple-belted `safety_checker=None` + all measured comments.
+- [x] **LOCAL-SD.2** — Fork `voice_server.py` into `local-services/voice_server.py`. Add CORS. Expose STT + TTS endpoints (weird's Kokoro-in-browser stays; STT swap only unless Gee later decides to move TTS too).
+- [x] **LOCAL-SD.3** — Port Windows + Linux installers to weird's `start.bat` / `start.sh` auto-setup flow (Python check → pip diffusers stack → torch CUDA → Realistic Vision V5.1 download → voice deps). Wire into landing-page setup checks.
+- [x] **LOCAL-SD.4** — Rewrite `js/config.js`: strip POLLINATIONS block entirely. Add LOCAL_IMAGE (`endpoint: http://127.0.0.1:7860/sdapi/v1/txt2img`, defaults: steps=28, width=1024, height=1792, cfg=7, negative). Add LOCAL_VOICE (`endpoint: http://127.0.0.1:7861/...`). No apiKey. No Worker toggle. No Bearer header.
+- [x] **LOCAL-SD.5** — Rewrite `js/game/imaging.js`: kill `queuedFetch`+`buildUrl`+429/400/403 retry ladder+`sanitizePrompt` fallback. New `renderImage(prompt, opts)` POSTs to local SD, returns b64. All position-1..8 prompt composition (drug tokens, hold tokens, pregnancy tokens, nudity block, pose lib, sanitize gore) kept as-is — they're prompt engineering, not endpoint-specific.
+- [x] **LOCAL-SD.6** — Rewrite `js/game/voice-in.js`: swap Pollinations transcribe → local voice-server STT.
+- [x] **LOCAL-SD.7** — Rewrite `js/setup/detector.js`: add SD-alive check (GET `/sdapi/v1/options`) + voice-server-alive check. Remove Pollinations key check.
+- [x] **LOCAL-SD.8** — Rewrite `js/ui/landing.js` setup wizard: add SD + voice cards mirroring Ollama + Kokoro cards. Install button (runs installer script), Load button, status pill (starting / loading / ready / error), Retry.
+- [x] **LOCAL-SD.9** — Rewrite `js/ui/settings.js` + `js/ui/in-game-settings.js`: strip Pollinations key input + Worker toggle. Add SD endpoint override (advanced), voice endpoint override.
+- [x] **LOCAL-SD.10** — Update call-sites: `js/game/hunt.js`, `js/game/film.js`, `js/game/girl-gen.js`, `js/ui/room.js`, `js/ui/town-view.js`, `js/ui/gallery-view.js`, `js/ui/dungeon-plot-view.js` — swap all `imageEndpoint*` references to the new `renderImage()` API.
+- [x] **LOCAL-SD.11** — Delete `js/env.local.js` + `js/env.example.js` (Pollinations key files) — no keys shipped.
+- [x] **LOCAL-SD.12** — Update `docs/ARCHITECTURE.md` (tech stack table, image layer, decision log entry), `docs/SKILL_TREE.md` (drop Pollinations rows, add local SD + voice-server rows), `docs/ROADMAP.md` (Phase 22 entry), `README.md` (gameplay wiki image note), `SETUP-README.md` (install SD + voice, port table update).
+- [x] **LOCAL-SD.13** — Cloudflare Worker proxy (image-token Bearer route) — all weird-side references removed (config.js, imaging.js, landing.js, settings, in-game-settings, room.js, terms/privacy sections). Website2.0 `apps/weird/` mirror + Worker itself are a separate follow-up decision (per 2026-09-10 direction: "weird repo only") — noted in ROADMAP Phase 22.9.
+
 # ═══════════════════════════════════════════════════════════════
 # 🆕 NEXT BUILD — the live work-to-be-done list (top of queue)
 # ═══════════════════════════════════════════════════════════════

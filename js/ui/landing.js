@@ -23,7 +23,10 @@
     const modelOk    = s.ollama.activeModelPresent;
     const kokoroOk   = s.kokoro.loaded;
     const storageOk  = s.storage.ready;
-    const pollyOk    = s.pollinations.present;
+    const localImageReachable = !!(s.localImage && s.localImage.reachable);
+    const localImageReady     = !!(s.localImage && s.localImage.ready);
+    const localVoiceReachable = !!(s.localVoice && s.localVoice.reachable);
+    const localVoiceReady     = !!(s.localVoice && s.localVoice.ready);
 
     // Merge live snapshot health with cached health (fast polls skip the probe)
     const liveHealth = s.ollama.activeModelHealth;
@@ -102,7 +105,16 @@
       ${showWeightsRow ? `<div class="status-row">${statusPill(!broken && (healthStatus === 'ok' || healthStatus === 'unknown' || healthStatus === 'skipped' || healthStatus === 'no-probe-module'), healthLabel)}</div>` : ''}
       <div class="status-row">${statusPill(kokoroOk, kokoroOk ? 'Kokoro TTS loaded' : (s.kokoro.loading ? `Kokoro TTS loading (${Math.round((s.kokoro.progress||0)*100)}%)` : 'Kokoro TTS not loaded — click Load below'))}</div>
       <div class="status-row">${statusPill(storageOk, 'Save storage ready')}</div>
-      <div class="status-row">${statusPill(pollyOk, pollyOk ? 'Pollinations key (images)' : 'Pollinations key (images, optional)')}</div>
+      <div class="status-row">${statusPill(localImageReady, localImageReady
+          ? `Local image server ready (${escapeHtml(s.localImage.model || '')}${s.localImage.device ? ' · ' + escapeHtml(s.localImage.device) : ''})`
+          : localImageReachable
+            ? `Local image server: ${escapeHtml(s.localImage.state || 'unknown')}${s.localImage.state === 'no-checkpoint' ? ' — drop a .safetensors into models/' : ''}`
+            : 'Local image server not running (optional — start scripts/start_image_gen)')}</div>
+      <div class="status-row">${statusPill(localVoiceReady, localVoiceReady
+          ? 'Local voice-in ready (mic → text on your machine)'
+          : localVoiceReachable
+            ? 'Local voice server up — STT model not downloaded (run scripts/install_voice)'
+            : 'Local voice server not running (optional — mic-in disabled until started)')}</div>
       ${broken ? `
         <div class="status-row" style="margin-top:10px;padding:12px;background:#3a1820;border-left:3px solid #ff3d8a;border-radius:6px">
           <div style="font-weight:600;color:#ff7aa8;margin-bottom:6px">⚠ ${escapeHtml(healthDiag?.label || 'Model broken')}</div>
@@ -275,143 +287,66 @@
     }
   }
 
-  function renderPollinationsSetup(s) {
-    // Worker-route toggle — explicit on/off control. Persists in localStorage as
-    // dmth_use_unity_worker = 'on' / 'off' / unset. When unset, config.js falls back to
-    // hostname auto-detect (unityailab.com → on, everywhere else → off).
-    const workerMode = !!(window.DMTHConfig?.POLLINATIONS?.useUnityLabWorker);
-    const flagRaw = (() => { try { return window.localStorage.getItem('dmth_use_unity_worker'); } catch { return null; } })();
-    const flagState = flagRaw === 'on' ? 'on' : flagRaw === 'off' ? 'off' : 'auto';
-    const flagLabel = flagState === 'on' ? 'forced ON' : flagState === 'off' ? 'forced OFF' : `auto (hostname → ${workerMode ? 'on' : 'off'})`;
+  // Local image + voice servers — Python installers + launchers ship with weird under
+  // scripts/. Same one-time-install-then-run-per-session pattern as Ollama. Both are
+  // OPTIONAL — the game plays fully as text+emoji without them, so nothing here gates
+  // the LAUNCH button (unlike Ollama + Kokoro + storage, which are core).
+  function renderLocalServersSetup(s) {
+    const os = s.os;
+    const winExt = os === 'windows';
+    const scriptExt = winExt ? '.bat' : '.sh';
+    const shellPrefix = winExt ? '' : 'bash ';
+    const sep = winExt ? '\\' : '/';
 
-    const toggleHTML = `
-      <div style="background:#1c1a2a;border:1px solid #3a3458;border-left:4px solid #7e6bc4;border-radius:6px;padding:10px 12px;margin:10px 0;">
-        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-          <span style="font-weight:600;color:#c9bef0">🔀 Unity AI Lab Worker (shared Pollinations proxy)</span>
-          <span class="small muted">Current: <b>${flagLabel}</b> · resolved: <b>${workerMode ? 'ROUTED THROUGH WORKER' : 'direct Pollinations + your pk_ key'}</b></span>
-        </div>
-        <p class="small muted" style="margin:6px 0 8px">
-          When ON, image gen routes through <code>websiteunityailab.gfourteen7525.workers.dev/image/</code> and the Worker injects the operator's <code>sk_</code> token server-side. No key needed in your browser. Same routing as the rest of the website2.0 apps. <b>CORS note:</b> the Worker only allows <code>https://unityailab.com</code> origins — forcing it ON elsewhere will trigger CORS failures until you update the Worker's allowed-origins list.
-        </p>
-        <div class="btn-row">
-          <button class="btn-small ${flagState === 'on' ? 'btn-primary' : ''}" data-worker-toggle="on">Force ON</button>
-          <button class="btn-small ${flagState === 'off' ? 'btn-primary' : ''}" data-worker-toggle="off">Force OFF</button>
-          <button class="btn-small ${flagState === 'auto' ? 'btn-primary' : ''}" data-worker-toggle="auto">Auto (hostname)</button>
-        </div>
-      </div>
-    `;
+    const imageReady     = !!(s.localImage && s.localImage.ready);
+    const imageReachable = !!(s.localImage && s.localImage.reachable);
+    const voiceReady     = !!(s.localVoice && s.localVoice.ready);
+    const voiceReachable = !!(s.localVoice && s.localVoice.reachable);
 
-    if (workerMode) {
-      $('#polly-setup').innerHTML = `
-        <h3>4. Pollinations (routed through Unity AI Lab Worker)</h3>
-        ${toggleHTML}
-        <div style="background:#1a2a1a;border:1px solid #2f5d3a;border-left:4px solid #53d68a;border-radius:6px;padding:10px 12px;margin:10px 0;">
-          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-            <span style="font-size:1.15rem;color:#53d68a;font-weight:600;">✓ ROUTED THROUGH WORKER</span>
-            <code style="background:#0e1a0e;padding:3px 8px;border-radius:3px;color:#9fefb5;font-size:0.85rem;">websiteunityailab.gfourteen7525.workers.dev/image/</code>
-          </div>
-          <p class="small muted" style="margin:6px 0 0;">
-            No key needed in your browser. The Worker injects the operator's <code>sk_</code> token server-side. Uniform Pollinations auth across every app on the site.
-          </p>
-        </div>
-      `;
-      wireWorkerToggle();
-      return;
-    }
-    // Below: standard pk_ paste-box flow when Worker mode is off.
-    const hasKey = s.pollinations.present;
-    // Effective key resolved by config — respects precedence: localStorage > __DEV_ENV (env.local.js from .env) > default.
-    const effectiveKey = (window.DMTHConfig && window.DMTHConfig.POLLINATIONS && window.DMTHConfig.POLLINATIONS.apiKey) || '';
-    const lsKey = localStorage.getItem('dmth_pollinations_key') || '';
-    const sourceLabel = (effectiveKey && !lsKey)
-      ? 'from .env / env.local.js'
-      : (effectiveKey && lsKey)
-        ? 'from Settings panel'
-        : '';
-    // Mask the key as a string of dots matching its length — gives the input the visual
-    // "this is filled in" affordance without leaking the real key into the DOM. Capped at
-    // 48 dots so a long key doesn't overflow the input visually.
-    const maskedDots = hasKey ? '•'.repeat(Math.min(effectiveKey.length, 48)) : '';
-    const prefix = effectiveKey.slice(0, 4);
-    const suffix = effectiveKey.slice(-4);
+    // Per-server status label — distinguishes "not running" from "running but the
+    // model/checkpoint isn't there yet" so the visitor knows which script to run.
+    const imageLabel = imageReady
+      ? `Ready · ${escapeHtml(s.localImage.model || '')}${s.localImage.device ? ' · ' + escapeHtml(s.localImage.device) : ''}`
+      : imageReachable
+        ? `Server up · ${escapeHtml(s.localImage.state || 'unknown')}${s.localImage.state === 'no-checkpoint' ? ' — drop a .safetensors into models/' : ' (still loading)'}`
+        : 'Not running — run start_image_gen to serve on 127.0.0.1:7860';
+    const voiceLabel = voiceReady
+      ? 'Ready · faster-whisper on your GPU (CPU fallback available)'
+      : voiceReachable
+        ? 'Server up · STT model missing — run install_voice to download whisper-small'
+        : 'Not running — run start_voice to serve on 127.0.0.1:7861';
 
     $('#polly-setup').innerHTML = `
-      <h3>4. Pollinations API key (optional — for images)</h3>
-      ${toggleHTML}
-      <p class="small">Used for whole-body profile images + on-demand selfies. Skip it — the game plays fully as text+emoji.</p>
-      ${hasKey ? `
-        <div style="background:#1a2a1a;border:1px solid #2f5d3a;border-left:4px solid #53d68a;border-radius:6px;padding:10px 12px;margin:10px 0;">
-          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-            <span style="font-size:1.15rem;color:#53d68a;font-weight:600;">✓ KEY LOADED</span>
-            <code style="background:#0e1a0e;padding:3px 8px;border-radius:3px;color:#9fefb5;font-size:0.95rem;">${prefix}${'•'.repeat(8)}${suffix}</code>
-            <span class="small muted">(${sourceLabel})</span>
-          </div>
-          <p class="small muted" style="margin:6px 0 0;">Image generation is wired up — selfies will hit Pollinations directly. To change keys, paste a new one below.</p>
-        </div>
-      ` : `
-        <p class="small">No key set — image generation will fall back to the legacy free endpoint (rate-limited, may 403).</p>
-      `}
-      <div class="polly-row">
-        <input type="password" id="polly-key" class="text-input"
-          ${hasKey ? `value="${maskedDots}" data-masked="1"` : `placeholder="sk_... or pk_..."`} />
-        <button class="btn-small" id="polly-save">${hasKey ? 'Replace key' : 'Save'}</button>
-        ${lsKey ? `<button class="btn-small btn-danger" id="polly-clear">Clear localStorage key</button>` : ''}
+      <h3>4. Local image + voice servers (optional — enable pictures + mic-in)</h3>
+      <p class="small">Both run on YOUR machine. No API key, no cloud, no rate limit. The game plays fully as text+emoji without either — turn them on when you want images and mic-in.</p>
+
+      <div class="step-card">
+        <div class="step-label">🖼️ Local Stable Diffusion (image generation)</div>
+        <div class="status-row" style="margin:8px 0">${statusPill(imageReady, imageLabel)}</div>
+        <pre class="code-block" id="li-install">${shellPrefix}scripts${sep}install_image_gen${scriptExt}</pre>
+        <button class="btn-small" data-copy="li-install">Copy install command</button>
+        <pre class="code-block" id="li-start" style="margin-top:8px">${shellPrefix}scripts${sep}start_image_gen${scriptExt}</pre>
+        <button class="btn-small" data-copy="li-start">Copy start command</button>
+        <div class="step-note">Install (~2GB): torch + diffusers + Realistic Vision V5.1 uncensored checkpoint. Then start_image_gen serves on <code>127.0.0.1:7860</code>. Drop any <code>.safetensors</code> into <code>models/</code> to swap.</div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-label">🎤 Local voice-in (speech-to-text)</div>
+        <div class="status-row" style="margin:8px 0">${statusPill(voiceReady, voiceLabel)}</div>
+        <pre class="code-block" id="lv-install">${shellPrefix}scripts${sep}install_voice${scriptExt}</pre>
+        <button class="btn-small" data-copy="lv-install">Copy install command</button>
+        <pre class="code-block" id="lv-start" style="margin-top:8px">${shellPrefix}scripts${sep}start_voice${scriptExt}</pre>
+        <button class="btn-small" data-copy="lv-start">Copy start command</button>
+        <div class="step-note">Install (~480MB): faster-whisper + Whisper-small model. Serves on <code>127.0.0.1:7861</code>. GPU-first with a CPU fallback so it works without CUDA. TTS stays in the browser via Kokoro.</div>
       </div>
     `;
-    wireWorkerToggle();
-    // Wipe the dot-mask on first focus/keypress so the user can paste a new key cleanly.
-    const keyInput = $('#polly-key');
-    if (keyInput && keyInput.dataset.masked === '1') {
-      const wipeMask = () => { keyInput.value = ''; delete keyInput.dataset.masked; keyInput.removeEventListener('focus', wipeMask); keyInput.removeEventListener('input', wipeMask); };
-      keyInput.addEventListener('focus', wipeMask);
-      keyInput.addEventListener('input', wipeMask);
-    }
-    $('#polly-save').onclick = () => {
-      const v = keyInput.value.trim();
-      // Guard: if the user clicked Save without editing, the value is still the dot-mask. Don't save it.
-      if (v && v !== maskedDots && !/^•+$/.test(v)) {
-        localStorage.setItem('dmth_pollinations_key', v);
-        keyInput.value = '';
-        refresh();
-      }
-    };
-    const clearBtn = $('#polly-clear');
-    if (clearBtn) clearBtn.onclick = () => { localStorage.removeItem('dmth_pollinations_key'); refresh(); };
-  }
 
-  // Wire the Worker-routing toggle buttons (Force ON / Force OFF / Auto). Mutates the
-  // localStorage flag, then re-reads config.js's detector and forces a refresh so the
-  // current resolved state + correct UX (callout vs paste box) appear immediately.
-  function wireWorkerToggle() {
-    document.querySelectorAll('[data-worker-toggle]').forEach(b => {
+    $('#polly-setup').querySelectorAll('[data-copy]').forEach(b => {
       b.onclick = () => {
-        const mode = b.dataset.workerToggle;
-        try {
-          if (mode === 'auto') {
-            window.localStorage.removeItem('dmth_use_unity_worker');
-          } else {
-            window.localStorage.setItem('dmth_use_unity_worker', mode);
-          }
-        } catch (e) { console.warn('[worker-toggle] localStorage write failed:', e); }
-        // Re-evaluate the flag via config.js's detector + push the new value back into
-        // the POLLINATIONS block so the next renderPollinationsSetup picks it up.
-        try {
-          const p = window.DMTHConfig?.POLLINATIONS;
-          if (p && typeof window.DMTHConfig.detectUnityLabWorker === 'function') {
-            p.useUnityLabWorker = window.DMTHConfig.detectUnityLabWorker();
-          } else if (p) {
-            // detectUnityLabWorker isn't exported on DMTHConfig in this build — inline the
-            // priority logic: explicit flag overrides, otherwise hostname auto.
-            const flag = window.localStorage.getItem('dmth_use_unity_worker');
-            if (flag === 'on') p.useUnityLabWorker = true;
-            else if (flag === 'off') p.useUnityLabWorker = false;
-            else {
-              const h = (window.location.hostname || '').toLowerCase();
-              p.useUnityLabWorker = (h === 'unityailab.com' || h === 'www.unityailab.com');
-            }
-          }
-        } catch (e) { console.warn('[worker-toggle] flag re-evaluation failed:', e); }
-        refresh();
+        const target = document.getElementById(b.dataset.copy);
+        navigator.clipboard.writeText(target.textContent).then(() => {
+          const prev = b.textContent; b.textContent = 'Copied!'; setTimeout(() => b.textContent = prev, 1500);
+        });
       };
     });
   }
@@ -452,7 +387,7 @@
     renderOllamaSetup(currentStatus);
     renderModelSetup(currentStatus);
     renderKokoroSetup(currentStatus);
-    renderPollinationsSetup(currentStatus);
+    renderLocalServersSetup(currentStatus);
   }
 
   // Deep refresh — INCLUDES the health probe. Used at init, after a pull, and
@@ -472,7 +407,7 @@
     renderOllamaSetup(currentStatus);
     renderModelSetup(currentStatus);
     renderKokoroSetup(currentStatus);
-    renderPollinationsSetup(currentStatus);
+    renderLocalServersSetup(currentStatus);
   }
 
   function startPolling() {

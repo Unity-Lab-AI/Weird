@@ -1,5 +1,5 @@
 // DUNGEON MASTER: THE HUNT — procedural girl generator.
-// Template + seed → GirlProfile with persistent visualIdentity for Pollinations consistency.
+// Template + seed → GirlProfile with persistent visualIdentity for image consistency across renders.
 
 (function () {
   'use strict';
@@ -437,7 +437,7 @@
       assignedHoldIdx: null,
       captureDate: null,
 
-      // visualIdentity (Pollinations seed + locked blocks for persistence)
+      // visualIdentity (locked seed + face + outfit blocks — same identity across every render)
       visualIdentity: {
         seed,
         facialDescription: `${ETHNICITY_FACE[ethnicity] || ''} ${facial}`.trim(),

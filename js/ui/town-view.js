@@ -38,8 +38,8 @@
 
       <div class="panel">
         <h2>Render town</h2>
-        <p class="small muted">Generate a full-res Pollinations image of the town layout.</p>
-        <button id="render-btn" class="btn-small btn-primary" data-tooltip="Pollinations renders the full town grid as a single overhead image. Hash-cached so repeat clicks reuse the cached image until you change slots.">Render town →</button>
+        <p class="small muted">Generate a full-res image of the town layout via local SD.</p>
+        <button id="render-btn" class="btn-small btn-primary" data-tooltip="Local Stable Diffusion renders the full town grid as a single overhead image. Hash-cached so repeat clicks reuse the cached image until you change slots.">Render town →</button>
         <div id="town-render-slot"></div>
       </div>
     `;
@@ -74,8 +74,8 @@
       const hash = window.DMTHGame.townPlot.hashGrid(grid);
       const r = await window.DMTHGame.imaging.renderEnvironment({ kind: 'town', prompt, hash });
       if (r.url) {
-        const hint = r.directUrl ? ' (direct — may fail on content filter)' : r.cached ? ' (cached)' : '';
-        slot.innerHTML = `<img src="${r.url}" alt="town" class="gen-img" onerror="this.outerHTML='<p class=\\'small danger\\'>image load failed — Pollinations likely content-filtered this render. Try again with different slots or get a pk_ key.</p>'" /><p class="small muted">${hint}</p>`;
+        const hint = r.cached ? ' (cached)' : '';
+        slot.innerHTML = `<img src="${r.url}" alt="town" class="gen-img" onerror="this.outerHTML='<p class=\\'small danger\\'>image load failed — check the local SD server on 127.0.0.1:7860.</p>'" /><p class="small muted">${hint}</p>`;
       } else {
         slot.innerHTML = `<p class="small danger">Render failed: ${r.error || 'unknown'}</p>`;
       }

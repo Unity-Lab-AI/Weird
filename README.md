@@ -37,7 +37,7 @@ A massive multi-page text+emoji adult game where you run a sex-slave operation. 
 
 The public front door — what the game is, Start / Continue / Wiki, the team, behind the 18+ gate. (This is the view the social link-preview card is shot from.)
 
-### A captive replying via real local LLM, with her persistent Pollinations portrait
+### A captive replying via real local LLM, with her persistent local-SD portrait
 
 ![Captive room with LLM reply](docs/screenshots/11-room-ollama-reply.png)
 
@@ -46,6 +46,7 @@ Every reply is streamed from the local model, delta-parsed into body-state chang
 ### Body state, stats, drug HUD, quick-action panel
 
 ![Room mid-session](docs/screenshots/12-room-pollinations-selfie.png)
+<!-- Screenshot filename preserved for backwards-compat; the shipped app now renders via local SD, not Pollinations. -->
 
 Six body bars (arousal / wetness / cum-load / bruises / high), plus stamina + health bars, eight stats (intelligence / defiance / curiosity / trust / obedience / stamina / pain-tolerance / lust), one-handed mouse drug buttons (coke / weed / molly / acid / whiskey / K / tranquilizer-dart), action row (record / selfie / derobe / strip-everything / heal / mode-switch / dispose / list-on-market / timeline).
 
@@ -73,7 +74,7 @@ Six body bars (arousal / wetness / cum-load / bruises / high), plus stamina + he
 ### In-game settings (Ollama health check + repair, voice picker, save slots)
 ![Settings](docs/screenshots/13-settings.png)
 
-### Setup wizard (auto-installs everything — Ollama, model pull, Kokoro, Pollinations key)
+### Setup wizard (Ollama, model pull, Kokoro TTS, local Stable Diffusion, local voice-in)
 ![Setup wizard](docs/screenshots/01-landing-setup.png)
 
 ---
@@ -362,7 +363,7 @@ Delta values clamped to ±20-30 per turn so no single reply spikes her state.
 - 16 voice options
 - Per-girl voice override (her timbre stays consistent across every turn)
 - Sentence-aware playback queue — splits on `. ! ? …`, plays sequentially with the next sentence pipelined-generating behind it
-- Mic-in via Pollinations transcribe → auto-fills the textarea
+- Mic-in via the local voice server (faster-whisper on your GPU, CPU fallback) → auto-fills the textarea
 
 ### Mode switches
 
@@ -378,7 +379,7 @@ Delta values clamped to ±20-30 per turn so no single reply spikes her state.
 
 ### Films are infinite-copies passive earners
 
-Press 🎬 Start recording in a captive's hold. Every turn is captured. Press ⏹ Stop recording → film gets auto-priced + auto-cover-image (Pollinations) + listed on the market.
+Press 🎬 Start recording in a captive's hold. Every turn is captured. Press ⏹ Stop recording → film gets auto-priced + auto-cover-image (local SD) + listed on the market.
 
 ### Pricing formula
 
@@ -549,7 +550,7 @@ When you're done with a captive: 6 method choices.
 | 🎬 Finalization film | $100 | medium | **yes** (3-5× regular price) | premium final scene with the captive |
 | 🤝 Trade | $0 | low | no | (goes to slave market alive) |
 
-Each method generates a per-method final-scene Pollinations image after the Ollama narration. Premium finalization films are one-shot consumables that sell for 3-5× a regular film's base price.
+Each method generates a per-method final-scene image via local SD after the Ollama narration. Premium finalization films are one-shot consumables that sell for 3-5× a regular film's base price.
 
 ---
 

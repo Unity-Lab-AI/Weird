@@ -1,6 +1,13 @@
 # SKILL_TREE — weird project
 
-**Generated:** 2026-04-21 · **Last revised:** 2026-06-20 (first-day-bugs session: escape governor, settings-apply, kokoro lifecycle, image identity-lock, 3 new archetypes — cascaded to main + live)
+**Generated:** 2026-04-21 · **Last revised:** 2026-09-10 (Phase 22 — local SD + local voice servers replace Pollinations)
+
+> **2026-09-10 migration note.** Every skill row below that says "Pollinations" is now a **local Stable Diffusion** capability (see `local-services/image-server/sd_server.py`, port 7860) or a **local faster-whisper** capability for STT (see `local-services/voice-server/voice_server.py`, port 7861). The prompt-engineering, seed persistence, cache patterns, and composer skills are unchanged — the network layer swapped from cloud API to browser-direct POST to loopback. New skills added in Phase 22:
+>
+> - **Local SD server operation** — Python + diffusers 0.35.1 + torch CUDA + safety-checker triple-belt (constructor arg + attribute nulling + method neutralisation, all measured), Realistic Vision V5.1 default checkpoint, CORS-open for browser-direct calls.
+> - **Local STT server operation** — faster-whisper + CTranslate2 lazy-cuBLAS-DLL trap handling, HuggingFace symlink-privilege trap handling on Windows, CPU int8 fallback.
+> - **Auto-install ladder** — Windows `.bat` + Linux `.sh` installers pin diffusers 0.35.1 / huggingface-hub<1.0 to avoid the internally-inconsistent 0.40 release, download ~2.6GB of models on first run, print measured error messages on failure.
+> - **Browser-direct POST to loopback** — `renderImage(prompt, seed, opts)` in `js/game/imaging.js` replaces the Pollinations URL-with-key builder; `voice-in.js` decodes webm/opus to int16 PCM via Web Audio API before POSTing to the local STT.
 
 Capability matrix for the weird build. Organized by domain, complexity, dependency, and priority. As of 2026-06-18 every named capability is shipped and live (the 2026-06-18 mega-build capabilities are catalogued in the first domain block below); see `docs/FINALIZED.md` + `docs/resume.md` for per-session implementation detail.
 

@@ -698,7 +698,7 @@
             // Custom image-prompt input. User types a free-form scene description; Ollama
             // composes a full prompt with all the existing guardrails (8-position canonical
             // ordering, full-body framing, nudity / pregnancy / drug markers);
-            // Pollinations fires. Draft text + last result image restore from module-scoped
+            // local SD fires. Draft text + last result image restore from module-scoped
             // per-girl caches so state.onChange re-renders don't wipe them.
             const draft = customPoseDrafts.get(girl.id) || '';
             const lastResult = customPoseResults.get(girl.id);
@@ -713,7 +713,7 @@
               <p class="small muted">Describe the scene + pose you want. Ollama composes a valid image prompt with all guardrails — you stage her how you want.</p>
               <textarea id="custom-pose-in" rows="3" placeholder="e.g. 'kneeling on the bed, looking up at the camera with submissive eyes, biting her lower lip, hands clasped between her thighs, soft warm bedroom lighting'">${draft.replace(/</g, '&lt;')}</textarea>
               <div class="btn-row" style="margin-top:6px">
-                <button id="custom-pose-fire" class="btn-small btn-primary" data-tooltip="Send your description to Ollama → composed prompt → Pollinations generation. Image appears below + saves to her Spank Bank.">🎨 Generate custom pose</button>
+                <button id="custom-pose-fire" class="btn-small btn-primary" data-tooltip="Send your description to Ollama → composed prompt → local SD render. Image appears below + saves to her Spank Bank.">🎨 Generate custom pose</button>
                 <button id="custom-pose-clear" class="btn-small" data-tooltip="Clear the input box.">Clear</button>
                 <span class="small muted" id="custom-pose-status"></span>
               </div>
@@ -1999,7 +1999,7 @@
       };
     }
 
-    // Custom pose handler. User text → Ollama-as-prompt-writer → Pollinations. Stashed
+    // Custom pose handler. User text → Ollama-as-prompt-writer → local SD. Stashed
     // in image history automatically via the generateFor pipeline. Input event updates
     // the draft cache on every keystroke so typing survives state.onChange re-renders.
     const customTextarea = el.querySelector('#custom-pose-in');
@@ -2025,14 +2025,14 @@
         const slot = el.querySelector('#custom-pose-slot');
         if (!text) { if (status) status.textContent = 'type a description first'; return; }
         if (!window.DMTHGame.imaging?.isAvailable()) {
-          if (status) status.textContent = 'Pollinations not configured — paste a pk_ key in Settings';
+          if (status) status.textContent = 'Local SD server not reachable — start it via scripts/start_image_gen';
           return;
         }
         // When Ollama is unavailable, composePrompt fallback accepts
         // userStaging as customPose so it still produces a real prompt instead of silently
         // discarding the user's staging text.
         customFireBtn.disabled = true;
-        if (status) status.textContent = '⏳ Ollama composing prompt + Pollinations generating…';
+        if (status) status.textContent = '⏳ Ollama composing prompt + local SD rendering on your GPU…';
         if (slot) slot.innerHTML = `<div class="panel"><p class="small muted">Generating custom pose…</p></div>`;
         try {
           const result = await window.DMTHGame.imaging.generateFor(girl.id, {
@@ -2065,8 +2065,8 @@
       };
     }
 
-    // Selfie +  buttons — Pollinations overlay into #selfie-slot. Tries fetch;
-    // falls back to a direct <img src> if CORS/403. `extraOpts` adds {withPlayer} (you in frame,
+    // Selfie + buttons — local SD render into #selfie-slot. Returns blob URLs only
+    // (no cross-origin fallback exists — local SD returns blobs, not URLs). `extraOpts` adds {withPlayer} (you in frame,
     // third-person) or {pov} (first-person, your arms) reading your created character avatar.
     const SELFIE_POSES = ['selfie-topless','selfie-midsection','selfie-panties','selfie-lounge','selfie-kneeling','selfie-spread','selfie-bent-over'];
     async function genIntoSelfieSlot(extraOpts, label) {
@@ -2102,8 +2102,8 @@
     const _withMeBtn = el.querySelector('#selfie-withme-btn'); if (_withMeBtn) _withMeBtn.onclick = () => genIntoSelfieSlot({ withPlayer: true }, 'shot with you');
     const _povBtn = el.querySelector('#selfie-pov-btn'); if (_povBtn) _povBtn.onclick = () => genIntoSelfieSlot({ pov: true }, 'POV shot');
 
-    // Profile image — Pollinations overlay, optional. Renders via <img src=> so it works
-    // even when CORS/fetch blocks the blob cache.  On <img> error, fall back to a clickable
+    // Profile image — local SD overlay, optional. Renders the cached blob URL when present.
+    // On <img> error (blob URL revoked, cache miss), fall back to a clickable
     // link so the user can still open the generated image in a new tab.
     (async () => {
       const slot = el.querySelector('#profile-img-slot');
