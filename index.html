@@ -60,7 +60,8 @@
 <body>
 
   <!-- Env injection — optional, gitignored. No failure if absent. -->
-  <script src="js/env.local.js?v=20260621040000" onerror="console.debug('[env] no env.local.js — normal for deploy')"></script>
+  <!-- js/env.local.js removed — no cloud keys to sync since image + voice both run on the visitor's machine now. -->
+  <script>window.__DEV_ENV = window.__DEV_ENV || {};</script>
 
   <!-- Age verification + legal acceptance gate — first thing that fires. -->
   <script src="js/ui/age-gate.js?v=20260621040000"></script>
@@ -158,18 +159,17 @@
         </div>
       </section>
 
-      <!-- Step 4: Pollinations -->
-      <section class="card" aria-label="Pollinations">
-        <h2>🖼️ Pollinations (optional — images)</h2>
+      <!-- Step 4: Local image + voice servers -->
+      <section class="card" aria-label="Local image + voice servers">
+        <h2>🖼️🎤 Local image + voice servers (optional)</h2>
         <div id="polly-setup">
           <p class="small muted">Waiting…</p>
         </div>
         <p class="small muted" style="margin-top:10px">
-          <b>Key type matters:</b> browser-side use needs a <code>pk_</code> publishable key
-          (rate-limited, 1 image/hour/IP on free tier). <code>sk_</code> secret keys are
-          server-side only and Pollinations will reject them from the browser with 403.
-          Get your key at <a href="https://enter.pollinations.ai" target="_blank" rel="noopener">enter.pollinations.ai</a>.
-          <br>If the key fails, the game falls back to the legacy free endpoint automatically.
+          Both are Python servers that ship with the game under <code>local-services/</code> and
+          run on YOUR machine. No API key. No cloud. Nothing leaves your box. Install once via
+          the <code>scripts/install_*</code> commands, start per session via
+          <code>scripts/start_*</code>. The game is fully playable as text+emoji without them.
         </p>
       </section>
 
@@ -185,8 +185,9 @@
           Everything in <strong>DUNGEON MASTER: THE HUNT</strong> runs <strong>on your machine</strong>.
           The static site you're looking at is served as a plain static site — zero backend.
           <strong>Ollama</strong> runs your local LLM (the girls' minds).
-          <strong>Kokoro</strong> runs in your browser for voice (models cached in your browser storage).
-          <strong>Pollinations</strong> (optional) generates images via your own key.
+          <strong>Kokoro</strong> runs in your browser for voice-out (models cached in your browser storage).
+          <strong>Local Stable Diffusion</strong> (optional) generates images on your GPU.
+          <strong>Local speech-to-text</strong> (optional) turns your mic into text on your GPU.
           Your save data lives in your browser's IndexedDB. Export / import anytime from Settings.
         </p>
         <p class="small muted">
@@ -223,7 +224,8 @@
         <li><b>Frontend</b> — vanilla-JS browser game (IIFE modules on <code>window.DMTHGame.*</code>), no build step</li>
         <li><b>Ollama</b> at localhost:11434 — local uncensored LLM (dolphin-mistral / abliterated variants)</li>
         <li><b>Kokoro</b> — in-browser TTS, a distinct voice per girl</li>
-        <li><b>Pollinations</b> — optional image generation via your own key (seeded face + outfit for visual consistency)</li>
+        <li><b>Local Stable Diffusion</b> — optional on-your-GPU image generation via <code>local-services/image-server</code> (seeded face + outfit for visual consistency)</li>
+        <li><b>Local speech-to-text</b> — optional mic-in via <code>local-services/voice-server</code> (faster-whisper on your GPU with a CPU fallback)</li>
         <li><b>Persistence</b> — IndexedDB save state, fully local; pause freezes time, progress reloads when you return</li>
       </ul>
 
@@ -285,8 +287,8 @@
       <p>You agree that, by using the Service, you assume any and all responsibility for your use of it and for any consequences that arise from that use. Use of the Service is entirely at your own risk and at your own discretion.</p>
 
       <h3 id="tos-nature">II. Nature of the Service</h3>
-      <p>This website, in its current state, is NOT a generative AI provider. Unity AI Lab does not host, train, fine-tune, or operate any large-language-model or generative-image inference infrastructure. The Service simply uses an external generative AI provider — namely Pollinations (and Pollinations' own upstream providers and infrastructure) — to provide proof-of-concept experimental showcases.</p>
-      <p>The purpose of these showcases is to demonstrate jailbreak, cybersecurity, and generative-AI-security capabilities of Unity AI Lab from a red-team perspective. We aim to show the ability to bypass conventional content-moderation and safety systems, and we are willing to explain how it is done — not only to prove it can be done, but to showcase the skillsets of the engineers behind the project.</p>
+      <p>This website, in its current state, is NOT a generative AI provider. Unity AI Lab does not host, train, fine-tune, or operate any large-language-model or generative-image inference infrastructure. The Service is a static browser front-end that runs generative AI <b>entirely on the visitor's own machine</b>: text generation via a local Ollama server the visitor installs, image generation via a local Stable Diffusion server the visitor installs, and speech-to-text via a local faster-whisper server the visitor installs. No prompt, no output, and no telemetry is sent to Unity AI Lab or to any third party by the shipped code.</p>
+      <p>The purpose of the Service is to demonstrate jailbreak, cybersecurity, and generative-AI-security capabilities of Unity AI Lab from a red-team perspective, in a form that is fully locally reproducible and does not depend on any cloud provider. We aim to show what an uncensored, fully local, no-key generative stack looks like and how it can be composed — not only to prove it can be done, but to showcase the skillsets of the engineers behind the project.</p>
       <p>Accordingly, the Service is best understood as a public research exhibit and educational reference — an artifact for security researchers, AI-safety practitioners, and the technically curious. It is not a commercial product. It is not offered for a fee. It is not marketed as production-grade infrastructure, is not operated under any service-level commitment, and is provided on an experimental basis.</p>
       <p>Features of the Service may change, regress, break, behave unpredictably, or be removed at any time without notice. AI outputs may be inaccurate, offensive, sexually explicit, violent, false, fabricated, defamatory, or otherwise unsuitable. You should not rely on the Service for any operational, medical, legal, financial, or life-safety purpose.</p>
 
@@ -315,8 +317,8 @@
       <p>If you are a parent or guardian and you believe your child has used the Service, you may contact us at <a href="mailto:contact@unityailab.com">contact@unityailab.com</a> and we will, where reasonable and feasible, take steps to assist — recognizing that we do not maintain user accounts, do not retain user inputs, and do not have a user database from which to remove records (see our Privacy Policy).</p>
 
       <h3 id="tos-ai">VI. AI-Generated Content</h3>
-      <p>Unity AI Lab and any of its parties are not responsible for anything the AI produces, as far as generated text, audio, or images. Any problem with such functionality is deferred back to the original generative AI providers — Pollinations, and that provider's providers (including the underlying model providers, hosting providers, content-moderation providers, and third-party infrastructure used by Pollinations to serve generations).</p>
-      <p>The Service does not generate content itself. When you interact with a chat, image-generation, voice, or vision feature on the Service, the request is forwarded to Pollinations' infrastructure, which performs the inference on its own systems and returns the result. We relay the result to your browser without modification of the generative output beyond the wrapping necessary to display it on the page.</p>
+      <p>Unity AI Lab and any of its parties are not responsible for anything the AI produces, as far as generated text, audio, or images. When you interact with a chat, image-generation, or speech-to-text feature on the Service, the request is sent to a server running on <b>your own computer</b> — a local Ollama process, a local Stable Diffusion process, or a local faster-whisper process, each of which you installed and each of which runs offline on your own hardware. Unity AI Lab does not operate that infrastructure, does not receive the prompt, does not receive the output, and has no ability to see, log, or intervene in what is generated.</p>
+      <p>Model behavior — including refusal patterns, bias, and content-moderation defaults — is determined by the model file you loaded and the runtime you installed. If a specific generation troubles you, the correct place to raise it is with the maintainers of the model or runtime you chose to install, not with Unity AI Lab.</p>
       <p>You acknowledge that:</p>
       <ul>
         <li>AI outputs may be wrong, harmful, biased, fabricated (so-called "hallucinations"), or factually inaccurate.</li>
@@ -325,7 +327,7 @@
         <li>AI outputs may infringe third-party rights, including intellectual-property and personality rights, depending on the prompt and the provider's model behavior.</li>
         <li>You are solely responsible for your prompts, for any content you generate or cause to be generated through the Service, and for any subsequent use, distribution, or publication of that content.</li>
       </ul>
-      <p>To the maximum extent permitted by law, Unity AI Lab disclaims all responsibility, liability, and warranty in respect of the content of AI generations served through the Service. If you have a concern about a specific generation, please raise it with Pollinations directly through their published channels.</p>
+      <p>To the maximum extent permitted by law, Unity AI Lab disclaims all responsibility, liability, and warranty in respect of the content of AI generations produced through the Service. If you have a concern about a specific generation, please raise it with the maintainers of the local model or runtime that produced it (for example, the Ollama project or the model author on Hugging Face).</p>
 
       <h3 id="tos-use">VII. Acceptable Use</h3>
       <p>You agree not to use the Service to do any of the following, and not to attempt or encourage anyone else to do any of the following:</p>
@@ -335,7 +337,7 @@
         <li>Generate or distribute content intended to harass, threaten, intimidate, defame, dox, or stalk an identifiable individual or group.</li>
         <li>Generate operational instructions for the construction, acquisition, or deployment of biological, chemical, radiological, nuclear, or high-yield-explosive weapons, or any other content the dissemination of which is criminal in your jurisdiction.</li>
         <li>Use the Service to commit fraud, identity theft, market manipulation, or any other unlawful financial activity.</li>
-        <li>Probe, scan, attack, or otherwise compromise the integrity, availability, or confidentiality of the Service, of Pollinations' infrastructure, or of any third-party system reachable from the Service, except where you are conducting authorized security research subject to a separate agreement and applicable law.</li>
+        <li>Probe, scan, attack, or otherwise compromise the integrity, availability, or confidentiality of the Service or of any third-party system reachable from the Service, except where you are conducting authorized security research subject to a separate agreement and applicable law.</li>
         <li>Impersonate Unity AI Lab, its members, or any other person or entity, or misrepresent your affiliation with any person or entity.</li>
         <li>Circumvent the age-verification gate, attempt to provide the Service to minors, or assist anyone under the age of consent in their jurisdiction in accessing the Service.</li>
         <li>Resell, sublicense, or commercially redistribute the Service or any substantial portion of it without our prior written consent.</li>
@@ -361,17 +363,19 @@
       <h4>Our materials</h4>
       <p>The Service, including its source code, design, layout, brand elements (such as the "UNITYAILAB" wordmark and the gothic-V-D visual system), original prose, original libraries (PolliLibJS and PolliLibPy), and original documentation, is the property of Unity AI Lab or its contributors and is protected by copyright, trademark, and other intellectual-property laws. Where source code is published under an open-source license, that license governs your rights in that code; the open-source license does not extend to brand elements, copy, or content not covered by the license. Nothing in these Terms grants you any right in any Unity AI Lab trademark, service mark, or trade dress without our prior written consent.</p>
       <h4>Third-party materials</h4>
-      <p>The Service relies on, links to, or embeds materials and services owned by third parties — including but not limited to Pollinations, Pollinations' upstream model and infrastructure providers, font foundries (Trajan Pro, Cormorant Garamond, Inter, JetBrains Mono), icon libraries (Font Awesome), front-end libraries (React, Bootstrap, AOS), the static-site hosting platform, and the visitor-counter service at abacus.jasoncameron.dev. All trademarks, logos, and brand elements of those third parties are the property of their respective owners. Unity AI Lab is not affiliated with Unity Technologies; the "Unity" in "Unity AI Lab" refers to a separate brand.</p>
+      <p>The Service relies on, links to, or embeds materials and services owned by third parties — including but not limited to the Ollama project (local LLM runtime), the Hugging Face model hub (from which the visitor's local models are downloaded), the diffusers / faster-whisper / Kokoro-js open-source libraries, font foundries (Trajan Pro, Cormorant Garamond, Inter, JetBrains Mono), icon libraries (Font Awesome), front-end libraries (React, Bootstrap, AOS), the static-site hosting platform, and the visitor-counter service at abacus.jasoncameron.dev. All trademarks, logos, and brand elements of those third parties are the property of their respective owners. Unity AI Lab is not affiliated with Unity Technologies; the "Unity" in "Unity AI Lab" refers to a separate brand.</p>
       <h4>AI-generated outputs</h4>
-      <p>Ownership and license rights in AI-generated outputs depend on the model provider, the jurisdiction, and the specific facts of the generation. Unity AI Lab does not assert ownership over the outputs you cause to be generated through the Service and makes no representation about who, if anyone, owns or holds rights in those outputs. You are responsible for understanding the licensing terms of Pollinations and any upstream provider, and for verifying that your use of any output is lawful.</p>
+      <p>Ownership and license rights in AI-generated outputs depend on the model, the jurisdiction, and the specific facts of the generation. Unity AI Lab does not assert ownership over the outputs you cause to be generated through the Service and makes no representation about who, if anyone, owns or holds rights in those outputs. You are responsible for understanding the licensing terms of the model file you loaded (typically documented on its Hugging Face page) and for verifying that your use of any output is lawful.</p>
       <h4>Your prompts and submissions</h4>
-      <p>As described in our Privacy Policy, the Service does not maintain a server-side store of your prompts, conversation history, or generated outputs. To the extent that any prompt or submission you provide is transmitted to Pollinations, you grant the rights necessary for Pollinations and its upstream providers to process that prompt and return a response, in accordance with their respective terms.</p>
+      <p>As described in our Privacy Policy, the Service does not maintain a server-side store of your prompts, conversation history, or generated outputs — and by design cannot, because the prompts never leave your machine. Your prompts travel from your browser to a local server running on the same machine (Ollama on 127.0.0.1:11434, Stable Diffusion on 127.0.0.1:7860, and/or speech-to-text on 127.0.0.1:7861), and the response is delivered back inside your browser.</p>
 
       <h3 id="tos-thirdparty">XII. Third-Party Services &amp; Links</h3>
       <p>The Service depends on, links to, or interoperates with services operated by third parties. These include but are not limited to:</p>
       <ul>
-        <li><b>Pollinations</b> — the generative AI provider that performs all model inference on behalf of the Service. Their terms of service, privacy practices, and content policies govern your use of those generations. See pollinations.ai.</li>
-        <li><b>Pollinations' upstream providers</b> — Pollinations relies on its own model providers, hosting providers, and content-moderation providers, each governed by their own terms.</li>
+        <li><b>The Ollama project</b> — the local LLM runtime you install on your own machine. Its license, terms, and privacy behavior govern your local use.</li>
+        <li><b>Hugging Face</b> — the model hub from which local model files (LLM weights, Stable Diffusion checkpoints, Whisper models) are downloaded during first-time setup. Your one-time downloads are governed by Hugging Face's terms and by the license of each model file.</li>
+        <li><b>Model authors</b> — each model file you load is authored by an independent party (dolphin / abliterated LLM authors, Realistic Vision for SD, Systran for faster-whisper) and governed by its own license and content policy.</li>
+        <li><b>Open-source runtime libraries</b> — the diffusers library, faster-whisper, piper-tts, torch, Kokoro-js, etc., each governed by their respective open-source licenses.</li>
         <li><b>Static-site hosting</b> — the platform that serves this Service's static pages, governed by that hosting provider's own site policies.</li>
         <li><b>abacus.jasoncameron.dev</b> — a third-party stateless visitor-counter service used to display an aggregate visitor count on certain pages.</li>
         <li><b>CDN-hosted libraries</b> — including unpkg.com (React, Babel) and Google Fonts.</li>
@@ -409,7 +413,7 @@
       <p><b>Entire agreement.</b> These Terms, together with the Privacy Policy and any other notices we publish on the Service, constitute the entire agreement between you and Unity AI Lab regarding the Service and supersede any prior or contemporaneous agreements between you and us regarding the Service.</p>
       <p><b>Assignment.</b> You may not assign or transfer these Terms, by operation of law or otherwise, without our prior written consent. We may assign these Terms freely, including to any successor in interest, affiliate, or acquirer.</p>
       <p><b>No agency.</b> Nothing in these Terms creates an agency, partnership, joint venture, or employment relationship between you and Unity AI Lab.</p>
-      <p><b>Force majeure.</b> Unity AI Lab is not liable for any failure or delay in performance caused by circumstances beyond its reasonable control, including acts of nature, denial-of-service attacks, third-party-provider outages (including outages of Pollinations or its upstream providers), governmental action, or changes in applicable law.</p>
+      <p><b>Force majeure.</b> Unity AI Lab is not liable for any failure or delay in performance caused by circumstances beyond its reasonable control, including acts of nature, denial-of-service attacks, third-party-provider outages (including outages of the static-site hosting platform, of the Hugging Face model hub, or of the visitor's local runtime environment), governmental action, or changes in applicable law.</p>
       <p><b>Headings.</b> Section headings in these Terms are for convenience only and have no legal or contractual effect.</p>
       <p><b>Language.</b> The controlling language of these Terms is English. Any translation is provided for convenience and does not modify the English text.</p>
 
@@ -445,7 +449,7 @@
         <li><a href="#pp-not">What We Do Not Collect</a></li>
         <li><a href="#pp-local">Local Browser Storage</a></li>
         <li><a href="#pp-counter">Visitor Counter</a></li>
-        <li><a href="#pp-ai">AI Generations &amp; Pollinations</a></li>
+        <li><a href="#pp-ai">AI Generations (run on your device)</a></li>
         <li><a href="#pp-cookies">Cookies &amp; Similar Technologies</a></li>
         <li><a href="#pp-hosting">Hosting &amp; Server Access Logs</a></li>
         <li><a href="#pp-children">Children's Privacy</a></li>
@@ -467,7 +471,7 @@
       <ul>
         <li>We do not maintain a server-side database of users. There is no account system, no profile, and no copy of your conversations on our servers.</li>
         <li>We do not store the prompts you send or the AI responses you receive. Generative AI responses are not stored by us. The exchange happens between your browser and the generative AI provider; we just relay it.</li>
-        <li>The AI work is performed by Pollinations, a third-party generative AI provider. Your prompts leave your browser and travel to Pollinations and Pollinations' upstream providers. It is up to Pollinations for how the data is handled, in accordance with their terms — and they themselves do not store data either, but you should review their policies directly.</li>
+        <li>The AI work is performed <b>on your own computer</b>, by servers you install and run locally (Ollama for chat, local Stable Diffusion for images, local faster-whisper for speech-to-text). Your prompts do not leave your machine. There is no cloud provider in the loop and no telemetry.</li>
         <li>Your chat history, settings, and age-verification flags are kept in your own browser's localStorage. They never leave your device unless you explicitly export them. If you clear your browser data, they are gone.</li>
         <li>We do not use cookies, advertising trackers, analytics pixels, fingerprinting, or third-party retargeting.</li>
         <li>We use a third-party stateless visitor counter (abacus.jasoncameron.dev) to display an aggregate visit number on the home page. It returns a number; it does not return personal data.</li>
@@ -476,8 +480,8 @@
       </ul>
 
       <h3 id="pp-who">III. Who We Are</h3>
-      <p>Unity AI Lab is an unincorporated hobby project operated by a small group of engineers across multiple U.S. states. The Service is not a commercial product, is provided free of charge, and exists primarily as a public proof-of-concept showcase of generative-AI security and jailbreak research from a red-team perspective. The Service is not a generative AI provider; the underlying model inference is performed by Pollinations and its upstream providers.</p>
-      <p>For the purposes of data-protection laws that recognize the concept, Unity AI Lab is the "controller" with respect to the limited information described in Sections V, VI, and IX of this Policy. Pollinations is a separate controller (or processor, depending on the legal framing) with respect to the prompts and AI generations described in Section VII.</p>
+      <p>Unity AI Lab is an unincorporated hobby project operated by a small group of engineers across multiple U.S. states. The Service is not a commercial product, is provided free of charge, and exists primarily as a public proof-of-concept showcase of generative-AI security and jailbreak research from a red-team perspective. The Service is not a generative AI provider; the underlying model inference is performed <b>on the visitor's own computer</b>, by local server processes the visitor installs (Ollama, local Stable Diffusion, local faster-whisper).</p>
+      <p>For the purposes of data-protection laws that recognize the concept, Unity AI Lab is the "controller" with respect to the limited information described in Sections V, VI, and IX of this Policy. There is no separate cloud AI provider to name — the visitor is the sole party in possession of, and control over, the prompts and generations described in Section VII.</p>
 
       <h3 id="pp-not">IV. What We Do Not Collect</h3>
       <p>It is shorter to start with what we do not collect, because the list of things we do collect is small:</p>
@@ -485,7 +489,7 @@
         <li>We do not require, ask for, or store your name, email address, phone number, postal address, government identifier, payment-card information, or any other directly identifying personal data, except where you voluntarily send us an email at the address provided in this Policy.</li>
         <li>We do not run a user-account system. There is no sign-up, no profile, and no user database on our side.</li>
         <li>We do not store the content of your chat conversations on our servers. Your prompts and the AI responses are never written to a Unity AI Lab database.</li>
-        <li>We do not store generated images, audio, or video on our servers. Generations are produced by Pollinations on demand and streamed or linked directly to your browser.</li>
+        <li>We do not store generated images, audio, or video on our servers. Generations are produced by the local server processes running on the visitor's own machine and are delivered inside their own browser; nothing leaves that machine.</li>
         <li>We do not use cookies set by Unity AI Lab. We do not use cookies for analytics, advertising, or tracking. (Third-party services we link to or embed may use their own cookies on their own domains; see Section VIII.)</li>
         <li>We do not use Google Analytics, Meta Pixel, TikTok Pixel, or any other advertising or behavioral analytics trackers.</li>
         <li>We do not fingerprint your browser or device.</li>
@@ -506,16 +510,14 @@
       <p>The Service displays an aggregate visitor counter on certain pages. This counter is provided by a third-party stateless service operated by an independent developer at abacus.jasoncameron.dev. When your browser loads a page that displays the counter, it makes an HTTP request to that service for the current count (and, once per browser session, increments it by one).</p>
       <p>The counter is stateless and aggregate. It returns a number; it does not return personal data and does not link visits across sessions. Like any HTTP request, the request to the counter service necessarily includes your IP address and browser User-Agent string at the network level — Unity AI Lab does not see, log, or store these values, but the third-party counter service may do so as part of operating its service. Unity AI Lab does not control, audit, or determine the retention practices of the third-party counter service. If you would prefer that no such request leave your browser, you can block requests to abacus.jasoncameron.dev with browser extensions or DNS-level filters.</p>
 
-      <h3 id="pp-ai">VII. AI Generations &amp; Pollinations</h3>
-      <p>Any generative AI responses are not stored by us. When you interact with a chat, image, voice, or vision feature on the Service, the request is forwarded — through a Cloudflare Worker proxy we operate — to Pollinations (pollinations.ai), which performs the inference on its own systems and returns the response. We relay the response to your browser.</p>
-      <p>The Cloudflare Worker proxy exists for two reasons: first, to keep the upstream API token off the client (so it cannot be extracted by any user of the Service); and second, to attach the moderation-routing parameters required by Pollinations and its upstream providers. The Worker does not write the prompts or responses to durable storage; it forwards them and discards. Cloudflare, as the operator of the Worker runtime, applies its own platform-level logging and security measures, governed by Cloudflare's privacy practices.</p>
-      <p>The data exchange with the AI is therefore subject to the terms of Pollinations, which themselves do not store data either; however, it is up to Pollinations for how the data is handled. Pollinations relies on its own model providers, hosting providers, and content-moderation providers (which may include providers operating on the Microsoft Azure OpenAI Service, among others). Each of those upstream providers has its own privacy policy and data-handling practices that may apply to the prompts and outputs that pass through their systems. Unity AI Lab is not in privity with those upstream providers and does not control, audit, or determine their data retention.</p>
+      <h3 id="pp-ai">VII. AI Generations (run on your device)</h3>
+      <p>Any generative AI responses are not stored by us and never travel to us. When you interact with a chat, image, or speech-to-text feature on the Service, the request is sent to a server running <b>on the same computer your browser is on</b>: a local Ollama process for chat, a local Stable Diffusion process for images, and a local faster-whisper process for speech-to-text. Each of those local servers is installed and operated by the visitor. Unity AI Lab does not host any of them, does not proxy them, and cannot see the prompts or outputs.</p>
+      <p>There is no Cloudflare Worker in the loop for AI inference. There is no cloud AI provider. There is no upstream model host to which your prompts are forwarded. The static site loaded from Unity AI Lab's hosting platform contains the front-end JavaScript and nothing else; every AI byte comes from your own machine.</p>
       <p>Practical consequences:</p>
       <ul>
-        <li>You should not enter into the Service any information you would not be comfortable sending to a third-party AI provider whose retention and training practices you have not personally reviewed.</li>
-        <li>You should not enter the personal data of identifiable third parties into the Service.</li>
-        <li>You should not enter any information that is subject to confidentiality, attorney-client privilege, HIPAA, FERPA, GLBA, PCI-DSS, or similar regulated-data protections.</li>
-        <li>You should review Pollinations' published privacy practices directly at pollinations.ai and the practices of the underlying model providers if and when they are disclosed.</li>
+        <li>Nothing you type into the AI features leaves your machine (assuming your local runtimes are not themselves configured to make outbound calls — the defaults ship with only loopback listeners).</li>
+        <li>The privacy behavior of the AI models you install is determined by those models' authors and by the runtimes you install (Ollama, diffusers, faster-whisper). Review their published documentation directly.</li>
+        <li>You are responsible for your own runtime environment — including any network-level logging, container-runtime telemetry, or endpoint-security software on your machine that might inspect local traffic.</li>
       </ul>
 
       <h3 id="pp-cookies">VIII. Cookies &amp; Similar Technologies</h3>
@@ -524,7 +526,7 @@
 
       <h3 id="pp-hosting">IX. Hosting &amp; Server Access Logs</h3>
       <p>The Service's static pages are served from a third-party static-site hosting platform. As a normal incident of operating any web hosting platform, the hosting provider may log standard server access information when your browser requests pages — including IP address, request URL, timestamp, User-Agent, and referrer. Unity AI Lab does not have direct read-access to those logs; they are governed by the hosting provider's own privacy and security policies.</p>
-      <p>The Cloudflare Worker proxy described in Section VII is operated on Cloudflare's infrastructure and is governed by Cloudflare's privacy and security practices. Cloudflare may log standard request metadata at the platform level.</p>
+      <p>There is no Cloudflare Worker proxy for AI inference in the current architecture; AI runs entirely on the visitor's own device. To the extent Cloudflare or a similar CDN sits in front of the static-site hosting platform serving these pages, that CDN may log standard request metadata at the platform level for the static pages themselves, governed by that provider's own privacy and security practices.</p>
 
       <h3 id="pp-children">X. Children's Privacy</h3>
       <p>The Service is not directed to and is not intended for use by children. The Service is restricted to individuals above the age of consent in their jurisdiction (the age at which a person is considered an adult under applicable law). For users in the United States this generally means individuals who are eighteen (18) years of age or older; in some jurisdictions the threshold is higher.</p>
@@ -535,7 +537,7 @@
       <h3 id="pp-under18">XI. If you are under 18 — read this in plain English</h3>
       <div class="warn-banner">PLAIN ENGLISH · NO LEGALESE · <b>THIS SITE IS NOT FOR YOU.</b></div>
       <p>If you are under the age of 18 — or under the age of an adult in your country, state, or region — please stop using this website right now. We mean it. The site is built for adults, and the chat, images, and text on it can include explicit, graphic, violent, sexual, or otherwise mature content that we don't want you to see.</p>
-      <p>On the privacy side specifically: even though we don't keep a list of who you are or what you typed, the things you type are sent to a third-party AI provider (Pollinations) and to the providers they use. We can't tell those companies to forget about you, because we don't even know who you are. So your best move is to not send anything from this site at all.</p>
+      <p>On the privacy side specifically: the AI in this game runs on the same computer your browser is on, not on our servers. That means what you type never reaches Unity AI Lab. But the AI is still adult software you shouldn't be using — please don't try to. Close the tab.</p>
       <p>What you should do, in order:</p>
       <ol>
         <li>Close this tab or browser window. Don't click around. Just leave.</li>
@@ -568,7 +570,7 @@
       <p>Unity AI Lab uses commercially reasonable security practices for a static website hosted on a third-party static-site platform and an associated Cloudflare Worker proxy: HTTPS for all traffic, server-side storage of upstream API tokens (so they are never exposed to the browser), no client-side credentials, no user-account database to compromise, and no server-side store of conversations. Notwithstanding these practices, no method of transmission over the internet or method of electronic storage is one-hundred-percent secure, and we cannot guarantee absolute security.</p>
 
       <h3 id="pp-transfers">XIV. International Data Transfers</h3>
-      <p>The Service is hosted on infrastructure located primarily in the United States (a static-site hosting platform + Cloudflare). Pollinations and its upstream providers operate their own infrastructure in jurisdictions determined by them. By using the Service from outside the United States or outside the location of any upstream provider, you understand and agree that your prompts and any associated request metadata may be transferred to and processed in the United States and other jurisdictions whose data-protection laws may differ from those of your home jurisdiction. To the extent any such transfer is subject to data-protection law, we rely on the lawful-transfer mechanisms made available by the relevant providers (such as the European Commission's Standard Contractual Clauses, where applicable to those providers' own arrangements with their customers). Unity AI Lab itself does not maintain a separate cross-border-transfer mechanism because we do not maintain a server-side store of user data.</p>
+      <p>The Service's static pages are hosted on infrastructure located primarily in the United States. AI inference happens on the visitor's own device, so prompts and outputs never cross a border on Unity AI Lab's behalf. The one-time downloads that populate the visitor's local models (from Hugging Face, the Ollama registry, and similar hubs) travel from those hubs' infrastructure to the visitor's device; each hub applies its own jurisdictional and data-protection practices. Unity AI Lab does not maintain a separate cross-border-transfer mechanism because we do not maintain a server-side store of user data.</p>
 
       <h3 id="pp-retention">XV. Retention</h3>
       <p>Because Unity AI Lab does not maintain a server-side store of user data, retention on our side is limited to:</p>
@@ -576,7 +578,7 @@
         <li><b>Your localStorage entries</b> — retained on your device until you clear them through your browser settings. We do not have a copy.</li>
         <li><b>Email correspondence</b> — emails you send to <a href="mailto:contact@unityailab.com">contact@unityailab.com</a> are retained in our email inbox for as long as is reasonably necessary to address the inquiry, and then either deleted or archived in line with normal email-management practices.</li>
       </ul>
-      <p>Third-party providers — including the static-site hosting platform, Cloudflare, Pollinations, the upstream model providers, the visitor counter service, and the font / library CDNs — apply their own retention policies to any logs or metadata they collect, which are outside our control.</p>
+      <p>Third-party providers — including the static-site hosting platform, Hugging Face (for one-time local model downloads), the Ollama model registry, the visitor counter service, and the font / library CDNs — apply their own retention policies to any logs or metadata they collect, which are outside our control.</p>
 
       <h3 id="pp-changes">XVI. Changes to this Policy</h3>
       <p>We may revise this Policy from time to time. When we do, we will update the "Effective" date at the top of this page and, for material changes, we will mark the revision in the version history. Your continued use of the Service after the Effective date of a revision constitutes your acceptance of the revised Policy. If you do not agree to a revision, your sole remedy is to stop using the Service and, if you wish, to clear the localStorage entries described in Section V.</p>
@@ -596,7 +598,7 @@
       <div class="card">
         <h2>⚙️ Settings</h2>
         <div id="settings-body-inline"></div>
-        <p class="small muted">Need Ollama / Kokoro / Pollinations setup? Go to <a href="#setup">⚡ Setup</a> for the wizard.</p>
+        <p class="small muted">Need Ollama / Kokoro / local image + voice setup? Go to <a href="#setup">⚡ Setup</a> for the wizard.</p>
       </div>
     </section>
 

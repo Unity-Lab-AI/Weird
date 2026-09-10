@@ -27,7 +27,8 @@
 
 | Component | Notes |
 |---|---|
-| **Pollinations `pk_` key** | Unlocks per-girl portrait images + on-demand selfies. Free at <https://pollinations.ai>. The `sk_` secret keys are rejected by the browser — must be `pk_` publishable. |
+| **Local Stable Diffusion server** (optional) | Ships in `local-services/image-server/`. Run `scripts/install_image_gen` once (pulls torch + diffusers + a ~2GB uncensored checkpoint), then `scripts/start_image_gen` per session. Unlocks per-girl portrait images + on-demand selfies. Runs on your GPU. No API key. |
+| **Local voice server** (optional) | Ships in `local-services/voice-server/`. Run `scripts/install_voice` once (pulls faster-whisper + a ~480MB Whisper-small model), then `scripts/start_voice` per session. Unlocks mic-in. GPU-first, CPU fallback available. No API key. |
 | **Embedding model** (`nomic-embed-text`) | Enables memory retrieval — not required, last-N chronological memory works without it. |
 
 ---
@@ -89,12 +90,33 @@ If the CDN load fails:
 
 ---
 
-## Get a Pollinations key (optional)
+## Start the local image + voice servers (optional)
 
-1. Go to <https://pollinations.ai> and sign up
-2. Visit <https://enter.pollinations.ai> for your API key
-3. **Use the `pk_` publishable key** — the `sk_` secret key will be rejected by the browser
-4. Paste the `pk_` key into Settings → Pollinations on the landing page
+Both are Python servers that ship with the game under `local-services/` and run entirely on your machine. No API key. Nothing leaves your box. The game is fully playable as text+emoji without either — turn them on when you want images and mic-in.
+
+**Windows:**
+
+```
+scripts\install_image_gen.bat    (one-time — ~2GB SD checkpoint)
+scripts\start_image_gen.bat      (per session — serves on 127.0.0.1:7860)
+
+scripts\install_voice.bat        (one-time — ~480MB Whisper model)
+scripts\start_voice.bat          (per session — serves on 127.0.0.1:7861)
+```
+
+**Linux / macOS:**
+
+```
+bash scripts/install_image_gen.sh
+bash scripts/start_image_gen.sh
+
+bash scripts/install_voice.sh
+bash scripts/start_voice.sh
+```
+
+The landing-page setup wizard shows a live status pill for each server and copy-to-clipboard buttons for both commands. Once the servers are running, images + mic-in enable automatically inside the game — no restart, no reload.
+
+**Swap the SD checkpoint:** drop any `.safetensors` into `weird/models/` and restart `start_image_gen`. Files with `xl` in the name are auto-detected as SDXL and loaded via `StableDiffusionXLPipeline` (with model-cpu-offload so they fit alongside Ollama on a 16GB card); anything else loads as SD1.5. If both an SDXL and an SD1.5 file are present, SDXL wins. The default download is RealVisXL V5.0 (~6.5GB SDXL, uncensored, ungated) — with Realistic Vision V5.1 SD1.5 (~2GB) as the fallback if the SDXL fetch fails.
 
 If no key is provided, image features gracefully degrade — text+emoji gameplay continues to work.
 
@@ -146,13 +168,12 @@ git remote add origin <your-static-host-or-git-remote>
 git push -u origin main
 ```
 
-Point the host's pages/static-serve feature at the served branch and the site goes live at whatever URL your host assigns. Nothing runs on a server — Ollama is the visitor's local machine, Kokoro runs in their browser, Pollinations is called client-side with the visitor's own key.
+Point the host's pages/static-serve feature at the served branch and the site goes live at whatever URL your host assigns. Nothing runs on a server — Ollama is the visitor's local machine, Kokoro runs in their browser, and the local image + voice servers are Python processes the visitor runs on their own machine. No cloud AI, no API keys, no proxy.
 
 ### What's NOT deployed
 
-- `.env` — local dev only, gitignored
-- `js/env.local.js` — local dev Pollinations key injection, gitignored
-- `cache/` — user-specific Pollinations image cache
+- `.env` — local dev only, gitignored (rarely needed now that no cloud keys are used)
+- `cache/` — user-specific local-SD image cache
 - `save.json` / `server/save*.json` — save data
 - `node_modules/` — Playwright (only used for screenshot tooling)
 
@@ -183,7 +204,7 @@ Settings → **Factory reset** → confirm. Wipes:
 
 - All IDB save slots
 - Cached Kokoro weights (you'll re-download on next visit)
-- Cached Pollinations images
+- Cached local-SD images
 - All localStorage UI preferences (voice toggle, last-used model, etc.)
 
 ---
@@ -222,7 +243,7 @@ Settings → **Factory reset** → confirm. Wipes:
                                           │
                                           ▼
                           ┌──────────────────────────────────┐
-                          │  imaging.js (Pollinations)       │
+                          │  imaging.js (local SD via POST)  │
                           │  pregnancy.js (gestation)        │
                           │  action-effects.js (stat spec)   │
                           │  whore-out.js (johns)            │
@@ -329,7 +350,7 @@ index.html load
    ├──► hero + landing nav rendered
    │
    ├──► (route #home → CTA grid + IDB save detection)
-   ├──► (route #setup → Ollama detection → model status → Kokoro load → Pollinations key)
+   ├──► (route #setup → Ollama detection → model status → Kokoro load → local SD status → local voice status)
    │
    └──► launch click → location.href = game.html
               │
@@ -400,7 +421,7 @@ composePrompt(girl, opts)
    clampSeed(seed, girl.id) ← deterministic seed fallback via djb2 hash
         │
         ▼
-   buildUrl() ← Pollinations endpoint composition
+   renderImage() → POST http://127.0.0.1:7860/sdapi/v1/txt2img
         │
         ▼
    queuedFetch() ← single-slot serializer + 429 backoff
@@ -424,7 +445,7 @@ Mic input
   ├─► MediaRecorder API (browser)
   │     │
   │     ▼
-  │  Pollinations transcribe endpoint
+  │  POST http://127.0.0.1:7861/stt (local faster-whisper)
   │     │
   │     ▼
   │  user-in textarea autofilled → Send
@@ -517,11 +538,7 @@ npx http-server . -p 8000
 python3 -m http.server 8000
 ```
 
-For dev-time auto-injection of a Pollinations token (so you don't have to paste it into Settings every time you wipe storage):
-
-1. Copy `.env.example` → `.env` at the project root (gitignored)
-2. Paste your `sk_` or `pk_` key into `POLLINATIONS_API_KEY=`
-3. Launch via `start.bat` (Windows) or `start.sh` (Mac/Linux) — the launcher runs the env sync as Step 0 and regenerates `js/env.local.js` from `.env`. The browser's `window.__DEV_ENV` reflects the latest values on every launch.
+The `.env` → `js/env.local.js` sync pattern that shipped with the old Pollinations-key flow is no longer wired: `js/env.local.js` and `js/env.example.js` were removed when local SD replaced Pollinations, because no cloud keys need syncing. `scripts/sync-env.ps1` remains for any advanced override you might want (e.g. `LOCAL_IMAGE_ENDPOINT=http://192.168.1.42:7860` for a networked SD box), but it's no longer required by the launchers.
 
 Both `.env` and `js/env.local.js` are gitignored. `.env` is the single source of truth — never edit `js/env.local.js` by hand; the launcher will overwrite it.
 
@@ -545,7 +562,7 @@ npx playwright install chromium
 node scripts/screenshots.mjs
 ```
 
-The script walks the entire game, sends a real Ollama turn, requests a real Pollinations selfie, and waits for each to actually complete before screenshotting. Non-headless so you can watch it play.
+The script walks the entire game, sends a real Ollama turn, requests a real local-SD selfie, and waits for each to actually complete before screenshotting. Non-headless so you can watch it play. Requires the local SD server to be running.
 
 ---
 
@@ -564,9 +581,20 @@ ollama rm dolphin-mistral
 ollama pull dolphin-mistral
 ```
 
-### "Pollinations 403"
+### "Local SD server not reachable"
 
-You're using an `sk_` secret key in the browser. Pollinations rejects `sk_` from browser origins. Generate a `pk_` publishable key at <https://enter.pollinations.ai> and paste that instead.
+The image server hasn't started, or it's on a different port. Check:
+1. `scripts/start_image_gen` window is still running.
+2. `curl http://127.0.0.1:7860/sdapi/v1/options` returns JSON (not a connection error).
+3. Nothing else is listening on 7860 (`netstat -ano | findstr :7860` on Windows).
+
+### "no checkpoint in models/"
+
+The install script downloaded RealVisXL V5.0 (or Realistic Vision V5.1 as fallback) but the file isn't where the server expects. Verify `weird/models/*.safetensors` exists. Drop any `.safetensors` into that folder and restart `start_image_gen`.
+
+### "STT cannot use the GPU"
+
+faster-whisper resolves cuBLAS/cuDNN lazily by name. The install script installs `nvidia-cublas-cu12` + `nvidia-cudnn-cu12` wheels and `voice_server.py` puts them on PATH at boot. If GPU init still fails the server falls back to CPU int8 automatically (slower but works everywhere).
 
 If you have no key the game silently falls back to the legacy free endpoint — rate-limited but functional.
 
@@ -587,8 +615,8 @@ Browsers block audio playback until the page receives at least one user gesture.
 
 ### "No images appearing"
 
-1. Check Settings → Pollinations key — should start with `pk_`
-2. Check rate limits — Pollinations free tier is ~1 image/hour/IP. Authed `pk_` keys have higher limits.
+1. Check that the local SD server is running (`scripts/start_image_gen` window still open).
+2. Check the landing-page status pill for the image server — it should read something like "Ready · RealVisXL_V5.0_fp16.safetensors · cuda" (or `realistic-vision-v51.safetensors` if you're on the SD1.5 fallback).
 3. Game also writes detailed logs to console — open DevTools.
 
 ### "Save got corrupted"
@@ -605,7 +633,7 @@ This wipes the save entirely — only do it if there's no other recovery path. E
 
 ## CI / hooks
 
-The repo's `.gitignore` excludes local-dev tooling folders, `.env`, `js/env.local.js`, `cache/`, `node_modules/`, `save.json`, screenshots cache, and the Pollinations user state. The shipping branch contains only the static-client code.
+The repo's `.gitignore` excludes local-dev tooling folders, `.env`, `cache/`, `node_modules/`, `save.json`, screenshots cache, the visitor's `models/` folder (with the multi-GB SD checkpoint + Whisper model files), and the Python virtualenv (`.venv/`, `__pycache__/`). The shipping branch contains only the static-client code + the Python server sources under `local-services/` + the installer / launcher scripts.
 
 No CI configured (this is a static-client browser game with no build step). All verification is manual: open the page, play the loop, watch the dev console.
 

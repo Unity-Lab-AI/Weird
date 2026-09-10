@@ -1,8 +1,16 @@
-// DUNGEON MASTER: THE HUNT — mic input via MediaRecorder → Pollinations transcribe.
-// Captures audio from the user's mic, sends to Pollinations STT, returns transcript.
+// DUNGEON MASTER: THE HUNT — mic input via MediaRecorder → local voice-server /stt.
+// Captures audio from the visitor's mic, decodes it to int16 PCM in the browser using
+// Web Audio API, POSTs to the local voice server (127.0.0.1:7861) which runs
+// faster-whisper on the visitor's GPU (CPU fallback available). Returns the transcript.
+//
+// No cloud service. No API key. The voice server ships with this project (see
+// local-services/voice-server/voice_server.py + scripts/install_voice.*) and sends
+// Access-Control-Allow-Origin: * so this browser-direct fetch works from any origin.
 
 (function () {
   'use strict';
+
+  function cfg() { return window.DMTHConfig.LOCAL_VOICE; }
 
   let mediaRecorder = null;
   let chunks = [];
@@ -26,6 +34,41 @@
     startedAt = Date.now();
   }
 
+  // Browsers hand us webm/opus by default from MediaRecorder, but the local voice server
+  // wants raw int16 PCM (or a WAV container). Decode with Web Audio API and hand-convert
+  // Float32 samples to Int16, then base64-encode. Mono-mix by taking channel 0 — whisper
+  // doesn't benefit from stereo and the server accepts one PCM stream.
+  async function blobToPcmB64(blob) {
+    const arrayBuffer = await blob.arrayBuffer();
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) throw new Error('AudioContext not supported');
+    const ac = new AC();
+    let audioBuf;
+    try {
+      audioBuf = await ac.decodeAudioData(arrayBuffer);
+    } finally {
+      // Close the AudioContext right after decode; keeping it open leaks a mic-tab tone
+      // on some browsers.
+      if (ac.close) ac.close();
+    }
+    const channelData = audioBuf.getChannelData(0);
+    const sampleRate = audioBuf.sampleRate;
+    const int16 = new Int16Array(channelData.length);
+    for (let i = 0; i < channelData.length; i++) {
+      const s = Math.max(-1, Math.min(1, channelData[i]));
+      int16[i] = s < 0 ? Math.round(s * 0x8000) : Math.round(s * 0x7FFF);
+    }
+    const bytes = new Uint8Array(int16.buffer);
+    // Chunked btoa to avoid stack-overflow from spreading a huge Uint8Array into
+    // String.fromCharCode.apply — safe up to any recording length.
+    let bin = '';
+    const CHUNK = 0x8000;
+    for (let i = 0; i < bytes.length; i += CHUNK) {
+      bin += String.fromCharCode.apply(null, bytes.subarray(i, i + CHUNK));
+    }
+    return { pcm_b64: btoa(bin), sample_rate: sampleRate };
+  }
+
   async function stopAndTranscribe() {
     if (!isRecording()) throw new Error('not recording');
     const blob = await new Promise(resolve => {
@@ -39,29 +82,27 @@
     stream = null;
     mediaRecorder = null;
 
-    // Send to Pollinations transcribe endpoint
-    const apiKey = window.DMTHConfig.POLLINATIONS.apiKey;
-    if (!apiKey) return { ok: false, error: 'no-pollinations-key', durationMs: Date.now() - startedAt };
-
-    // Pollinations audio transcription: use the text endpoint with an audio input via multipart.
-    // The pollinations_transcribe MCP tool normally handles this — here we inline a direct POST.
+    // Decode webm/opus → int16 PCM base64 for the local STT server.
+    let pcm;
     try {
-      const form = new FormData();
-      form.append('file', blob, 'recording.webm');
-      form.append('model', 'whisper');
-      // Try the Pollinations audio endpoint
-      const res = await fetch('https://audio.pollinations.ai/transcribe', {
+      pcm = await blobToPcmB64(blob);
+    } catch (err) {
+      return { ok: false, error: `decode: ${err.message}`, durationMs: Date.now() - startedAt };
+    }
+
+    try {
+      const c = cfg();
+      const res = await fetch(c.endpoint + c.stt, {
         method: 'POST',
-        headers: { 'Authorization': `Bearer ${apiKey}` },
-        body: form
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(pcm)
       });
       if (!res.ok) {
-        // Fallback — many proxies for pollinations-transcribe use text.pollinations.ai/openai
-        return { ok: false, error: `transcribe HTTP ${res.status}`, durationMs: Date.now() - startedAt };
+        return { ok: false, error: `stt HTTP ${res.status}`, durationMs: Date.now() - startedAt };
       }
       const data = await res.json().catch(() => null);
-      const transcript = data?.text || data?.transcript || '';
-      return { ok: true, transcript: transcript.trim(), durationMs: Date.now() - startedAt };
+      const transcript = (data?.text || '').trim();
+      return { ok: true, transcript, durationMs: Date.now() - startedAt };
     } catch (err) {
       return { ok: false, error: err.message, durationMs: Date.now() - startedAt };
     }
@@ -75,6 +116,19 @@
     chunks = [];
   }
 
+  // Liveness probe for the setup wizard / detector. Returns true if the local voice
+  // server answers GET /state (regardless of whether the model is loaded — that's
+  // reported in the payload). False on network failure or non-2xx.
+  async function isServerAvailable() {
+    try {
+      const c = cfg();
+      const res = await fetch(c.endpoint + c.state, { method: 'GET' });
+      return res.ok;
+    } catch { return false; }
+  }
+
   window.DMTHGame = window.DMTHGame || {};
-  window.DMTHGame.voiceIn = Object.freeze({ isSupported, isRecording, start, stopAndTranscribe, cancel });
+  window.DMTHGame.voiceIn = Object.freeze({
+    isSupported, isRecording, start, stopAndTranscribe, cancel, isServerAvailable
+  });
 })();

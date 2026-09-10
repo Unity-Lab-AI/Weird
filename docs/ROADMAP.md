@@ -1,7 +1,69 @@
 # ROADMAP — weird project
 
-**Generated:** 2026-04-21 · **Last revised:** 2026-06-18 (DEPRAVITY-spine mega-build shipped; pushed to branch `UpdateWork`)
+**Generated:** 2026-04-21 · **Last revised:** 2026-09-10 (Phase 22 — local SD migration shipped, then SDXL swap + asset preload bar)
 **Title: DUNGEON MASTER: THE HUNT** (Gee verbatim 2026-04-21).
+
+## Phase 22 — Local image + voice servers (Pollinations gut) — SHIPPING 2026-09-10 (P1)
+
+> Gee directive verbatim 2026-09-10: *"here is what we are doing: 1. looking over Unity 18+ and we are going to use its image gen exact for the weird project. in doing so we will entirelly gut pollinations every and reconnect everything that needed pollinations to the new image gen like the Unity 18+ project"* + follow-up: *"remember it all has to install and work as its opwn thing ecxacly as it did just not ust pollinations so when we ship nothing needs a key or token and all auto installs in the checks it already has just update them"*.
+
+Migrated the entire image pipeline AND speech-to-text off the Pollinations cloud API onto local servers that ship with the game and run on the visitor's own hardware. No keys, no tokens, no cloud fallback. Same UX — same auto-install flow, same setup wizard, same in-game features — just now every AI byte stays on the visitor's machine.
+
+### Milestone 22.1 — Local Stable Diffusion server + browser-direct CORS
+- [x] Forked `local-services/image-server/sd_server.py` from Unity 18+ (AUTOMATIC1111-compatible `/sdapi/v1/txt2img` on `127.0.0.1:7860`, diffusers-based, `safety_checker=None` triple-belted, Realistic Vision V5.1 default checkpoint). Added `Access-Control-Allow-Origin: *` on every response + `do_OPTIONS` preflight handler so the browser can call it directly from any origin (same pattern as Ollama's `OLLAMA_ORIGINS=*`). Added seed support so a torch.Generator reproduces facial identity across renders.
+
+### Milestone 22.2 — Local voice server (STT via faster-whisper)
+- [x] Forked `local-services/voice-server/voice_server.py` from Unity 18+ as STT-only (Kokoro-in-browser stays for TTS). `POST /stt` accepts base64 PCM/WAV, returns transcript. GPU-first with a CPU int8 fallback (weird's audience is broader than Unity 18+'s CUDA-only assumption). CORS headers + OPTIONS preflight added.
+
+### Milestone 22.3 — Auto-install + launcher scripts
+- [x] `scripts/install_image_gen.{bat,sh}` — pins diffusers 0.35.1 + huggingface-hub<1.0 (the "internally inconsistent 0.40" trap Unity 18+ documented), installs torch CUDA 11.8 wheel if missing, downloads RealVisXL V5.0 fp16 (~6.5 GB SDXL, uncensored, ungated) into `weird/models/`; falls back to Realistic Vision V5.1 (~2.1 GB SD1.5) if the SDXL fetch fails. (Milestone 22.1 originally shipped with RV5.1 as the default; 22.10 swapped SDXL to the front.)
+- [x] `scripts/install_voice.{bat,sh}` — installs faster-whisper + `nvidia-cublas-cu12` + `nvidia-cudnn-cu12` (the lazy-cuBLAS-DLL-load trap), downloads Whisper-small via `snapshot_download(local_dir_use_symlinks=False)` (the Windows-symlink-privilege trap).
+- [x] `scripts/start_image_gen.{bat,sh}` + `scripts/start_voice.{bat,sh}` — launchers that start the two Python servers on their respective ports.
+
+### Milestone 22.4 — Config + composer swap
+- [x] `js/config.js` — stripped the entire POLLINATIONS block (endpoints, apiKey, imageModel, Worker toggle, `detectUnityLabWorker`), replaced with `LOCAL_IMAGE` (endpoint, txt2img/options/status paths, defaults) + `LOCAL_VOICE` (endpoint, stt/state paths). No apiKey. No cloud endpoints. No Cloudflare Worker.
+- [x] `js/game/imaging.js` — killed `hasKey`, `queuedFetch` Bearer/429 backoff, `safeEncodedPrompt`, `buildUrl`, and the sanitize→forceFree fallback chain. Replaced with a single `renderImage(prompt, seed, opts)` that POSTs to local SD and returns `{ blob, url, error }`. The 8-position prompt composer (drug/hold/pregnancy/nudity tokens, POSE_LIBRARY, sanitizePrompt, enforceFullBody, `composePromptViaOllama`) is preserved intact — that's prompt engineering, not endpoint-specific.
+- [x] `js/game/voice-in.js` — swapped Pollinations transcribe for `POST http://127.0.0.1:7861/stt` with base64 PCM (webm/opus decoded to int16 via Web Audio API's `decodeAudioData` + a chunked-btoa encoder that handles arbitrarily-long recordings).
+- [x] `js/assets/asset-gen.js` — swapped `imaging.buildUrl` (deleted) for `imaging.renderImage`.
+
+### Milestone 22.5 — Setup detector + landing wizard
+- [x] `js/setup/detector.js` — dropped `probePollinationsKey`, added `probeLocalImage` (probes `/sdapi/v1/options` for `state: starting|loading|ready|no-checkpoint` + model + device) and `probeLocalVoice` (probes `/state` for stt-model presence + cuda dir count).
+- [x] `js/ui/landing.js` — replaced `renderPollinationsSetup` (with its Worker-toggle machinery) with `renderLocalServersSetup` mirroring the Ollama-setup card style: per-server status pill + install/start command copy blocks (OS-aware — `.bat` on Windows, `.sh` on Linux). Status rows show "Local image server ready · realistic-vision-v51 · cuda" / "Local voice-in ready" instead of the Pollinations key pill.
+
+### Milestone 22.6 — Settings + call-site sweep
+- [x] `js/ui/settings.js` + `js/ui/in-game-settings.js` — stripped Pollinations key input + Worker toggle; added Local image endpoint + Local voice endpoint override fields for advanced users (e.g. `http://192.168.1.42:7860` for a networked SD box).
+- [x] `js/ui/room.js`, `js/ui/town-view.js`, `js/ui/dungeon-plot-view.js` — user-facing status text swapped from "Pollinations not configured — paste a pk_ key" to "Local SD server not reachable — start it via scripts/start_image_gen".
+- [x] Small-file sweep of stale Pollinations comments in `js/game/hunt.js`, `js/game/film.js`, `js/game/girl-gen.js`, `js/ui/gallery-view.js`.
+
+### Milestone 22.7 — Env file removal + key leak cleanup
+- [x] Deleted `js/env.local.js` (which carried the leaked `sk_VDynoot0nLqUWpFhvPGax9oP2g1SACcp` Pollinations key from BUGStwo.37) and `js/env.example.js`. The `.env` → `js/env.local.js` sync pattern is retired — no cloud keys need syncing now that image + voice both run locally. `scripts/sync-env.ps1` remains for advanced overrides. `index.html` + `game.html` `<script src="env.local.js">` tags stubbed with an empty `window.__DEV_ENV = {}` fallback.
+
+### Milestone 22.8 — Legal + docs rewrite
+- [x] `index.html` — rewrote Terms Section II (Nature of Service) + Section VI (AI-Generated Content) + Section XII (Third-Party Services) + Privacy Section VII (AI Generations) + all supporting sections to reflect that AI now runs on the visitor's own device. Pollinations is no longer named as the third-party AI provider — it's not one. Cloudflare Worker proxy paragraphs removed. `docs/policies/{terms,privacy}-source.html` marked as historical snapshots that pre-date the migration.
+- [x] `README.md`, `SETUP-README.md`, `docs/ROADMAP.md`, `wiki.html` updated with the new local-SD + local-voice flow. `docs/FINALIZED.md` untouched per LAW (permanent archive of what shipped when).
+
+### Milestone 22.9 — Cloudflare Worker + website2.0 mirror (coordination note, not shipping here)
+- [ ] The Cloudflare Worker (`websiteunityailab.gfourteen7525.workers.dev/image/`) that BUGStwo.37 wired for the website2.0 `apps/weird/` mirror still exists and still routes Pollinations for the hosted mirror. Per 2026-09-10 direction, the website2.0 mirror is a separate decision — this epic ships weird-repo-only. When the mirror gets re-synced from this weird main, the direct-to-Worker code path will already be gone; the mirror will need its own decision (delete the mirror / keep the Worker as legacy-only / rewrite the mirror to require local SD).
+
+### Milestone 22.10 — SDXL swap + asset preload bar (2026-09-10 second pass)
+
+> Gee verbatim 2026-09-10: *"okay small issue im not sure we are correctly generating and transfer to coefficients as every image has the persoen in the image super imposed on themselves like a double body and or double head so im thinking it something with how we are handling the dafult image model to properly do it"* → *SDXL SWITCH — Download Realistic Vision V6.0 SDXL* (fork answer). Plus verbatim: *"they should load i guess but there should be a loading bar or something for each new run through if its making assests then thats fgine"*.
+
+- [x] **SDXL auto-detect in `sd_server.py`** — new `is_sdxl_checkpoint(path)` sniffs the filename for `xl` (case-insensitive); new `find_checkpoint()` prefers SDXL over SD1.5 when both are present. Load path branches on the flag: SDXL uses `StableDiffusionXLPipeline` with `enable_model_cpu_offload()` (fits alongside Ollama's ~10 GB on a 16 GB card by swapping UNet / text-encoder stages CPU↔GPU per render, ~2× slower per stage but no OOM); SD1.5 stays on `StableDiffusionPipeline` with `to(device) + attention_slicing`. Safety-checker triple-belt applied to both arches.
+- [x] **Default download swap** — `scripts/install_image_gen.bat` and `.sh` now curl `SG161222/RealVisXL_V5.0` `RealVisXL_V5.0_fp16.safetensors` (~6.5 GB) first; on failure they fall back to the prior Realistic Vision V5.1 SD1.5 file. `scripts/_auto_setup_image_gen.bat` comment updated to name the new default.
+- [x] **Character-image resolution** — `js/config.js` `LOCAL_IMAGE.width/height` swapped from `1024×1792` (the SD1.5 default that was triggering duplicate-subject artifacts) via a brief `768×1344` middle stop to the SDXL native `832×1216` tall-portrait bucket. Env renders (town/dungeon) still override to `1792×1024` landscape at their callsite.
+- [x] **Asset preload orchestrator** — `js/assets/asset-preload.js` (new) exposes `starterListFromState`, `fullCatalogList`, `wipeAssetCache`, `preloadAll(list, {onProgress, abortSignal})`. Sequential SD-queue drain with per-item progress callback + abort. Sets `DMTHAssetGen.setPreloadInFlight(true)` around the loop so state-mutation `prewarm()` fire-and-forgets don't race the sweep.
+- [x] **Progress-bar overlay** — `js/ui/asset-preload-overlay.js` (new) fullscreen modal (`.dmth-preload-*` styles), shows headline + subtitle + `<preview>` thumb that swaps to the latest finished render + progress bar + current asset name + skip button. Returns `{completed, skipped, rendered, failed}`.
+- [x] **New-game wiring** — `js/ui/newgame.js` wraps `bootstrap.newGame(...)` in the `setPreloadInFlight(true)` guard, `DMTHStorage.cache.clear()`s for a fresh set per playthrough, builds the starter list from `state.current` (owned dungeon + inventory + owned locations), and blocks on `DMTHAssetPreloadOverlay.show(...)` before `router.go('dashboard')`.
+- [x] **`asset-gen.js` guard hook** — added `preloadInFlight` closure state + `setPreloadInFlight` / `isPreloadInFlight` accessors on the frozen export. `prewarm()` no-ops when the flag is on. Prior on-acquire behavior unchanged when flag is off.
+- [x] **`game.html`** — two new script tags: `js/assets/asset-preload.js` next to `asset-gen.js`, and `js/ui/asset-preload-overlay.js` next to `ollama-repair-overlay.js`.
+- [x] **User-facing text sync** — `js/ui/landing.js` step-note for the SD server names RealVisXL V5.0 as the default, describes the SDXL-detection rule + the SD1.5 fallback; `SETUP-README.md` swap-checkpoint / no-checkpoint / no-images-appearing sections updated to match.
+
+**Measured perf** (RTX 4070 Ti Super, 16 GB VRAM, Ollama warm with dolphin-mistral:7b @ 32K context = ~10 GB resident): SDXL first render at 832×1216 24 steps = 13.5 s; warm subsequent = 11.7 s. SD1.5 at the prior 1024×1792 default was 3+ min per image and produced duplicate subjects/heads.
+
+---
+
+
 
 > **Cross-references:** [`../README.md`](../README.md) (gameplay wiki) · [`../SETUP-README.md`](../SETUP-README.md) (technical setup) · [`ARCHITECTURE.md`](./ARCHITECTURE.md) (system design) · [`SKILL_TREE.md`](./SKILL_TREE.md) (capability matrix) · [`TODO.md`](./TODO.md) (active backlog) · [`FINALIZED.md`](./FINALIZED.md) (completion archive)
 

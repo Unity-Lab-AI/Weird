@@ -15,7 +15,8 @@
 <body>
 
   <!-- Env injection (local dev only; no error if absent) -->
-  <script src="js/env.local.js?v=20260621040000" onerror="console.debug('[env] no env.local.js — normal for deploy')"></script>
+  <!-- js/env.local.js removed — no cloud keys to sync since image + voice both run on the visitor's machine now. -->
+  <script>window.__DEV_ENV = window.__DEV_ENV || {};</script>
 
   <!-- Age verification + legal acceptance gate — first thing that fires. -->
   <script src="js/ui/age-gate.js?v=20260621040000"></script>
@@ -29,6 +30,7 @@
   <script src="js/assets/catalog.js?v=20260621040000"></script>
   <script src="js/assets/loader.js?v=20260621040000"></script>
   <script src="js/assets/asset-gen.js?v=20260621040000"></script>
+  <script src="js/assets/asset-preload.js?v=20260621040000"></script>
   <script src="js/setup/detector.js?v=20260621040000"></script>
   <script src="js/setup/models.js?v=20260621040000"></script>
   <script src="js/setup/ollama-repair.js?v=20260621040000"></script>
@@ -131,6 +133,7 @@
   <script src="js/ui/escape-recovery-view.js?v=20260621040000"></script>
   <script src="js/ui/in-game-settings.js?v=20260621040000"></script>
   <script src="js/ui/ollama-repair-overlay.js?v=20260621040000"></script>
+  <script src="js/ui/asset-preload-overlay.js?v=20260621040000"></script>
 
   <header class="app-chrome">
     <div class="chrome-brand">DUNGEON MASTER: THE HUNT</div>
@@ -155,7 +158,7 @@
     <button class="btn-small" id="chrome-pause" data-tooltip="Pause the game — freezes time, escapes, decay, john arrivals and raids while you step away. Progress is saved; resume any time. State also persists automatically when you navigate away and reload.">⏸</button>
     <button class="btn-small" id="chrome-voice" data-tooltip="Toggle Kokoro TTS voice playback on/off.">🔊</button>
     <button class="btn-small btn-danger" id="chrome-new-game" data-tooltip="WIPES your save and starts fresh. Use Settings → Save Slots to keep a copy first.">🔄 New Game</button>
-    <a href="#settings" class="btn-small" data-tooltip="Ollama / Kokoro / Pollinations / save slots / factory reset.">⚙</a>
+    <a href="#settings" class="btn-small" data-tooltip="Ollama / Kokoro / local endpoints / save slots / factory reset.">⚙</a>
     <a href="./index.html" class="btn-small" data-tooltip="Back to the landing page.">🏠</a>
   </header>
 
@@ -231,7 +234,7 @@
       try { if (window.DMTHVoiceQueue) window.DMTHVoiceQueue.cancel(); } catch {}
       try { window.DMTHGame.state._nuking = true; } catch {}
       await window.DMTHStorage.wipeAll();
-      for (const k of Object.keys(localStorage)) if (k.startsWith('dmth_') && k !== 'dmth_pollinations_key' && k !== 'dmth_ollama_endpoint' && k !== 'dmth_ollama_model' && k !== 'dmth_kokoro_voice') localStorage.removeItem(k);
+      for (const k of Object.keys(localStorage)) if (k.startsWith('dmth_') && k !== 'dmth_ollama_endpoint' && k !== 'dmth_ollama_model' && k !== 'dmth_kokoro_voice' && k !== 'dmth_local_image_endpoint' && k !== 'dmth_local_voice_endpoint') localStorage.removeItem(k);
       location.hash = '#newgame';
       location.reload();
     };

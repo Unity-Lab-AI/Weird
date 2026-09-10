@@ -4,7 +4,8 @@
 //   - Preset models pulled?
 //   - Kokoro loaded in-browser?
 //   - IndexedDB initialized?
-//   - Pollinations key present?
+//   - Local SD image server reachable + checkpoint ready?
+//   - Local voice server reachable + STT model ready?
 
 (function () {
   'use strict';
@@ -75,10 +76,64 @@
     }
   }
 
-  // --- Pollinations key probe ---
-  function probePollinationsKey() {
-    const k = cfg().POLLINATIONS.apiKey;
-    return { present: !!k && k.length > 0 };
+  // --- Local Stable Diffusion probe ---
+  // GET /sdapi/v1/options returns { sd_model_checkpoint, unity_status: {state, model, device, error} }
+  // where state is 'starting' | 'loading' | 'ready' | 'no-checkpoint'. A reachable server but
+  // no checkpoint is a specific fixable state (drop a .safetensors into models/), so the probe
+  // surfaces it distinctly instead of collapsing every unhappy state to 'not reachable'.
+  async function probeLocalImage() {
+    const c = cfg().LOCAL_IMAGE;
+    try {
+      const res = await fetch(c.endpoint + c.options, { method: 'GET' });
+      if (!res.ok) {
+        return { reachable: false, reason: `HTTP ${res.status}`, ready: false };
+      }
+      const data = await res.json().catch(() => ({}));
+      const s = data.unity_status || {};
+      return {
+        reachable: true,
+        state: s.state || 'unknown',
+        ready: s.state === 'ready',
+        model: s.model || data.sd_model_checkpoint || null,
+        device: s.device || null,
+        error: s.error || null
+      };
+    } catch (err) {
+      const msg = String(err?.message || err);
+      const looksLikeCors = /Failed to fetch|NetworkError|CORS/i.test(msg);
+      return {
+        reachable: false,
+        reason: looksLikeCors ? 'not-reachable-or-cors' : msg,
+        ready: false
+      };
+    }
+  }
+
+  // --- Local voice server (STT) probe ---
+  // GET /state → { ok, stt_model_present, stt_model_dir, cuda_dirs }.
+  async function probeLocalVoice() {
+    const c = cfg().LOCAL_VOICE;
+    try {
+      const res = await fetch(c.endpoint + c.state, { method: 'GET' });
+      if (!res.ok) {
+        return { reachable: false, reason: `HTTP ${res.status}`, ready: false };
+      }
+      const data = await res.json().catch(() => ({}));
+      return {
+        reachable: true,
+        ready: !!data.stt_model_present,
+        modelDir: data.stt_model_dir || null,
+        cudaDirs: data.cuda_dirs || 0
+      };
+    } catch (err) {
+      const msg = String(err?.message || err);
+      const looksLikeCors = /Failed to fetch|NetworkError|CORS/i.test(msg);
+      return {
+        reachable: false,
+        reason: looksLikeCors ? 'not-reachable-or-cors' : msg,
+        ready: false
+      };
+    }
   }
 
   // --- Full status snapshot ---
@@ -88,7 +143,12 @@
   // catching the case where Storage Sense / cleanup tools deleted the multi-GB
   // blob file but left the manifest intact.
   async function fullStatus(opts = {}) {
-    const [ollama, storage] = await Promise.all([probeOllama(), probeStorage()]);
+    const [ollama, storage, localImage, localVoice] = await Promise.all([
+      probeOllama(),
+      probeStorage(),
+      probeLocalImage(),
+      probeLocalVoice()
+    ]);
     const preset = cfg().OLLAMA.activeModel;
     const modelPresent = ollama.reachable && ollama.models.includes(preset);
 
@@ -112,11 +172,10 @@
     }
 
     const kokoro = probeKokoro();
-    const polly = probePollinationsKey();
 
-    // "Green" now requires the health probe to pass when it ran. If we skipped
-    // the probe, fall back to manifest presence (preserves old behavior for
-    // pollers that explicitly opt out).
+    // "Green" for the whole stack. Local SD + voice are IMAGE/VOICE features — the game
+    // is still playable without them (text+emoji fallback), so they don't gate allGreen;
+    // the landing wizard still surfaces their status individually.
     const modelHealthOk = activeModelHealth === 'ok'
       || activeModelHealth === 'skipped'
       || activeModelHealth === 'no-probe-module';
@@ -133,7 +192,8 @@
       },
       kokoro,
       storage,
-      pollinations: polly,
+      localImage,
+      localVoice,
       allGreen,
       checkedAt: Date.now()
     };
@@ -145,7 +205,8 @@
     probeOllamaModelPresent,
     probeKokoro,
     probeStorage,
-    probePollinationsKey,
+    probeLocalImage,
+    probeLocalVoice,
     fullStatus
   });
 })();
