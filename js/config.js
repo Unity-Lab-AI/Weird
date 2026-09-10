@@ -112,11 +112,16 @@
     txt2img:   '/sdapi/v1/txt2img',        // POST — {prompt, negative_prompt, steps, width, height, cfg_scale}
     options:   '/sdapi/v1/options',        // GET  — probe used by the setup wizard to decide "server alive"
     status:    '/status',                  // GET  — {state: starting|loading|ready|no-checkpoint, model, device, error}
-    // Full-body portrait tall by default (character images). Environment renders
-    // (town/dungeon) still override to 1792×1024 landscape at their callsite.
-    width: 1024,
-    height: 1792,
-    steps: 28,
+    // Full-body portrait tall by default. 832×1216 is SDXL's canonical tall-portrait
+    // bucket (~1MP, ~2:3 aspect) — sd_server.py auto-detects SDXL vs SD1.5 by
+    // checkpoint filename and swaps to StableDiffusionXLPipeline. If the visitor
+    // is running an SD1.5 checkpoint instead, this res is above SD1.5's coherent
+    // zone and they'll see duplicate-subject artifacts — drop to 512×896 in that
+    // case (dmth_local_image_endpoint override, or hand-edit here). Environment
+    // renders (town/dungeon) still override to 1792×1024 landscape at their callsite.
+    width: 832,
+    height: 1216,
+    steps: 24,
     cfgScale: 7.0,
     // Standard quality-steering negative — nothing here steers subject matter.
     negativePrompt:

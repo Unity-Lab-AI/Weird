@@ -41,11 +41,24 @@ _status = {"state": "starting", "model": None, "device": None, "error": None}
 
 
 def find_checkpoint():
-    """Any .safetensors/.ckpt in models/ — first by name, so drops are picked up."""
+    """Any .safetensors/.ckpt in models/. Prefers SDXL files (filename contains
+    'xl' case-insensitive) because SDXL renders coherently at 832-1024+ where
+    SD1.5 hallucinates duplicate subjects. Falls back to the first-by-name if
+    no SDXL file is present, so an SD1.5 drop still works."""
     if not os.path.isdir(MODELS):
         return None
     files = sorted(f for f in os.listdir(MODELS) if f.endswith((".safetensors", ".ckpt")))
-    return os.path.join(MODELS, files[0]) if files else None
+    if not files:
+        return None
+    xl = [f for f in files if "xl" in f.lower()]
+    return os.path.join(MODELS, (xl[0] if xl else files[0]))
+
+
+def is_sdxl_checkpoint(path):
+    """Cheap arch detection by filename — SDXL model files carry 'xl' in the
+    name (RealVisXL, SDXL-Base, JuggernautXL, etc.). Avoids the ~2s cost of
+    loading state-dict shapes just to sniff the arch."""
+    return "xl" in os.path.basename(path).lower()
 
 
 def load_pipe():
@@ -53,7 +66,7 @@ def load_pipe():
     if _pipe is not None:
         return _pipe
     import torch
-    from diffusers import StableDiffusionPipeline, DPMSolverMultistepScheduler
+    from diffusers import DPMSolverMultistepScheduler
 
     ckpt = find_checkpoint()
     if not ckpt:
@@ -61,16 +74,30 @@ def load_pipe():
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
     dtype = torch.float16 if device == "cuda" else torch.float32
-    _status.update(state="loading", model=os.path.basename(ckpt), device=device)
-    print(f"[sd] loading {os.path.basename(ckpt)} on {device} ...", flush=True)
+    sdxl = is_sdxl_checkpoint(ckpt)
+    arch_label = "SDXL" if sdxl else "SD1.5"
+    _status.update(state="loading", model=os.path.basename(ckpt), device=device, arch=arch_label.lower())
+    print(f"[sd] loading {os.path.basename(ckpt)} on {device} as {arch_label} ...", flush=True)
 
-    pipe = StableDiffusionPipeline.from_single_file(
-        ckpt,
-        torch_dtype=dtype,
-        safety_checker=None,          # ⛔ see the module docstring — deliberate
-        requires_safety_checker=False,
-        load_safety_checker=False,
-    )
+    if sdxl:
+        # SDXL renders coherently at 832-1216 portrait / 1024x1024 square where
+        # SD1.5 tiles duplicate subjects. No safety_checker in SDXL's pipeline
+        # class — the SD1.5-only kwargs would trigger unexpected-kwarg errors.
+        from diffusers import StableDiffusionXLPipeline
+        pipe = StableDiffusionXLPipeline.from_single_file(
+            ckpt,
+            torch_dtype=dtype,
+            add_watermarker=False,          # no invisible watermark on outputs
+        )
+    else:
+        from diffusers import StableDiffusionPipeline
+        pipe = StableDiffusionPipeline.from_single_file(
+            ckpt,
+            torch_dtype=dtype,
+            safety_checker=None,            # ⛔ see the module docstring — deliberate
+            requires_safety_checker=False,
+            load_safety_checker=False,
+        )
     # ⛔ THE CONSTRUCTOR ARGUMENT IS NOT ENOUGH — MEASURED, NOT ASSUMED.
     # With `safety_checker=None` passed above, `from_single_file` STILL loaded a
     # checker from the checkpoint's own config, and the first real render came
@@ -81,16 +108,28 @@ def load_pipe():
     # class its LAWs ban, in one. So the checker is removed from the built
     # pipeline, and the method that invokes it is neutralised as well, because
     # some diffusers versions call it through the pipeline rather than the
-    # attribute. Belt and braces, deliberately.
+    # attribute. Belt and braces, deliberately. Applied to BOTH arches — SDXL
+    # doesn't ship a checker today but future variants might.
     pipe.safety_checker = None
     pipe.feature_extractor = None
     pipe.requires_safety_checker = False
     pipe.run_safety_checker = lambda image, device=None, dtype=None: (image, None)
     pipe.scheduler = DPMSolverMultistepScheduler.from_config(pipe.scheduler.config)
-    pipe = pipe.to(device)
-    pipe.set_progress_bar_config(disable=True)
+
     if device == "cuda":
-        pipe.enable_attention_slicing()      # comfortable headroom on modest GPUs
+        if sdxl:
+            # SDXL fp16 is ~7GB. Alongside Ollama's typical ~10GB dolphin-mistral
+            # residency on a 16GB card, VRAM is tight. model_cpu_offload swaps
+            # UNet / text-encoder stages between CPU and GPU as needed — a bit
+            # slower per render but fits without OOM even when Ollama has its
+            # model warm. `to(device)` is implicit inside offload, don't double it.
+            pipe.enable_model_cpu_offload()
+        else:
+            pipe = pipe.to(device)
+        pipe.enable_attention_slicing()     # comfortable headroom on modest GPUs
+    else:
+        pipe = pipe.to(device)
+    pipe.set_progress_bar_config(disable=True)
     _pipe = pipe
     _status.update(state="ready")
     print(f"[sd] ready on {device} — http://127.0.0.1:{PORT}", flush=True)

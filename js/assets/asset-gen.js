@@ -27,6 +27,14 @@
 
   const OPT_IN_KEY = 'dmth_procedural_assets';
 
+  // Bulk-preload orchestration guard. When true, prewarm() no-ops so the
+  // state-mutation fire-and-forget path doesn't race the sequential preload
+  // loop with duplicate renders. Toggled by asset-preload.preloadAll around
+  // the render sweep. Closure-scoped because DMTHAssetGen is Object.frozen.
+  let preloadInFlight = false;
+  function setPreloadInFlight(v) { preloadInFlight = !!v; }
+  function isPreloadInFlight()   { return preloadInFlight; }
+
   // Default ON: procedural generation drives the live game; static cover.png is the fallback.
   // Disable explicitly with localStorage.dmth_procedural_assets === 'false'.
   function isEnabled() {
@@ -112,8 +120,11 @@
 
   // Fire-and-forget warm — called on acquire (state.addItem/addDungeon/addOwnedLocation). Generates
   // + caches + gallery-stacks in the background. No-op if disabled or already cached.
+  // Also no-op while asset-preload is orchestrating a bulk render — otherwise the state-mutation
+  // path fires duplicate renders that race the preload loop and burn GPU time on the same assets.
   function prewarm(category, id) {
     if (!id || !isEnabled()) return;
+    if (preloadInFlight) return;
     try { Promise.resolve(generateAssetImage(category, id)).catch(() => {}); } catch (e) { /* non-fatal */ }
   }
 
@@ -126,6 +137,8 @@
     cacheKey,
     generateAssetImage,
     getCached,
-    prewarm
+    prewarm,
+    setPreloadInFlight,
+    isPreloadInFlight
   });
 })();

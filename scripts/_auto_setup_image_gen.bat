@@ -46,9 +46,9 @@ if errorlevel 1 (
     )
 )
 
-REM Check for a checkpoint. install_image_gen.bat downloads Realistic Vision V5.1
-REM if none is present, so if deps installed but the checkpoint didn't land,
-REM re-invoke install_image_gen.bat to fetch it.
+REM Check for a checkpoint. install_image_gen.bat downloads RealVisXL V5.0 SDXL
+REM (or falls back to Realistic Vision V5.1 SD1.5) if none is present, so if deps
+REM installed but the checkpoint didn't land, re-invoke install_image_gen.bat to fetch it.
 dir /b models\*.safetensors >nul 2>&1
 if errorlevel 1 (
     echo No .safetensors in models/ - re-running install_image_gen.bat to download...

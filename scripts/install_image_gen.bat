@@ -40,12 +40,22 @@ python -c "import torch;print('  [ok] torch',torch.__version__,'| cuda:',torch.c
 if not exist "models" mkdir models
 dir /b models\*.safetensors >nul 2>&1
 if errorlevel 1 (
-  echo   [*] downloading Realistic Vision V5.1 ^(~2.1GB, uncensored, ungated^)...
-  curl -L --fail -o "models\realistic-vision-v51.safetensors" "https://huggingface.co/SG161222/Realistic_Vision_V5.1_noVAE/resolve/main/Realistic_Vision_V5.1_fp16-no-ema.safetensors"
+  REM SDXL is the default: it renders coherently at 832-1024+ portrait where
+  REM SD1.5 hallucinates duplicate subjects/heads. RealVisXL V5.0 fp16 is the
+  REM SDXL sibling of Realistic Vision by the same author. If this download
+  REM fails we fall back to Realistic Vision V5.1 SD1.5 - smaller, older
+  REM checkpoint but ships in one file. sd_server.py auto-detects arch by
+  REM filename ('xl' = SDXL) and swaps to StableDiffusionXLPipeline.
+  echo   [*] downloading RealVisXL V5.0 ^(~6.5GB, SDXL, uncensored, ungated^)...
+  curl -L --fail -o "models\RealVisXL_V5.0_fp16.safetensors" "https://huggingface.co/SG161222/RealVisXL_V5.0/resolve/main/RealVisXL_V5.0_fp16.safetensors"
   if errorlevel 1 (
-    echo   [!] download failed - drop any .safetensors into models\ by hand
-    pause
-    exit /b 1
+    echo   [!] SDXL download failed - falling back to Realistic Vision V5.1 ^(~2.1GB, SD1.5^)...
+    curl -L --fail -o "models\realistic-vision-v51.safetensors" "https://huggingface.co/SG161222/Realistic_Vision_V5.1_noVAE/resolve/main/Realistic_Vision_V5.1_fp16-no-ema.safetensors"
+    if errorlevel 1 (
+      echo   [!] both downloads failed - drop any .safetensors into models\ by hand
+      pause
+      exit /b 1
+    )
   )
 ) else (
   echo   [ok] a checkpoint is already in models\

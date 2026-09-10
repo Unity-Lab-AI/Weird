@@ -9,6 +9,11 @@
 .env.*.local
 js/env.local.js
 
+# === Local SD checkpoints (multi-GB each — never commit) ===
+models/
+*.safetensors
+*.ckpt
+
 # === Save data + cache ===
 cache/
 save.json

@@ -38,10 +38,20 @@ mkdir -p models
 if ls models/*.safetensors >/dev/null 2>&1; then
   echo "  [ok] a checkpoint is already in models/"
 else
-  echo "  [*] downloading Realistic Vision V5.1 (~2.1GB, uncensored, ungated)..."
-  curl -L --fail -o models/realistic-vision-v51.safetensors \
-    "https://huggingface.co/SG161222/Realistic_Vision_V5.1_noVAE/resolve/main/Realistic_Vision_V5.1_fp16-no-ema.safetensors" || {
-      echo "  [!] download failed - drop any .safetensors into models/ by hand"; exit 1; }
+  # SDXL is the default: it renders coherently at 832-1024+ portrait where
+  # SD1.5 hallucinates duplicate subjects/heads. RealVisXL V5.0 fp16 is the
+  # SDXL sibling of Realistic Vision by the same author. If this download
+  # fails we fall back to Realistic Vision V5.1 SD1.5 - smaller, older
+  # checkpoint but ships in one file. sd_server.py auto-detects arch by
+  # filename ('xl' = SDXL) and swaps to StableDiffusionXLPipeline.
+  echo "  [*] downloading RealVisXL V5.0 (~6.5GB, SDXL, uncensored, ungated)..."
+  if ! curl -L --fail -o models/RealVisXL_V5.0_fp16.safetensors \
+      "https://huggingface.co/SG161222/RealVisXL_V5.0/resolve/main/RealVisXL_V5.0_fp16.safetensors"; then
+    echo "  [!] SDXL download failed - falling back to Realistic Vision V5.1 (~2.1GB, SD1.5)..."
+    curl -L --fail -o models/realistic-vision-v51.safetensors \
+      "https://huggingface.co/SG161222/Realistic_Vision_V5.1_noVAE/resolve/main/Realistic_Vision_V5.1_fp16-no-ema.safetensors" || {
+        echo "  [!] both downloads failed - drop any .safetensors into models/ by hand"; exit 1; }
+  fi
 fi
 
 echo

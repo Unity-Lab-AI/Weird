@@ -75,7 +75,12 @@ if not exist "%PROJECT_DIR%\scripts\_auto_setup_image_gen.bat" (
     goto :step_voice
 )
 echo   + Launching SD auto-setup + server in a new window ^(first run downloads ~2GB^)...
-start "SD image gen (127.0.0.1:7860)" cmd /k "call \"%PROJECT_DIR%\scripts\_auto_setup_image_gen.bat\""
+REM `start /D "%PROJECT_DIR%"` opens the new window with the project root as CWD, so the
+REM auto-setup script can use a relative path (no cross-shell escape headache with quotes
+REM around a Windows path inside a cmd /k arg — the previous `\"...\"` form passed through
+REM literally and cmd reported the whole thing as "not recognized as an internal or
+REM external command"). The title stays first so start doesn't interpret /D as the title.
+start "SD image gen (127.0.0.1:7860)" /D "%PROJECT_DIR%" cmd /k call scripts\_auto_setup_image_gen.bat
 
 echo.
 
@@ -94,7 +99,7 @@ if not exist "%PROJECT_DIR%\scripts\_auto_setup_voice.bat" (
     goto :find_server
 )
 echo   + Launching voice auto-setup + server in a new window ^(first run downloads ~480MB^)...
-start "Voice STT (127.0.0.1:7861)" cmd /k "call \"%PROJECT_DIR%\scripts\_auto_setup_voice.bat\""
+start "Voice STT (127.0.0.1:7861)" /D "%PROJECT_DIR%" cmd /k call scripts\_auto_setup_voice.bat
 
 echo.
 

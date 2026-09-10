@@ -325,7 +325,7 @@
       <div class="step-card">
         <div class="step-label">🖼️ Local Stable Diffusion (image generation)</div>
         <div class="status-row" style="margin:8px 0">${statusPill(imageReady, imageLabel)}</div>
-        <div class="step-note">Serves on <code>127.0.0.1:7860</code>. Realistic Vision V5.1 uncensored checkpoint (~2GB). Drop any <code>.safetensors</code> into <code>models/</code> to swap. Not running? Close the game window, re-run <code>${escapeHtml(shellPrefix + 'start' + scriptExt)}</code> from the project root, wait for the SD window to say "ready". Manual override: <code>${escapeHtml(shellPrefix + 'scripts' + sep + 'install_image_gen' + scriptExt)}</code> then <code>${escapeHtml(shellPrefix + 'scripts' + sep + 'start_image_gen' + scriptExt)}</code>.</div>
+        <div class="step-note">Serves on <code>127.0.0.1:7860</code>. RealVisXL V5.0 SDXL uncensored checkpoint (~6.5GB, auto-downloaded on first run; falls back to Realistic Vision V5.1 SD1.5 if the SDXL fetch fails). Drop any <code>.safetensors</code> into <code>models/</code> to swap (files with <code>xl</code> in the name load as SDXL). Not running? Close the game window, re-run <code>${escapeHtml(shellPrefix + 'start' + scriptExt)}</code> from the project root, wait for the SD window to say "ready". Manual override: <code>${escapeHtml(shellPrefix + 'scripts' + sep + 'install_image_gen' + scriptExt)}</code> then <code>${escapeHtml(shellPrefix + 'scripts' + sep + 'start_image_gen' + scriptExt)}</code>.</div>
       </div>
 
       <div class="step-card">

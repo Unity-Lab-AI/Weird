@@ -116,7 +116,7 @@ bash scripts/start_voice.sh
 
 The landing-page setup wizard shows a live status pill for each server and copy-to-clipboard buttons for both commands. Once the servers are running, images + mic-in enable automatically inside the game — no restart, no reload.
 
-**Swap the SD checkpoint:** drop any `.safetensors` into `weird/models/` and restart `start_image_gen`. First file by name wins. The default is Realistic Vision V5.1 (uncensored, ungated).
+**Swap the SD checkpoint:** drop any `.safetensors` into `weird/models/` and restart `start_image_gen`. Files with `xl` in the name are auto-detected as SDXL and loaded via `StableDiffusionXLPipeline` (with model-cpu-offload so they fit alongside Ollama on a 16GB card); anything else loads as SD1.5. If both an SDXL and an SD1.5 file are present, SDXL wins. The default download is RealVisXL V5.0 (~6.5GB SDXL, uncensored, ungated) — with Realistic Vision V5.1 SD1.5 (~2GB) as the fallback if the SDXL fetch fails.
 
 If no key is provided, image features gracefully degrade — text+emoji gameplay continues to work.
 
@@ -590,7 +590,7 @@ The image server hasn't started, or it's on a different port. Check:
 
 ### "no checkpoint in models/"
 
-The install script downloaded Realistic Vision V5.1 but the file isn't where the server expects. Verify `weird/models/*.safetensors` exists. Drop any `.safetensors` into that folder and restart `start_image_gen`.
+The install script downloaded RealVisXL V5.0 (or Realistic Vision V5.1 as fallback) but the file isn't where the server expects. Verify `weird/models/*.safetensors` exists. Drop any `.safetensors` into that folder and restart `start_image_gen`.
 
 ### "STT cannot use the GPU"
 
@@ -616,7 +616,7 @@ Browsers block audio playback until the page receives at least one user gesture.
 ### "No images appearing"
 
 1. Check that the local SD server is running (`scripts/start_image_gen` window still open).
-2. Check the landing-page status pill for the image server — it should read "Ready · realistic-vision-v51.safetensors · cuda".
+2. Check the landing-page status pill for the image server — it should read something like "Ready · RealVisXL_V5.0_fp16.safetensors · cuda" (or `realistic-vision-v51.safetensors` if you're on the SD1.5 fallback).
 3. Game also writes detailed logs to console — open DevTools.
 
 ### "Save got corrupted"
