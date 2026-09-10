@@ -80,7 +80,7 @@
         <section class="wiki-section" id="overview-w" data-w="overview">
           <h2>Overview</h2>
           <p>You are the villain — the dungeon operator, the predator, the collector. <b>DUNGEON MASTER: THE HUNT</b> is a persistent text-and-emoji <b>city-builder</b> wearing the skin of a dungeon-harem evil-taboo simulator. Gather resources (money from film sales + captured girls), invest in construction (dungeon + per-hold upgrades), expand operations (more girls, harder grounds, bigger dungeons), and grow forever. <b>There is no win state</b> — the game is the ever-growing collection and the ever-upgrading dungeon.</p>
-          <p>Every girl is procedurally generated from an archetype, runs on a local uncensored LLM (Ollama) for live dialogue, gets her own TTS voice (Kokoro), and a seeded face + outfit (Pollinations) kept consistent across every image of her. Everything persists locally in your browser (IndexedDB) and nothing leaves your machine.</p>
+          <p>Every girl is procedurally generated from an archetype, runs on a local uncensored LLM (Ollama) for live dialogue, gets her own TTS voice (Kokoro), and a seeded face + outfit (local Stable Diffusion) kept consistent across every image of her. Everything persists locally in your browser (IndexedDB) and nothing leaves your machine.</p>
           <div class="wiki-warn">Adult fiction, 18+ only. Every template and procedural spawn is locked to an 18+ floor. Taboo content stays in fiction.</div>
         </section>
 
@@ -88,7 +88,7 @@
         <section class="wiki-section" id="howtoplay-w" data-w="howtoplay">
           <h2>How to Play</h2>
           <ol>
-            <li><b>Set up your tools.</b> Run Ollama locally (an uncensored model — dolphin-mistral / abliterated), and optionally drop a Pollinations key in Settings for images + load Kokoro for voice. See the landing <a href="index.html#setup">⚡ Setup</a>.</li>
+            <li><b>Set up your tools.</b> Run Ollama locally (an uncensored model — dolphin-mistral / abliterated), and optionally start the bundled local Stable Diffusion server for images (<code>scripts/start_image_gen</code>) + load Kokoro for voice-out + start the local voice-in server for mic-to-text (<code>scripts/start_voice</code>). See the landing <a href="index.html#setup">⚡ Setup</a>.</li>
             <li><b>Start a new game.</b> You begin with a basic dungeon and one starter captive already in a hold. Name the honorific your girls call you.</li>
             <li><b>Go hunting.</b> Open <b>Town</b>, pick a hunting ground, buy capture tools from the shop, and run the 4-stage capture attempt.</li>
             <li><b>Bring her home.</b> She's assigned a hold. Open her room to talk, feed/water her, drug her, dress her, and interact.</li>

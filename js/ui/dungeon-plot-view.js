@@ -14,7 +14,7 @@
     el.innerHTML = `
       <div class="panel">
         <h2>${tpl?.emoji || '⛓️'} ${tpl?.displayName} — interior plot</h2>
-        <p class="small muted">Hold cells auto-placed. Add facility slots where empty. Render the interior as a Pollinations image when you want.</p>
+        <p class="small muted">Hold cells auto-placed. Add facility slots where empty. Render the interior as a local SD image when you want.</p>
         <div class="btn-row">
           <a href="#upgrade?dungeon=${dungeonId}" class="btn-small">← upgrades</a>
         </div>
@@ -63,7 +63,7 @@
       <div class="panel">
         <h2>Render dungeon interior</h2>
         <button id="render-btn" class="btn-small ${window.DMTHGame.imaging.isAvailable() ? 'btn-primary' : ''}" ${window.DMTHGame.imaging.isAvailable() ? '' : 'disabled'}>
-          ${window.DMTHGame.imaging.isAvailable() ? 'Render interior →' : 'Set Pollinations key first'}
+          ${window.DMTHGame.imaging.isAvailable() ? 'Render interior →' : 'Start local SD server first'}
         </button>
         <div id="dungeon-render-slot"></div>
       </div>

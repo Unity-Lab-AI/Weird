@@ -1,6 +1,15 @@
 # SKILL_TREE — weird project
 
-**Generated:** 2026-04-21 · **Last revised:** 2026-06-20 (first-day-bugs session: escape governor, settings-apply, kokoro lifecycle, image identity-lock, 3 new archetypes — cascaded to main + live)
+**Generated:** 2026-04-21 · **Last revised:** 2026-09-10 (Phase 22 — local SD + local voice servers replace Pollinations, then SDXL swap + asset preload bar)
+
+> **2026-09-10 migration note.** Every skill row below that says "Pollinations" is now a **local Stable Diffusion** capability (see `local-services/image-server/sd_server.py`, port 7860) or a **local faster-whisper** capability for STT (see `local-services/voice-server/voice_server.py`, port 7861). The prompt-engineering, seed persistence, cache patterns, and composer skills are unchanged — the network layer swapped from cloud API to browser-direct POST to loopback. New skills added in Phase 22:
+>
+> - **Local SD server operation** — Python + diffusers 0.35.1 + torch CUDA + safety-checker triple-belt (constructor arg + attribute nulling + method neutralisation, all measured), **auto-detects SDXL vs SD1.5 by checkpoint filename** (`xl` case-insensitive → `StableDiffusionXLPipeline` with `enable_model_cpu_offload()`; else `StableDiffusionPipeline` with `to(device) + attention_slicing`), CORS-open for browser-direct calls. Default checkpoint: RealVisXL V5.0 fp16 (SDXL, ~6.5 GB); Realistic Vision V5.1 SD1.5 (~2 GB) as fallback.
+> - **Local STT server operation** — faster-whisper + CTranslate2 lazy-cuBLAS-DLL trap handling, HuggingFace symlink-privilege trap handling on Windows, CPU int8 fallback.
+> - **Auto-install ladder** — Windows `.bat` + Linux `.sh` installers pin diffusers 0.35.1 / huggingface-hub<1.0 to avoid the internally-inconsistent 0.40 release, download ~6.5 GB of SDXL checkpoint (~2 GB SD1.5 fallback) + faster-whisper model on first run, print measured error messages on failure.
+> - **Browser-direct POST to loopback** — `renderImage(prompt, seed, opts)` in `js/game/imaging.js` replaces the Pollinations URL-with-key builder; `voice-in.js` decodes webm/opus to int16 PCM via Web Audio API before POSTing to the local STT.
+> - **Asset preload orchestrator + progress-bar overlay** — `js/assets/asset-preload.js` (starter-set + full-catalog list builders, `wipeAssetCache()`, `preloadAll(list, {onProgress, abortSignal})`) and `js/ui/asset-preload-overlay.js` (fullscreen modal, live thumb preview, skip button) gate new-game entry on a sequential SD bake of the starter kit; `asset-gen.setPreloadInFlight(true)` closure-scope guard blocks on-acquire prewarms so nothing double-renders. Fresh set per playthrough via `DMTHStorage.cache.clear()` before the sweep.
+> - **VRAM co-tenancy pattern** — SDXL fp16 (~7 GB) + Ollama dolphin-mistral:7b (~10 GB with 32K context) don't both fit resident on a 16 GB card. `enable_model_cpu_offload()` on the SDXL pipeline swaps UNet / text-encoder stages between CPU and GPU per render — ~2× slower per stage but no OOM even when Ollama has its model warm.
 
 Capability matrix for the weird build. Organized by domain, complexity, dependency, and priority. As of 2026-06-18 every named capability is shipped and live (the 2026-06-18 mega-build capabilities are catalogued in the first domain block below); see `docs/FINALIZED.md` + `docs/resume.md` for per-session implementation detail.
 

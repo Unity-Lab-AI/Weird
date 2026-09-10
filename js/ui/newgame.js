@@ -104,9 +104,35 @@
         custom:        (el.querySelector('#pc-custom').value || '').trim().slice(0, 80)
       };
       await window.DMTHGame.state.load();  // ensure state is initialized
-      await window.DMTHGame.bootstrap.newGame({ mode, includeUnity });
-      window.DMTHGame.state.setPlayerName(playerName);   // what the girls call the player
-      window.DMTHGame.state.setPlayerCharacter(playerCharacter);   // his avatar for the images
+
+      // Block on-acquire prewarm() renders while bootstrap seeds state and the preload
+      // loop sweeps the starter set. Without this the state-mutation path fires
+      // fire-and-forget renders that race the sequential preload and burn GPU on
+      // duplicates. The preload orchestrator sets the same flag internally; wrapping
+      // the full block is belt-and-suspenders so no prewarm sneaks in during bootstrap.
+      window.DMTHAssetGen?.setPreloadInFlight?.(true);
+      try {
+        await window.DMTHGame.bootstrap.newGame({ mode, includeUnity });
+        window.DMTHGame.state.setPlayerName(playerName);              // what the girls call the player
+        window.DMTHGame.state.setPlayerCharacter(playerCharacter);    // his avatar for the images
+
+        // Fresh render set per playthrough: nuke the cache, bake the starter kit
+        // with a visible progress bar, then enter the game. Otherwise Unity's portrait
+        // queues behind background asset renders on entry and never shows.
+        try { await window.DMTHStorage.cache.clear(); } catch (e) { /* non-fatal */ }
+        const list = window.DMTHAssetPreload?.starterListFromState
+          ? window.DMTHAssetPreload.starterListFromState(window.DMTHGame.state.current)
+          : [];
+        if (list.length && window.DMTHAssetPreloadOverlay?.show) {
+          await window.DMTHAssetPreloadOverlay.show({
+            list,
+            title: 'Baking your starter kit',
+            subtitle: `Rendering ${list.length} asset image${list.length === 1 ? '' : 's'} on your local GPU — fresh set every playthrough.`
+          });
+        }
+      } finally {
+        window.DMTHAssetGen?.setPreloadInFlight?.(false);
+      }
       window.DMTHRouter.go('dashboard');
     };
   }

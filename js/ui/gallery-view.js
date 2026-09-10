@@ -113,10 +113,10 @@
       thumb.onclick = () => showLightbox(Number(thumb.dataset.idx));
     });
 
-    // Blob-based download. The <a download> attribute is
-    // only honored same-origin per HTML5 spec; Pollinations URLs are cross-origin and
-    // would otherwise open inline. fetch→blob→objectURL→click forces a real download
-    // even cross-origin (assuming CORS allows the GET). Falls back to direct href on
+    // Blob-based download. The <a download> attribute is only honored same-origin per
+    // HTML5 spec; the loopback SD server URL is a different origin from the page host,
+    // and blob: URLs from URL.createObjectURL are their own origin — fetch→blob→objectURL→
+    // click forces a real download in every case. Falls back to direct href on
     // fetch error so worst-case is the original open-in-tab behavior.
     lbDownload.addEventListener('click', async (ev) => {
       ev.preventDefault();

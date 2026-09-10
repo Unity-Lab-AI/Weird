@@ -1,6 +1,6 @@
 // DUNGEON MASTER: THE HUNT — settings panel.
-// Slide-out panel: endpoint config, model swap, default voice picker, Pollinations key,
-// save wipe / export / import, re-open setup wizard.
+// Slide-out panel: endpoint config, model swap, default voice picker, local SD / voice
+// endpoint overrides, save wipe / export / import, re-open setup wizard.
 
 (function () {
   'use strict';
@@ -51,19 +51,34 @@
       </section>
 
       <section class="settings-section">
-        <h3>Pollinations (images)</h3>
+        <h3>Local image server (Stable Diffusion)</h3>
         <label class="field">
-          <span>API key</span>
-          <input type="password" id="s-polly" placeholder="${cfg.POLLINATIONS.apiKey ? 'saved ✓' : 'sk_…'}" />
+          <span>Endpoint</span>
+          <input type="text" id="s-local-image-endpoint" value="${cfg.LOCAL_IMAGE.endpoint}" />
         </label>
+        <p class="small muted">
+          Runs on this machine. Default <code>http://127.0.0.1:7860</code>. Start it with
+          <code>scripts\\start_image_gen.bat</code> (Windows) or
+          <code>scripts/start_image_gen.sh</code> (Linux). One-time setup:
+          <code>scripts/install_image_gen.*</code> pulls torch + diffusers + a ~2GB
+          uncensored checkpoint. Drop any <code>.safetensors</code> into <code>models/</code>
+          to swap.
+        </p>
+      </section>
+
+      <section class="settings-section">
+        <h3>Local voice server (speech-to-text)</h3>
         <label class="field">
-          <span>Image model</span>
-          <select id="s-polly-model">
-            <option value="flux" ${cfg.POLLINATIONS.imageModel === 'flux' ? 'selected' : ''}>flux (recommended, strict)</option>
-            <option value="turbo" ${cfg.POLLINATIONS.imageModel === 'turbo' ? 'selected' : ''}>turbo (fast)</option>
-            <option value="gptimage" ${cfg.POLLINATIONS.imageModel === 'gptimage' ? 'selected' : ''}>gptimage</option>
-          </select>
+          <span>Endpoint</span>
+          <input type="text" id="s-local-voice-endpoint" value="${cfg.LOCAL_VOICE.endpoint}" />
         </label>
+        <p class="small muted">
+          Runs on this machine for the mic → text path. Default
+          <code>http://127.0.0.1:7861</code>. Start:
+          <code>scripts\\start_voice.bat</code> / <code>scripts/start_voice.sh</code>.
+          Install: <code>scripts/install_voice.*</code> (~480MB Whisper-small).
+          TTS stays in the browser via Kokoro.
+        </p>
       </section>
 
       <section class="settings-section">
@@ -102,14 +117,16 @@
     $('#s-temp').onchange = e => { localStorage.setItem('dmth_ollama_temp', e.target.value); softReload(); };
     $('#s-voice').onchange = e => { localStorage.setItem('dmth_kokoro_voice', e.target.value); softReload(); };
     $('#s-speed').onchange = e => { localStorage.setItem('dmth_kokoro_speed', e.target.value); softReload(); };
-    $('#s-polly').onchange = e => {
-      if (e.target.value.trim()) {
-        localStorage.setItem('dmth_pollinations_key', e.target.value.trim());
-        e.target.value = '';
-        softReload();
-      }
+    const localImageEndpointEl = $('#s-local-image-endpoint');
+    if (localImageEndpointEl) localImageEndpointEl.onchange = e => {
+      localStorage.setItem('dmth_local_image_endpoint', e.target.value.trim() || 'http://127.0.0.1:7860');
+      softReload();
     };
-    $('#s-polly-model').onchange = e => { localStorage.setItem('dmth_pollinations_model', e.target.value); softReload(); };
+    const localVoiceEndpointEl = $('#s-local-voice-endpoint');
+    if (localVoiceEndpointEl) localVoiceEndpointEl.onchange = e => {
+      localStorage.setItem('dmth_local_voice_endpoint', e.target.value.trim() || 'http://127.0.0.1:7861');
+      softReload();
+    };
 
     $('#s-preview-voice').onclick = async () => {
       const voice = $('#s-voice').value;
@@ -162,7 +179,7 @@
     // age-gate + ToS acceptance) + sessionStorage. No survivors. Lands on landing page
     // with a fresh age-gate prompt.
     $('#s-full-nuke').onclick = async () => {
-      if (!confirm('FULL NUKE — delete EVERYTHING: game data, Pollinations key, age verification, ToS acceptance, all preferences. You will re-verify 18+ and re-accept the ToS on the next load. This cannot be undone. Proceed?')) return;
+      if (!confirm('FULL NUKE — delete EVERYTHING: game data, local endpoint overrides, age verification, ToS acceptance, all preferences. You will re-verify 18+ and re-accept the ToS on the next load. This cannot be undone. Proceed?')) return;
       if (!confirm('Second confirmation — really wipe ALL user data?')) return;
       try { if (window.DMTHGame?.tick) window.DMTHGame.tick.stop(); } catch {}
       try { if (window.DMTHVoiceQueue) window.DMTHVoiceQueue.cancel(); } catch {}

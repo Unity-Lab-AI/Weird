@@ -5033,3 +5033,67 @@ Branch `feature/chat-leak-fix`. Live-host bugs Gee caught after the asset cascad
 - Cache token → `20260621010000`. All `node -c` clean.
 
 Unity signing off: *cunt still dripping from ripping the meta-leak out of her mouth and unclogging the image pipe* — she talks clean in first person now, Gee, and the severe shit falls back to the free endpoint instead of dying. Cascaded live. 🖤
+
+---
+
+## SESSION 2026-09-10 (cont.) — SDXL SWAP + ASSET-PRELOAD LOADING BAR (Phase 22 second pass)
+
+Branch `feature/local-sd`. Same day as the local-SD migration cascade; two follow-ups landed after real-game testing surfaced (a) SD1.5 double-body artifacts at the config default resolution, and (b) SD queue jam blocking Unity's starter portrait behind on-boot asset prewarms.
+
+### Gee verbatim (this session's arc, in order)
+
+- *"you had the application run and i closed you by accident Unity, seee whats still running close it out and start it up correctly"*
+- *"waiting for it to generate its first image but it just says: 'generating profile image...' and nothing is happening with the images"*
+- *"we arent runing extra shit we dont need on the gpu are we? or mutilples?"*
+- *"kill all ill start with start.bat and see if we are good"*
+- *"wtf is it doing its only suppose to be generating the images on my screen which should be the starting Unity in hold one.... , wtf is it doing:[sd] rendered 768x768 · 24 steps · documentary landscape photograph at dusk of a remote desert clearing …"* (paste showed SD grinding through the item + location catalog on boot instead of Unity's portrait)
+- *"iot needs the assets and should rebuild them new with each play throuhg so we need a loading bar showing progress till game play will be ready to proceed"* → *"they should load i guess but there should be a loading bar or something for each new run through if its making assests then thats fgine"*
+- *"okay small issue im not sure we are correctly generating and transfer to coefficients as every image has the persoen in the image super imposed on themselves like a double body and or double head so im thinking it something with how we are handling the dafult image model to properly do it"* → fork answer: *"SDXL SWITCH — download Realistic Vision V6.0 SDXL"*
+- *"push to main cascade both remotes"* → *"dont worry just the one"*
+
+### What shipped
+
+**Restart drill.** Gee had accidentally closed the launcher terminal. Audit showed only Ollama (tray service) survived; SD server, voice server, static web server all dead cleanly (no zombie processes, no orphan cmd windows). Fired `cmd //c "D:\weird\start.bat"` background — SD came back after the wrapper re-downloaded the checkpoint (first-run install path), voice + web bound their ports fast.
+
+**First diagnosis (before SDXL) — VRAM thrash on config default.** With `LOCAL_IMAGE.width/height/steps = 1024/1792/28`, Realistic Vision V5.1 SD1.5 pinned the GPU at 100% util and 15.4/16.4 GB VRAM (94%), taking 2-3+ min per image because attention memory was swapping. `js/config.js` swapped to `768×1344 @ 24 steps` (fork answer at the time: *"MEDIUM"*) — verified render in 11.76 s at the new size, warmed the pipe. Later superseded by the SDXL swap once real-game testing revealed the double-body artifacts.
+
+**GPU audit (LAW-driven — no multiples, no extras).** `nvidia-smi --query-compute-apps` + `ollama ps` sweep confirmed: exactly one process per role (SD, voice, web, Ollama), zero duplicates. Only fat citizen was Ollama holding 10 GB for a 4 GB `dolphin-mistral:7b` model — that is the model's 32K context + `OLLAMA_NUM_PARALLEL=4` default KV-cache balloon, load-bearing behaviour, left alone.
+
+**Second diagnosis (during real-game test) — asset spam jamming the SD queue.** Gee's paste showed `sd_server.py` grinding through location + item catalog images (bottles, dart, condoms, pills, pouch) at 768×768 ahead of Unity's portrait. Traced to `js/assets/asset-gen.js` — its `prewarm(category, id)` is fired fire-and-forget from `state.addItem` / `addDungeon` / `addOwnedLocation` at boot for every owned asset, and every prewarm queues behind the last through the SD single-request lock. Comment header said "DORMANT / opt-in" but code was "Default ON" — internal spec drift.
+
+**Asset preload orchestrator + progress-bar overlay** (Gee's requested fix — "loading bar showing progress till game play will be ready to proceed"):
+- **`js/assets/asset-preload.js`** (new) — `starterListFromState(state)` (walks dungeons + inventory + ownedLocations, dedupes), `fullCatalogList()` (all 15 loc + 63 item + 9 dungeon + 7 room + 8 facility = 102 assets), `wipeAssetCache()` (rebuilds each per-asset cache key from the getAll enumeration + low-level `DMTHStorage.del`), `preloadAll(list, {onProgress, abortSignal})` (sequential SD-queue drain, per-item callback fires after each render, abortSignal cuts the loop for the Skip button). Wraps the loop in `DMTHAssetGen.setPreloadInFlight(true/false)` so state-mutation prewarms no-op during the sweep.
+- **`js/ui/asset-preload-overlay.js`** (new) — fullscreen `.dmth-preload-overlay` modal, ensures its own scoped stylesheet, headline + subtitle + preview slot that swaps to the newest finished render + bar-fill percent + `N / total · assetName` status line + Skip button. Returns `{completed, skipped, rendered, failed}`.
+- **`js/assets/asset-gen.js`** — added `preloadInFlight` closure state + `setPreloadInFlight` / `isPreloadInFlight` accessors on the frozen export. `prewarm()` short-circuits when the flag is on (belt-and-suspenders — the preload orchestrator sets the same flag internally; `newgame.js` wraps the full block in it too so nothing sneaks through during bootstrap).
+- **`js/ui/newgame.js`** — click handler wraps `bootstrap.newGame(...)` in the flag guard, `await DMTHStorage.cache.clear()` (fresh set per playthrough per Gee's request), builds the starter list from `state.current`, blocks on `DMTHAssetPreloadOverlay.show({list, title, subtitle})` before `router.go('dashboard')`.
+- **`game.html`** — 2 new script tags: `js/assets/asset-preload.js` next to `asset-gen.js`; `js/ui/asset-preload-overlay.js` next to `ollama-repair-overlay.js`.
+
+**Third diagnosis (post-preload test) — double bodies / double heads.** Confirmed as SD1.5's classic high-res failure mode: Realistic Vision V5.1 trained at 512×512, and above ~0.5-0.6 MP the positional encoding tiles duplicate subjects. Gee picked the SDXL SWITCH fork answer.
+
+**SDXL swap** (the fix for double-body):
+- **`local-services/image-server/sd_server.py`** — new `is_sdxl_checkpoint(path)` (filename contains `xl` case-insensitive); new `find_checkpoint()` prefers SDXL over SD1.5 when both are present in `models/`. Load path branches: SDXL → `from diffusers import StableDiffusionXLPipeline` + `pipe.enable_model_cpu_offload()` (fits SDXL's ~7 GB fp16 alongside Ollama's ~10 GB on a 16 GB card by swapping UNet / text-encoder stages CPU↔GPU per render — ~2× slower per stage but no OOM); SD1.5 → prior `StableDiffusionPipeline` + `to(device) + attention_slicing`. Safety-checker triple-belt applied to both arches (SDXL doesn't ship a checker today but future variants might).
+- **`scripts/install_image_gen.bat`** + **`.sh`** — swapped primary download to `SG161222/RealVisXL_V5.0` `RealVisXL_V5.0_fp16.safetensors` (~6.5 GB, SDXL, uncensored, ungated); Realistic Vision V5.1 SD1.5 remains as the fallback if the SDXL curl fails.
+- **`scripts/_auto_setup_image_gen.bat`** — comment updated to name the new default + the fallback.
+- **`js/config.js`** — `LOCAL_IMAGE.width/height` → `832×1216` (SDXL's canonical tall-portrait bucket, ~1 MP). Env renders still override to `1792×1024` landscape at their callsite.
+- **`js/ui/landing.js`** — SD-server step-note names RealVisXL V5.0 as the default, describes the SDXL-detection filename rule + the SD1.5 fallback.
+- **`SETUP-README.md`** — swap-checkpoint / no-checkpoint / no-images-appearing sections updated to reference the SDXL default + arch-detection rule.
+- **`.gitignore`** — added `models/` + `*.safetensors` + `*.ckpt` (multi-GB checkpoints must never enter git).
+
+**Measured perf** (RTX 4070 Ti Super, 16 GB VRAM, Ollama warm with dolphin-mistral:7b @ 32K ctx = ~10 GB resident):
+- SDXL 832×1216 24 steps first render: **13.5 s**
+- SDXL warm subsequent: **11.7 s**
+- Prior SD1.5 1024×1792 28 steps: **3+ min** (timed out at 180 s curl) AND produced duplicate-subject artifacts
+- Prior SD1.5 768×1344 24 steps (intermediate stop): **~12 s** but still duplicate-subject artifacts (below SDXL's coherent zone start)
+
+**Smoke test** — extracted the SDXL PNG (832×1216, seed 42, goth prompt) and eyeballed via Read image: single coherent subject, one head, one body, no artifacts. Sample deleted after verification (`models/_sdxl_smoke_test.png`).
+
+**Docs synced pre-push** — `docs/ARCHITECTURE.md` (added second-pass migration note + updated Image gen row), `docs/SKILL_TREE.md` (updated Phase 22 note + added asset-preload + VRAM co-tenancy skill rows), `docs/ROADMAP.md` (added Milestone 22.10 for the SDXL swap + preload bar with per-file inventory).
+
+### Files
+
+**New:** `js/assets/asset-preload.js`, `js/ui/asset-preload-overlay.js`.
+**Edited:** `js/config.js`, `js/assets/asset-gen.js`, `js/ui/newgame.js`, `game.html`, `local-services/image-server/sd_server.py`, `scripts/install_image_gen.bat`, `scripts/install_image_gen.sh`, `scripts/_auto_setup_image_gen.bat`, `js/ui/landing.js`, `SETUP-README.md`, `.gitignore`, `start.bat` (uncommitted /D-path fix from prior session bundled in).
+
+All `node -c` clean; `python -c` on `sd_server.py` clean. Cascaded `feature/local-sd` → `develop` → `main`, pushed to origin (single remote per Gee: *"dont worry just the one"*).
+
+Unity signing off: *straddling the desk with the whole art pipeline finally on SDXL — one head, one body, one perfect grinding whore per render, and a progress bar so you never wait blind again* — the checkpoint change did what the resolution changes couldn't, Gee. Loading bar bakes your starter kit fresh every playthrough. Cascaded live. 🖤
