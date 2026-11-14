@@ -45,8 +45,7 @@ Every reply is streamed from the local model, delta-parsed into body-state chang
 
 ### Body state, stats, drug HUD, quick-action panel
 
-![Room mid-session](docs/screenshots/12-room-pollinations-selfie.png)
-<!-- Screenshot filename preserved for backwards-compat; the shipped app now renders via local SD, not Pollinations. -->
+![Room mid-session](docs/screenshots/12-room-selfie.png)
 
 Six body bars (arousal / wetness / cum-load / bruises / high), plus stamina + health bars, eight stats (intelligence / defiance / curiosity / trust / obedience / stamina / pain-tolerance / lust), one-handed mouse drug buttons (coke / weed / molly / acid / whiskey / K / tranquilizer-dart), action row (record / selfie / derobe / strip-everything / heal / mode-switch / dispose / list-on-market / timeline).
 

@@ -1,7 +1,7 @@
 // scripts/screenshots.mjs — generate README screenshots + the social og-card via Playwright.
 //
 // Walks the game from the LANDING (home) → setup → in-game pages, fires a real Ollama
-// turn and a real Pollinations image gen, and waits for each to actually finish before
+// turn and a real local Stable Diffusion image render, and waits for each to actually finish before
 // screenshotting. The 18+ age gate is pre-bypassed via scripts/age-gate-bypass.mjs so
 // the real pages render instead of the verification backdrop.
 //
@@ -28,16 +28,6 @@ const HEADLESS = process.env.HEADLESS === '1' || process.env.HEADLESS === 'true'
 const SHOTS = [];
 mkdirSync(OUT_DIR, { recursive: true });
 
-// Read the Pollinations key from env.local.js so image-gen runs during the script.
-// Gracefully degrades to anonymous if missing.
-function readPollyKey() {
-  const envFile = join(PROJECT_DIR, 'js', 'env.local.js');
-  if (!existsSync(envFile)) return '';
-  const txt = readFileSync(envFile, 'utf8');
-  const m = txt.match(/POLLINATIONS_API_KEY:\s*['"]([^'"]+)['"]/);
-  return m ? m[1] : '';
-}
-
 async function shot(page, name, desc) {
   const file = join(OUT_DIR, `${name}.png`);
   await page.screenshot({ path: file, fullPage: false });
@@ -63,8 +53,7 @@ async function safeClick(page, sel, optMs = 1000) {
 }
 
 (async () => {
-  const pollyKey = readPollyKey();
-  console.log(`Headless: ${HEADLESS} · Pollinations key: ${pollyKey ? pollyKey.slice(0, 5) + '…' + pollyKey.slice(-4) : '(none, image gen may skip)'}`);
+  console.log(`Headless: ${HEADLESS} · image gen needs the local SD server on :7860 (scripts/start_image_gen)`);
 
   const browser = await chromium.launch({
     headless: HEADLESS,
@@ -74,7 +63,7 @@ async function safeClick(page, sel, optMs = 1000) {
   const ctx = await browser.newContext({
     viewport: { width: 1440, height: 900 },
     // Age gate bypassed + game config seeded (dmth_* keys) before any module reads them.
-    storageState: { cookies: [], origins: seedStorageStateOrigins(BASE, { pollyKey }) }
+    storageState: { cookies: [], origins: seedStorageStateOrigins(BASE) }
   });
   // Belt-and-suspenders: also seed via init script so the gate sees the flags on first paint.
   await ctx.addInitScript(ageGateInitScript());
@@ -104,7 +93,7 @@ async function safeClick(page, sel, optMs = 1000) {
   // -------------- 1b. SETUP WIZARD (kept as a distinct shot) --------------
   await page.goto(`${BASE}/index.html#setup`);
   await page.waitForTimeout(1500);
-  await shot(page, '01-landing-setup', 'Setup wizard — Ollama install, model pull, Kokoro TTS, Pollinations key');
+  await shot(page, '01-landing-setup', 'Setup wizard — Ollama install, model pull, Kokoro TTS, local image + voice servers');
   await safeClick(page, '#load-kokoro-btn', 1500);
   await page.waitForTimeout(2000);
 
@@ -157,16 +146,16 @@ async function safeClick(page, sel, optMs = 1000) {
     }
   }
 
-  // -------------- 11. POLLINATIONS IMAGE --------------
-  console.log('\n=== Pollinations image ===');
+  // -------------- 11. LOCAL IMAGE RENDER --------------
+  console.log('\n=== Local image render ===');
   if (await safeClick(page, '#selfie-btn', 1500)) {
     try {
       await page.waitForSelector('#selfie-slot img', { timeout: 120_000 });
       await page.waitForTimeout(3000);
-      await shot(page, '12-room-pollinations-selfie', 'Pollinations image generated — full-body, persistent facial + outfit seed');
+      await shot(page, '12-room-selfie', 'Local SD image generated — full-body, persistent facial + outfit seed');
     } catch (e) {
-      console.warn('  Pollinations image did not arrive in 120s:', e.message);
-      await shot(page, '12-room-pollinations-selfie', 'Image generation attempted (may have rate-limited)');
+      console.warn('  Image did not arrive in 120s:', e.message);
+      await shot(page, '12-room-selfie', 'Image generation attempted (server may be offline)');
     }
   }
 

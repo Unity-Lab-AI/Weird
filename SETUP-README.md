@@ -75,6 +75,8 @@ ollama pull dolphin-llama3
 
 The setup wizard (`index.html#setup`) detects available models and lets you pull one with a live progress bar inside the browser. No CLI required for normal use.
 
+**Choosing the active model.** Step 2 of the wizard shows the recommended catalog (Dolphin and abliterated builds, with *Pull* / *Set active* per card). Underneath, a **Your installed models** section lists every other chat model already in your Ollama — anything you pulled by hand or built from your own Modelfile — each with a *Set active* button. The pick is stored in `localStorage` (`dmth_ollama_model`) and drives every girl's persona. Embedding models (names containing `embed`) are hidden there because the game uses one for memory search. Model names are compared on their tagged form, so `dolphin-llama3` and `dolphin-llama3:latest` are the same model. Models outside the catalog are not guaranteed to hold persona without refusing; the uncensored ones are the safe choice.
+
 ---
 
 ## Install Kokoro voice (in-browser)
@@ -538,21 +540,7 @@ npx http-server . -p 8000
 python3 -m http.server 8000
 ```
 
-The `.env` → `js/env.local.js` sync pattern that shipped with the old Pollinations-key flow is no longer wired: `js/env.local.js` and `js/env.example.js` were removed when local SD replaced Pollinations, because no cloud keys need syncing. `scripts/sync-env.ps1` remains for any advanced override you might want (e.g. `LOCAL_IMAGE_ENDPOINT=http://192.168.1.42:7860` for a networked SD box), but it's no longer required by the launchers.
-
-Both `.env` and `js/env.local.js` are gitignored. `.env` is the single source of truth — never edit `js/env.local.js` by hand; the launcher will overwrite it.
-
-If you launch the static server manually (without `start.bat` / `start.sh`), run the sync first:
-
-```powershell
-# Windows
-powershell -NoProfile -ExecutionPolicy Bypass -File scripts/sync-env.ps1
-```
-
-```bash
-# Mac/Linux — extract the sync_env function from start.sh, or just call start.sh once
-bash start.sh
-```
+No `.env` sync step runs at launch: there are no cloud keys, so nothing needs syncing. Local-dev overrides (for example `LOCAL_IMAGE_ENDPOINT=http://192.168.1.42:7860` for an image server on another machine) can be put in the in-game Settings panel, or in a `.env` that `scripts/sync-env.ps1` turns into `js/env.local.js` (optional, gitignored) if you run it by hand.
 
 ### Regenerating README screenshots
 
@@ -596,8 +584,6 @@ The install script downloaded RealVisXL V5.0 (or Realistic Vision V5.1 as fallba
 
 faster-whisper resolves cuBLAS/cuDNN lazily by name. The install script installs `nvidia-cublas-cu12` + `nvidia-cudnn-cu12` wheels and `voice_server.py` puts them on PATH at boot. If GPU init still fails the server falls back to CPU int8 automatically (slower but works everywhere).
 
-If you have no key the game silently falls back to the legacy free endpoint — rate-limited but functional.
-
 ### "Kokoro autoplay blocked"
 
 Browsers block audio playback until the page receives at least one user gesture. Click anywhere on the page once, then voice will play normally.
@@ -606,7 +592,7 @@ Browsers block audio playback until the page receives at least one user gesture.
 
 1. Open DevTools console
 2. Look for the first red error
-3. Common: cached `js/env.local.js` from old version — `localStorage.clear()` + hard refresh
+3. Common: stale cached JS from an old version — `localStorage.clear()` + hard refresh
 4. Common: stale IDB save migration failure — Settings → Factory reset
 
 ### "CORS error on Ollama fetch"

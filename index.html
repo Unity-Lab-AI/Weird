@@ -162,7 +162,7 @@
       <!-- Step 4: Local image + voice servers -->
       <section class="card" aria-label="Local image + voice servers">
         <h2>🖼️🎤 Local image + voice servers (optional)</h2>
-        <div id="polly-setup">
+        <div id="local-servers-setup">
           <p class="small muted">Waiting…</p>
         </div>
         <p class="small muted" style="margin-top:10px">
@@ -470,7 +470,7 @@
       <p>The honest one-screen version, so you do not have to read the whole document to get the gist:</p>
       <ul>
         <li>We do not maintain a server-side database of users. There is no account system, no profile, and no copy of your conversations on our servers.</li>
-        <li>We do not store the prompts you send or the AI responses you receive. Generative AI responses are not stored by us. The exchange happens between your browser and the generative AI provider; we just relay it.</li>
+        <li>We do not store the prompts you send or the AI responses you receive. Generative AI responses are not stored by us. The exchange happens between your browser and the local servers running on your own machine; nothing is relayed through us.</li>
         <li>The AI work is performed <b>on your own computer</b>, by servers you install and run locally (Ollama for chat, local Stable Diffusion for images, local faster-whisper for speech-to-text). Your prompts do not leave your machine. There is no cloud provider in the loop and no telemetry.</li>
         <li>Your chat history, settings, and age-verification flags are kept in your own browser's localStorage. They never leave your device unless you explicitly export them. If you clear your browser data, they are gone.</li>
         <li>We do not use cookies, advertising trackers, analytics pixels, fingerprinting, or third-party retargeting.</li>
@@ -526,7 +526,7 @@
 
       <h3 id="pp-hosting">IX. Hosting &amp; Server Access Logs</h3>
       <p>The Service's static pages are served from a third-party static-site hosting platform. As a normal incident of operating any web hosting platform, the hosting provider may log standard server access information when your browser requests pages — including IP address, request URL, timestamp, User-Agent, and referrer. Unity AI Lab does not have direct read-access to those logs; they are governed by the hosting provider's own privacy and security policies.</p>
-      <p>There is no Cloudflare Worker proxy for AI inference in the current architecture; AI runs entirely on the visitor's own device. To the extent Cloudflare or a similar CDN sits in front of the static-site hosting platform serving these pages, that CDN may log standard request metadata at the platform level for the static pages themselves, governed by that provider's own privacy and security practices.</p>
+      <p>AI inference does not pass through any proxy; it runs entirely on the visitor's own device. To the extent Cloudflare or a similar CDN sits in front of the static-site hosting platform serving these pages, that CDN may log standard request metadata at the platform level for the static pages themselves, governed by that provider's own privacy and security practices.</p>
 
       <h3 id="pp-children">X. Children's Privacy</h3>
       <p>The Service is not directed to and is not intended for use by children. The Service is restricted to individuals above the age of consent in their jurisdiction (the age at which a person is considered an adult under applicable law). For users in the United States this generally means individuals who are eighteen (18) years of age or older; in some jurisdictions the threshold is higher.</p>
@@ -567,7 +567,7 @@
       <p>You may use an authorized agent to exercise your rights under applicable law. We may require proof of the agent's authority before acting on a request submitted by an agent.</p>
 
       <h3 id="pp-security">XIII. Security</h3>
-      <p>Unity AI Lab uses commercially reasonable security practices for a static website hosted on a third-party static-site platform and an associated Cloudflare Worker proxy: HTTPS for all traffic, server-side storage of upstream API tokens (so they are never exposed to the browser), no client-side credentials, no user-account database to compromise, and no server-side store of conversations. Notwithstanding these practices, no method of transmission over the internet or method of electronic storage is one-hundred-percent secure, and we cannot guarantee absolute security.</p>
+      <p>Unity AI Lab uses commercially reasonable security practices for a static website hosted on a third-party static-site platform: HTTPS for all traffic, no API keys or tokens anywhere (all AI runs on your own machine), no client-side credentials, no user-account database to compromise, and no server-side store of conversations. Notwithstanding these practices, no method of transmission over the internet or method of electronic storage is one-hundred-percent secure, and we cannot guarantee absolute security.</p>
 
       <h3 id="pp-transfers">XIV. International Data Transfers</h3>
       <p>The Service's static pages are hosted on infrastructure located primarily in the United States. AI inference happens on the visitor's own device, so prompts and outputs never cross a border on Unity AI Lab's behalf. The one-time downloads that populate the visitor's local models (from Hugging Face, the Ollama registry, and similar hubs) travel from those hubs' infrastructure to the visitor's device; each hub applies its own jurisdictional and data-protection practices. Unity AI Lab does not maintain a separate cross-border-transfer mechanism because we do not maintain a server-side store of user data.</p>

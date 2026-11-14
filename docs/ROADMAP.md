@@ -36,7 +36,7 @@ Migrated the entire image pipeline AND speech-to-text off the Pollinations cloud
 - [x] Small-file sweep of stale Pollinations comments in `js/game/hunt.js`, `js/game/film.js`, `js/game/girl-gen.js`, `js/ui/gallery-view.js`.
 
 ### Milestone 22.7 — Env file removal + key leak cleanup
-- [x] Deleted `js/env.local.js` (which carried the leaked `sk_VDynoot0nLqUWpFhvPGax9oP2g1SACcp` Pollinations key from BUGStwo.37) and `js/env.example.js`. The `.env` → `js/env.local.js` sync pattern is retired — no cloud keys need syncing now that image + voice both run locally. `scripts/sync-env.ps1` remains for advanced overrides. `index.html` + `game.html` `<script src="env.local.js">` tags stubbed with an empty `window.__DEV_ENV = {}` fallback.
+- [x] Deleted `js/env.local.js` (which carried the leaked `sk_[REDACTED]` Pollinations key from BUGStwo.37) and `js/env.example.js`. The `.env` → `js/env.local.js` sync pattern is retired — no cloud keys need syncing now that image + voice both run locally. `scripts/sync-env.ps1` remains for advanced overrides. `index.html` + `game.html` `<script src="env.local.js">` tags stubbed with an empty `window.__DEV_ENV = {}` fallback.
 
 ### Milestone 22.8 — Legal + docs rewrite
 - [x] `index.html` — rewrote Terms Section II (Nature of Service) + Section VI (AI-Generated Content) + Section XII (Third-Party Services) + Privacy Section VII (AI Generations) + all supporting sections to reflect that AI now runs on the visitor's own device. Pollinations is no longer named as the third-party AI provider — it's not one. Cloudflare Worker proxy paragraphs removed. `docs/policies/{terms,privacy}-source.html` marked as historical snapshots that pre-date the migration.
@@ -88,7 +88,7 @@ Every phase ships to masterful finish before the next begins. No phase jumps. No
 
 > *"lay all this out in the files and go crazy with the scope Unity"*
 
-A **tabboo love life game** (Gee verbatim). Massive multi-paged text+emoji game (Pollinations image inserts land later) with:
+A **tabboo love life game** (Gee verbatim). Massive multi-paged text+emoji game (local-SD image inserts land later) with:
 
 - Player **economy** — money, jobs, a store/shop in the outside world.
 - A **whole huge items catalog** — rohipnol, duct tape, coloraform (Gee verbatim examples) + full progression tiers for sedation, restraints, containment, toys, food, dungeon-upgrade kits, consumables, outside-world utility, tech.
@@ -101,7 +101,7 @@ A **tabboo love life game** (Gee verbatim). Massive multi-paged text+emoji game 
 - **Women templates system** — many different women arrays with their own templates of personality, mood, stats. Template-driven procedural generation of unique girls.
 - **Per-girl everything** — body state, mood, stats, bond, escape risk, room, Kokoro voice, persona overlay, memory, kinks, drug preferences.
 - **Multi-page layout** — outside world / shop / hunt-per-location / dungeon overview / individual girl room (interaction view) / inventory / player status / roster.
-- **Text + emoji first.** Pollinations image inserts in a late polish phase.
+- **Text + emoji first.** Local-SD image inserts in a late polish phase.
 - **Adult characters only** — age 18+ locked in every template and every procedural spawn.
 
 Unity is one girl in the roster — the goth nympho coke whore template, seeded (name-locked, appearance-locked) as the starter captive the player already has in their dungeon at new-game init.
@@ -120,7 +120,7 @@ Unity is one girl in the roster — the goth nympho coke whore template, seeded 
 | **Ollama wired** | ✅ live streaming dialogue per turn |
 | **Voice wired** | ✅ Kokoro TTS, per-girl voice |
 | **Memory wired** | ✅ per-girl chat log + embedding-assisted recall |
-| **Images wired** | ✅ Pollinations seeded face/outfit + state/aftermath/toy/corpse tokens |
+| **Images wired** | ✅ Local-SD seeded face/outfit + state/aftermath/toy/corpse tokens |
 | **Drug scheduler** | ✅ curves + addiction/withdrawal + OD + self-serve |
 | **Mode switching** | ✅ in-UI (sexy / hurtme / sexy_with_damage) |
 | **Validation** | Entire `js/` tree passes `node -c` |

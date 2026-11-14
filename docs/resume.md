@@ -30,7 +30,7 @@ Source: `docs/Bugs First day.md` (Gee hand-crafted, captured verbatim one-task-p
 3. **TUTORIAL.1** — DEFERRED by Gee until further notice.
 
 ## ⚙️ HOW TO RESUME / TEST
-`start.bat` (serves `:9535`) + Ollama on `localhost:11434` + Pollinations key in Settings. Verify edits with `node -c` (NO TESTS law). Engine = IIFE modules on `window.DMTHGame.*`; UI on `window.DMTHRouter`; captives in `state.current.roster`.
+`start.bat` (serves `:9535`) + Ollama on `localhost:11434` + the local image server on `:7860` (`scripts/start_image_gen`). Verify edits with `node -c` (NO TESTS law). Engine = IIFE modules on `window.DMTHGame.*`; UI on `window.DMTHRouter`; captives in `state.current.roster`.
 
 ## ⚖️ LAWS (binding)
 LAW #0 verbatim Gee words · LAW #1 no AI-vendor attribution in shipping code/docs/commits · no tests · 800-line read before edit · docs-before-push (FINALIZED + TODO + affected docs in the SAME push) · adult-floor 18+ · Git Flow (`feature/*`, never main/develop directly). `.claude/` gitignored.
