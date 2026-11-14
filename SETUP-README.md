@@ -33,6 +33,52 @@
 
 ---
 
+## Windows installer (desktop app)
+
+`app/` is an Electron shell packaged by electron-builder into a one-file NSIS setup exe, `DungeonMasterTheHunt-Setup-<version>.exe`. It replaces `start.bat` for players: no Python, Node or browser needed up front.
+
+**System requirements**
+
+| | Minimum | Recommended |
+|---|---|---|
+| OS | Windows 10, 64-bit | Windows 11, 64-bit |
+| GPU | NVIDIA, 8 GB VRAM (slow, models swap) | NVIDIA RTX 30/40/50, 16 GB VRAM (about 13 s per image) |
+| RAM | 16 GB | 32 GB |
+| Storage | 30 GB free | 50 GB free |
+| Network | first launch only | same |
+
+The setup screen checks this PC against the table (OS build, largest NVIDIA GPU via `nvidia-smi`, RAM, free space on the install drive) and marks each row. A PC without an NVIDIA GPU still plays as text.
+
+**What it does**
+1. **Setup wizard** (NSIS): welcome page lists the requirements, pick the install folder, copies the app (a few hundred MB). Running it over an existing install asks: update (app replaced, data kept), uninstall everything, or cancel.
+2. **First launch** shows the setup screen, which downloads into `<install folder>\data` with per-step progress, resume for interrupted downloads, and a retry button:
+
+| Step | Size | Goes to |
+|---|---|---|
+| Python 3.10 runtime (python-build-standalone) | 0.1 GB | `data/runtime/python` |
+| PyTorch (CUDA 11.8) + diffusers + faster-whisper (`local-services/requirements.txt`) | about 6 GB | into that runtime |
+| Ollama server (portable zip, no tray app, no service) | 1.5 GB | `data/runtime/ollama` |
+| Image model: RealVisXL V5.0 fp16 (falls back to Realistic Vision V5.1) | 6.9 GB | `data/models` |
+| Speech-to-text: faster-whisper small | 0.5 GB | `data/models/whisper-small` |
+| Chat model: `dolphin-mistral:7b` | 4.1 GB | `data/ollama-models` |
+| Memory model: `nomic-embed-text` | 0.3 GB | `data/ollama-models` |
+
+3. **Every launch**: the app serves the game from its own bundled files on `127.0.0.1:9535` (any free port if that one is taken), starts Ollama (`:11434`, `OLLAMA_ORIGINS=*`), the image server (`:7860`) and the voice server (`:7861`) with hidden consoles, then opens the game in its window. A server already listening on its port (your own Ollama, a repo launcher) is adopted instead of duplicated. Image and voice keep loading in the background, because the game is playable as text meanwhile. Closing the window stops every server it started.
+4. **App menu** (press Alt): check/repair components, open the data or logs folder, shut down everything and quit, remove downloaded components.
+
+**Uninstall.** Windows "Apps" uninstall removes the app and asks whether to take `<install folder>\data` too (about 20 GB). Updates always keep data. Logs: `<install folder>\data\logs` (one file per server, plus `setup.log` from the installer).
+
+**Build it**
+```bash
+cd app
+npm install
+npm run dist      # writes ../dist/DungeonMasterTheHunt-Setup-<version>.exe
+npm start         # run the shell from a checkout without packaging
+```
+The packaged app bundles the game files (HTML, `css/`, `js/`, `assets/`) and `local-services/`. Model weights are never bundled; they download on first run. In a dev checkout the data folder is `%LOCALAPPDATA%/DungeonMasterTheHunt` and an existing repo Python/Ollama/`models/` setup is picked up as-is, so already-satisfied steps are skipped. Environment overrides: `DMTH_DATA` (data folder), `DMTH_PYTHON` (interpreter).
+
+---
+
 ## Install Ollama
 
 ### Windows

@@ -353,6 +353,7 @@
     $('#local-servers-setup').innerHTML = `
       <h3>4. Local image + voice servers</h3>
       <p class="small">Both run on YOUR machine. No API key, no cloud, no rate limit. <b>The launcher auto-installs + auto-starts both</b> alongside Ollama — no terminal needed. First launch pulls ~2.5GB of models in the background; status pills below flip to Ready when downloads finish. Game is fully playable as text+emoji while the download runs.</p>
+      <p class="small muted"><b>System requirements</b> — minimum: Windows 10 64-bit, NVIDIA GPU with 8 GB VRAM, 16 GB RAM, 30 GB free disk. Recommended: Windows 11, NVIDIA RTX 30/40/50 with 16 GB VRAM, 32 GB RAM, 50 GB free (about 13 s per image). No NVIDIA GPU: the game still plays as text, without images. The Windows installer sets all of this up for you.</p>
 
       <div class="step-card">
         <div class="step-label">🖼️ Local Stable Diffusion (image generation)</div>
