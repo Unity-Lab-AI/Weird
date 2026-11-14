@@ -14,7 +14,7 @@
 //
 // Usage (Playwright):
 //   import { ageGateLocalStorage, seedStorageStateOrigins } from './age-gate-bypass.mjs';
-//   const ctx = await browser.newContext({ storageState: { cookies: [], origins: seedStorageStateOrigins(BASE, { pollyKey }) } });
+//   const ctx = await browser.newContext({ storageState: { cookies: [], origins: seedStorageStateOrigins(BASE) } });
 
 // Matches age-gate.js KEYS + VERIFICATION_VALUE + CURRENT_LEGAL_VERSION exactly.
 export const AGE_GATE_VERIFICATION_VALUE = 'ijdfjgdfo-38d9sf-sdf';
@@ -36,9 +36,8 @@ export function ageGateLocalStorage(now = '2026-01-01') {
 
 // The real game config localStorage keys (dmth_* — config.js / room.js read these).
 // `ssd_*` was the OLD prefix and is dead; never seed those.
-export function gameConfigLocalStorage({ pollyKey = '', ollamaModel = 'dolphin-mistral:7b', ollamaEndpoint = 'http://localhost:11434' } = {}) {
+export function gameConfigLocalStorage({ ollamaModel = 'dolphin-mistral:7b', ollamaEndpoint = 'http://localhost:11434' } = {}) {
   return [
-    ...(pollyKey ? [{ name: 'dmth_pollinations_key', value: pollyKey }] : []),
     { name: 'dmth_voice_on', value: 'off' },          // never blast TTS audio during a capture run
     { name: 'dmth_ollama_model', value: ollamaModel },
     { name: 'dmth_ollama_endpoint', value: ollamaEndpoint }
@@ -46,7 +45,7 @@ export function gameConfigLocalStorage({ pollyKey = '', ollamaModel = 'dolphin-m
 }
 
 // Build the Playwright storageState `origins` array for a base origin, with the age
-// gate bypassed + the game config seeded. Pass { pollyKey } to enable image gen.
+// gate bypassed + the game config seeded.
 export function seedStorageStateOrigins(origin, opts = {}) {
   return [{
     origin,

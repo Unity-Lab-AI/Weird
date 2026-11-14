@@ -46,7 +46,7 @@ Shipped + cascaded + LIVE on Forgejo (`git.unityailab.com:UnityAILab/Weird`), se
 - **TUTORIAL.1** ⏸️ DEFERRED by Gee until he explicitly says go.
 
 ## ⚙️ HOW TO RESUME / TEST
-`start.bat` (serves `:9535`) + Ollama `:11434` + Pollinations key in Settings. Verify edits `node -c` (NO TESTS law). Screenshots: `python -m http.server 9535` then `HEADLESS=1 node scripts/screenshots.mjs`. Asset default set (when greenlit): `node scripts/build-assets.mjs`. Engine = IIFE modules on `window.DMTHGame.*`; UI on `window.DMTHRouter`; captives in `state.current.roster`.
+`start.bat` (serves `:9535`) + Ollama `:11434` + local image server `:7860` (`scripts/start_image_gen`). Verify edits `node -c` (NO TESTS law). Screenshots: `python -m http.server 9535` then `HEADLESS=1 node scripts/screenshots.mjs`. Asset default set (when greenlit): `node scripts/build-assets.mjs`. Engine = IIFE modules on `window.DMTHGame.*`; UI on `window.DMTHRouter`; captives in `state.current.roster`.
 
 ## ⚖️ LAWS (binding)
 LAW #0 verbatim Gee words · LAW #1 NO AI-vendor attribution (Claude/Anthropic) in shipping code/docs/commits · no tests · 800-line read before edit · docs-before-push (FINALIZED + TODO + affected docs in the SAME push) · adult-floor 18+ · Git Flow (`feature/*` → develop → main, verify each cascade step; never edit main/develop directly) · NO-BATCH-WORK (edits by hand) · NO GITHUB (Forgejo @ git.unityailab.com is the ONLY host) · `.claude/` gitignored + deploy-excluded.

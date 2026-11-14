@@ -1,9 +1,9 @@
 // scripts/build-assets.mjs — generate the STATIC DEFAULT ASSET SET (tier-2 fallback + template).
 //
 // Walks every asset in js/assets/catalog.js, composes the styled prompt (shared STYLE BLOCK +
-// the asset's own catalog prompt) with its deterministic per-asset seed, fires Pollinations, and
+// the asset's own catalog prompt) with its deterministic per-asset seed, renders it on the local Stable Diffusion server, and
 // writes the result to assets/<plural>/<id>/cover.png — exactly where loader.js resolves it.
-// Pure Node (no browser): Pollinations is a GET-URL-returns-an-image service.
+// Pure Node (no browser): POSTs to the local SD server (scripts/start_image_gen must be running).
 //
 // This is the curate-and-commit step: generate → eyeball the pngs → re-roll misses → commit the
 // winners. The committed cover.png set is BOTH the offline/static-host fallback AND the visual
@@ -13,13 +13,14 @@
 //   node scripts/build-assets.mjs                 # all 102 assets
 //   node scripts/build-assets.mjs item            # one category (location|item|dungeon|room|facility)
 //   node scripts/build-assets.mjs item pipe       # one asset (re-roll a single miss)
-//   DELAY_MS=1500 node scripts/build-assets.mjs    # throttle between requests (default 1200ms)
+//   DELAY_MS=500 node scripts/build-assets.mjs     # pause between requests (default 200ms)
+//   LOCAL_IMAGE_ENDPOINT=http://127.0.0.1:7860     # override the server address
 
 import { mkdirSync, writeFileSync, existsSync, readFileSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
 
 const PROJECT_DIR = resolve(import.meta.dirname, '..');
-const DELAY_MS = parseInt(process.env.DELAY_MS || '1200', 10);
+const DELAY_MS = parseInt(process.env.DELAY_MS || '200', 10);
 const [catFilter, idFilter] = process.argv.slice(2);
 
 // Curation re-roll knobs (the static default set is one-time-curated, so determinism doesn't
@@ -44,25 +45,23 @@ const DMTHAssets = window.DMTHAssets;
 const DMTHAssetGen = window.DMTHAssetGen;
 if (!DMTHAssets || !DMTHAssetGen) { console.error('failed to load catalog / asset-gen'); process.exit(1); }
 
-// --- Pollinations key (optional) from js/env.local.js → use the authed endpoint when present. ---
-function readPollyKey() {
-  const f = join(PROJECT_DIR, 'js', 'env.local.js');
-  if (!existsSync(f)) return '';
-  const m = readFileSync(f, 'utf8').match(/POLLINATIONS_API_KEY:\s*['"]([^'"]+)['"]/);
-  return m ? m[1] : '';
-}
-const KEY = readPollyKey();
-const ENDPOINT_AUTH = 'https://gen.pollinations.ai/image/';
-const ENDPOINT_FREE = 'https://image.pollinations.ai/prompt/';
-const MODEL = 'flux';
+// --- Local Stable Diffusion server (same API the game uses, see js/config.js LOCAL_IMAGE). ---
+const ENDPOINT = process.env.LOCAL_IMAGE_ENDPOINT || 'http://127.0.0.1:7860';
+const NEGATIVE = 'blurry, lowres, bad anatomy, bad hands, extra fingers, deformed, watermark, text, jpeg artifacts, worst quality';
 
-function buildUrl(prompt, seed) {
-  const params = new URLSearchParams({
-    model: MODEL, width: '768', height: '768', nologo: 'true', seed: String(seed),
-    safe: 'false', referrer: 'dungeon-master-the-hunt'
+async function renderPng(prompt, seed) {
+  const res = await fetch(`${ENDPOINT}/sdapi/v1/txt2img`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      prompt: prompt.slice(0, 1500), negative_prompt: NEGATIVE,
+      steps: 24, width: 768, height: 768, cfg_scale: 7.0, seed
+    })
   });
-  if (KEY) { params.set('key', KEY); return `${ENDPOINT_AUTH}${encodeURIComponent(prompt).slice(0, 1800)}?${params}`; }
-  return `${ENDPOINT_FREE}${encodeURIComponent(prompt).slice(0, 1800)}?${params}`;
+  if (!res.ok) return { error: `HTTP ${res.status}` };
+  const j = await res.json().catch(() => ({}));
+  const b64 = (j.images || [])[0];
+  return b64 ? { buf: Buffer.from(b64, 'base64') } : { error: 'no image in response' };
 }
 
 function folderFor(category, id) {
@@ -73,7 +72,7 @@ function folderFor(category, id) {
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
 (async () => {
-  console.log(`Pollinations: ${KEY ? 'authed (' + KEY.slice(0, 5) + '…)' : 'anonymous free endpoint'} · delay ${DELAY_MS}ms`);
+  console.log(`Local image server: ${ENDPOINT} · delay ${DELAY_MS}ms`);
   const cats = catFilter ? [catFilter] : ['location', 'item', 'dungeon', 'room', 'facility'];
   let ok = 0, fail = 0, skipped = 0;
 
@@ -84,13 +83,12 @@ const sleep = (ms) => new Promise(r => setTimeout(r, ms));
       const basePrompt = DMTHAssetGen.buildAssetPrompt(category, entry.id);
       const prompt = EXTRA ? `${basePrompt}, ${EXTRA}` : basePrompt;
       const seed = (DMTHAssetGen.assetSeed(category, entry.id) + SEED_SALT * 7919) >>> 0 & 0x7FFFFFFF;
-      const url = buildUrl(prompt, seed);
       const dir = folderFor(category, entry.id);
       const out = join(dir, 'cover.png');
       try {
-        const res = await fetch(url);
-        if (!res.ok) { console.warn(`  ✗ ${category}/${entry.id} — HTTP ${res.status}`); fail++; await sleep(DELAY_MS); continue; }
-        const buf = Buffer.from(await res.arrayBuffer());
+        const r = await renderPng(prompt, seed);
+        if (r.error) { console.warn(`  ✗ ${category}/${entry.id} — ${r.error}`); fail++; await sleep(DELAY_MS); continue; }
+        const buf = r.buf;
         if (buf.length < 500) { console.warn(`  ✗ ${category}/${entry.id} — empty/placeholder body`); fail++; await sleep(DELAY_MS); continue; }
         mkdirSync(dirname(out), { recursive: true });
         writeFileSync(out, buf);

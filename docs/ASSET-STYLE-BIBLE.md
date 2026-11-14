@@ -20,13 +20,13 @@ placeholder, and the image resolves in this order:
 1. **DYNAMIC / PROCEDURAL — the DEFAULT (on)** — each asset generates its OWN image **per playthrough**.
    It's warmed in the background **when the asset is first acquired** (`asset-gen.prewarm`, called from
    `state.addItem` / `addDungeon` / `addOwnedLocation`) and/or generated **on the first click** of its
-   emoji. `asset-gen.js` composes `STYLE_BLOCK + catalog.prompt` with the asset's seed, fires Pollinations,
+   emoji. `asset-gen.js` composes `STYLE_BLOCK + catalog.prompt` with the asset's seed, renders on the local SD server,
    caches the blob in IDB, and **stacks every fresh generation into the playthrough asset gallery**
    (`state.assetGallery` → the `#asset-gallery` view). Default ON; disable with
    `localStorage.dmth_procedural_assets === 'false'`.
 2. **STATIC DEFAULT SET — the FALLBACK** — a committed `assets/<plural>/<id>/cover.png` per asset,
    generated once via `build-assets.mjs` and hand-curated. Shown **only when a live generation fails**
-   (Pollinations down / offline / blocked). It is also the visual **template/example** every procedural
+   (SD server down / offline / blocked). It is also the visual **template/example** every procedural
    render aims to match. Guaranteed-present so a static host is never bare.
 3. **EMOJI** — the catalog `emoji` field. The clickable placeholder shown until an image exists, and the
    ultimate safety net. Never removed.

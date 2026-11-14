@@ -43,10 +43,6 @@ dist/
 build/
 .cache/
 
-# === Personal user-data files ===
-# Pollinations auth — user-specific
-.claude/pollinations-user.json
-
 # === Logs ===
 *.log
 logs/

@@ -368,7 +368,7 @@
     return 'BODY LANGUAGE: ' + BODYLANG_BY_LEVEL[bond];
   }
 
-  // EMOTION FRONT-LOAD  — flux has a hard
+  // EMOTION FRONT-LOAD  — the image model has a hard
   // beauty bias and slaps a smile on a nude girl unless her emotional state hits FIRST. The detailed
   // FACIAL EXPRESSION token sits mid-prompt and loses; this short, forceful state phrase is injected
   // into the PREFIX (the very front, where the model weighs hardest) so the distress/joy WINS. Only
@@ -855,7 +855,7 @@
     const vi = girl.visualIdentity || {};
     // IDENTITY LOCK — the SAME woman in every image of her, from the pre-capture hunt thumb through
     // her in-hold captive shots. Lead the face block with a hard consistency cue (paired with her
-    // persistent visualIdentity.seed) so flux holds her identity across the big prompt change
+    // persistent visualIdentity.seed) so the model holds her identity across the big prompt change
     // (location→hold, clothed→nude) instead of drifting into a different-looking girl.
     const faceBlock   = `THE EXACT SAME WOMAN in every image, identical unchanging facial identity: ${vi.facialDescription || 'natural face, soft features'}`;
     // her captured-at, type-unique outfit (defaultOutfitDescription) is the
@@ -886,7 +886,7 @@
     const aftermathTokens = isPostmortem ? '' : actAftermathTokens(girl.body);
     const exprTok     = isPostmortem ? '' : expressionTokens(girl);   // face by Stockholm/affect
     const bodyLangTok = isPostmortem ? '' : bodyLanguageTokens(girl); // posture by Stockholm (nude renders only)
-    const emotionLead = isPostmortem ? '' : emotionLeadTokens(girl);  // front-loaded emotion (beats flux's smile bias)
+    const emotionLead = isPostmortem ? '' : emotionLeadTokens(girl);  // front-loaded emotion (beats the model's smile bias)
     const fightTok    = (isPostmortem || girl.body?.isNugget) ? '' : fightActionTokens(girl, withPlayer || pov); // low-bond fighter limbs in action — suppressed for a limbless nugget (no limbs to thrash, would fight the amputee block)
     const toyTok      = isPostmortem ? '' : toyTokens(girl.body);   // implement in use on her (gag/clamps/machine…)
     const pregTokens  = isPostmortem ? '' : pregnancyTokens(girl.pregnancy);
@@ -899,7 +899,7 @@
     // positions so the postmortem token block lands consistently.
     const defaultPose = POSE_LIBRARY[situation] || POSE_LIBRARY.profile;
     // Go HARD on the dead-body posture  — eyes shut tight + sprawled limp where she fell so
-    // flux reads a corpse, not a posed awake girl. Front-loaded eyes-closed + boneless sprawl.
+    // the model reads a corpse, not a posed awake girl. Front-loaded eyes-closed + boneless sprawl.
     const corpsePose = 'eyes closed tight, sprawled limp and motionless on the floor where she fell, lying on her back, head lolled limply to one side, arms flung slack and splayed out, legs sprawled apart and limp, body utterly boneless and still, hair fanned across the floor';
     const pose = effectivePose || (isPostmortem ? corpsePose : defaultPose);
     const env = envTokens({

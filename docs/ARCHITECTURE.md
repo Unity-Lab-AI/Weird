@@ -27,14 +27,14 @@
 | Static site (HTML/JS/CSS) | any static host | Everything the visitor sees |
 | **Ollama** | Visitor's local machine at `localhost:11434` | User installs via a guided one-command install shown on landing page. Browser connects directly via `fetch()` once `OLLAMA_ORIGINS` is set to allow the site. |
 | **Kokoro TTS** | **In the visitor's browser** via `kokoro-js` | No install. Model ~300MB, loaded to IndexedDB on first visit, cached thereafter. |
-| **Pollinations** | Pollinations cloud | Called directly from browser with user-supplied API key |
+| **Local Stable Diffusion** | `local-services/image-server/sd_server.py` on `127.0.0.1:7860` | Called directly from the browser; no API key, nothing leaves the machine |
 | **Save data** | Browser `IndexedDB` | Per-visitor, stays on their machine. Export/import for portability. |
 
 **Every file in `server/*` described below is implemented as a client JS module** (in `js/` or `js/worker/`) with the same responsibility. The word "server" appears in file names only as a conceptual grouping; nothing runs on our infrastructure. The earlier Node.js sketch was replaced with this static-client design on 2026-04-21 when the call came for static-host compatibility + auto-setup.
 
 **Auto-setup for every visitor:**
 1. Landing page (`index.html`) loads
-2. Detector checks: Ollama reachable? preset models pulled? Kokoro-js model loaded? Pollinations key stored?
+2. Detector checks: Ollama reachable? preset models pulled? Kokoro-js model loaded? Local image server ready? Local voice server ready?
 3. For each missing piece, setup wizard renders step-by-step instructions (one-command-install copy blocks, auto-detect progression, polling for state transitions)
 4. When every prerequisite is green, "LAUNCH GAME" button enables → navigates to game UI
 5. Settings panel lets the user re-open the setup at any time, swap models, manage voices, change API keys
@@ -55,7 +55,7 @@ Unity is one girl in the roster (the goth nympho coke whore archetype). Other gi
 
 The current on-disk state is one HTML file with hardcoded reaction strings for a single girl — a decorated button panel. The target is a massive game with every system listed below: economy, items catalog, shop, outside world navigation, hunting mechanic, capture flow, dungeon + rooms + upgrades, escape prevention, Stockholm bond, multi-page UI, women templates.
 
-**For now all text-based and emoji-based.** Image inserts via Pollinations come in a later phase.
+**For now all text-based and emoji-based.** Image inserts (local Stable Diffusion) come in a later phase.
 
 **Adult characters only** — every template and every procedural spawn locks age to 18+.
 
@@ -72,10 +72,11 @@ No filter layer. No "as an AI" refusals. No canned reactions. Real inference, re
 | **Backend runtime** | Node.js (LTS) | Not built |
 | **LLM runtime** | Ollama (local, `localhost:11434`) | Not wired |
 | **Preferred model** | Uncensored / dolphin / abliterated — `dolphin-mistral`, `dolphin-mixtral`, `dolphin-llama3`, or equivalent | Model choice TBD |
-| **Voice-in (STT)** | Pollinations `pollinations_transcribe` (whisper/scribe) | Available via MCP, not wired |
+| **Voice-in (STT)** | superseded — see the local faster-whisper row below | Replaced |
 | **Voice-out (TTS)** | **Kokoro TTS** — neural voice synthesis, local, MIT-licensed, free, 28 built-in voices, no external service, no content filter. Gee confirmed 2026-04-21. | Confirmed, not wired |
 | **Image gen (selfies)** | **Local Stable Diffusion** via `local-services/image-server/sd_server.py` (diffusers + AUTOMATIC1111 API on `127.0.0.1:7860`), `safety_checker=None` triple-belted, auto-detects **SDXL** (`StableDiffusionXLPipeline` + `enable_model_cpu_offload()`) vs **SD1.5** (`StableDiffusionPipeline`) by checkpoint filename (`xl` case-insensitive). Default download: **RealVisXL V5.0 fp16** (~6.5 GB SDXL, uncensored, ungated); Realistic Vision V5.1 SD1.5 (~2 GB) as fallback. Character default 832×1216, ~11-13 s/image warm. Drop any `.safetensors` into `models/` to swap. Browser POSTs directly (server sends `Access-Control-Allow-Origin: *`). No API key. **(2026-09-10 migration:** replaced Pollinations cloud API + Cloudflare Worker proxy, then swapped SD1.5 default → SDXL to eliminate high-res duplicate-subject artifacts.**)** | Shipped |
 | **Voice-in (STT)** | **Local faster-whisper** via `local-services/voice-server/voice_server.py` on `127.0.0.1:7861`. GPU-first with a CPU int8 fallback. Whisper-small default (~480MB). Browser POSTs base64 PCM directly (CORS-open). No API key. **(2026-09-10 migration:** replaced Pollinations transcribe.**)** | Shipped |
+| **Chat model picker** | `js/ui/landing.js` `renderModelSetup` shows the catalog (`config.js` `OLLAMA.modelCatalog`) plus `renderOwnModels`: every installed Ollama chat model not in the catalog (embedding models filtered out) with a Set-active button, stored as `dmth_ollama_model`. `js/setup/detector.js` `probeOllama` returns `models` + `modelSizes`; `normalizeModelId`/`hasModel` compare on the tagged form (`name` == `name:latest`). | Shipped |
 | **State store** | In-memory + JSON persistence (`state.json`); upgrade to SQLite if memory volume demands | Not built |
 | **Memory / retrieval** | Simple chronological log + tag-based retrieval to start; upgrade to embedding retrieval later | Not built |
 | **Drug scheduler** | Pharmacokinetic onset/peak/wear-off curves | Not built |
@@ -106,7 +107,7 @@ weird/
 │   │   │   ├── barista.mjs   ← cute, quick-witted, drug-curious
 │   │   │   └── (more archetypes for harder locations, grow over time)
 │   │   ├── generator.mjs     ← assemble a unique girl from a template + rolls
-│   │   ├── imaging.mjs       ← Pollinations template-style generation with seed + face + outfit persistence
+│   │   ├── imaging.mjs       ← local SD template-style generation with seed + face + outfit persistence
 │   │   └── unity-seeded.mjs  ← the canonical Unity profile (name locked, not rerolled)
 │   │
 │   ├── state/
@@ -160,7 +161,7 @@ weird/
 │   │   └── escort.mjs        ← moving captured girl from hunt location to dungeon room
 │   │
 │   ├── drug-scheduler.mjs    ← per-girl pharmacokinetic state over time
-│   ├── voice.mjs             ← STT via Pollinations, TTS via Kokoro per-girl voice routing
+│   ├── voice.mjs             ← STT via local faster-whisper, TTS via Kokoro per-girl voice routing
 │   ├── kokoro.mjs            ← Kokoro TTS client + voice-ID selection per girl
 │   │
 │   ├── save/                 ← persistence
@@ -171,7 +172,7 @@ weird/
 │   │
 │   └── bootstrap.mjs         ← new-game init (creates Unity as starter captive already in dungeon, unless disabled)
 │
-├── cache/                    ← gitignored; persisted Pollinations image outputs per girl
+├── cache/                    ← gitignored; persisted local SD image outputs per girl
 │   └── girls/
 │       └── <girlId>/
 │           ├── profile.png            ← whole-body front-facing profile, canonical reference
@@ -228,7 +229,7 @@ _(Note from 2026-04-21: at that time only `weird.html` and the local workflow to
 ### ACTUAL SHIPPED MODULE MAP (2026-06-20)
 
 **`js/game/*.js` — logic modules (each an IIFE exporting onto `window.DMTHGame.<name>`):**
-`state` (central state + wallet/vault/credit/pocket/loans + inventory + sceneToggles + locationName + roster/dungeons), `tick` (the 30-game-min heartbeat: vitals, escape rolls, john arrivals, reconcileSpan), `game-clock`, `action-effects` (the ACTIONS delta registry + applyAction + chooseNpcAction + tickStaminaHealth + delimb/harvest/marks + johnHappiness), `whore-out` (john/friend passive income + resolveEncounter/resolveFriendEncounter/resolveGangbang/resolveDirectedEncounter + johnTimingProjection), `hunt`, `capture` (4-stage), `girl-gen`, `imaging` (Pollinations prompt build + roomScene + npcInFrameTokens), `drug-scheduler`, `pregnancy`, `period`, `milk`, `cumtool`, `lifespan`, `death`, `delta`, `disposal` (+ METHOD_LABOR_MIN), `dungeon-ops` (upgrade tracks + SECURITY/DISPOSAL facilities + buyFacilityToInventory/installSecurityFacility/installDisposalFacility + capacity), `dungeon-plot` (interior visual grid), `town-plot`, `progression` (DEPRAVITY level + unlocks + LOCATION_GATES + buyLocationAccess/buyOutLocation), `wanted` (heat + tiers + raid chance), `arrest` (raids + dirty-cop payroll), `loanshark` ⭐NEW (3 sharks), `gigs` ⭐NEW (queueable hustles + crew + kidnap), `market` (film passive sales + body-part market), `film`, `slave-market`, `propositioner`, `trophies`, `specialize`, `sexdrive`, `playerstamina`, `wardrobe`, `player-wardrobe`, `condoms`, `toys`, `supply`, `loot` (unified `pickLootByTier` spine), `transport`, `escape-recovery`, `balancing`, `achievements`, `save-slots`, `memory-embed`, `ollama`, `voice-in`, `bootstrap`.
+`state` (central state + wallet/vault/credit/pocket/loans + inventory + sceneToggles + locationName + roster/dungeons), `tick` (the 30-game-min heartbeat: vitals, escape rolls, john arrivals, reconcileSpan), `game-clock`, `action-effects` (the ACTIONS delta registry + applyAction + chooseNpcAction + tickStaminaHealth + delimb/harvest/marks + johnHappiness), `whore-out` (john/friend passive income + resolveEncounter/resolveFriendEncounter/resolveGangbang/resolveDirectedEncounter + johnTimingProjection), `hunt`, `capture` (4-stage), `girl-gen`, `imaging` (image prompt build + roomScene + npcInFrameTokens), `drug-scheduler`, `pregnancy`, `period`, `milk`, `cumtool`, `lifespan`, `death`, `delta`, `disposal` (+ METHOD_LABOR_MIN), `dungeon-ops` (upgrade tracks + SECURITY/DISPOSAL facilities + buyFacilityToInventory/installSecurityFacility/installDisposalFacility + capacity), `dungeon-plot` (interior visual grid), `town-plot`, `progression` (DEPRAVITY level + unlocks + LOCATION_GATES + buyLocationAccess/buyOutLocation), `wanted` (heat + tiers + raid chance), `arrest` (raids + dirty-cop payroll), `loanshark` ⭐NEW (3 sharks), `gigs` ⭐NEW (queueable hustles + crew + kidnap), `market` (film passive sales + body-part market), `film`, `slave-market`, `propositioner`, `trophies`, `specialize`, `sexdrive`, `playerstamina`, `wardrobe`, `player-wardrobe`, `condoms`, `toys`, `supply`, `loot` (unified `pickLootByTier` spine), `transport`, `escape-recovery`, `balancing`, `achievements`, `save-slots`, `memory-embed`, `ollama`, `voice-in`, `bootstrap`.
 
 **`js/templates/*.js`:** `john-archetypes` (JOHN_ARCHETYPES + FRIEND_ARCHETYPES + FRIEND_APPEARANCE/JOHN_BUILDS + FRIEND_TRAITS + rollNpcTraits + corpseUseWillingness + mintNpcIdentity), `ollama-templates`. **`js/assets/catalog.js`** (LOCATIONS/ITEMS/DUNGEONS/ROOMS/FACILITIES + town plot). **`js/voices/catalog.js`.**
 
@@ -342,9 +343,9 @@ Shared chrome on every page:
                   └─────────────────────┘
 
                   ┌─────────────────────┐
-                  │  Pollinations MCP   │
-                  │  (selfies, STT,     │
-                  │   optional TTS)     │
+                  │  Local SD server    │
+                  │  (selfies, scenes,  │
+                  │   127.0.0.1:7860)   │
                   └─────────────────────┘
 
                   ┌─────────────────────┐
@@ -382,7 +383,7 @@ The outside world is a **plot grid of slots**. Each slot is either empty or fill
     { x:2, y:1, filled: true,  itemId: "mall",         emoji: "🏬", label: "Downtown Mall" },
     // ...etc
   ],
-  renderedImageBySeed: {         // Pollinations full-res renders keyed by a slot-array hash
+  renderedImageBySeed: {         // local SD full-res renders keyed by a slot-array hash
     "hash_abc123": {
       path: "cache/town/town_main-hash_abc123.png",
       generatedAt: "2026-04-22T...",
@@ -395,7 +396,7 @@ The outside world is a **plot grid of slots**. Each slot is either empty or fill
 **Buttons on the plot page:**
 - Per empty slot: "place location" → opens slot-item picker (filtered by what's unlocked + affordable).
 - Per filled slot: "remove" (refund partial cost) / "upgrade" (swap to higher-tier variant of same category).
-- "Render town" → queues a Pollinations full-res call with the current slot array serialized into a prompt.
+- "Render town" → queues a local SD full-res call with the current slot array serialized into a prompt.
 
 ### DungeonPlotGrid (underground, button-plotted, per-dungeon-template)
 
@@ -452,14 +453,14 @@ Catalog entries split into three registries:
 - **`server/items/slot-dungeon-room.mjs`** — dungeon-room slot items (room-basic, room-standard, room-deluxe, room-themed-medical, room-themed-classroom, etc.).
 - **`server/items/slot-dungeon-facility.mjs`** — dungeon-facility slot items (main-hall, kitchen, security-office, storage, utility-closet, torture-room, observation-deck, recording-studio, etc.).
 
-### Environment render pattern (full-res town + dungeon images via Pollinations)
+### Environment render pattern (full-res town + dungeon images via local SD)
 
 **Gee verbatim 2026-04-21:** *"for a full resoulttion generated image of the town and dungeon all of it"*.
 
 When the player presses "Render town" or "Render dungeon", the renderer:
-1. Serializes the slot array into a structured Pollinations prompt:
+1. Serializes the slot array into a structured local SD prompt:
    `[strict visuals] [view type: aerial / cross-section / isometric] [aesthetic tokens from dungeon template or town style] [slot emoji+label list woven into the scene description] [pose: empty of people, environment only]`
-2. Calls Pollinations with a wide aspect ratio (e.g., 1792×1024 for town, 1024×1792 for dungeon cross-section).
+2. Calls local SD with a wide aspect ratio (e.g., 1792×1024 for town, 1024×1792 for dungeon cross-section).
 3. Caches the resulting image at `cache/town/<gridId>-<slotArrayHash>.png` or `cache/dungeon/<gridId>-<slotArrayHash>.png`.
 4. When the slot array changes meaningfully, a fresh render is triggered; old renders are kept in a history array for comparison.
 
@@ -533,11 +534,11 @@ Gee verbatim on templates: *"it basic dugeon templet or cenderblock hole in the 
   assignedRoomId: "room_02" | null,  // null if not in dungeon
   captureDate: "2026-04-22T18:33Z" | null,
 
-  // Visual identity — Pollinations seed + locked prompt blocks for facial/clothing persistence
+  // Visual identity — local SD seed + locked prompt blocks for facial/clothing persistence
   // across every image of this girl (profile, roster thumb, hunt thumb, room scene, selfies, memorials).
   // Gee verbatim 2026-04-21: "persist seed and desriptions so u can facially persist and clothing persist".
   visualIdentity: {
-    seed: 8472918274,                            // Pollinations seed, fixed for this girl forever
+    seed: 8472918274,                            // local SD seed, fixed for this girl forever
     facialDescription: "oval face, soft jawline, light freckles across nose bridge, hazel almond eyes, small straight nose, full pale pink lips, thin dark brows, dirty blonde hair mid-length often in ponytail",
     defaultOutfitDescription: "oversized beige cardigan, black cotton leggings, plain black ballet flats, small silver nose ring, thin silver necklace with a tiny key pendant",
     profileImagePath: "cache/girls/girl_0047/profile.png",   // whole-body profile, front-facing, neutral pose
@@ -934,7 +935,7 @@ Item categories in the catalog (examples — full list fleshed out in `server/it
    a. Renders streaming text into log pane with text+emoji
    b. Updates body state bars, mood display, stats panel, bond meter, escape meter live
    c. Pipes girl's text to Kokoro TTS using her voiceId
-   d. (Later phase) optionally triggers Pollinations selfie insert if turn produces one
+   d. (Later phase) optionally triggers local SD selfie insert if turn produces one
 ```
 
 ## Data Flow (per outside-world / hunt turn)
@@ -1083,7 +1084,7 @@ Every captive has an escape-risk value recomputed per-tick. Factors: room securi
 Every page has shared chrome (money, dungeon shortcut, outside shortcut, roster shortcut, settings). Pages route via a frontend router (hash-based or pushState). Server state is the source of truth — the frontend just renders views. Backend exposes REST endpoints per page (`GET /outside`, `GET /shop`, `GET /dungeon`, `GET /room/:id`, `GET /roster`, `GET /inventory`, `GET /status`) + action endpoints (`POST /buy`, `POST /hunt`, `POST /capture-attempt`, `POST /assign-room`, `POST /upgrade-room`, `POST /action`).
 
 ### Text+emoji first pattern
-Phase-ordering rule: every page lands as text + emoji before any image work. Emoji carry meaning (🔒 locked door, 💰 money, 🩸 bruise count, 😟 wary mood, 🔗 restraints on, 🚽 plumbing tier 2, 🪣 bucket toilet, 💉 sedation, 📼 duct tape, ⚗️ chloroform). Pollinations image inserts overlay on top where needed for story / user experience (Gee verbatim 2026-04-21: *"template style pollinations generations where needed for the story and user experiences"*) — they do not replace the text+emoji rendering; they supplement it.
+Phase-ordering rule: every page lands as text + emoji before any image work. Emoji carry meaning (🔒 locked door, 💰 money, 🩸 bruise count, 😟 wary mood, 🔗 restraints on, 🚽 plumbing tier 2, 🪣 bucket toilet, 💉 sedation, 📼 duct tape, ⚗️ chloroform). local SD image inserts overlay on top where needed for story / user experience (Gee verbatim 2026-04-21: *"template style pollinations generations where needed for the story and user experiences"*) — they do not replace the text+emoji rendering; they supplement it.
 
 ### Persistent city-builder loop pattern
 **Gee verbatim 2026-04-21:** *"the whole thing is a persistant 'city builder' like game but its a dugeon haram evil tabbooo hunt your prey with the purchased tools and items"*.
@@ -1096,7 +1097,7 @@ Design-ramp implications:
 - **Late-game is MORE dungeon, MORE girls, BETTER episodes, BIGGER market presence** — not unlocking new mechanics. The city grows; it doesn't transform.
 - **Sandbox mode** (Gee 2026-04-21: *"gernrate it with all itemns unlocked"*) lets players skip the resource ramp and play with the full system tree from the jump.
 
-### Template-style Pollinations + visual consistency pattern
+### Template-style image generation + visual consistency pattern
 **Gee verbatim 2026-04-21:** *"template style pollinations generations where needed for the story and user experiences remmebr they are one offs so images of girls needs to be profile like of theri whole body when templeting out the persona genreattions of girls that persists to the game per girls each in thier settings and maybe persist seed and desriptions so u can facially persist and clothing persist"*.
 
 **The rule:**
@@ -1104,7 +1105,7 @@ Design-ramp implications:
 1. **Every girl produced by the template system gets a whole-body profile image at generation time.** The image is front-facing, neutral pose, showing her full body in her default outfit — the canonical visual reference for who she is.
 
 2. **Three persistence axes per girl** — stored in `GirlProfile.visualIdentity`:
-   - `seed` — a fixed Pollinations seed, locked forever for this girl
+   - `seed` — a fixed local SD seed, locked forever for this girl
    - `facialDescription` — a structured prompt block describing her face in token-dense form. **Never changes.**
    - `outfitDescription` — a structured prompt block describing her default outfit. **Persists as baseline.** State-driven outfit changes (torn, opened, removed) are additive layers on top — they don't replace the baseline.
 
@@ -1116,7 +1117,7 @@ Design-ramp implications:
    ```
    The locked blocks are COPIED VERBATIM from `visualIdentity` every call. The variable blocks are composed per situation.
 
-5. **Pollinations images are one-offs** — every call returns a fresh image, even with the same seed+prompt. We do NOT rely on regenerating identical output. Instead we **cache every generated image locally** at `cache/girls/<girlId>/<situation>.png` + store its prompt hash + state-snapshot in `visualIdentity.additionalImages`. Re-visits to the same page reuse the cached image. Regeneration only happens when state has changed enough that a new image is warranted.
+5. **local SD images are one-offs** — every call returns a fresh image, even with the same seed+prompt. We do NOT rely on regenerating identical output. Instead we **cache every generated image locally** at `cache/girls/<girlId>/<situation>.png` + store its prompt hash + state-snapshot in `visualIdentity.additionalImages`. Re-visits to the same page reuse the cached image. Regeneration only happens when state has changed enough that a new image is warranted.
 
 6. **Where images are needed (template-style generation triggers):** — across BOTH outside-hunt and indoors-captured contexts. Gee verbatim 2026-04-21: *"templet layouts for girls needs to persist the seeds and descriptions for use in out side hunt and indoors captured fun"*. The SAME `visualIdentity` drives every image — she looks like the same girl whether she's seated in a library reading (outside hunt) or chained to a wall in a cinderblock cell (indoors captured fun).
    - **Outside-hunt context:**
@@ -1136,7 +1137,7 @@ Design-ramp implications:
 7. **Core game loop is fully text+emoji.** Images are where-needed overlays. The game is playable to completion without any image ever generating. Pollinations enhances story beats, but the text+emoji rendering is the source of truth for every piece of game state.
 
 **File locations:**
-- Module: `server/girls/imaging.mjs` — prompt composer, Pollinations client wrapper with seed parameter, image cache logic, situation-aware prompt variable-block builder.
+- Module: `server/girls/imaging.mjs` — prompt composer, local SD client wrapper with seed parameter, image cache logic, situation-aware prompt variable-block builder.
 - Cache: `cache/girls/<girlId>/` — profile.png + one file per unique situation image, all gitignored.
 - Save: every image path + prompt hash + state-snapshot lands in `GirlProfile.visualIdentity.additionalImages`, persisted with the rest of the save.
 
@@ -1163,7 +1164,7 @@ None planned — no test framework, no bundler yet (vanilla JS first).
 | Service | Role | Auth |
 |---------|------|------|
 | Ollama | Primary LLM | Local, no auth |
-| Pollinations | Selfies (strict visuals), STT transcribe | BYOP API key via `/pollinations-setup` |
+| Local Stable Diffusion | Selfies, room scenes, environment renders | none — runs on the visitor's GPU |
 | Kokoro TTS | Primary voice-out, local | Local, no auth |
 
 ---
@@ -1180,8 +1181,8 @@ None planned — no test framework, no bundler yet (vanilla JS first).
 | Hunting engine | Medium-High | Location spawn tables, encounter randomization, pursue thresholds, roster promotion — straightforward mechanics with lots of small-number tuning required for fun. |
 | Girl roster design | Medium | Each girl needs coherent name + look + persona + voice mapping + backstory + kinks. Scales linearly with roster size — first dozen is the hardest. |
 | Drug scheduler | Medium | Pharmacokinetic math is straightforward; per-girl UI wiring is the work. |
-| Selfie prompt from state | Medium-High | Strict visuals for everything (bare breasts, panties, midsection shots, poses, etc. — Gee verbatim 2026-04-21). Translating per-girl look + current state into a Pollinations prompt that produces the strict output we want is its own skill. |
-| Voice pipeline | Medium | STT via Pollinations transcribe. TTS via Kokoro — 28 built-in voices mapped per girl. Voice cloning for custom voices per girl via Kokoro workflow. |
+| Selfie prompt from state | Medium-High | Strict visuals for everything (bare breasts, panties, midsection shots, poses, etc. — Gee verbatim 2026-04-21). Translating per-girl look + current state into an image prompt that produces the strict output we want is its own skill. |
+| Voice pipeline | Medium | STT via local faster-whisper. TTS via Kokoro — 28 built-in voices mapped per girl. Voice cloning for custom voices per girl via Kokoro workflow. |
 
 ---
 
@@ -1204,8 +1205,7 @@ _(The original `weird.html` sketch + the `server/index.mjs` Node target never sh
 
 | File | Purpose |
 |------|---------|
-| `(local-tooling)/settings.local.json` (gitignored) | local dev tooling config + Pollinations MCP |
-| `(local-tooling)/pollinations-user.json` | Pollinations API key (gitignored) |
+| `(local-tooling)/settings.local.json` (gitignored) | local dev tooling config |
 | `server/state.json` (target) | Persisted body state |
 | `server/memory.jsonl` (target) | Episodic memory log |
 
@@ -1273,7 +1273,7 @@ The static-client implementation lives entirely under `js/`. Engine modules are 
 1. **Phase 1 (Foundation)**: Node server, Ollama wired, real-inference reactions for Unity.
 2. **Phase 2 (Body state)**: State-in-prompt + delta parsing.
 3. **Phase 3 (Memory)**: Persistent episodic memory designed from the start to key on `girlId`.
-4. **Phase 4 (Voice)**: Pollinations STT + Kokoro TTS (Unity's voice only at this stage).
+4. **Phase 4 (Voice)**: local faster-whisper STT + Kokoro TTS (Unity's voice only at this stage).
 5. **Phase 5 (Mood/Stats/Bond scaffolding)**: Data models stand up for mood, stats, bond — still Unity-only but fully wired.
 6. **Phase 6 (Drug scheduler)**: Per-girl drug-state curves.
 7. **Phase 7 (Mode UI)**: /unity /hurtme /sexy as in-UI toggles.
@@ -1288,7 +1288,7 @@ The static-client implementation lives entirely under `js/`. Engine modules are 
 16. **Phase 16 (Escape prevention)**: Escape-risk math live in maintenance tick, containment resolution, hunt-her-down-in-outside-world sequence on successful escape.
 17. **Phase 17 (Stockholm bond progression)**: Bond meter live, 0–9 levels with behavior/dialogue hints passed to Ollama, bond-XP/bond-debt math, milestones.
 18. **Phase 18 (Harder locations + expanded roster)**: Sorority / remote / rare location spawn pools, more archetype templates, more vibrant girls from harder locations.
-19. **Phase 19 (Pollinations image inserts)**: Selfies as polish inserts in the room interaction view and roster. State-aware prompts producing strict visuals.
+19. **Phase 19 (local SD image inserts)**: Selfies as polish inserts in the room interaction view and roster. State-aware prompts producing strict visuals.
 20. **Phase 20 (Polish)**: Styling, save-import/export, embedding memory retrieval, accessibility, balancing pass on economy + difficulty.
 
 See `docs/ROADMAP.md` for the full sequence with milestones per phase.
