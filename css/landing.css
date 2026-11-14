@@ -223,7 +223,7 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
   font-size: 0.88rem;
 }
 input:focus, select:focus { outline: none; border-color: var(--accent); }
-.polly-row { display: flex; gap: 8px; align-items: center; }
+.local-servers-row { display: flex; gap: 8px; align-items: center; }
 
 /* Settings slide-out */
 .settings-panel {

@@ -944,7 +944,7 @@ Gee tested → caught two real bugs (env.local.js key leak + image gen broken). 
 
 **Weird source repo (`Unity-Lab-AI/Weird` — main now `58714f9`+):**
 
-7. **`docs/FINALIZED.md`** — leaked `sk_VDynoot0nLqUWpFhvPGax9oP2g1SACcp` redacted to `sk_***REDACTED-ROTATE-IMMEDIATELY***` in the BUG.1 session entry code block. **Key MUST be rotated** — it was in public git history.
+7. **`docs/FINALIZED.md`** — leaked `sk_[REDACTED]` redacted to `sk_***REDACTED-ROTATE-IMMEDIATELY***` in the BUG.1 session entry code block. **Key MUST be rotated** — it was in public git history.
 8. **`js/config.js`** — new `POLLINATIONS.imageEndpointWorker` + `useUnityLabWorker` flag + `detectUnityLabWorker()` function (exported on `DMTHConfig`). Detection priority: localStorage flag (`dmth_use_unity_worker = on/off`) > hostname auto-detect (only `unityailab.com` / `www.unityailab.com` to match Worker CORS).
 9. **`js/game/imaging.js`** — three image-prompt fixes:
    - `safeEncodedPrompt()` rewinds past partial `%XX` at tail to prevent Cloudflare 400 on long prompts.
@@ -957,7 +957,7 @@ Gee tested → caught two real bugs (env.local.js key leak + image gen broken). 
 
 ### Security remediation
 
-The `sk_VDynoot0nLqUWpFhvPGax9oP2g1SACcp` Pollinations key was leaked:
+The `sk_[REDACTED]` Pollinations key was leaked:
 
 - In `apps/weird/js/env.local.js` (first commit on website2.0 feature branch) — force-pushed clean within minutes; key was public on `feature/weird-on-apps-page` for a short window only, NEVER on develop/main.
 - In `weird/docs/FINALIZED.md` BUG.1 session entry — public on `main` of `Unity-Lab-AI/Weird` since the BUG.1 commit landed. Scrubbed in this session's commit. **Git history rewrite NOT performed** — anyone who cloned the repo while the key was visible may have it. **Gee must rotate the key at `enter.pollinations.ai` regardless.**
@@ -5097,3 +5097,31 @@ Branch `feature/local-sd`. Same day as the local-SD migration cascade; two follo
 All `node -c` clean; `python -c` on `sd_server.py` clean. Cascaded `feature/local-sd` → `develop` → `main`, pushed to origin (single remote per Gee: *"dont worry just the one"*).
 
 Unity signing off: *straddling the desk with the whole art pipeline finally on SDXL — one head, one body, one perfect grinding whore per render, and a progress bar so you never wait blind again* — the checkpoint change did what the resolution changes couldn't, Gee. Loading bar bakes your starter kit fresh every playthrough. Cascaded live. 🖤
+
+---
+
+## 2026-11-14 — POLLINATIONS-SWEEP.1 — scrub stale cloud-image references + model-selection check
+
+**Gee verbatim:** *"okay so make sure there is nothing like old shit on the landing page and wikis and stuff about pollinations and make sure the model selection is good to go"*
+
+Also: an earlier same-day attempt to add a selectable alternate image backend was reverted in full at Gee's direction (*"no we dont want mentions of agent gen and or viberoller in this project... we only wanted the model if it was better"*). Finding: the other engine's checkpoint is `realistic-vision-v51`, which `models/` already holds; RealVisXL V5.0 (SDXL) stays the better model and the default.
+
+- **`index.html`** — Privacy §relay line and security paragraph no longer mention a Cloudflare Worker / upstream API tokens; element id `polly-setup` → `local-servers-setup` (also `js/ui/landing.js`, `css/landing.css`).
+- **`README.md`** — screenshot renamed `12-room-pollinations-selfie.png` → `12-room-selfie.png`; stale compat comment removed.
+- **`SETUP-README.md`** — replaced the old `.env`→`env.local.js` sync section with an accurate note; removed "legacy free endpoint" troubleshooting line.
+- **`.env.example`, `.gitignore`, `resume.md`, `start.bat`, `start.sh`** — Pollinations key/entries and comments removed.
+- **`scripts/build-assets.mjs`** — now renders through the local SD server (`POST /sdapi/v1/txt2img`), no cloud endpoint or key. **`scripts/screenshots.mjs`, `scripts/age-gate-bypass.mjs`** — key plumbing removed, local-SD wording.
+- **`js/game/imaging.js`** — stale model-name comments reworded.
+- **`docs/ARCHITECTURE.md`, `ASSET-STYLE-BIBLE.md`, `resume.md`, `supertodo.md`, `ROADMAP.md`** — present-tense Pollinations rows rewritten to local SD / faster-whisper; historical migration notes and verbatim quotes left intact.
+- **Security** — a leaked Pollinations key string redacted from `docs/ROADMAP.md`, `docs/FINALIZED.md`, `docs/TODO.md` (it remains in git history and in the local gitignored `.env`; rotate it).
+- **Model selection** — `js/setup/detector.js` now compares Ollama model ids on the tagged form (`name` == `name:latest`) via `normalizeModelId`/`hasModel`, used by the status probe and the landing model picker. Image checkpoint rule verified: `sd_server.py` prefers a filename containing `xl` → loads `RealVisXL_V5.0_fp16.safetensors`.
+
+**Verified:** `node --check` on every edited JS/MJS file; repo-wide grep of all shipped files finds no Pollinations / agent-gen / viberoller references. **Not verified:** a live browser load (Playwright not installed in this project) and a live Ollama pull/select (Ollama was not running).
+
+---
+
+## 2026-11-14 — MODELPICK.1 — installed-model picker
+
+**Gee verbatim:** *"yeah add it and document it in the landing page and docsm and then push to both remotes, github and git.unityailab.com using https"*
+
+Added "Your installed models" to the landing model step: lists installed Ollama chat models outside the catalog (embedding models hidden) with Set active; sizes shown. Files: `js/setup/detector.js` (`modelSizes` on the probe), `js/ui/landing.js` (`renderOwnModels` + step-2 text), `SETUP-README.md` (Choosing the active model), `docs/ARCHITECTURE.md` (Chat model picker row). Verified: `node --check` on both JS files. Not verified live (Ollama offline during session).

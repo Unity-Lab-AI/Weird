@@ -21,6 +21,11 @@
     return 'unknown';
   }
 
+  // Ollama lists every model with a tag; a bare name means ":latest". Compare on the tagged form
+  // so "dolphin-llama3" and "dolphin-llama3:latest" count as the same installed model.
+  const normalizeModelId = id => (id && !String(id).includes(':')) ? `${id}:latest` : id;
+  const hasModel = (models, id) => (models || []).some(m => normalizeModelId(m) === normalizeModelId(id));
+
   // --- Ollama probe ---
   async function probeOllama() {
     try {
@@ -33,7 +38,10 @@
       }
       const data = await res.json();
       const models = (data.models || []).map(m => m.name || m.model).filter(Boolean);
-      return { reachable: true, models };
+      // Sizes (bytes) per model id, so the picker can show user-pulled models it has no catalog entry for.
+      const modelSizes = {};
+      for (const m of (data.models || [])) { const id = m.name || m.model; if (id) modelSizes[id] = m.size || 0; }
+      return { reachable: true, models, modelSizes };
     } catch (err) {
       // Usually: CORS block or connection refused
       const msg = String(err?.message || err);
@@ -49,7 +57,7 @@
   async function probeOllamaModelPresent(modelId) {
     const probe = await probeOllama();
     if (!probe.reachable) return { present: false, reason: probe.reason };
-    const present = probe.models.includes(modelId);
+    const present = hasModel(probe.models, modelId);
     return { present, models: probe.models };
   }
 
@@ -150,7 +158,7 @@
       probeLocalVoice()
     ]);
     const preset = cfg().OLLAMA.activeModel;
-    const modelPresent = ollama.reachable && ollama.models.includes(preset);
+    const modelPresent = ollama.reachable && hasModel(ollama.models, preset);
 
     // Health probe — only meaningful if the manifest claims the model is there.
     // Result codes: 'ok' | 'corrupt' | 'missing' | 'unreachable' | 'unknown' | 'skipped' | 'no-probe-module'
@@ -201,6 +209,8 @@
 
   window.DMTHDetector = Object.freeze({
     detectOS,
+    normalizeModelId,
+    hasModel,
     probeOllama,
     probeOllamaModelPresent,
     probeKokoro,

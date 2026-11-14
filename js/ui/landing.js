@@ -194,22 +194,53 @@
     });
   }
 
+  // Models already installed in Ollama that the catalog doesn't list (pulled by hand, custom
+  // Modelfiles, other abliterated builds). Selectable as the active chat model. Embedding models
+  // are skipped: the game uses one for memory search, and it can't hold a conversation.
+  function renderOwnModels(s) {
+    const D = window.DMTHDetector;
+    const catalogIds = window.DMTHModels.getCatalog().map(m => D.normalizeModelId(m.id));
+    const own = (s.ollama.models || []).filter(id =>
+      !catalogIds.includes(D.normalizeModelId(id)) && !/embed/i.test(id));
+    if (!own.length) return '';
+    const active = D.normalizeModelId(s.ollama.activeModel);
+    return `
+      <h4 style="margin-top:18px">Your installed models</h4>
+      <p class="small muted">Already on your machine but not in the list above. Pick any chat model — it is used for every girl's persona. Not every model holds persona content without refusing; the uncensored ones above are the safe bet.</p>
+      <div class="model-grid">
+        ${own.map(id => {
+          const isActive = D.normalizeModelId(id) === active;
+          const gb = (s.ollama.modelSizes && s.ollama.modelSizes[id]) ? (s.ollama.modelSizes[id] / 1e9).toFixed(1) + ' GB' : '';
+          return `
+            <div class="model-card ${isActive ? 'active' : ''}">
+              <div class="model-name">${escapeHtml(id)}</div>
+              <div class="model-meta">${gb ? `<span>${gb}</span>` : ''}<span class="tag-ok">installed</span></div>
+              <div class="model-actions">
+                ${isActive
+                  ? `<button class="btn-small" disabled>Active ✓</button>`
+                  : `<button class="btn-small" data-set-active="${escapeHtml(id)}">Set active</button>`}
+              </div>
+            </div>`;
+        }).join('')}
+      </div>`;
+  }
+
   function renderModelSetup(s) {
     if (!s.ollama.reachable) {
       $('#model-setup').innerHTML = `<p class="small muted">Finish step 1 first (Ollama must be running).</p>`;
       return;
     }
     const catalog = window.DMTHModels.getCatalog();
-    const installed = new Set(s.ollama.models);
+    const hasModel = id => window.DMTHDetector.hasModel(s.ollama.models, id);
     const active = s.ollama.activeModel;
 
     $('#model-setup').innerHTML = `
       <h3>2. Pull a model</h3>
-      <p class="small">These are uncensored / abliterated models that will hold persona without refusing. Pick one (recommended first) and pull it. Models live on your machine.</p>
+      <p class="small">These are uncensored / abliterated models that will hold persona without refusing. Pick one (recommended first) and pull it, or choose a model you already have under <b>Your installed models</b> below the list. Models live on your machine.</p>
       <div class="model-grid">
         ${catalog.map(m => {
-          const isInstalled = installed.has(m.id);
-          const isActive = m.id === active;
+          const isInstalled = hasModel(m.id);
+          const isActive = window.DMTHDetector.normalizeModelId(m.id) === window.DMTHDetector.normalizeModelId(active);
           return `
             <div class="model-card ${isActive ? 'active' : ''}">
               <div class="model-name">${escapeHtml(m.displayName)}</div>
@@ -234,6 +265,7 @@
           `;
         }).join('')}
       </div>
+      ${renderOwnModels(s)}
     `;
 
     $('#model-setup').querySelectorAll('[data-pull]').forEach(b => {
@@ -318,7 +350,7 @@
         ? 'Server up · STT model still downloading (~480MB, first run only)'
         : 'Not running yet — the launcher auto-installs + starts it; still initializing on first run';
 
-    $('#polly-setup').innerHTML = `
+    $('#local-servers-setup').innerHTML = `
       <h3>4. Local image + voice servers</h3>
       <p class="small">Both run on YOUR machine. No API key, no cloud, no rate limit. <b>The launcher auto-installs + auto-starts both</b> alongside Ollama — no terminal needed. First launch pulls ~2.5GB of models in the background; status pills below flip to Ready when downloads finish. Game is fully playable as text+emoji while the download runs.</p>
 
@@ -335,7 +367,7 @@
       </div>
     `;
 
-    $('#polly-setup').querySelectorAll('[data-copy]').forEach(b => {
+    $('#local-servers-setup').querySelectorAll('[data-copy]').forEach(b => {
       b.onclick = () => {
         const target = document.getElementById(b.dataset.copy);
         navigator.clipboard.writeText(target.textContent).then(() => {

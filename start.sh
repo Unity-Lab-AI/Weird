@@ -19,7 +19,7 @@ echo
 # Every backend runs LOCAL: Ollama for chat, local SD for images (this launcher
 # auto-starts it), local faster-whisper for STT (auto-started too), Kokoro in the
 # browser for TTS. No cloud, no API keys, no env sync — the .env->js/env.local.js
-# step that used to sync Pollinations credentials is gone because nothing needs one.
+# step that used to sync cloud credentials is gone because nothing needs one.
 
 port_in_use() {
   local port="$1"

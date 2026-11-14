@@ -15,7 +15,7 @@ echo.
 REM Every backend runs LOCAL: Ollama for chat, local SD for images (this launcher
 REM auto-starts it), local faster-whisper for STT (auto-started too), Kokoro in the
 REM browser for TTS. No cloud, no API keys, no env sync — the .env->js/env.local.js
-REM step that used to sync Pollinations credentials is gone because nothing needs one.
+REM step that used to sync cloud credentials is gone because nothing needs one.
 
 REM === STEP 1: Ollama check + auto-start ============================
 echo [1/4] Checking Ollama...
