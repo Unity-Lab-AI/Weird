@@ -1,5 +1,14 @@
 # 🔗 DUNGEON MASTER: THE HUNT — Gameplay Wiki
 
+## ⬇️ Download the Windows installer
+
+**Latest: [v1.1.0](https://git.unityailab.com/UnityAILab/Weird/releases/tag/v1.1.0) ([GitHub](https://github.com/Unity-Lab-AI/Weird/releases/tag/v1.1.0))** — `DungeonMasterTheHunt-Setup-<version>.exe` + `SHA256SUMS.txt`
+
+- **Forgejo releases:** https://git.unityailab.com/UnityAILab/Weird/releases
+- **GitHub releases:** https://github.com/Unity-Lab-AI/Weird/releases
+
+Run the setup, pick a folder, then click **Install** on the first-run screen. System requirements: [below](#install-and-system-requirements).
+
 > *persistent city-builder — dungeon harem evil taboo — hunt your prey with the purchased tools and items*
 
 A massive multi-page text+emoji adult game where you run a sex-slave operation. Start in a basic dungeon, hunt girls across town, capture them with progressively better tools, hold them in upgradeable rooms, form Stockholm bonds, record films, sell them on the slave market, dispose of the ones you tire of. Every captive has her own persona driven by a real local LLM with persistent body state, drug pharmacokinetics, pregnancy, and a memory of every john she's seen.
