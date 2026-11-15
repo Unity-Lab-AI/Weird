@@ -297,7 +297,8 @@
              <p class="small">Downloading model… ${Math.round((k.progress||0)*100)}%</p>
              <p class="small muted">Web Worker init runs with a 60-second safety timeout. If it stalls, the loader falls back to main-thread synthesis automatically.</p>`
           : `<button class="btn-primary" id="load-kokoro-btn">${lastErr ? 'Retry Kokoro Load' : 'Load Kokoro TTS'}</button>
-             ${lastErr ? `<p class="small" style="color:#ff7aa8;margin-top:8px"><b>Last attempt failed:</b> ${escapeHtml(String(lastErr.message || lastErr))}</p>` : ''}
+             ${lastErr ? `<p class="small" style="color:#ff7aa8;margin-top:8px"><b>Last attempt failed:</b> ${escapeHtml(String(lastErr.message || lastErr))}</p>
+             <p class="small muted">The loader already tried the default, WASM and WebGPU backends, on a worker and on the main thread. If every one failed: use a current Chrome or Edge, turn on hardware acceleration in the browser settings, check that <code>cdn.jsdelivr.net</code> and <code>huggingface.co</code> are reachable (the runtime and model download from there once), then retry. The game plays without voice-out meanwhile.</p>` : ''}
              <p class="small muted" id="kokoro-err"></p>`
       }
     `;
@@ -307,7 +308,7 @@
         loadBtn.disabled = true;
         loadBtn.textContent = 'Loading…';
         try {
-          await window.DMTHKokoro.ensureLoaded(() => refresh());
+          await window.DMTHKokoro.ensureLoaded(() => refreshSoon());
           refresh();
         } catch (err) {
           // The error span won't exist if the render loop replaced the button with the
@@ -353,6 +354,7 @@
     $('#local-servers-setup').innerHTML = `
       <h3>4. Local image + voice servers</h3>
       <p class="small">Both run on YOUR machine. No API key, no cloud, no rate limit. <b>The launcher auto-installs + auto-starts both</b> alongside Ollama — no terminal needed. First launch pulls ~2.5GB of models in the background; status pills below flip to Ready when downloads finish. Game is fully playable as text+emoji while the download runs.</p>
+      <p class="small muted"><b>System requirements</b> — minimum: Windows 10 64-bit, NVIDIA GPU with 8 GB VRAM, 16 GB RAM, 30 GB free disk. Recommended: Windows 11, NVIDIA RTX 30/40/50 with 16 GB VRAM, 32 GB RAM, 50 GB free (about 13 s per image). No NVIDIA GPU: the game still plays as text, without images. The Windows installer sets all of this up for you.</p>
 
       <div class="step-card">
         <div class="step-label">🖼️ Local Stable Diffusion (image generation)</div>
@@ -407,13 +409,32 @@
   // ---------- refresh cycle ----------
   // Fast refresh — runs every 3s. SKIPS the health probe (which would otherwise
   // fire a real chat request every poll and pound Ollama).
+  // One status refresh at a time. Event-driven callers (Kokoro progress fires many times a second while the
+  // model downloads) go through refreshSoon(), which coalesces them into at most one refresh per 400 ms;
+  // without this every progress tick launched three network probes and the page flooded its own sockets.
+  let refreshing = null;
+  let refreshQueued = false;
+  let soonTimer = null;
   async function refresh() {
-    currentStatus = await window.DMTHDetector.fullStatus({ skipHealthProbe: true });
-    renderStatus(currentStatus);
-    renderOllamaSetup(currentStatus);
-    renderModelSetup(currentStatus);
-    renderKokoroSetup(currentStatus);
-    renderLocalServersSetup(currentStatus);
+    if (refreshing) { refreshQueued = true; return refreshing; }
+    refreshing = (async () => {
+      try {
+        currentStatus = await window.DMTHDetector.fullStatus({ skipHealthProbe: true });
+        renderStatus(currentStatus);
+        renderOllamaSetup(currentStatus);
+        renderModelSetup(currentStatus);
+        renderKokoroSetup(currentStatus);
+        renderLocalServersSetup(currentStatus);
+      } finally {
+        refreshing = null;
+      }
+    })();
+    await refreshing;
+    if (refreshQueued) { refreshQueued = false; refreshSoon(); }
+  }
+  function refreshSoon() {
+    if (soonTimer) return;
+    soonTimer = setTimeout(() => { soonTimer = null; refresh(); }, 400);
   }
 
   // Deep refresh — INCLUDES the health probe. Used at init, after a pull, and
@@ -460,8 +481,8 @@
       window.location.href = './game.html';
     };
 
-    window.DMTHKokoro.onStateChange(() => refresh());
-    window.addEventListener('storage', () => refresh());
+    window.DMTHKokoro.onStateChange(() => refreshSoon());
+    window.addEventListener('storage', () => refreshSoon());
   }
 
   function escapeHtml(s) {

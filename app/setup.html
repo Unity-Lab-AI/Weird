@@ -1,0 +1,94 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Dungeon Master: The Hunt - setup</title>
+<style>
+  body{margin:0;background:#0b0b0f;color:#e8e6f0;font:15px system-ui;display:flex;justify-content:center;padding:36px 16px}
+  .box{width:640px;max-width:100%}
+  h1{font-size:14px;letter-spacing:.14em;text-transform:uppercase;color:#8c8aa0;margin:0 0 6px}
+  p{color:#a9a7bd;line-height:1.5;margin:8px 0}
+  .step{padding:10px 0;border-bottom:1px solid #262633}
+  .top{display:flex;justify-content:space-between;gap:12px}
+  .gb{color:#8c8aa0;white-space:nowrap}
+  .bar{height:6px;background:#1a1a24;border-radius:3px;margin-top:8px;overflow:hidden;display:none}
+  .bar i{display:block;height:100%;width:0;background:#c0306a}
+  .note{font:11px ui-monospace,monospace;color:#8c8aa0;margin-top:4px;min-height:14px;white-space:pre-wrap}
+  .ok{color:#39d98a}.bad{color:#ff5c5c}.wait{color:#8c8aa0}
+  button{background:#c0306a;color:#fff;border:0;border-radius:6px;padding:10px 20px;font:inherit;cursor:pointer;margin:16px 8px 0 0}
+  button.alt{background:#262633}
+  button:disabled{opacity:.5;cursor:default}
+  table{width:100%;border-collapse:collapse;margin:10px 0 4px;font-size:13px}
+  th,td{text-align:left;padding:6px 8px;border-bottom:1px solid #262633;vertical-align:top}
+  th{color:#8c8aa0;font-weight:600}
+  .warn{color:#ffb454}
+  #err{color:#ff5c5c;white-space:pre-wrap;font:12px ui-monospace,monospace}
+</style>
+<div class="box">
+  <h1>Dungeon Master: The Hunt - first-run setup</h1>
+  <p>This downloads what the game runs on into one folder, <b id="data"></b>. Everything stays on this machine and can be removed in one go.</p>
+  <table id="req">
+    <tr><th></th><th>Minimum</th><th>Recommended</th><th>This PC</th></tr>
+    <tr><td>OS</td><td>Windows 10, 64-bit</td><td>Windows 11, 64-bit</td><td id="c-os">checking</td></tr>
+    <tr><td>GPU</td><td>NVIDIA, 8 GB VRAM (images are slow, models swap in and out)</td><td>NVIDIA, 16 GB VRAM, RTX 30/40/50 (about 13 s per image)</td><td id="c-gpu">checking</td></tr>
+    <tr><td>RAM</td><td>16 GB</td><td>32 GB</td><td id="c-ram">checking</td></tr>
+    <tr><td>Storage</td><td>30 GB free</td><td>50 GB free (saves, generated images, extra models)</td><td id="c-disk">checking</td></tr>
+    <tr><td>Network</td><td colspan="3">First launch only, for the downloads. The game then runs offline, except the in-browser voice (Kokoro), which fetches its voice weights once on first use and caches them.</td></tr>
+  </table>
+  <p class="wait" style="font-size:12px">No NVIDIA GPU? The game still plays as text and emoji; image generation needs the GPU. AMD and Intel GPUs are not supported for images.</p>
+  <p id="space"></p>
+  <div id="steps"></div>
+  <p id="err"></p>
+  <button id="go">Install</button><button id="purge" class="alt">Remove downloaded components</button><button id="quit" class="alt">Quit</button>
+</div>
+<script>
+const $ = id => document.getElementById(id);
+const fmtGB = n => (n / 1e9).toFixed(1) + ' GB';
+let plan;
+function render() {
+  $('data').textContent = plan.data;
+  const need = plan.steps.filter(s => !s.done).reduce((a, s) => a + s.gb, 0);
+  $('space').textContent = plan.steps.every(s => s.done)
+    ? 'Everything is installed.'
+    : `About ${need.toFixed(1)} GB still to download` + (plan.free != null ? ` - ${fmtGB(plan.free)} free on that drive.` : '.');
+  $('steps').innerHTML = plan.steps.map(s => `
+    <div class="step" id="st-${s.id}">
+      <div class="top"><span>${s.title}</span><span class="gb">${s.gb} GB <b class="${s.done ? 'ok' : 'wait'}" id="tag-${s.id}">${s.done ? 'installed' : 'waiting'}</b></span></div>
+      <div class="bar" id="bar-${s.id}"><i></i></div><div class="note" id="note-${s.id}"></div>
+    </div>`).join('');
+  $('go').textContent = plan.steps.every(s => s.done) ? 'Launch' : 'Install';
+}
+window.dmthApp.onSetupEvent(ev => {
+  const tag = $('tag-' + ev.step), bar = $('bar-' + ev.step), note = $('note-' + ev.step);
+  if (!tag) return;
+  if (ev.status === 'done') { tag.textContent = 'installed'; tag.className = 'ok'; bar.style.display = 'none'; note.textContent = ''; return; }
+  if (ev.status === 'failed') { tag.textContent = 'failed'; tag.className = 'bad'; note.textContent = ev.line || ''; return; }
+  tag.textContent = 'installing'; tag.className = 'wait';
+  if (ev.total) { bar.style.display = 'block'; bar.firstElementChild.style.width = Math.min(100, ev.got / ev.total * 100) + '%'; }
+  if (ev.line) note.textContent = ev.line.slice(-300);
+});
+$('go').onclick = async () => {
+  $('go').disabled = $('purge').disabled = true; $('err').textContent = '';
+  const r = await window.dmthApp.setupStart();
+  if (!r.ok) { $('err').textContent = r.error; $('go').disabled = $('purge').disabled = false; $('go').textContent = 'Retry'; }
+};
+$('purge').onclick = () => window.dmthApp.purge();
+$('quit').onclick = () => window.dmthApp.quit();
+const mark = (id, ok, text) => { const e = $(id); e.textContent = text; e.className = ok === true ? 'ok' : ok === 'warn' ? 'warn' : 'bad'; };
+window.dmthApp.system().then(sys => {
+  const winBuild = Number((sys.os.match(/(\d+)\.(\d+)\.(\d+)/) || [])[3] || 0);
+  mark('c-os', winBuild >= 19041, winBuild ? `Windows ${winBuild >= 22000 ? '11' : '10'} (build ${winBuild})` : sys.os);
+  const g = sys.gpus.slice().sort((a, b) => b.vramMB - a.vramMB)[0];
+  if (!g) mark('c-gpu', false, 'No NVIDIA GPU found - text only');
+  else {
+    const gb = g.vramMB / 1024;
+    mark('c-gpu', gb >= 14 ? true : gb >= 7.5 ? 'warn' : false, `${g.name}, ${gb.toFixed(0)} GB` + (gb >= 14 ? '' : gb >= 7.5 ? ' - meets the minimum' : ' - below the minimum'));
+  }
+  const ram = sys.ramBytes / 2 ** 30;
+  mark('c-ram', ram >= 30 ? true : ram >= 15 ? 'warn' : false, `${ram.toFixed(0)} GB` + (ram >= 30 ? '' : ram >= 15 ? ' - meets the minimum' : ' - below the minimum'));
+});
+window.dmthApp.setupPlan().then(p => {
+  plan = p; render();
+  const gb = (p.free || 0) / 2 ** 30;
+  mark('c-disk', p.free == null ? 'warn' : gb >= 50 ? true : gb >= 30 ? 'warn' : false,
+    p.free == null ? 'unknown' : `${gb.toFixed(0)} GB free` + (gb >= 50 ? '' : gb >= 30 ? ' - meets the minimum' : ' - below the minimum'));
+});
+</script>

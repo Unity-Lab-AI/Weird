@@ -35,12 +35,14 @@ jobs:
           # Repo name lowercased → the per-repo pages subdomain (hostnames are case-insensitive).
           REPO="$(echo "${{ github.event.repository.name }}" | tr 'A-Z' 'a-z')"
           # Pure static repo → no ./dist; rsync the repo root. Exclude VCS/CI + the INTERNAL docs
-          # (the docs/ workflow folder + the resume.md dev handoff) so they stay off the live site —
+          # (the docs/ workflow folder + the resume.md dev handoff) and the desktop installer's source (app/, a
+          # build input, not part of the website) so they stay off the live site —
           # but DO ship README.md + SETUP-README.md to the web root, because the landing page's
           # Readme / Setup Guide tiles load them at runtime via doc.html (a blanket --exclude='*.md'
           # was 404ing those two public docs on the live host).
           rsync -az --delete \
             --exclude='.git' --exclude='.forgejo' --exclude='.gitea' \
             --exclude='docs' --exclude='resume.md' \
+            --exclude='app' --exclude='dist' \
             -e "ssh -i ~/.ssh/deploy -o StrictHostKeyChecking=accept-new" \
             ./ "${USER}@${HOST}:${REPO}/"

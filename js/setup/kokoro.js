@@ -171,14 +171,19 @@
           // Tear down the failed worker so a fresh attempt isn't blocked.
           try { worker?.terminate(); } catch {}
           worker = null;
-          if (timedOut) {
-            // Reset error so the main-thread fallback can try fresh.
-            console.warn('[kokoro] worker init timed out — falling back to main-thread load');
-            lastError = null;
+          // A worker that timed out OR failed to start any backend gets one fresh attempt on the main
+          // thread, which can succeed where a worker cannot (module-worker or WebGPU-in-worker limits).
+          console.warn('[kokoro] worker load failed (' + (timedOut ? 'timeout' : 'error') + ') — trying the main thread');
+          lastError = null;
+          try {
             await loadMainThread(onProgress);
             return;
+          } catch (mainErr) {
+            const combined = new Error(`worker: ${String(err && err.message || err)} || main thread: ${String(mainErr && mainErr.message || mainErr)}`);
+            lastError = combined;     // what the landing page shows under "Last attempt failed"
+            emit();
+            throw combined;
           }
-          throw err;
         } finally {
           unsub();
         }
@@ -211,14 +216,25 @@
       const mod = await import(cfg().KOKORO.cdnUrl);
       const KokoroTTS = mod.KokoroTTS || (mod.default && mod.default.KokoroTTS);
       if (!KokoroTTS) throw new Error('kokoro-js did not export KokoroTTS');
-      mainTts = await KokoroTTS.from_pretrained(cfg().KOKORO.modelId, {
-        dtype: cfg().KOKORO.dtype,
-        progress_callback: (p) => {
-          progress = (p && p.progress) || progress;
-          emit();
-          if (onProgress) onProgress(p);
+      const progress_callback = (p) => {
+        progress = (p && p.progress) || progress;
+        emit();
+        if (onProgress) onProgress(p);
+      };
+      // Same fallback order as the worker: configured dtype on the default backend, then WASM, then
+      // WebGPU where the browser has it. All reasons are kept so a total failure is diagnosable.
+      const attempts = [{ dtype: cfg().KOKORO.dtype }, { device: 'wasm', dtype: 'q8' }];
+      if (navigator.gpu) attempts.push({ device: 'webgpu', dtype: 'fp32' });
+      const errors = [];
+      for (const a of attempts) {
+        try {
+          mainTts = await KokoroTTS.from_pretrained(cfg().KOKORO.modelId, { ...a, progress_callback });
+          break;
+        } catch (e) {
+          errors.push(`${a.device || 'default'}/${a.dtype}: ${String((e && e.message) || e).slice(0, 220)}`);
         }
-      });
+      }
+      if (!mainTts) throw new Error('no audio backend could start. ' + errors.join(' | '));
       ready = true;
       loading = false;
       mainLoading = false;

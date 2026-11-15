@@ -32,7 +32,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 # so a visitor drops a .safetensors into local-services/../../models and the
 # next render picks it up.
 ROOT = os.path.dirname(os.path.dirname(HERE))
-MODELS = os.path.join(ROOT, "models")
+MODELS = os.environ.get("SD_MODELS") or os.path.join(ROOT, "models")
 PORT = int(os.environ.get("SD_PORT", "7860"))
 
 _pipe = None

@@ -78,6 +78,23 @@ Every phase ships to masterful finish before the next begins. No phase jumps. No
 
 ---
 
+
+## Phase 23 — Windows binary installer (desktop app) — BUILT 2026-11-14 (P1)
+
+> Gee directive verbatim 2026-11-14: *"okay now we need to make it into a bionary installer like the agent gen and gladiator has, with all the similar shit speced to this project"* + *"make sure it has recommended system requirments like the other binaries have"*
+
+- [x] `app/` — Electron shell + electron-builder NSIS setup exe (`DungeonMasterTheHunt-Setup-<version>.exe`, about 93 MB; weights never bundled).
+- [x] `app/setup.js` — resumable first-run installer into `<install folder>/data`: Python 3.11 runtime, torch cu118 + `local-services/requirements.txt`, portable Ollama, RealVisXL V5.0 (Realistic Vision fallback), whisper-small, `dolphin-mistral:7b`, `nomic-embed-text`. Each step skips when already satisfied.
+- [x] `app/supervisor.js` — starts Ollama `:11434`, image `:7860`, voice `:7861` hidden; adopts servers already listening; crash backoff; stops the tree on close.
+- [x] `app/main.js` — bundled static game server on `127.0.0.1:9535`, setup screen or boot screen, app menu (repair, open data/logs, shut down everything, remove downloaded components).
+- [x] `app/installer.nsh` + `installer-stop.ps1` — stop running servers before update/uninstall, update keeps `data`, uninstall asks whether to remove it, requirements on the welcome and folder pages.
+- [x] Recommended system requirements (minimum vs recommended: OS, GPU/VRAM, RAM, storage, network) in the NSIS pages, the setup screen with a live check of the PC, `README.md`, `SETUP-README.md`, and the landing page.
+- [x] `sd_server.py` reads `SD_MODELS`; `local-services/requirements.txt` added.
+- [x] Verified end to end on a real machine (2026-11-14): silent NSIS install into a folder, full first-run setup from the installed layout (452 s, about 15 GB), supervised Ollama + image + voice servers up from the installed layout, a real SDXL render (832x1216 in about 12 s including model load), update over a running install (processes stopped, data kept), uninstall while running (processes stopped, app files, registry and shortcut removed, data kept).
+- [x] Bugs found by that test and fixed: the pinned-interpreter download no longer exists upstream (Python 3.10 reached end of life) -> runtime pinned to a release tag and Python 3.11; landing page flooded its own sockets while Kokoro loaded (status refresh fired on every progress tick) -> refresh coalesced (2,212 requests in 22 s down to 46); Kokoro "no available backend found" had no fallback -> default, WASM, WebGPU attempts on the worker then the main thread, with every reason reported.
+- [x] Deploy workflow excludes `app/` and `dist/` from the web root.
+- [ ] Not done: code signing (needs a purchased certificate; releases ship unsigned with SHA-256 checksums and SmartScreen instructions), a CI release workflow.
+
 ## Project Vision (Gee's verbatim 2026-04-21)
 
 > *"the weird.html is the rough idea but its going to be massively expanded and made masterfully using real ollama and the such ecxt ext as unity"*
