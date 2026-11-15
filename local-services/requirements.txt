@@ -1,0 +1,14 @@
+# Python packages for the local image server (sd_server.py) and voice server (voice_server.py).
+# torch is installed separately (CUDA wheel index) by the setup step before this file.
+# diffusers 0.35.1 + huggingface-hub 0.36 is the verified-working pair (diffusers 0.40 is
+# internally inconsistent about the hub version).
+diffusers==0.35.1
+huggingface-hub>=0.30.0,<1.0
+accelerate
+safetensors
+transformers
+numpy
+faster-whisper
+# CTranslate2 (faster-whisper) resolves these by name at first inference
+nvidia-cublas-cu12
+nvidia-cudnn-cu12

@@ -10,8 +10,25 @@ A massive multi-page text+emoji adult game where you run a sex-slave operation. 
 
 ---
 
+## Install and system requirements
+
+A Windows installer (`DungeonMasterTheHunt-Setup-<version>.exe`) copies the app into a folder you choose and, on first launch, downloads everything the game runs on into that same folder. Everything stays on your machine: the chat model, the image model, speech-to-text. One folder, removable in one go (the uninstaller asks). Build it from `app/` (see [`SETUP-README.md`](./SETUP-README.md#windows-installer-desktop-app)).
+
+| | Minimum | Recommended |
+|---|---|---|
+| **OS** | Windows 10, 64-bit | Windows 11, 64-bit |
+| **GPU** | NVIDIA, 8 GB VRAM. Images work but are slow, models swap in and out | NVIDIA RTX 30/40/50, 16 GB VRAM. About 13 s per image |
+| **RAM** | 16 GB | 32 GB |
+| **Storage** | 30 GB free (about 20 GB downloaded on first run) | 50 GB free, room for saves, generated images and extra models |
+| **Network** | First launch only, for the downloads | same |
+
+No NVIDIA GPU: the game still plays as text and emoji, only image generation needs the card. AMD and Intel GPUs are not supported for images. The in-browser voice (Kokoro) fetches its voice weights once on first use and caches them.
+
+---
+
 ## Table of contents
 
+- [Install and system requirements](#install-and-system-requirements)
 - [The game loop](#the-game-loop)
 - [Hunt → Capture](#hunt--capture)
 - [Hold → Upgrade](#hold--upgrade)
