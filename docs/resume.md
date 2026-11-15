@@ -4,7 +4,7 @@
 
 **Branch:** `feature/first-day-bugs` (off `develop`) · **State:** 11 atomic commits, every changed file passes `node -c`; the local tooling folder is gitignored. Remote: `git@git.unityailab.com:UnityAILab/Weird.git` (Forgejo SSH) — **nothing pushed this session**.
 
-> **Git-truth (corrected 2026-06-20):** the prior alpha (financial underworld + NPC actions + stores/property overhaul + escape popup + balance audit + TIP-FILTH) was fully CASCADED and SHIPPED: `UpdateWork → develop → main` ALPHA RELEASE merged, then a pre-alpha LIVE deploy stacked on top (auto-deploy workflow, communal Pollinations key, social card). `main` is clean + deployed + up to date with origin. The old push-hold / "25 commits frozen" banner was stale by an entire release cascade.
+> **Git-truth (corrected 2026-06-20):** the prior alpha (financial underworld + NPC actions + stores/property overhaul + escape popup + balance audit + TIP-FILTH) was fully CASCADED and SHIPPED: `UpdateWork → develop → main` ALPHA RELEASE merged, then a pre-alpha LIVE deploy stacked on top (auto-deploy workflow, communal cloud-image key, social card). `main` is clean + deployed + up to date with origin. The old push-hold / "25 commits frozen" banner was stale by an entire release cascade.
 
 ---
 
