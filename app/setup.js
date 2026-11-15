@@ -1,7 +1,7 @@
 // First-run installer: everything the game runs on, into one folder that can be removed in one go.
 //
 // Steps (each skipped when already satisfied, so a machine already set up for the repo launchers is complete):
-//   python    Python 3.10 runtime (python-build-standalone, includes pip)     -> DATA/runtime/python
+//   python    Python 3.11 runtime (python-build-standalone, includes pip)     -> DATA/runtime/python
 //   base      torch (CUDA 11.8) + local-services/requirements.txt             -> into that runtime
 //   ollama    Ollama server binaries (portable zip, no tray app, no service)  -> DATA/runtime/ollama
 //   image     RealVisXL V5.0 fp16 checkpoint (SD 1.5 model as a fallback)     -> DATA/models
@@ -20,6 +20,7 @@ const { DATA, RUNTIME, resolve, exists, freeBytes } = require('./paths');
 
 const DL = path.join(DATA, 'downloads');
 const TORCH = ['torch==2.7.1', '--index-url', 'https://download.pytorch.org/whl/cu118'];
+const PYTHON_TAG = '20261110';       // python-build-standalone release the runtime is taken from
 const CHAT_MODEL = 'dolphin-mistral:7b';
 const EMBED_MODEL = 'nomic-embed-text';
 const SETUP_PORT = 11436;            // temporary Ollama server used only while pulling models
@@ -95,8 +96,10 @@ function run(cmd, args, { env = {}, cwd, log = () => {} } = {}) {
   });
 }
 
-async function ghAsset(repo, test) {
-  const rel = await fetchJson(`https://api.github.com/repos/${repo}/releases/latest`);
+// `tag` pins a specific release; without it the repo's latest release is used. The Python runtime is pinned
+// because the rolling "latest" release drops interpreter versions as they reach end of life.
+async function ghAsset(repo, test, tag) {
+  const rel = await fetchJson(`https://api.github.com/repos/${repo}/releases/${tag ? 'tags/' + tag : 'latest'}`);
   const a = (rel.assets || []).find(x => test(x.name));
   if (!a) throw new Error(`no matching asset in ${repo} ${rel.tag_name}`);
   return { url: a.browser_download_url, name: a.name, tag: rel.tag_name };
@@ -157,11 +160,11 @@ function plan(root) {
   };
   return [
     {
-      gb: 0.1, id: 'python', title: 'Python 3.10 runtime',
+      gb: 0.1, id: 'python', title: 'Python 3.11 runtime',
       done: () => !!py(),
       async run(log, progress) {
         const a = await ghAsset('astral-sh/python-build-standalone',
-          n => /^cpython-3\.10\.\d+\+\d+-x86_64-pc-windows-msvc-install_only\.tar\.gz$/.test(n));
+          n => /^cpython-3\.11\.\d+\+\d+-x86_64-pc-windows-msvc-install_only\.tar\.gz$/.test(n), PYTHON_TAG);
         log(`downloading ${a.name} (${a.tag})`);
         const f = path.join(dlDir(), a.name);
         if (!exists(f)) await download(a.url, f, progress);

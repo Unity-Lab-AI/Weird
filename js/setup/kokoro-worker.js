@@ -16,6 +16,25 @@
 
 const kokoro = { tts: null, loading: false };
 
+// The speech model runs on ONNX Runtime, which needs at least one working backend (WebGPU or WASM).
+// "no available backend found" means the one it picked could not start on this browser/GPU. Try the
+// configured dtype with the default backend first, then WASM (works almost everywhere), then WebGPU
+// where the browser exposes it, and report every attempt's reason if all of them fail.
+async function loadWithFallback(KokoroTTS, msg) {
+  const progress_callback = (p) => self.postMessage({ type: 'progress', payload: p });
+  const attempts = [{ dtype: msg.dtype }, { device: 'wasm', dtype: 'q8' }];
+  if (self.navigator && self.navigator.gpu) attempts.push({ device: 'webgpu', dtype: 'fp32' });
+  const errors = [];
+  for (const a of attempts) {
+    try {
+      return await KokoroTTS.from_pretrained(msg.modelId, { ...a, progress_callback });
+    } catch (err) {
+      errors.push(`${a.device || 'default'}/${a.dtype}: ${String((err && err.message) || err).slice(0, 220)}`);
+    }
+  }
+  throw new Error('no audio backend could start. ' + errors.join(' | '));
+}
+
 self.onmessage = async (e) => {
   const msg = e.data || {};
 
@@ -26,10 +45,7 @@ self.onmessage = async (e) => {
       const mod = await import(msg.cdnUrl);
       const KokoroTTS = mod.KokoroTTS || (mod.default && mod.default.KokoroTTS);
       if (!KokoroTTS) throw new Error('kokoro-js did not export KokoroTTS');
-      kokoro.tts = await KokoroTTS.from_pretrained(msg.modelId, {
-        dtype: msg.dtype,
-        progress_callback: (p) => self.postMessage({ type: 'progress', payload: p })
-      });
+      kokoro.tts = await loadWithFallback(KokoroTTS, msg);
       self.postMessage({ type: 'ready' });
     } catch (err) {
       self.postMessage({ type: 'error', message: String((err && err.message) || err) });

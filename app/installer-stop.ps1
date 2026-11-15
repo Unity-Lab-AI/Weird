@@ -83,7 +83,7 @@ if (-not $Clean) { exit 0 }
 # After the old version's uninstaller: a folder it deleted while something still had it open stays "delete pending"
 # until that handle closes, and the setup's copy then fails. Remove what is left of the old app and wait until it is
 # really gone. Only the app's own names are touched; data and anything else in the folder are never touched.
-$names = @($appExe, 'Uninstall Dungeon Master The Hunt.exe', 'uninstallerIcon.ico', 'resources', 'locales', 'resources.pak',
+$names = @($appExe, 'Uninstall DungeonMasterTheHunt.exe', 'uninstallerIcon.ico', 'resources', 'locales', 'resources.pak',
   'chrome_100_percent.pak', 'chrome_200_percent.pak', 'icudtl.dat', 'snapshot_blob.bin', 'v8_context_snapshot.bin',
   'LICENSE.electron.txt', 'LICENSES.chromium.html', 'd3dcompiler_47.dll', 'ffmpeg.dll', 'libEGL.dll', 'libGLESv2.dll',
   'vk_swiftshader.dll', 'vk_swiftshader_icd.json', 'vulkan-1.dll')

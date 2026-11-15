@@ -5138,3 +5138,17 @@ Built `app/` (Electron + electron-builder NSIS): `main.js`, `preload.js`, `paths
 
 **Verified:** `npm run dist` produces `dist/DungeonMasterTheHunt-Setup-<version>.exe` (about 93 MB); bundle inspected (game files, both servers, requirements; no weights; no banned names); packaged app launched against a temp data folder: serves `index.html`/`game.html`/`js/config.js` with correct types, path traversal returns 404, goes to the setup screen listing exactly the missing steps (adopts the existing Ollama and chat model), requirements table renders with correct live values (screenshot checked).
 **Not verified:** a full first-run download/install (about 20 GB), the NSIS wizard install/update/uninstall flows, running the supervised servers from the installed layout, code signing. Deferred: release workflow to publish the exe.
+
+---
+
+## 2026-11-14 — INSTALLER.1 verification pass, fixes, and cleanup
+
+**Gee verbatim:** *"lets make sure the binary is complete first, and can u do code signing? that would be cool if you can do it with out much from me. once binary iis done lets do the releases pages on both remotes and do the cascade on both remotes and deploy"* + *"if u can compelte the code signing there is no point in doing it"* + *"retry kokoro load: LAst attempt failed: no available backend found"* + *"make sure all logs, temp files, caches, and user runs are completely cleared and deleted and the project is in ship ready state"*
+
+- **Code signing: not done, on purpose.** A publicly trusted signature needs a purchased certificate and identity validation, which cannot be done without the owner; a self-signed certificate would not remove the SmartScreen warning. Releases ship unsigned with `SHA256SUMS.txt` and SmartScreen instructions.
+- **Real-machine test of the binary** (silent install, full first-run setup 452 s / about 15 GB, supervised servers, SDXL render, update over a running install, uninstall while running) passed after fixing: the Python runtime download (3.10 dropped upstream) -> pinned release tag + Python 3.11 (`app/setup.js`); uninstaller name in `app/installer-stop.ps1`; app version 1.1.0.
+- **Kokoro "no available backend found":** `js/setup/kokoro-worker.js` and `js/setup/kokoro.js` now try default, WASM, WebGPU backends on the worker then the main thread and report every reason; `js/ui/landing.js` shows a troubleshooting hint. Forced-failure test returns the combined message in under a second.
+- **Landing page request flood found and fixed:** status refresh fired on every Kokoro progress tick (2,212 requests in 22 s, sockets exhausted); `js/ui/landing.js` now coalesces refreshes (46 requests, no failures).
+- **Deploy:** `.forgejo/workflows/deploy.yml` now excludes `app/` and `dist/` from the web root.
+- **Voice engine question:** Unity Voice V2 is a single-voice (Unity) model; Gee chose to keep Kokoro only (per-girl voices preserved).
+- Docs: `docs/ROADMAP.md` Phase 23, `SETUP-README.md` Kokoro troubleshooting.

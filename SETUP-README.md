@@ -55,7 +55,7 @@ The setup screen checks this PC against the table (OS build, largest NVIDIA GPU 
 
 | Step | Size | Goes to |
 |---|---|---|
-| Python 3.10 runtime (python-build-standalone) | 0.1 GB | `data/runtime/python` |
+| Python 3.11 runtime (python-build-standalone) | 0.1 GB | `data/runtime/python` |
 | PyTorch (CUDA 11.8) + diffusers + faster-whisper (`local-services/requirements.txt`) | about 6 GB | into that runtime |
 | Ollama server (portable zip, no tray app, no service) | 1.5 GB | `data/runtime/ollama` |
 | Image model: RealVisXL V5.0 fp16 (falls back to Realistic Vision V5.1) | 6.9 GB | `data/models` |
@@ -625,6 +625,9 @@ The image server hasn't started, or it's on a different port. Check:
 ### "no checkpoint in models/"
 
 The install script downloaded RealVisXL V5.0 (or Realistic Vision V5.1 as fallback) but the file isn't where the server expects. Verify `weird/models/*.safetensors` exists. Drop any `.safetensors` into that folder and restart `start_image_gen`.
+
+### Kokoro: "no audio backend could start" / "no available backend found"
+The voice model runs on ONNX Runtime and needs one working backend. The loader tries the default, then WASM, then WebGPU (when the browser exposes it), first in a worker and then on the main thread, and lists each attempt's reason in the message. If every attempt fails: use a current Chrome or Edge (the desktop app includes one), turn on hardware acceleration in the browser settings, make sure `cdn.jsdelivr.net` and `huggingface.co` are reachable (the runtime and model download once, then cache), and press Retry. The game plays without voice-out meanwhile.
 
 ### "STT cannot use the GPU"
 
