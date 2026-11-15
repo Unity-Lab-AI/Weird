@@ -36,7 +36,8 @@ jobs:
             --exclude='./.git' --exclude='./.forgejo' --exclude='./.gitea' --exclude='./.github' \
             --exclude='./docs' --exclude='./resume.md' --exclude='./app' --exclude='./dist' \
             -C . .
-          tar -tzf /tmp/artifact.tar.gz | grep -qx './index.html'
+          # grep reads the whole listing (no -q): an early exit would SIGPIPE tar and fail under pipefail
+          tar -tzf /tmp/artifact.tar.gz | grep -x './index.html' > /dev/null
 
       - name: Queue the artifact for atomic deployment
         env:
