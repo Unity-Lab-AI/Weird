@@ -2,7 +2,7 @@
 
 > 🛑 **STANDING CONSTRAINT (Gee): DO NOT `git push` until Gee explicitly says to.** Local commits are fine and expected; pushes are held. *"quit pushing to the feature branch until i tell you to ... just get the work done"*
 
-**Branch:** `feature/first-day-bugs` (off `develop`) · **State:** 11 atomic commits, every changed file passes `node -c`; `.claude/` gitignored. Remote: `git@git.unityailab.com:UnityAILab/Weird.git` (Forgejo SSH) — **nothing pushed this session**.
+**Branch:** `feature/first-day-bugs` (off `develop`) · **State:** 11 atomic commits, every changed file passes `node -c`; the local tooling folder is gitignored. Remote: `git@git.unityailab.com:UnityAILab/Weird.git` (Forgejo SSH) — **nothing pushed this session**.
 
 > **Git-truth (corrected 2026-06-20):** the prior alpha (financial underworld + NPC actions + stores/property overhaul + escape popup + balance audit + TIP-FILTH) was fully CASCADED and SHIPPED: `UpdateWork → develop → main` ALPHA RELEASE merged, then a pre-alpha LIVE deploy stacked on top (auto-deploy workflow, communal Pollinations key, social card). `main` is clean + deployed + up to date with origin. The old push-hold / "25 commits frozen" banner was stale by an entire release cascade.
 
@@ -33,6 +33,6 @@ Source: `docs/Bugs First day.md` (Gee hand-crafted, captured verbatim one-task-p
 `start.bat` (serves `:9535`) + Ollama on `localhost:11434` + the local image server on `:7860` (`scripts/start_image_gen`). Verify edits with `node -c` (NO TESTS law). Engine = IIFE modules on `window.DMTHGame.*`; UI on `window.DMTHRouter`; captives in `state.current.roster`.
 
 ## ⚖️ LAWS (binding)
-LAW #0 verbatim Gee words · LAW #1 no AI-vendor attribution in shipping code/docs/commits · no tests · 800-line read before edit · docs-before-push (FINALIZED + TODO + affected docs in the SAME push) · adult-floor 18+ · Git Flow (`feature/*`, never main/develop directly). `.claude/` gitignored.
+LAW #0 verbatim Gee words · LAW #1 no AI-vendor attribution in shipping code/docs/commits · no tests · 800-line read before edit · docs-before-push (FINALIZED + TODO + affected docs in the SAME push) · adult-floor 18+ · Git Flow (`feature/*`, never main/develop directly). `the local tooling folder/` gitignored.
 
 *Resume from here: the 25 first-day bugs are DONE + committed local on `feature/first-day-bugs`. HOLD all pushes until Gee says. Next: wiki closeout + ROADMAP box-flip, then cascade up the Git Flow on his word. Everything node -c clean.* 🖤
