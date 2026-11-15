@@ -1,14 +1,12 @@
-# DUNGEON MASTER: THE HUNT — pre-alpha auto-deploy.
-# Mirrors the lab-wide pages mechanism (see UnityAILab/Website build.yml "Deploy to nginx"):
-# every push to main rsyncs the static site over SSH to the pages web root, served live at
-# https://weird.git.unityailab.com (the box's wildcard cert + wildcard nginx vhost already match).
+# DUNGEON MASTER: THE HUNT — static site deploy to https://weird.git.unityailab.com
 #
-# This repo is PURE STATIC (vanilla HTML/JS/CSS, no bundler) — so there's no build/test/dist
-# step; we deploy the repo root directly, in-run on main (Forgejo can suppress runs triggered by
-# the automatic token, so we never rely on a second pages-branch push).
+# Uses the lab's current pages mechanism: the runner (isolated rootless networking) reaches the origin through
+# the container gateway, packs the static site into a tarball, and queues it with the Forgejo deploy endpoint,
+# which swaps it into the pages web root atomically. The old SSH rsync route no longer reaches the host.
 #
-# Requires the org/repo Actions secrets the lab already uses for pages:
-#   PAGES_DEPLOY_KEY (base64-encoded SSH private key) · PAGES_DEPLOY_HOST · PAGES_DEPLOY_USER
+# The repo is pure static (vanilla HTML/JS/CSS, no build), so the artifact is the repo root minus VCS/CI, the
+# internal workflow docs (docs/, resume.md) and the desktop installer source (app/). README.md and
+# SETUP-README.md DO ship: the landing page loads them at runtime through doc.html.
 name: deploy
 
 on:
@@ -18,31 +16,38 @@ on:
 
 jobs:
   deploy:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
+      - name: Reach the origin from isolated rootless networking
+        run: |
+          set -eu
+          gateway=$(getent ahostsv4 host.containers.internal | awk 'NR==1 {print $1}')
+          test -n "$gateway"
+          printf '%s git.unityailab.com weird.git.unityailab.com\n' "$gateway" >> /etc/hosts
+
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Deploy static site to the pages web root (SSH rsync)
-        env:
-          KEY: ${{ secrets.PAGES_DEPLOY_KEY }}
-          HOST: ${{ secrets.PAGES_DEPLOY_HOST }}
-          USER: ${{ secrets.PAGES_DEPLOY_USER }}
+      - name: Pack the static site
         run: |
-          mkdir -p ~/.ssh && chmod 700 ~/.ssh
-          # KEY is base64-encoded in the secret to survive newline mangling through CI.
-          printf '%s' "$KEY" | base64 -d > ~/.ssh/deploy && chmod 600 ~/.ssh/deploy
-          # Repo name lowercased → the per-repo pages subdomain (hostnames are case-insensitive).
-          REPO="$(echo "${{ github.event.repository.name }}" | tr 'A-Z' 'a-z')"
-          # Pure static repo → no ./dist; rsync the repo root. Exclude VCS/CI + the INTERNAL docs
-          # (the docs/ workflow folder + the resume.md dev handoff) and the desktop installer's source (app/, a
-          # build input, not part of the website) so they stay off the live site —
-          # but DO ship README.md + SETUP-README.md to the web root, because the landing page's
-          # Readme / Setup Guide tiles load them at runtime via doc.html (a blanket --exclude='*.md'
-          # was 404ing those two public docs on the live host).
-          rsync -az --delete \
-            --exclude='.git' --exclude='.forgejo' --exclude='.gitea' \
-            --exclude='docs' --exclude='resume.md' \
-            --exclude='app' --exclude='dist' \
-            -e "ssh -i ~/.ssh/deploy -o StrictHostKeyChecking=accept-new" \
-            ./ "${USER}@${HOST}:${REPO}/"
+          set -eu
+          test -f index.html
+          tar -czf /tmp/artifact.tar.gz \
+            --exclude='./.git' --exclude='./.forgejo' --exclude='./.gitea' --exclude='./.github' \
+            --exclude='./docs' --exclude='./resume.md' --exclude='./app' --exclude='./dist' \
+            -C . .
+          tar -tzf /tmp/artifact.tar.gz | grep -qx './index.html'
+
+      - name: Queue the artifact for atomic deployment
+        env:
+          DEPLOY_TOKEN: ${{ github.token }}
+          COMMIT: ${{ github.sha }}
+          WORKFLOW_RUN: ${{ github.run_id }}
+        run: |
+          set -eu
+          digest=$(sha256sum /tmp/artifact.tar.gz | cut -d' ' -f1)
+          curl --fail-with-body --silent --show-error -X POST \
+            -H "Authorization: Bearer $DEPLOY_TOKEN" \
+            -H "X-Commit-SHA: $COMMIT" -H "X-Workflow-Run: $WORKFLOW_RUN" \
+            -H "X-Repository: UnityAILab/Weird" -H "X-Artifact-SHA256: $digest" \
+            --data-binary @/tmp/artifact.tar.gz https://git.unityailab.com/_deploy/repos/174/deploy

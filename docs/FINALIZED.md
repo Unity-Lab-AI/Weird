@@ -5152,3 +5152,13 @@ Built `app/` (Electron + electron-builder NSIS): `main.js`, `preload.js`, `paths
 - **Deploy:** `.forgejo/workflows/deploy.yml` now excludes `app/` and `dist/` from the web root.
 - **Voice engine question:** Unity Voice V2 is a single-voice (Unity) model; Gee chose to keep Kokoro only (per-girl voices preserved).
 - Docs: `docs/ROADMAP.md` Phase 23, `SETUP-README.md` Kokoro troubleshooting.
+
+---
+
+## 2026-11-15 — DEPLOY-FIX.1 — Forgejo pages deploy ported to the lab's current mechanism
+
+**Gee verbatim:** *"can u check the other projects like agent gen and how it deploys to forgejo as sonnet says it cant deploy this project to forgejo but i think its just not doing it correctly"*
+
+Cause: the lab's pages infrastructure changed (October): runners use isolated rootless networking and deploy by queuing a tarball with the Forgejo deploy endpoint; the old SSH rsync route in `.forgejo/workflows/deploy.yml` fails (runs 18 and 19 failed in ~35 s; no rsync deploy in the org has succeeded since 2026-10-10). Org secrets were present, so secrets were not the cause. Reference pattern: EgoDeath's `deploy.yml`.
+
+Fix: `.forgejo/workflows/deploy.yml` now adds the gateway hosts entry, packs the repo root (excluding `.git`, `.forgejo`, `.gitea`, `.github`, `docs/`, `resume.md`, `app/`, `dist/`) into a tarball, and POSTs it to `https://git.unityailab.com/_deploy/repos/174/deploy` with the run token. Dry-run of the pack step on a clean export: 5.8 MB, `index.html` at the root, same file set the old rsync shipped.
